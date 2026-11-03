@@ -41,15 +41,14 @@ jobs:
       - name: Deploy to Vercel Production
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
           mkdir -p .vercel
-          OID="${VERCEL_ORG_ID:-team_SYso2o6L4hc49njYuLDaZWb1}"
-          PID="${VERCEL_PROJECT_ID}"
+          OID="${{ secrets.VERCEL_ORG_ID }}"
+          OID="${OID:-team_SYso2o6L4hc49njYuLDaZWb1}"
+          PID="${{ secrets.VERCEL_PROJECT_ID }}"
           if [ -n "$PID" ]; then
             echo "{\"projectId\":\"$PID\",\"orgId\":\"$OID\",\"projectName\":\"samiq-luxury-platform\"}" > .vercel/project.json
-          else
+          elif [ ! -f .vercel/project.json ]; then
             npx vercel link --yes --project samiq-luxury-platform --scope "$OID" --token "$VERCEL_TOKEN"
           fi
-          npx vercel deploy --prod --yes --token "$VERCEL_TOKEN" --scope "$OID"
+          npx vercel deploy --prod --yes --token "$VERCEL_TOKEN"
