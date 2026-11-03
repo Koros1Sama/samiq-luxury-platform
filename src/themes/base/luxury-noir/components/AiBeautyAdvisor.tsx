@@ -78,17 +78,28 @@ export function AiBeautyAdvisor() {
 
   return (
     <>
-      {/* Floating Trigger Button (Elevated on mobile above bottom app nav) */}
+      {/* Mobile Floating Button (Discreet side icon on bottom-20 start) */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-20 md:bottom-5 end-4 md:end-5 z-40 flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-3 rounded-full bg-gradient-to-r from-[#1C180E] to-[#121118] border border-gold/50 shadow-[0_4px_30px_rgba(201,168,76,0.35)] text-ivory hover:scale-105 transition-all group"
+        className="fixed bottom-20 start-3 z-40 w-11 h-11 rounded-full bg-[#121217]/95 border border-gold/50 shadow-[0_4px_20px_rgba(201,168,76,0.35)] flex md:hidden items-center justify-center text-gold hover:scale-110 active:scale-95 transition-all"
+        title="اسألي خبير كشف المقلد"
+        aria-label="المستشار الذكي"
+      >
+        <SparkleStarIcon size={18} color="#C9A84C" />
+      </button>
+
+      {/* Desktop Floating Pill */}
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="fixed bottom-5 end-5 z-40 hidden md:flex items-center gap-2.5 px-4 py-3 rounded-full bg-gradient-to-r from-[#1C180E] to-[#121118] border border-gold/50 shadow-[0_4px_30px_rgba(201,168,76,0.35)] text-ivory hover:scale-105 transition-all group"
         aria-label="المستشار الذكي"
       >
         <div className="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center text-gold group-hover:rotate-12 transition-transform">
           <SparkleStarIcon size={16} color="#C9A84C" />
         </div>
-        <div className="text-start hidden sm:block">
+        <div className="text-start">
           <span className="text-xs font-sans font-bold bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] bg-clip-text text-transparent block">
             اسأل خبير لكشف المقلد
           </span>

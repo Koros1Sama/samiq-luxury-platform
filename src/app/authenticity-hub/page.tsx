@@ -319,7 +319,7 @@ export default function AuthenticityHubPage() {
                       <ul className="space-y-1 text-ivory/80">
                         {guide.originalMarkers.map((m, i) => (
                           <li key={i} className="flex items-start gap-1.5">
-                            <span className="text-emerald-400 font-bold">✓</span>
+                            <VerifiedCheckIcon className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
                             <span>{m}</span>
                           </li>
                         ))}
@@ -331,7 +331,7 @@ export default function AuthenticityHubPage() {
                       <ul className="space-y-1 text-ivory/80">
                         {guide.fakeRisks.map((r, i) => (
                           <li key={i} className="flex items-start gap-1.5">
-                            <span className="text-rose-400 font-bold">✕</span>
+                            <CrossWarningIcon className="w-3.5 h-3.5 text-rose-400 mt-0.5 shrink-0" />
                             <span>{r}</span>
                           </li>
                         ))}

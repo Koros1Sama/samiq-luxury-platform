@@ -317,7 +317,7 @@ export function WhatsAppCartDrawer({
                 </div>
                 {appliedCoupon && (
                   <span className="text-[11px] text-emerald-400 block font-sans">
-                    ✓ {appliedCoupon.message}
+                    {appliedCoupon.message}
                   </span>
                 )}
                 {couponError && (

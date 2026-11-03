@@ -92,11 +92,25 @@ export function FeatureTierSimulator({
 
   return (
     <>
-      {/* Floating Activation Pill (Elevated on mobile above bottom app nav) */}
+      {/* Mobile Floating Button (Discreet side icon on bottom-20) */}
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-20 md:bottom-5 start-4 md:start-5 z-40 flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full bg-gradient-to-r from-[#1E1B15] to-[#121217] border border-[#C9A84C]/50 shadow-[0_4px_25px_rgba(201,168,76,0.35)] text-ivory hover:border-[#FCF6BA] hover:scale-105 transition-all duration-300"
+        className="fixed bottom-20 end-3 z-40 w-11 h-11 rounded-full bg-[#121217]/95 border border-gold/50 shadow-[0_4px_20px_rgba(201,168,76,0.35)] flex md:hidden items-center justify-center text-gold hover:scale-110 active:scale-95 transition-all"
+        title={`محاكي باقات سامق: $${pricing.totalUsd}`}
+        aria-label="محاكي باقات سامق"
+      >
+        <TuningSliderIcon size={18} color="#C9A84C" />
+        <span className="absolute -top-1 -end-1 px-1 py-0.2 rounded-full bg-gold text-obsidian text-[8px] font-bold font-sans">
+          ${pricing.totalUsd}
+        </span>
+      </button>
+
+      {/* Desktop Floating Pill */}
+      <button
+        type="button"
+        onClick={() => setIsOpen(true)}
+        className="fixed bottom-5 start-5 z-40 hidden md:flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-gradient-to-r from-[#1E1B15] to-[#121217] border border-[#C9A84C]/50 shadow-[0_4px_25px_rgba(201,168,76,0.35)] text-ivory hover:border-[#FCF6BA] hover:scale-105 transition-all duration-300"
       >
         <TuningSliderIcon size={16} color="#C9A84C" />
         <span className="text-xs font-sans font-bold bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] bg-clip-text text-transparent">

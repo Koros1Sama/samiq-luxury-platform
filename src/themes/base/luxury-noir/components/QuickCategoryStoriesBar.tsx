@@ -40,14 +40,13 @@ export function QuickCategoryStoriesBar({
             <button
               key={s.id}
               onClick={() => handleClick(s)}
-              className={`shrink-0 flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-sans transition-all duration-200 ${
+              className={`shrink-0 px-3.5 py-1.5 rounded-full text-xs font-sans transition-all duration-300 whitespace-nowrap ${
                 isSelected
-                  ? 'bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-bold shadow-md scale-[1.02]'
-                  : 'bg-white/5 hover:bg-white/10 text-ivory/80 hover:text-ivory border border-white/10'
+                  ? 'bg-[#C9A84C]/15 text-[#FCF6BA] border border-[#C9A84C]/60 shadow-[0_0_18px_rgba(201,168,76,0.28),inset_0_1px_0_rgba(252,246,186,0.25)] font-bold scale-[1.02]'
+                  : 'bg-white/[0.03] text-[#9A968E] border border-white/[0.07] hover:border-[#C9A84C]/30 hover:text-[#F5F2EB]'
               }`}
             >
-              <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-obsidian' : 'bg-gold'}`} />
-              <span className="whitespace-nowrap">{s.title}</span>
+              {s.title}
             </button>
           );
         })}
