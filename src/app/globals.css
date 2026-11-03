@@ -7,6 +7,95 @@
   --foreground: #F5F2EB;
 }
 
+/* Multi-Theme System Definitions */
+[data-theme="luxury-noir"] {
+  --bg-color: #070709;
+  --surface-color: #0E0E12;
+  --surface-elevated: #15151B;
+  --text-primary: #F5F2EB;
+  --text-muted: #9A968E;
+  --accent-gold: #C9A84C;
+  --border-lux: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="editorial-ivory"] {
+  --background: #FAF7F2;
+  --foreground: #181512;
+  color-scheme: light !important;
+}
+
+[data-theme="editorial-ivory"] .bg-obsidian,
+[data-theme="editorial-ivory"].bg-obsidian {
+  background-color: #FAF7F2 !important;
+}
+
+[data-theme="editorial-ivory"] .bg-surface {
+  background-color: #F3EFE6 !important;
+}
+
+[data-theme="editorial-ivory"] .bg-surface-elevated {
+  background-color: #FFFFFF !important;
+}
+
+[data-theme="editorial-ivory"] .text-ivory {
+  color: #181512 !important;
+}
+
+[data-theme="editorial-ivory"] .text-muted-lux {
+  color: #6E675F !important;
+}
+
+[data-theme="editorial-ivory"] .border-white\/5,
+[data-theme="editorial-ivory"] .border-white\/10 {
+  border-color: rgba(24, 21, 18, 0.12) !important;
+}
+
+[data-theme="editorial-ivory"] .bg-white\/5 {
+  background-color: rgba(24, 21, 18, 0.04) !important;
+}
+
+[data-theme="editorial-ivory"] .bg-black\/60,
+[data-theme="editorial-ivory"] .bg-black\/80 {
+  background-color: rgba(250, 247, 242, 0.92) !important;
+}
+
+[data-theme="emerald-botanical"] {
+  --background: #061410;
+  --foreground: #F5FAF7;
+  color-scheme: dark !important;
+}
+
+[data-theme="emerald-botanical"] .bg-obsidian,
+[data-theme="emerald-botanical"].bg-obsidian {
+  background-color: #061410 !important;
+}
+
+[data-theme="emerald-botanical"] .bg-surface {
+  background-color: #0A1F19 !important;
+}
+
+[data-theme="emerald-botanical"] .bg-surface-elevated {
+  background-color: #112B23 !important;
+}
+
+[data-theme="emerald-botanical"] .text-ivory {
+  color: #F5FAF7 !important;
+}
+
+[data-theme="emerald-botanical"] .text-muted-lux {
+  color: #8FA89E !important;
+}
+
+[data-theme="emerald-botanical"] .border-white\/5,
+[data-theme="emerald-botanical"] .border-white\/10 {
+  border-color: rgba(212, 175, 55, 0.18) !important;
+}
+
+[data-theme="emerald-botanical"] .bg-white\/5 {
+  background-color: rgba(16, 185, 129, 0.08) !important;
+}
+
+
 /* Base resets & Arabic RTL handling */
 html {
   color-scheme: dark;

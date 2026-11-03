@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { FEATURES_REGISTRY, calculateTierPrice, validateFeatureDependencies, resolveEffectiveFeatures } from '@/core/features/registry';
 import { FeatureFlags } from '../../../contract';
 import { TuningSliderIcon, CloseIcon } from './LuxuryIcons';
+import { ThemeSwitcher } from './ThemeSwitcher';
 
 interface FeatureTierSimulatorProps {
   currentFeatures: FeatureFlags;
@@ -129,6 +130,15 @@ export function FeatureTierSimulator({
               >
                 <CloseIcon size={16} color="#9A968E" />
               </button>
+            </div>
+
+            {/* Live Theme Switcher */}
+            <div className="mt-4 p-3.5 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
+              <div>
+                <span className="text-xs font-semibold text-ivory block">القالب البصري النشط:</span>
+                <span className="text-[11px] text-muted-lux">تبديل فوري بين الثيمات الـ 3 (Noir, Ivory, Botanical)</span>
+              </div>
+              <ThemeSwitcher />
             </div>
 
             {/* Total Pricing Bar */}

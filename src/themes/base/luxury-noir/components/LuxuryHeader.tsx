@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { MiftahLogoSvg } from './MiftahLogoSvg';
 import { CurrencySwitcher } from './CurrencySwitcher';
+import { ThemeSwitcher } from './ThemeSwitcher';
 import { SearchModal } from './SearchModal';
 import { ThemeCurrencyCode, FeatureFlags } from '../../../contract';
 
@@ -71,8 +72,11 @@ export function LuxuryHeader({
           })}
         </nav>
 
-        {/* Left / End: Actions (Currency, Search, Account, Cart, Mobile Toggle) */}
-        <div className="flex items-center gap-3 sm:gap-4">
+        {/* Left / End: Actions (Theme, Currency, Search, Account, Cart, Mobile Toggle) */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Theme Switcher */}
+          <ThemeSwitcher isCompact />
+
           {/* Currency Switcher */}
           <CurrencySwitcher
             currentCurrency={currentCurrency}

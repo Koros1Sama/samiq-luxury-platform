@@ -139,9 +139,50 @@ export interface SamiqDatabaseSchema {
   blogPosts: BlogPostRecord[];
   reviews: ReviewRecord[];
   branches: BranchRecord[];
+  conversations: OmnichannelConversation[];
 }
 
-const DB_FILE_PATH = path.join(process.cwd(), 'data', 'samiq-db.json');
+export type ChannelType = 'web' | 'whatsapp' | 'telegram';
+
+export interface ChatMessage {
+  id: string;
+  sender: 'customer' | 'bot' | 'agent';
+  senderName: string;
+  text: string;
+  timestamp: string;
+}
+
+export interface OmnichannelConversation {
+  id: string;
+  channel: ChannelType;
+  customerName: string;
+  customerIdentifier: string;
+  lastMessage: string;
+  lastMessageTime: string;
+  unreadCount: number;
+  isBotActive: boolean;
+  status: 'active' | 'resolved' | 'pending';
+  messages: ChatMessage[];
+}
+
+function getDatabaseFilePath(): string {
+  const isVercel = Boolean(process.env.VERCEL);
+  if (isVercel) {
+    const tmpPath = path.join('/tmp', 'samiq-db.json');
+    if (!fs.existsSync(tmpPath)) {
+      const seedPath = path.join(process.cwd(), 'data', 'samiq-db.json');
+      if (fs.existsSync(seedPath)) {
+        try {
+          fs.copyFileSync(seedPath, tmpPath);
+        } catch (e) {
+          console.warn('Could not copy seed to /tmp:', e);
+        }
+      }
+    }
+    return tmpPath;
+  }
+  return path.join(process.cwd(), 'data', 'samiq-db.json');
+}
 
 /**
  * Default Seed Database Data
@@ -447,6 +488,89 @@ function createDefaultSeed(): SamiqDatabaseSchema {
         isActive: true,
       },
     ],
+    conversations: [
+      {
+        id: 'conv-wa-1',
+        channel: 'whatsapp',
+        customerName: 'أم ريان — صنعاء',
+        customerIdentifier: '+967 771 234 567',
+        lastMessage: 'كيف أفرق بين غسول سيرافي الأصلي والتقليد قبل فتح العبوة؟',
+        lastMessageTime: 'منذ 10 دقائق',
+        unreadCount: 1,
+        isBotActive: true,
+        status: 'active',
+        messages: [
+          {
+            id: 'm1',
+            sender: 'customer',
+            senderName: 'أم ريان',
+            text: 'السلام عليكم، هل غسول سيرافي للبشرة الدهنية متوفر بحجم 473 مل؟',
+            timestamp: '14:20',
+          },
+          {
+            id: 'm2',
+            sender: 'bot',
+            senderName: 'المستشارة الذكية (مفتاح الجمال)',
+            text: 'وعليكم السلام ورحمة الله. نعم متوفر في فرع حدة والكتالوج الإلكتروني، المنتج أصلي 100% مستورد من فرنسا مع باركود فحص فوري.',
+            timestamp: '14:21',
+          },
+          {
+            id: 'm3',
+            sender: 'customer',
+            senderName: 'أم ريان',
+            text: 'كيف أفرق بين غسول سيرافي الأصلي والتقليد قبل فتح العبوة؟',
+            timestamp: '14:23',
+          },
+        ],
+      },
+      {
+        id: 'conv-web-2',
+        channel: 'web',
+        customerName: 'سارة المهدي',
+        customerIdentifier: 'sarah.m@gmail.com',
+        lastMessage: 'طلبت سيروم فيتامين سي من الموقع، هل التوصيل إلى حدة بنفس اليوم؟',
+        lastMessageTime: 'منذ 25 دقيقة',
+        unreadCount: 0,
+        isBotActive: true,
+        status: 'active',
+        messages: [
+          {
+            id: 'm4',
+            sender: 'customer',
+            senderName: 'سارة المهدي',
+            text: 'طلبت سيروم فيتامين سي من الموقع، هل التوصيل إلى حدة بنفس اليوم؟',
+            timestamp: '13:50',
+          },
+          {
+            id: 'm5',
+            sender: 'bot',
+            senderName: 'مستشارة سَامِق الذكية',
+            text: 'أهلاً بكِ أستاذة سارة. طلبات أمانة العاصمة صنعاء تسلّم في نفس اليوم خلال 3 إلى 5 ساعات عبر مندوبنا مع إمكانية الفحص قبل السداد.',
+            timestamp: '13:51',
+          },
+        ],
+      },
+      {
+        id: 'conv-tg-3',
+        channel: 'telegram',
+        customerName: 'م. عبد الرحمن الحكيمي',
+        customerIdentifier: '@Ar_Hakeemi',
+        lastMessage: 'أريد حجز استشارة جلدية لزوجتي يوم الخميس القادم في فرع حدة.',
+        lastMessageTime: 'منذ 45 دقيقة',
+        unreadCount: 2,
+        isBotActive: false,
+        status: 'pending',
+        messages: [
+          {
+            id: 'm6',
+            sender: 'customer',
+            senderName: 'م. عبد الرحمن الحكيمي',
+            text: 'أريد حجز استشارة جلدية لزوجتي يوم الخميس القادم في فرع حدة.',
+            timestamp: '13:10',
+          },
+        ],
+      },
+    ],
   };
 }
 
@@ -455,13 +579,18 @@ function createDefaultSeed(): SamiqDatabaseSchema {
  */
 export function getDb(): SamiqDatabaseSchema {
   try {
-    if (!fs.existsSync(DB_FILE_PATH)) {
+    const dbPath = getDatabaseFilePath();
+    if (!fs.existsSync(dbPath)) {
       const initialSeed = createDefaultSeed();
       saveDb(initialSeed);
       return initialSeed;
     }
-    const raw = fs.readFileSync(DB_FILE_PATH, 'utf-8');
-    return JSON.parse(raw) as SamiqDatabaseSchema;
+    const raw = fs.readFileSync(dbPath, 'utf-8');
+    const parsed = JSON.parse(raw) as SamiqDatabaseSchema;
+    if (!parsed.conversations) {
+      parsed.conversations = createDefaultSeed().conversations;
+    }
+    return parsed;
   } catch (err) {
     console.error('Error reading samiq-db.json, falling back to seed:', err);
     return createDefaultSeed();
@@ -473,11 +602,12 @@ export function getDb(): SamiqDatabaseSchema {
  */
 export function saveDb(data: SamiqDatabaseSchema): void {
   try {
-    const dir = path.dirname(DB_FILE_PATH);
+    const dbPath = getDatabaseFilePath();
+    const dir = path.dirname(dbPath);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
-    fs.writeFileSync(DB_FILE_PATH, JSON.stringify(data, null, 2), 'utf-8');
+    fs.writeFileSync(dbPath, JSON.stringify(data, null, 2), 'utf-8');
   } catch (err) {
     console.error('Error writing samiq-db.json:', err);
   }
@@ -775,3 +905,56 @@ export function updatePlatformFeatures(features: Record<string, boolean>): void 
   db.features = { ...db.features, ...features };
   saveDb(db);
 }
+
+// 12. Omnichannel Inbox & Live Agent Takeover
+export function getAllConversations(): OmnichannelConversation[] {
+  const db = getDb();
+  return db.conversations || [];
+}
+
+export function getConversationById(id: string): OmnichannelConversation | undefined {
+  const db = getDb();
+  return (db.conversations || []).find((c) => c.id === id);
+}
+
+export function addMessageToConversation(
+  conversationId: string,
+  message: { sender: 'customer' | 'bot' | 'agent'; senderName: string; text: string }
+): OmnichannelConversation | null {
+  const db = getDb();
+  if (!db.conversations) db.conversations = [];
+  const conv = db.conversations.find((c) => c.id === conversationId);
+  if (!conv) return null;
+
+  const newMsg: ChatMessage = {
+    id: `m-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    sender: message.sender,
+    senderName: message.senderName,
+    text: message.text,
+    timestamp: new Date().toLocaleTimeString('ar-YE', { hour: '2-digit', minute: '2-digit' }),
+  };
+
+  conv.messages.push(newMsg);
+  conv.lastMessage = message.text;
+  conv.lastMessageTime = 'الآن';
+  if (message.sender === 'customer') {
+    conv.unreadCount += 1;
+  } else {
+    conv.unreadCount = 0;
+  }
+
+  saveDb(db);
+  return conv;
+}
+
+export function toggleBotStatus(conversationId: string, isBotActive: boolean): OmnichannelConversation | null {
+  const db = getDb();
+  if (!db.conversations) db.conversations = [];
+  const conv = db.conversations.find((c) => c.id === conversationId);
+  if (!conv) return null;
+
+  conv.isBotActive = isBotActive;
+  saveDb(db);
+  return conv;
+}
+

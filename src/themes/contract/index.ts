@@ -9,6 +9,49 @@
 
 export type ThemeCurrencyCode = 'YER' | 'SAR' | 'USD';
 
+export type SamiqThemeId = 'luxury-noir' | 'editorial-ivory' | 'emerald-botanical';
+
+export interface ThemeMeta {
+  id: SamiqThemeId;
+  nameAr: string;
+  nameEn: string;
+  paletteDescription: string;
+  primaryColor: string;
+  accentColor: string;
+  badge: string;
+}
+
+export const SAMIQ_THEMES: Record<SamiqThemeId, ThemeMeta> = {
+  'luxury-noir': {
+    id: 'luxury-noir',
+    nameAr: 'أسود رخامي فاخر (Luxury Noir)',
+    nameEn: 'Luxury Noir',
+    paletteDescription: 'الأسود الساحر مع الذهب الملكي وإضاءات الهالو السينمائية',
+    primaryColor: '#070709',
+    accentColor: '#C9A84C',
+    badge: 'الأكثر فخامة',
+  },
+  'editorial-ivory': {
+    id: 'editorial-ivory',
+    nameAr: 'حرير عاجي تحريري (Editorial Ivory)',
+    nameEn: 'Editorial Ivory',
+    paletteDescription: 'حرير عاجي دافئ، نصوص إسبريسو، ولمسات شامبانيا عيادات التجميل السويسرية',
+    primaryColor: '#FAF7F2',
+    accentColor: '#B8860B',
+    badge: 'طابع المجلات العالمية',
+  },
+  'emerald-botanical': {
+    id: 'emerald-botanical',
+    nameAr: 'زمرد نباتي ملكي (Emerald Botanical)',
+    nameEn: 'Emerald Botanical',
+    paletteDescription: 'الأخضر الزمردي العميق مع الذهب المصقول للمنتجات العضوية والطبيعية',
+    primaryColor: '#061410',
+    accentColor: '#D4AF37',
+    badge: 'للمستحضرات العضوية',
+  },
+};
+
+
 export interface TenantBrandInfo {
   id: string;
   name: string;
@@ -142,6 +185,7 @@ export interface StorefrontProps {
   tenant: TenantBrandInfo;
   features: FeatureFlags;
   initialCurrency?: ThemeCurrencyCode;
+  initialTheme?: SamiqThemeId;
   products: ProductCardData[];
   categories: CategoryBentoItem[];
   authenticityGuide: AuthenticityComparisonData;

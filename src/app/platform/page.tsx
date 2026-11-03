@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { FEATURES_REGISTRY, calculateTierPrice, validateFeatureDependencies, resolveEffectiveFeatures } from '@/core/features/registry';
+import { ThemeSwitcher } from '@/themes/base/luxury-noir/components/ThemeSwitcher';
 
 export default function PlatformSuperAdminPage() {
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([
@@ -51,6 +52,7 @@ export default function PlatformSuperAdminPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            <ThemeSwitcher />
             <Link
               href="/"
               className="px-4 py-2 rounded-xl bg-gold/15 hover:bg-gold/25 text-champagne border border-gold/40 text-xs font-bold transition flex items-center gap-1.5"
