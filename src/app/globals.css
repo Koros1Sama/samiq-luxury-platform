@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #070709;
+  --foreground: #F5F2EB;
+}
+
+/* Base resets & Arabic RTL handling */
+html {
+  color-scheme: dark;
+  scroll-behavior: smooth;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  overflow-x: hidden;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* SAMIQ CRITICAL ARABIC RULE:
+   NEVER apply letter-spacing to Arabic text because it breaks cursive ligature connections.
+*/
+[dir="rtl"], [lang="ar"] {
+  letter-spacing: normal !important;
+}
+
+/* Custom Luxury Gold Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #070709;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2A261D;
+  border-radius: 4px;
+  border: 1px solid rgba(201, 168, 76, 0.2);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #C9A84C;
+}
+
+/* Selection style */
+::selection {
+  background-color: #C9A84C;
+  color: #070709;
+}
+
+/* Hide scrollbar for clean horizontal pill sliders */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

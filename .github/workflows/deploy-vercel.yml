@@ -1,0 +1,57 @@
+name: Deploy to Vercel Production
+
+on:
+  push:
+    branches:
+      - master
+      - main
+    paths:
+      - '**'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup Vercel Global Authentication
+        env:
+          VERCEL_AUTH: ${{ secrets.VERCEL_AUTH_JSON }}
+          VERCEL_CONFIG: ${{ secrets.VERCEL_CONFIG_JSON }}
+        run: |
+          mkdir -p ~/.config/com.vercel.cli ~/.local/share/com.vercel.cli ~/.vercel
+          if [ -n "$VERCEL_AUTH" ]; then
+            echo "$VERCEL_AUTH" > ~/.config/com.vercel.cli/auth.json
+            echo "$VERCEL_AUTH" > ~/.local/share/com.vercel.cli/auth.json
+            echo "$VERCEL_AUTH" > ~/.vercel/auth.json
+          fi
+          if [ -n "$VERCEL_CONFIG" ]; then
+            echo "$VERCEL_CONFIG" > ~/.config/com.vercel.cli/config.json
+            echo "$VERCEL_CONFIG" > ~/.local/share/com.vercel.cli/config.json
+            echo "$VERCEL_CONFIG" > ~/.vercel/config.json
+          fi
+
+      - name: Deploy to Vercel Production
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          mkdir -p .vercel
+          PID="${VERCEL_PROJECT_ID}"
+          OID="${VERCEL_ORG_ID:-team_SYso2o6L4hc49njYuLDaZWb1}"
+          if [ -n "$PID" ] && [ -n "$OID" ]; then
+            echo "{\"projectId\":\"$PID\",\"orgId\":\"$OID\",\"projectName\":\"samiq-web\"}" > .vercel/project.json
+          fi
+          if [ -n "$VERCEL_TOKEN" ]; then
+            npx vercel deploy --prod --yes --token "$VERCEL_TOKEN"
+          else
+            npx vercel deploy --prod --yes
+          fi

@@ -1,0 +1,80 @@
+import React from 'react';
+import Image from 'next/image';
+import { CategoryBentoItem } from '../../../contract';
+
+interface BrandBentoGridProps {
+  categories: CategoryBentoItem[];
+  onSelectCategory?: (id: string) => void;
+}
+
+export function BrandBentoGrid({ categories, onSelectCategory }: BrandBentoGridProps) {
+  return (
+    <section id="categories-bento" className="py-16 sm:py-20 relative bg-surface/30">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Section Title */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
+          <div>
+            <span className="text-xs font-sans text-gold font-semibold uppercase tracking-wider block mb-1">
+              مجموعات مفتاح الجمال الحصرية
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-serif font-bold text-ivory">
+              أبرز الأقسام والماركات العالمية
+            </h2>
+          </div>
+          <p className="text-xs sm:text-sm text-muted-lux font-sans max-w-md">
+            نوفر منتجات الوكالات الأصلية المختبرة جلدياً مع كفالة الأصالة الموثقة.
+          </p>
+        </div>
+
+        {/* 4 Cards Bento Grid (Matching Reference Monitor Screenshot) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {categories.map((cat) => (
+            <div
+              key={cat.id}
+              onClick={() => onSelectCategory?.(cat.id)}
+              className="group cursor-pointer p-1.5 rounded-[1.75rem] bg-white/[0.03] border border-white/[0.08] hover:border-gold/50 shadow-xl transition-all duration-500 hover:-translate-y-1.5 flex flex-col"
+            >
+              <div className="h-full rounded-[calc(1.75rem-0.375rem)] bg-[#0E0E12] p-5 flex flex-col justify-between overflow-hidden relative min-h-[360px]">
+                {/* Ambient Golden Hover Shimmer */}
+                <div className="absolute -top-24 -end-24 w-48 h-48 bg-gold/10 rounded-full blur-2xl group-hover:bg-gold/20 transition-all pointer-events-none" />
+
+                {/* Card Header (Brand Name) */}
+                <div className="flex items-center justify-between z-10">
+                  <span className="text-base font-serif font-bold text-ivory group-hover:text-champagne transition">
+                    {cat.brand}
+                  </span>
+                  {cat.badge && (
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-sans font-bold bg-gold/10 text-gold border border-gold/20">
+                      {cat.badge}
+                    </span>
+                  )}
+                </div>
+
+                {/* Studio Cosmetic Photographic Asset (Replaces cartoon SVG shapes) */}
+                <div className="my-4 h-48 w-full rounded-2xl overflow-hidden relative z-10 bg-white/[0.02]">
+                  <Image
+                    src={cat.image}
+                    alt={cat.title}
+                    fill
+                    className="object-cover object-center group-hover:scale-105 transition-transform duration-700 brightness-95"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0E0E12] via-transparent to-transparent opacity-80" />
+                </div>
+
+                {/* Card CTA Button (Matching screenshot) */}
+                <div className="z-10 pt-2 border-t border-white/5">
+                  <div className="w-full py-2.5 px-3 rounded-xl bg-white/[0.04] group-hover:bg-gold/15 group-hover:border-gold/30 border border-white/5 text-ivory group-hover:text-champagne font-sans font-bold text-xs flex items-center justify-between transition-all">
+                    <span>{cat.ctaText}</span>
+                    <span className="text-gold group-hover:-translate-x-1 transition-transform">
+                      ←
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}

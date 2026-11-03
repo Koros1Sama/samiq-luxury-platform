@@ -1,0 +1,610 @@
+{
+  "tenant": {
+    "id": "11111111-1111-1111-1111-111111111111",
+    "name": "مفتاح الجمال",
+    "legalName": "مفتاح الجمال — أصلي وتقليد",
+    "tagline": "بوابتك الموثوقة لعالم الجمال",
+    "whatsapp": "967775234989",
+    "phone": "967775234989",
+    "city": "صنعاء",
+    "deliveryCoverage": "توصيل فوري لجميع مديريات صنعاء وشحن آمن لكافة المحافظات",
+    "heroBadge": "مضمون أصلي 100%",
+    "instagram": "miftah_beauty",
+    "noindex": true
+  },
+  "features": {
+    "tier_1_static": true,
+    "tier_2_editable": true,
+    "tier_3_catalog": true,
+    "cart_whatsapp": true,
+    "authenticity_guide": true,
+    "skin_routine_advisor": true,
+    "customer_accounts": true,
+    "payment_gateways": false,
+    "ai_chatbot": true,
+    "whatsapp_channel": false,
+    "telegram_channel": false
+  },
+  "products": [
+    {
+      "id": "prod-1",
+      "title": "سيروم فيتامين سي النقي 10% (Pure Vitamin C10)",
+      "subtitle": "مضاد أكسدة فائق مع حمض الساليسيليك لنضارة فورية",
+      "brand": "La Roche-Posay",
+      "categorySlug": "skincare",
+      "image": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=800&q=80",
+      "isAuthenticGuaranteed": true,
+      "isFeatured": true,
+      "badge": "الأصلي الفرنسي BATCH: 54U700",
+      "prices": {
+        "YER": 28500,
+        "SAR": 195,
+        "USD": 52
+      },
+      "comparePrices": {
+        "YER": 34000,
+        "SAR": 235,
+        "USD": 62
+      },
+      "variants": [
+        {
+          "id": "v1",
+          "title": "30 مل (الأصلي)",
+          "inStock": true
+        }
+      ]
+    },
+    {
+      "id": "prod-2",
+      "title": "غسول سيرافي المرطب للبشرة العادية والجافة (Hydrating Cleanser)",
+      "subtitle": "يحتوي على 3 سيراميدات أساسية وحمض الهيالورونيك",
+      "brand": "CeraVe",
+      "categorySlug": "cleansers",
+      "image": "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=800&q=80",
+      "isAuthenticGuaranteed": true,
+      "isFeatured": true,
+      "badge": "توصية أطباء الجلد",
+      "prices": {
+        "YER": 14500,
+        "SAR": 98,
+        "USD": 26
+      },
+      "variants": [
+        {
+          "id": "v2-1",
+          "title": "473 مل (عائلي)",
+          "inStock": true
+        },
+        {
+          "id": "v2-2",
+          "title": "236 مل",
+          "inStock": true
+        }
+      ]
+    },
+    {
+      "id": "prod-3",
+      "title": "سيروم نياسيناميد 10% + زنك 1% (Niacinamide 10% + Zinc 1%)",
+      "subtitle": "لتضييق المسامات وتوحيد لون البشرة والتحكم بالإفرازات",
+      "brand": "The Ordinary",
+      "categorySlug": "serums",
+      "image": "https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?auto=format&fit=crop&w=800&q=80",
+      "isAuthenticGuaranteed": true,
+      "isFeatured": true,
+      "badge": "أصلي كندي معتمد",
+      "prices": {
+        "YER": 9500,
+        "SAR": 65,
+        "USD": 17
+      },
+      "variants": [
+        {
+          "id": "v3-1",
+          "title": "30 مل",
+          "inStock": true
+        },
+        {
+          "id": "v3-2",
+          "title": "60 مل",
+          "inStock": true
+        }
+      ]
+    },
+    {
+      "id": "prod-4",
+      "title": "أحمر شفاه كوتور الفاخر بثبات حريري (Rouge Pur Couture)",
+      "subtitle": "ترطيب عميق مع تغطية ساتانية وإشراقة تدوم 12 ساعة",
+      "brand": "YSL Beauty",
+      "categorySlug": "makeup",
+      "image": "https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=800&q=80",
+      "isAuthenticGuaranteed": true,
+      "isFeatured": true,
+      "badge": "إصدار فاخر",
+      "prices": {
+        "YER": 24000,
+        "SAR": 165,
+        "USD": 44
+      },
+      "variants": [
+        {
+          "id": "v4-1",
+          "title": "درجة 01 - لو روج الكلاسيكي",
+          "shadeCode": "#B81D36",
+          "inStock": true
+        },
+        {
+          "id": "v4-2",
+          "title": "درجة 09 - روز ستيليتو الهادئ",
+          "shadeCode": "#B76E79",
+          "inStock": true
+        }
+      ]
+    },
+    {
+      "id": "prod-5",
+      "title": "باليت ظلال العيون الملكي (Rose Gold Remastered)",
+      "subtitle": "18 لوناً غنياً بين المات المخملي والميتاليك اللامع بلمسات الذهب",
+      "brand": "Huda Beauty",
+      "categorySlug": "makeup",
+      "image": "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=800&q=80",
+      "isAuthenticGuaranteed": true,
+      "isFeatured": false,
+      "badge": "أصلي 100%",
+      "prices": {
+        "YER": 36000,
+        "SAR": 250,
+        "USD": 66
+      },
+      "variants": [
+        {
+          "id": "v5-1",
+          "title": "18 لوناً كاملاً",
+          "inStock": true
+        }
+      ]
+    },
+    {
+      "id": "prod-6",
+      "title": "كريم سيرافي المرطب المكثف للوجه والجسم (Moisturizing Cream)",
+      "subtitle": "حاجز حماية متواصل بتقنية MVE طوال 24 ساعة",
+      "brand": "CeraVe",
+      "categorySlug": "moisturizers",
+      "image": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80",
+      "isAuthenticGuaranteed": true,
+      "isFeatured": false,
+      "badge": "حجم توفيري 454g",
+      "prices": {
+        "YER": 18500,
+        "SAR": 125,
+        "USD": 33
+      },
+      "variants": [
+        {
+          "id": "v6-1",
+          "title": "454 غرام",
+          "inStock": true
+        }
+      ]
+    }
+  ],
+  "categories": [
+    {
+      "id": "cerave",
+      "title": "منتجات CeraVe",
+      "brand": "CeraVe",
+      "image": "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=800&q=80",
+      "ctaText": "منتجات CeraVe",
+      "href": "#cerave",
+      "badge": "الأكثر طلباً"
+    },
+    {
+      "id": "the-ordinary",
+      "title": "سيرومات The Ordinary",
+      "brand": "The Ordinary",
+      "image": "https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?auto=format&fit=crop&w=800&q=80",
+      "ctaText": "The Ordinary",
+      "href": "#the-ordinary",
+      "badge": "تركيزات نقية"
+    },
+    {
+      "id": "cosmetics",
+      "title": "مستحضرات التجميل والعناية",
+      "brand": "مستحضرات التجميل",
+      "image": "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=800&q=80",
+      "ctaText": "مستحضرات التجميل",
+      "href": "#cosmetics"
+    },
+    {
+      "id": "luxury-makeup",
+      "title": "المكياج الفاخر والأرواج",
+      "brand": "المكياج الفاخر",
+      "image": "https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=800&q=80",
+      "ctaText": "المكياج الفاخر",
+      "href": "#luxury-makeup",
+      "badge": "ثبات مخملي"
+    }
+  ],
+  "authenticityGuides": {
+    "prod-1": {
+      "productId": "prod-1",
+      "productTitle": "سيروم La Roche-Posay Pure Vitamin C10",
+      "brand": "La Roche-Posay",
+      "original": {
+        "title": "الأصلي الفرنسي المعتمد",
+        "image": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=800&q=80",
+        "batchCode": "54U700",
+        "formulaNotes": "سائل نقي ذهبي فاتح، رائحة حمضية منعشة وخفيفة، خالٍ تماماً من الرغوة أو الشوائب",
+        "packagingNotes": "زجاج داكن ثقيل عازل للضوء، رقم الباتش محفور بالليزر أسفل الزجاج، قطارة محكمة بسدادة مطاطية أصلية"
+      },
+      "counterfeit": {
+        "title": "التقليد المغشوش المنتشر",
+        "image": "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=800&q=80",
+        "batchCode": "بدون كود أو مطبوع بحبر باهت",
+        "formulaNotes": "سائل معكر مائل للبياض، رغوة كثيفة تطفو عند الرج، رائحة كيميائية نفاذة تسبب تهيج البشرة",
+        "packagingNotes": "زجاج خفيف رديء، غطاء قطارة بلاستيكي يسرب الهواء مما يسبب أكسدة وتلف التركيبة فوراً"
+      },
+      "checklist": [
+        {
+          "title": "رقم التشغيلة والباتش كود (Batch Code)",
+          "originalFeature": "محفور بالليزر في قاع الزجاج متطابق تماماً مع الكود المطبوع على الكرتون الخارجي (مثال: 54U700).",
+          "fakeRisk": "مفقود نهائياً أو مطبوع بحبر باهت يمكن مسحه بسهولة بالإصبع."
+        },
+        {
+          "title": "نقاء القوام وتجانس السيروم",
+          "originalFeature": "قوام انسيابي نقي شفاف بلون كهرماني ذهبي يتغلغل في البشرة دون بقايا دهنية.",
+          "fakeRisk": "سائل معكر تظهر به فقاعات ورغوة بيضاء لزجة لا تختفي بعد دقيقة."
+        },
+        {
+          "title": "الباركود ومطابقة الوكالة الرسمية",
+          "originalFeature": "يقرأ الباركود مباشرة في تطبيق الوكالة ويظهر دولة الصنع (فرنسا) وتاريخ الإنتاج.",
+          "fakeRisk": "باركود عشوائي لا يؤدي لأي صفحة أو يعطي منتجاً مختلفاً."
+        },
+        {
+          "title": "جودة الزجاج ومطاط القطارة",
+          "originalFeature": "زجاج طبي معتم عازل للضوء لحماية فيتامين C من الأكسدة مع قطارة دقيقة.",
+          "fakeRisk": "زجاج شفاف رخيص ومطاط رديء يتفتت بعد أسبوع من الاستخدام."
+        }
+      ],
+      "videoUrl": "https://youtube.com/shorts/sample-miftah-auth"
+    },
+    "54U700": {
+      "productId": "prod-1",
+      "productTitle": "سيروم La Roche-Posay Pure Vitamin C10",
+      "brand": "La Roche-Posay",
+      "original": {
+        "title": "الأصلي الفرنسي المعتمد",
+        "image": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=800&q=80",
+        "batchCode": "54U700",
+        "formulaNotes": "سائل نقي ذهبي فاتح، رائحة حمضية منعشة وخفيفة، خالٍ تماماً من الرغوة أو الشوائب",
+        "packagingNotes": "زجاج داكن ثقيل عازل للضوء، رقم الباتش محفور بالليزر أسفل الزجاج، قطارة محكمة بسدادة مطاطية أصلية"
+      },
+      "counterfeit": {
+        "title": "التقليد المغشوش المنتشر",
+        "image": "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=800&q=80",
+        "batchCode": "بدون كود أو مطبوع بحبر باهت",
+        "formulaNotes": "سائل معكر مائل للبياض، رغوة كثيفة تطفو عند الرج، رائحة كيميائية نفاذة تسبب تهيج البشرة",
+        "packagingNotes": "زجاج خفيف رديء، غطاء قطارة بلاستيكي يسرب الهواء مما يسبب أكسدة وتلف التركيبة فوراً"
+      },
+      "checklist": [
+        {
+          "title": "رقم التشغيلة والباتش كود (Batch Code)",
+          "originalFeature": "محفور بالليزر في قاع الزجاج متطابق تماماً مع الكود المطبوع على الكرتون الخارجي (مثال: 54U700).",
+          "fakeRisk": "مفقود نهائياً أو مطبوع بحبر باهت يمكن مسحه بسهولة بالإصبع."
+        },
+        {
+          "title": "نقاء القوام وتجانس السيروم",
+          "originalFeature": "قوام انسيابي نقي شفاف بلون كهرماني ذهبي يتغلغل في البشرة دون بقايا دهنية.",
+          "fakeRisk": "سائل معكر تظهر به فقاعات ورغوة بيضاء لزجة لا تختفي بعد دقيقة."
+        },
+        {
+          "title": "الباركود ومطابقة الوكالة الرسمية",
+          "originalFeature": "يقرأ الباركود مباشرة في تطبيق الوكالة ويظهر دولة الصنع (فرنسا) وتاريخ الإنتاج.",
+          "fakeRisk": "باركود عشوائي لا يؤدي لأي صفحة أو يعطي منتجاً مختلفاً."
+        },
+        {
+          "title": "جودة الزجاج ومطاط القطارة",
+          "originalFeature": "زجاج طبي معتم عازل للضوء لحماية فيتامين C من الأكسدة مع قطارة دقيقة.",
+          "fakeRisk": "زجاج شفاف رخيص ومطاط رديء يتفتت بعد أسبوع من الاستخدام."
+        }
+      ],
+      "videoUrl": "https://youtube.com/shorts/sample-miftah-auth"
+    }
+  },
+  "orders": [
+    {
+      "id": "ord-101",
+      "orderNumber": "MIFTAH-7842",
+      "tenantId": "11111111-1111-1111-1111-111111111111",
+      "customerName": "فاطمة العنسي",
+      "customerPhone": "967771234567",
+      "customerEmail": "fatima@example.com",
+      "city": "صنعاء",
+      "address": "شارع حدة - جوار برج الأمل",
+      "items": [
+        {
+          "productId": "prod-1",
+          "title": "سيروم فيتامين سي النقي 10% (Pure Vitamin C10)",
+          "variantTitle": "30 مل (الأصلي)",
+          "quantity": 1,
+          "unitPrice": {
+            "YER": 28500,
+            "SAR": 195,
+            "USD": 52
+          }
+        },
+        {
+          "productId": "prod-2",
+          "title": "غسول سيرافي المرطب للبشرة العادية والجافة",
+          "variantTitle": "473 مل (عائلي)",
+          "quantity": 1,
+          "unitPrice": {
+            "YER": 14500,
+            "SAR": 98,
+            "USD": 26
+          }
+        }
+      ],
+      "subtotalYer": 43000,
+      "shippingFeeYer": 0,
+      "discountYer": 0,
+      "totalYer": 43000,
+      "currency": "YER",
+      "paymentMethod": "whatsapp",
+      "status": "delivered",
+      "createdAt": "2026-11-01T22:12:36.095Z",
+      "updatedAt": "2026-11-02T22:12:36.095Z"
+    },
+    {
+      "id": "ord-102",
+      "orderNumber": "MIFTAH-7841",
+      "tenantId": "11111111-1111-1111-1111-111111111111",
+      "customerName": "سارة عبد الله",
+      "customerPhone": "967779876543",
+      "city": "تعز",
+      "address": "الحوبان - الشارع العام",
+      "items": [
+        {
+          "productId": "prod-4",
+          "title": "أحمر شفاه كوتور الفاخر بثبات حريري (Rouge Pur Couture)",
+          "variantTitle": "درجة 01 - لو روج الكلاسيكي",
+          "quantity": 1,
+          "unitPrice": {
+            "YER": 24000,
+            "SAR": 165,
+            "USD": 44
+          }
+        },
+        {
+          "productId": "prod-3",
+          "title": "سيروم نياسيناميد 10% + زنك 1%",
+          "variantTitle": "30 مل",
+          "quantity": 2,
+          "unitPrice": {
+            "YER": 9500,
+            "SAR": 65,
+            "USD": 17
+          }
+        }
+      ],
+      "subtotalYer": 43000,
+      "shippingFeeYer": 2500,
+      "discountYer": 0,
+      "totalYer": 45500,
+      "currency": "YER",
+      "paymentMethod": "kuraimi",
+      "paymentReference": "KR-908123",
+      "status": "shipped",
+      "createdAt": "2026-10-31T22:12:36.095Z",
+      "updatedAt": "2026-11-01T22:12:36.095Z"
+    }
+  ],
+  "coupons": [
+    {
+      "code": "MIFTAH10",
+      "discountPercentage": 10,
+      "isActive": true,
+      "usageCount": 42
+    },
+    {
+      "code": "ASLI20",
+      "discountPercentage": 20,
+      "minOrderAmountYer": 30000,
+      "isActive": true,
+      "usageCount": 15
+    },
+    {
+      "code": "VIP5000",
+      "discountPercentage": 0,
+      "fixedDiscountYer": 5000,
+      "minOrderAmountYer": 25000,
+      "isActive": true,
+      "usageCount": 8
+    }
+  ],
+  "shippingZones": [
+    {
+      "id": "zone-sanaa",
+      "nameAr": "أمانة العاصمة صنعاء وضواحيها",
+      "nameEn": "Sanaa Capital Region",
+      "city": "صنعاء",
+      "feeYer": 1000,
+      "feeSar": 7,
+      "feeUsd": 2,
+      "estimatedDeliveryHours": "خلال 2 إلى 4 ساعات",
+      "isAvailable": true
+    },
+    {
+      "id": "zone-aden",
+      "nameAr": "محافظة عدن ولحج",
+      "nameEn": "Aden & Lahij",
+      "city": "عدن",
+      "feeYer": 3000,
+      "feeSar": 21,
+      "feeUsd": 6,
+      "estimatedDeliveryHours": "خلال 24 إلى 48 ساعة",
+      "isAvailable": true
+    },
+    {
+      "id": "zone-taiz-ibb",
+      "nameAr": "محافظتي تعز وإب",
+      "nameEn": "Taiz & Ibb",
+      "city": "تعز",
+      "feeYer": 2500,
+      "feeSar": 18,
+      "feeUsd": 5,
+      "estimatedDeliveryHours": "خلال 24 إلى 36 ساعة",
+      "isAvailable": true
+    },
+    {
+      "id": "zone-hadramout",
+      "nameAr": "حضرموت (المكلا وسيئون) وشبوة",
+      "nameEn": "Hadramout & Shabwa",
+      "city": "المكلا",
+      "feeYer": 4000,
+      "feeSar": 28,
+      "feeUsd": 8,
+      "estimatedDeliveryHours": "خلال 48 ساعة",
+      "isAvailable": true
+    },
+    {
+      "id": "zone-saudi",
+      "nameAr": "المملكة العربية السعودية (شحن دولي سريع)",
+      "nameEn": "Saudi Arabia Express",
+      "city": "الرياض",
+      "feeYer": 8500,
+      "feeSar": 35,
+      "feeUsd": 10,
+      "estimatedDeliveryHours": "خلال 3 إلى 5 أيام عمل",
+      "isAvailable": true
+    }
+  ],
+  "customers": [
+    {
+      "id": "cust-1",
+      "tenantId": "11111111-1111-1111-1111-111111111111",
+      "fullName": "ريم المحمودي",
+      "phone": "967775001122",
+      "email": "reem@example.com",
+      "city": "صنعاء",
+      "defaultAddress": "حدة - الحي الدبلوماسي",
+      "loyaltyPoints": 350,
+      "wishlistProductIds": [
+        "prod-1",
+        "prod-4"
+      ],
+      "createdAt": "2026-09-15T10:00:00Z"
+    }
+  ],
+  "bookings": [
+    {
+      "id": "book-1",
+      "tenantId": "11111111-1111-1111-1111-111111111111",
+      "customerName": "أمل الصنعاني",
+      "customerPhone": "967773344556",
+      "serviceType": "skin_consultation",
+      "branchId": "branch-sanaa",
+      "bookingDate": "2026-11-10",
+      "bookingTime": "04:30 PM",
+      "notes": "استشارة فحص حاجز البشرة واختيار روتين مضاد للتصبغات",
+      "status": "confirmed",
+      "createdAt": "2026-11-01T14:20:00Z"
+    }
+  ],
+  "blogPosts": [
+    {
+      "id": "post-1",
+      "tenantId": "11111111-1111-1111-1111-111111111111",
+      "slug": "how-to-verify-vitamin-c-serum",
+      "title": "أسرار فحص سيروم فيتامين سي الأصلي: الفرق القاطع بين النقاء والتأكسد",
+      "excerpt": "دليل تفصيلي لكشف السيرومات المغشوشة المنتشرة في السوق اليمني وتأثيرها على صحة البشرة.",
+      "content": "\nفيتامين سي (L-Ascorbic Acid) من أقوى مضادات الأكسدة التي تحمي خلايا الجلد وتوحد لون البشرة، لكنه في الوقت ذاته من أكثر المواد حساسية تجاه الضوء والحرارة والهواء.\n\nالمنتجات المقلدة تعتمد عادة على سوائل ماء ملون بدون أي تركيز فعال، أو تحتوي على مواد كيميائية تتأكسد في أيام قليلة وتسبب التهابات حادة للبشرة.\n\nالعلامات الحاسمة لفحص سيروم La Roche-Posay Pure Vitamin C10 الأصلي:\n1. رقم الباتش (Batch Code):\nيأتي محفوراً بدقة بالغة أسفل الزجاجة بواسطة الليزر (مثال: 54U700)، ومطابقاً تماماً لنفس الكود المطبوع على ظهر الكرتون الخارجي. في المنتجات المقلدة تجد الكود مفقوداً تماماً أو مطبوعاً بحبر سطحي يزول بمسحة إصبع.\n\n2. قوام ولون السيروم:\nالسيروم الأصلي يتميز بلون ذهبي كهرماني نقي، وقوام انسيابي خفيف سريع الامتصاص دون أي ملمس زيتي لزج. في العبوات المقلدة تلاحظ رغوة بيضاء عائمة عند رج العبوة ورائحة كيميائية نفاذة.\n\n3. نوع ومطاط القطارة:\nالعبوة الفرنسية الأصلية مزودة بقطارة طبية ذات سدادة داخلية محكمة للغاية تمنع تسرب جزيئات الأكسجين لحماية الفيتامين من التلف.\n        ",
+      "author": "خبيرات مفتاح الجمال",
+      "coverImage": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=1200&q=80",
+      "tags": [
+        "العناية بالبشرة",
+        "فيتامين سي",
+        "كشف الأصلي والتقليد"
+      ],
+      "readTimeMinutes": 4,
+      "publishedAt": "2026-10-25",
+      "isFeatured": true
+    },
+    {
+      "id": "post-2",
+      "tenantId": "11111111-1111-1111-1111-111111111111",
+      "slug": "cerave-cleanser-original-guide",
+      "title": "دليل غسول سيرافي الأصلي: كيف تضمنين وجود السيراميدات الثلاث الأساسية؟",
+      "excerpt": "مقارنة دقيقة في الباركود وحجم العبوة ولون المضخة لغسول CeraVe Hydrating Cleanser.",
+      "content": "\nيُعد غسول CeraVe Hydrating Cleanser المستحضر الأكثر توصية من أطباء الجلد حول العالم للبشرة الجافة والعادية، نظراً لاحتوائه على 3 سيراميدات متطابقة جينياً مع حاجز الجلد الطبيعي (1، 3، 6-II) وحمض الهيالورونيك.\n\nكيف تميزين العبوة الأصلية؟\n- المضخة (Pump): رأس المضخة في العبوة الأصلية مصبوب بلون أزرق موحد متقن دون أي نتوءات بلاستيكية خشنة، وتحتوي آلية أمان قفل وفتح ناعمة للغاية.\n- ملمس اللوشن: الأصلي لوشن كريمي مائي أبيض ناصع لا يصنع رغوة قاسية، ويترك طبقة ترطيب مخملية فور الشطف.\n- الباركود الدولي: الباركود يبدأ برقم الوكالة المعتمد ويظهر تاريخ الإنتاج وبلد المنشأ مباشرة.\n        ",
+      "author": "فريق التوثيق المخبري",
+      "coverImage": "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=1200&q=80",
+      "tags": [
+        "سيرافي",
+        "ترطيب البشرة",
+        "السيراميدات"
+      ],
+      "readTimeMinutes": 5,
+      "publishedAt": "2026-10-28",
+      "isFeatured": false
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev-1",
+      "tenantId": "11111111-1111-1111-1111-111111111111",
+      "productId": "prod-1",
+      "customerName": "د. أروى الحميري",
+      "rating": 5,
+      "comment": "السيروم أصلي 100%، قمت بمطابقة رقم الدفعة 54U700 في قاعدة البيانات وظهر تاريخ الإنتاج الدقيق. النضارة بدأت تظهر من أول أسبوع.",
+      "isVerifiedPurchase": true,
+      "batchCodeVerified": "54U700",
+      "createdAt": "2026-10-20T12:00:00Z"
+    },
+    {
+      "id": "rev-2",
+      "tenantId": "11111111-1111-1111-1111-111111111111",
+      "productId": "prod-2",
+      "customerName": "منال الشامي",
+      "rating": 5,
+      "comment": "غسول سيرافي ممتاز جداً للبشرة الجافة، التوصيل في صنعاء استغرق 3 ساعات فقط مع فحص العبوة قبل الدفع.",
+      "isVerifiedPurchase": true,
+      "createdAt": "2026-10-22T15:30:00Z"
+    },
+    {
+      "id": "rev-3",
+      "tenantId": "11111111-1111-1111-1111-111111111111",
+      "productId": "prod-3",
+      "customerName": "هند القاسمي",
+      "rating": 5,
+      "comment": "سيروم نياسيناميد ذا أورديناري أصلي بدون شك، الزجاجة ثقيلة وملمس المحلول خفيف، المسامات صغرت بشكل ملحوظ.",
+      "isVerifiedPurchase": true,
+      "createdAt": "2026-10-29T18:15:00Z"
+    }
+  ],
+  "branches": [
+    {
+      "id": "branch-sanaa",
+      "tenantId": "11111111-1111-1111-1111-111111111111",
+      "name": "فرع صنعاء الرئيسي (حدة)",
+      "city": "صنعاء",
+      "address": "شارع حدة — مقابل مجمع الكميم التجاري",
+      "phone": "967775234989",
+      "whatsapp": "967775234989",
+      "hoursAr": "يومياً من 9:00 صباحاً حتى 10:00 مساءً",
+      "isMain": true,
+      "isActive": true
+    },
+    {
+      "id": "branch-aden",
+      "tenantId": "11111111-1111-1111-1111-111111111111",
+      "name": "نقطة تسليم عدن (المنصورة)",
+      "city": "عدن",
+      "address": "المنصورة — شارع التسعين جوار كابوتا",
+      "phone": "967775234989",
+      "whatsapp": "967775234989",
+      "hoursAr": "يومياً من 10:00 صباحاً حتى 9:00 مساءً",
+      "isMain": false,
+      "isActive": true
+    }
+  ]
+}
