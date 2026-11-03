@@ -45,13 +45,11 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
           mkdir -p .vercel
-          PID="${VERCEL_PROJECT_ID}"
           OID="${VERCEL_ORG_ID:-team_SYso2o6L4hc49njYuLDaZWb1}"
-          if [ -n "$PID" ] && [ -n "$OID" ]; then
-            echo "{\"projectId\":\"$PID\",\"orgId\":\"$OID\",\"projectName\":\"samiq-web\"}" > .vercel/project.json
-          fi
-          if [ -n "$VERCEL_TOKEN" ]; then
-            npx vercel deploy --prod --yes --token "$VERCEL_TOKEN"
+          PID="${VERCEL_PROJECT_ID}"
+          if [ -n "$PID" ]; then
+            echo "{\"projectId\":\"$PID\",\"orgId\":\"$OID\",\"projectName\":\"samiq-luxury-platform\"}" > .vercel/project.json
           else
-            npx vercel deploy --prod --yes
+            npx vercel link --yes --project samiq-luxury-platform --scope "$OID" --token "$VERCEL_TOKEN"
           fi
+          npx vercel deploy --prod --yes --token "$VERCEL_TOKEN" --scope "$OID"
