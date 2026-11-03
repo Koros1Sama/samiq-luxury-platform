@@ -144,7 +144,7 @@ export function WhatsAppCartDrawer({
 
       // 2. Build formatted WhatsApp message
       let message = `*طلب موثق جديد: ${orderNumber}*\n`;
-      message += `متجر مفتاح الجمال (أصلي وتقليد)\n\n`;
+      message += `متجر مفتاح الجمال (لكشف المقلد)\n\n`;
       message += `الاسم: ${orderPayload.customerName}\n`;
       message += `الهاتف: ${orderPayload.customerPhone}\n`;
       message += `المنطقة: ${selectedZone.nameAr} - ${orderPayload.address}\n`;

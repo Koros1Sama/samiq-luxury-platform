@@ -126,12 +126,30 @@ export default function AuthenticityHubPage() {
             <span>الموسوعة اليمنية الأولى للأصالة التجميلية</span>
           </div>
           <h1 className="text-3xl sm:text-5xl font-serif font-bold text-ivory leading-tight">
-            كيف تميزين المنتج الأصلي من التقليد المغشوش؟
+            كيف تميزين المنتج الأصلي لكشف المقلد المغشوش؟
           </h1>
           <p className="text-sm sm:text-base text-muted-lux font-sans leading-relaxed">
             في متجر مفتاح الجمال، لا نكتفي بضمان الأصالة، بل نمكّنكِ من فحص أي مستحضر تجميلي
             بنفسك عبر مطابقة رقم الدفعة (Batch Code) والخصائص الفيزيائية للعبوة والقوام.
           </p>
+          <div className="pt-2 flex items-center justify-center gap-3 flex-wrap text-xs font-sans">
+            <a
+              href="https://www.tiktok.com/@tamiffttah?_r=1&_t=ZS-9B6mlZDXTA0"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 py-2 rounded-full bg-gold/15 text-gold border border-gold/30 hover:bg-gold/25 transition font-semibold"
+            >
+              شاهد مقاطع كشف المقلد على تيك توك (@tamiffttah) ←
+            </a>
+            <a
+              href="https://www.instagram.com/tamifttah?rpxt=dXlocW9teTEyMW53"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 py-2 rounded-full bg-white/5 text-ivory border border-white/10 hover:bg-white/10 transition font-semibold"
+            >
+              حساب إنستغرام (@tamifttah) ←
+            </a>
+          </div>
         </div>
 
         {/* Interactive Batch Code Verifier Card */}

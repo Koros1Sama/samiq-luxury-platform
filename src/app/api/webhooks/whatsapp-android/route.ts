@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     const message = (payload?.query?.message || '').trim().toLowerCase();
     const sender = payload?.query?.sender || 'العميل';
 
-    let reply = 'أهلاً بك في متجر مفتاح الجمال (أصلي وتقليد). يمكنك كتابة "الاسعار" لمعرفة قائمة المنتجات، أو "الاصلي" لفحص رقم الدفعة، أو "طلب" لإتمام الشراء فوراً.';
+    let reply = 'أهلاً بك في متجر مفتاح الجمال (لكشف المقلد). يمكنك كتابة "الاسعار" لمعرفة قائمة المنتجات، أو "الاصلي" لفحص رقم الدفعة، أو "طلب" لإتمام الشراء فوراً.';
 
     if (message.includes('اسعار') || message.includes('منتجات') || message.includes('كتالوج')) {
       const products = getAllProducts();

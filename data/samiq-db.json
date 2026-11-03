@@ -2,15 +2,18 @@
   "tenant": {
     "id": "11111111-1111-1111-1111-111111111111",
     "name": "مفتاح الجمال",
-    "legalName": "مفتاح الجمال — أصلي وتقليد",
-    "tagline": "بوابتك الموثوقة لعالم الجمال",
+    "legalName": "مفتاح الجمال — لكشف المقلد",
+    "tagline": "لكشف المقلد — بوابتك الموثوقة لأرقى مستحضرات العناية والتجميل الأصلية",
     "whatsapp": "967775234989",
     "phone": "967775234989",
     "city": "صنعاء",
     "deliveryCoverage": "توصيل فوري لجميع مديريات صنعاء وشحن آمن لكافة المحافظات",
     "heroBadge": "مضمون أصلي 100%",
-    "instagram": "miftah_beauty",
-    "noindex": true
+    "instagram": "https://www.instagram.com/tamifttah?rpxt=dXlocW9teTEyMW53",
+    "noindex": true,
+    "tiktok": "https://www.tiktok.com/@tamiffttah?_r=1&_t=ZS-9B6mlZDXTA0",
+    "facebook": "https://www.facebook.com/share/1XjEnK4CeM/",
+    "googleMaps": "https://maps.app.goo.gl/DxsZTHrv2r386bXa9"
   },
   "features": {
     "tier_1_static": true,

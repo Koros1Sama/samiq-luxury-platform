@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     const text = message.text.trim();
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
 
-    let responseText = 'أهلاً بك في بوت متجر مفتاح الجمال (أصلي وتقليد). يمكنك كتابة /catalog لعرض المنتجات أو /authenticity لفحص الأصالة.';
+    let responseText = 'أهلاً بك في بوت متجر مفتاح الجمال (لكشف المقلد). يمكنك كتابة /catalog لعرض المنتجات أو /authenticity لفحص الأصالة.';
 
     if (text === '/start') {
       responseText = 'مرحباً بك في مفتاح الجمال. بوابتك الموثوقة لعالم الجمال في صنعاء واليمن. نوفر لك أرقى مستحضرات التجميل والعناية الأصلية 100% مع ضمان فحص الباركود.';

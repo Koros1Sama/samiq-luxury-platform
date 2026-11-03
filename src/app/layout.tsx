@@ -17,10 +17,15 @@ const ibmPlexArabic = IBM_Plex_Sans_Arabic({
 });
 
 export const metadata: Metadata = {
-  title: 'مفتاح الجمال — أصلي وتقليد | منصة سَامِق الفاخرة',
-  description: 'المتجر الرائد في اليمن لمستحضرات العناية بالبشرة والمكياج والعطور العالمية الأصلية الموثقة مع مقارن بصري للأصلي والتقليد.',
+  title: 'مفتاح الجمال — لكشف المقلد | منصة سَامِق الفاخرة',
+  description: 'المتجر الرائد في اليمن لمستحضرات العناية بالبشرة والمكياج والعطور العالمية الأصلية الموثقة مع مختبر بصري لكشف المقلد.',
+  manifest: '/manifest.webmanifest',
+  icons: {
+    icon: '/icon-192.png',
+    apple: '/apple-touch-icon.png',
+  },
   robots: {
-    index: false, // Respect pilot rule: noindex = true
+    index: false,
     follow: false,
   },
 };
@@ -41,6 +46,17 @@ export default function RootLayout({
     <html lang="ar" dir="rtl" className={`${amiri.variable} ${ibmPlexArabic.variable}`}>
       <body className="bg-obsidian text-ivory font-sans min-h-[100dvh]">
         {children}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').catch(function() {});
+                });
+              }
+            `,
+          }}
+        />
       </body>
     </html>
   );

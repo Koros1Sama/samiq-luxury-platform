@@ -44,18 +44,18 @@ export function AuthenticityCompareSlider({ guideData }: AuthenticityCompareSlid
   };
 
   return (
-    <section id="authenticity-slider" className="py-16 sm:py-24 bg-surface/50 border-y border-white/5 relative">
+    <section id="authenticity-lab" className="py-12 sm:py-20 bg-surface/50 border-y border-white/5 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
+        <div className="text-center max-w-2xl mx-auto mb-10 space-y-2">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-gold/10 border border-gold/30 text-champagne text-xs font-sans font-semibold">
             <ShieldCheckIcon size={15} color="#C9A84C" />
-            <span>تقنية سامق للتحقق البصري</span>
+            <span>مختبر مفتاح الجمال لكشف المقلد</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-serif font-bold text-ivory">
-            الأصلي <span className="text-champagne">مقابل</span> التقليد
+          <h2 className="text-2xl sm:text-4xl font-serif font-bold text-ivory">
+            الأصلي <span className="text-champagne">لكشف</span> المقلد
           </h2>
-          <p className="text-sm text-muted-lux font-sans leading-relaxed">
+          <p className="text-xs sm:text-sm text-muted-lux font-sans leading-relaxed">
             اسحبي المقبض التفاعلي لمشاهدة الفرق الدقيق بالعين المجردة بين المنتج الأصلي
             المضمون والعبوة المغشوشة المنتشرة في الأسواق.
           </p>
@@ -190,18 +190,37 @@ export function AuthenticityCompareSlider({ guideData }: AuthenticityCompareSlid
               ))}
             </div>
 
-            {/* Video Verification Trigger Button */}
-            <div className="pt-2">
+            {/* Video Verification Trigger Button & Official Social Links */}
+            <div className="pt-2 space-y-2.5">
               <button
                 type="button"
                 onClick={() => setShowVideoModal(true)}
-                className="w-full py-3.5 px-5 rounded-2xl bg-surface hover:bg-elevated border border-gold/40 text-ivory font-sans font-bold text-sm flex items-center justify-center gap-3 transition-all shadow-[0_4px_15px_rgba(201,168,76,0.15)] group"
+                className="w-full py-3 px-4 rounded-2xl bg-surface hover:bg-surface-elevated border border-gold/40 text-ivory font-sans font-bold text-xs sm:text-sm flex items-center justify-center gap-2.5 transition-all shadow-md group"
               >
-                <div className="w-7 h-7 rounded-full bg-gold/20 flex items-center justify-center text-gold group-hover:scale-110 transition">
+                <div className="w-6 h-6 rounded-full bg-gold/20 flex items-center justify-center text-gold group-hover:scale-110 transition shrink-0">
                   <PlayVideoIcon size={12} color="#C9A84C" />
                 </div>
-                <span>مشاهدة فيديو مقارنة العبوة والقوام (مفتاح الجمال)</span>
+                <span>مشاهدة شروحات فحص القوام والعبوة</span>
               </button>
+
+              <div className="grid grid-cols-2 gap-2 text-xs font-sans">
+                <a
+                  href="https://www.tiktok.com/@tamiffttah?_r=1&_t=ZS-9B6mlZDXTA0"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-champagne text-center font-semibold transition truncate"
+                >
+                  مقاطع تيك توك (@tamiffttah) ←
+                </a>
+                <a
+                  href="https://www.instagram.com/tamifttah?rpxt=dXlocW9teTEyMW53"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-champagne text-center font-semibold transition truncate"
+                >
+                  إنستغرام (@tamifttah) ←
+                </a>
+              </div>
             </div>
           </div>
         </div>

@@ -3,14 +3,17 @@
 import React, { useState } from 'react';
 import { StorefrontProps, ThemeCurrencyCode, ProductCardData, CartItem, FeatureFlags } from '../../contract';
 import { LuxuryHeader } from './components/LuxuryHeader';
+import { QuickCategoryStoriesBar } from './components/QuickCategoryStoriesBar';
 import { HeroShowcase } from './components/HeroShowcase';
-import { AuthenticityCompareSlider } from './components/AuthenticityCompareSlider';
-import { SkinRoutineAndIngredients } from './components/SkinRoutineAndIngredients';
-import { BrandBentoGrid } from './components/BrandBentoGrid';
 import { ProductShowcase } from './components/ProductShowcase';
+import { AuthenticityCompareSlider } from './components/AuthenticityCompareSlider';
+import { BrandBentoGrid } from './components/BrandBentoGrid';
+import { SkinRoutineAndIngredients } from './components/SkinRoutineAndIngredients';
+import { StoreLocationAndSocial } from './components/StoreLocationAndSocial';
+import { TrustFooterBar } from './components/TrustFooterBar';
+import { MobileAppBottomNav } from './components/MobileAppBottomNav';
 import { WhatsAppCartDrawer } from './components/WhatsAppCartDrawer';
 import { AiBeautyAdvisor } from './components/AiBeautyAdvisor';
-import { TrustFooterBar } from './components/TrustFooterBar';
 import { FeatureTierSimulator } from './components/FeatureTierSimulator';
 
 export function LuxuryNoirTheme({
@@ -25,6 +28,7 @@ export function LuxuryNoirTheme({
   // Live State
   const [currentCurrency, setCurrentCurrency] = useState<ThemeCurrencyCode>(initialCurrency);
   const [activeFeatures, setActiveFeatures] = useState<FeatureFlags>(features);
+  const [activeCategoryFilter, setActiveCategoryFilter] = useState('all');
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
@@ -54,36 +58,40 @@ export function LuxuryNoirTheme({
       return [...prev, newItem];
     });
 
-    // Auto open cart drawer
     setIsCartOpen(true);
   };
 
-  const handleUpdateQuantity = (itemId: string, newQuantity: number) => {
-    if (newQuantity <= 0) {
-      handleRemoveItem(itemId);
-      return;
-    }
+  const handleUpdateQuantity = (id: string, delta: number) => {
     setCartItems((prev) =>
-      prev.map((i) => (i.id === itemId ? { ...i, quantity: newQuantity } : i))
+      prev
+        .map((item) => {
+          if (item.id === id) {
+            const nextQty = item.quantity + delta;
+            return nextQty > 0 ? { ...item, quantity: nextQty } : null;
+          }
+          return item;
+        })
+        .filter(Boolean) as CartItem[]
     );
   };
 
-  const handleRemoveItem = (itemId: string) => {
-    setCartItems((prev) => prev.filter((i) => i.id !== itemId));
+  const handleRemoveItem = (id: string) => {
+    setCartItems((prev) => prev.filter((item) => item.id !== id));
   };
 
   const handleDirectWhatsApp = (product: ProductCardData) => {
-    const price = product.prices[currentCurrency] || product.prices.YER;
-    const msg = `مرحباً متجر مفتاح الجمال، أود الاستفسار وطلب منتج: *${product.title}* (${product.brand}) بسعر تقريبي: ${price} ${currentCurrency}، مع التأكد من رقم الدفعة الموثق.`;
-    const cleanPhone = tenant.whatsapp.replace(/[^0-9]/g, '');
-    window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+    const priceFormatted = `${product.prices[currentCurrency]} ${currentCurrency}`;
+    const text = encodeURIComponent(
+      `مرحباً مفتاح الجمال، أود طلب المنتج الأصلي:\n*${product.title}*\nالسعر: ${priceFormatted}\nهل متوفر تسليم فوري مع فحص الباركود؟`
+    );
+    window.open(`https://wa.me/${tenant.whatsapp}?text=${text}`, '_blank');
   };
 
   const cartTotalCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
-    <div className="min-h-[100dvh] bg-obsidian text-ivory font-sans selection:bg-gold selection:text-obsidian-dark antialiased">
-      {/* 1. Header */}
+    <div className="min-h-[100dvh] bg-obsidian text-ivory font-sans selection:bg-gold selection:text-obsidian-dark antialiased pb-16 md:pb-0">
+      {/* 1. Header (with Top Utility Micro-Bar & Slim Mobile Height) */}
       <LuxuryHeader
         currentCurrency={currentCurrency}
         onCurrencyChange={setCurrentCurrency}
@@ -92,41 +100,57 @@ export function LuxuryNoirTheme({
         onOpenCart={() => setIsCartOpen(true)}
       />
 
+      {/* 2. Quick Category Stories Bar (Mobile & Desktop) */}
+      <QuickCategoryStoriesBar
+        activeCategory={activeCategoryFilter}
+        onSelectCategory={setActiveCategoryFilter}
+      />
+
       <main>
-        {/* 2. Hero Section */}
+        {/* 3. Compact Visual Hero Section */}
         <HeroShowcase
           onCtaClick={() => {
-            const el = document.getElementById('featured-products');
+            const el = document.getElementById('products-catalog');
             el?.scrollIntoView({ behavior: 'smooth' });
           }}
         />
 
-        {/* 3. Authenticity Comparison Slider (Gated by feature) */}
-        {activeFeatures.authenticity_guide && (
-          <AuthenticityCompareSlider guideData={authenticityGuide} />
-        )}
-
-        {/* 4. Skin Routine & Active Ingredients Map (Gated by feature) */}
-        {activeFeatures.skin_routine_advisor && (
-          <SkinRoutineAndIngredients skinData={skinRoutine} />
-        )}
-
-        {/* 5. Brand Bento Grid */}
-        <BrandBentoGrid categories={categories} />
-
-        {/* 6. Product Showcase */}
+        {/* 4. Product Catalog (Brought Immediately Above the Fold!) */}
         <ProductShowcase
           products={products}
           currentCurrency={currentCurrency}
           onAddToCart={handleAddToCart}
           onDirectWhatsApp={handleDirectWhatsApp}
+          activeFilter={activeCategoryFilter}
         />
+
+        {/* 5. Authenticity Comparison Slider (مختبر لكشف المقلد) */}
+        {activeFeatures.authenticity_guide && (
+          <AuthenticityCompareSlider guideData={authenticityGuide} />
+        )}
+
+        {/* 6. Brand Bento Grid */}
+        <BrandBentoGrid categories={categories} />
+
+        {/* 7. Skin Routine & Active Ingredients Map */}
+        {activeFeatures.skin_routine_advisor && (
+          <SkinRoutineAndIngredients skinData={skinRoutine} />
+        )}
+
+        {/* 8. Store Location & Official Channels (Google Maps & 4 Socials) */}
+        <StoreLocationAndSocial />
       </main>
 
-      {/* 7. Footer & Trust Dock */}
+      {/* 9. Footer & Trust Dock */}
       <TrustFooterBar />
 
-      {/* 8. WhatsApp Cart Drawer (Gated by cart_whatsapp feature) */}
+      {/* 10. Native Mobile App Bottom Navigation Bar (md:hidden) */}
+      <MobileAppBottomNav
+        cartCount={cartTotalCount}
+        onOpenCart={() => setIsCartOpen(true)}
+      />
+
+      {/* 11. WhatsApp Cart Drawer */}
       {activeFeatures.cart_whatsapp && (
         <WhatsAppCartDrawer
           isOpen={isCartOpen}
@@ -139,10 +163,10 @@ export function LuxuryNoirTheme({
         />
       )}
 
-      {/* 9. AI Beauty Advisor Bot (Gated by ai_chatbot feature) */}
+      {/* 12. AI Beauty Advisor Bot (Elevated on mobile to bottom-20) */}
       {activeFeatures.ai_chatbot && <AiBeautyAdvisor />}
 
-      {/* 10. Platform Live Package Simulator */}
+      {/* 13. Platform Package Simulator (Elevated on mobile to bottom-20) */}
       <FeatureTierSimulator
         currentFeatures={activeFeatures}
         onFeaturesUpdate={setActiveFeatures}

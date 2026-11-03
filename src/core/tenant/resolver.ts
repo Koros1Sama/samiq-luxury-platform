@@ -33,7 +33,7 @@ export interface ResolvedTenantContext {
 }
 
 /**
- * Default Seed Tenant: "مفتاح الجمال — أصلي وتقليد"
+ * Default Seed Tenant: "مفتاح الجمال — لكشف المقلد"
  * Primary pilot merchant for SAMIQ platform
  */
 export const DEFAULT_PILOT_TENANT: TenantProfile = {
@@ -41,7 +41,7 @@ export const DEFAULT_PILOT_TENANT: TenantProfile = {
   slug: 'miftah',
   name: 'مفتاح الجمال',
   tagline: 'بوابتك الموثوقة لعالم الجمال',
-  legalName: 'مفتاح الجمال — أصلي وتقليد',
+  legalName: 'مفتاح الجمال — لكشف المقلد',
   phone: '967775234989',
   whatsapp: '967775234989',
   email: 'contact@miftah-beauty.ye',

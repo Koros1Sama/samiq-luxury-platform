@@ -99,7 +99,7 @@ export const FEATURES_REGISTRY: Record<string, FeatureDefinition> = {
   ai_chatbot: {
     id: 'ai_chatbot',
     nameEn: 'AI Beauty & Authenticity Consultant',
-    nameAr: 'المستشار الذكي (اسأل خبير أصلي وتقليد)',
+    nameAr: 'المستشار الذكي (اسأل خبير لكشف المقلد)',
     descriptionAr: 'شات بوت ذكي يقترح المنتجات المناسبة ويجيب على أسئلة الأصالة باللهجة اليمنية 24/7',
     category: 'addon',
     basePriceUsd: 150,

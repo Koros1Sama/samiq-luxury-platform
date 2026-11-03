@@ -1,6 +1,15 @@
 import React from 'react';
 import { MiftahLogoSvg } from './MiftahLogoSvg';
-import { ShieldCheckIcon, DeliveryVanIcon, ConciergeHeadsetIcon } from './LuxuryIcons';
+import {
+  ShieldCheckIcon,
+  DeliveryVanIcon,
+  ConciergeHeadsetIcon,
+  TikTokIcon,
+  InstagramIcon,
+  FacebookIcon,
+  WhatsAppIcon,
+  MapPinIcon,
+} from './LuxuryIcons';
 
 export function TrustFooterBar() {
   const trustFeatures = [
@@ -64,6 +73,54 @@ export function TrustFooterBar() {
               <p>صنعاء — شارع حدة / توصيل فوري لكافة المحافظات</p>
               <p className="dir-ltr text-end sm:text-start">WhatsApp: +967 775 234 989</p>
               <p>أوقات العمل: يومياً من 9:00 صباحاً حتى 10:00 مساءً</p>
+            </div>
+            {/* Official Social Links */}
+            <div className="pt-2 flex items-center gap-2">
+              <a
+                href="https://www.tiktok.com/@tamiffttah?_r=1&_t=ZS-9B6mlZDXTA0"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 rounded-full bg-white/5 hover:bg-gold/15 border border-white/10 hover:border-gold/30 flex items-center justify-center text-champagne transition"
+                title="تيك توك"
+              >
+                <TikTokIcon size={15} color="#C9A84C" />
+              </a>
+              <a
+                href="https://www.instagram.com/tamifttah?rpxt=dXlocW9teTEyMW53"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 rounded-full bg-white/5 hover:bg-gold/15 border border-white/10 hover:border-gold/30 flex items-center justify-center text-champagne transition"
+                title="إنستغرام"
+              >
+                <InstagramIcon size={15} color="#C9A84C" />
+              </a>
+              <a
+                href="https://wa.me/967775234989"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 rounded-full bg-white/5 hover:bg-gold/15 border border-white/10 hover:border-gold/30 flex items-center justify-center text-champagne transition"
+                title="واتساب"
+              >
+                <WhatsAppIcon size={15} color="#C9A84C" />
+              </a>
+              <a
+                href="https://www.facebook.com/share/1XjEnK4CeM/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 rounded-full bg-white/5 hover:bg-gold/15 border border-white/10 hover:border-gold/30 flex items-center justify-center text-champagne transition"
+                title="فيسبوك"
+              >
+                <FacebookIcon size={15} color="#C9A84C" />
+              </a>
+              <a
+                href="https://maps.app.goo.gl/DxsZTHrv2r386bXa9"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 rounded-full bg-white/5 hover:bg-gold/15 border border-white/10 hover:border-gold/30 flex items-center justify-center text-champagne transition"
+                title="موقع المتجر على خرائط جوجل"
+              >
+                <MapPinIcon size={15} color="#C9A84C" />
+              </a>
             </div>
           </div>
 

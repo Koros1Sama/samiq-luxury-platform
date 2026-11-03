@@ -9,7 +9,7 @@ interface BrandBentoGridProps {
 
 export function BrandBentoGrid({ categories, onSelectCategory }: BrandBentoGridProps) {
   return (
-    <section id="categories-bento" className="py-16 sm:py-20 relative bg-surface/30">
+    <section id="categories-bento" className="py-10 sm:py-16 relative bg-surface/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Title */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">

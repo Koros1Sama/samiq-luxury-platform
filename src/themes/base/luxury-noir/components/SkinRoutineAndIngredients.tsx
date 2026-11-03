@@ -40,7 +40,7 @@ export function SkinRoutineAndIngredients({
   };
 
   return (
-    <section id="skin-routine" className="py-16 sm:py-24 relative overflow-hidden bg-obsidian border-t border-white/5">
+    <section id="skin-routine" className="py-10 sm:py-16 relative overflow-hidden bg-obsidian border-t border-white/5">
       {/* Golden atmospheric glows */}
       <div className="absolute top-1/4 start-10 w-[500px] h-[500px] bg-[radial-gradient(circle_at_center,rgba(201,168,76,0.12)_0%,transparent_70%)] pointer-events-none blur-3xl" />
       <div className="absolute bottom-10 end-10 w-[400px] h-[400px] bg-[radial-gradient(circle_at_center,rgba(201,168,76,0.08)_0%,transparent_70%)] pointer-events-none blur-3xl" />

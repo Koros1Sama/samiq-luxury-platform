@@ -366,7 +366,7 @@ INSERT INTO features (id, name, description, category, base_price_usd, requires,
 ('skin_routine_advisor', 'مستشار روتين البشرة التفاعلي (Routine Advisor)', 'اختيار نوع البشرة مع عرض روتين متكامل ومخطط المكونات الفعالة المضيء', 'addon', 60.00, ARRAY['tier_1_static']::TEXT[], 'tier_1_static'),
 ('customer_accounts', 'حسابات العملاء وسجل الطلبات (Customer Hub)', 'تسجيل دخول العملاء برقم الهاتف والاطلاع على الطلبات السابقة', 'addon', 80.00, ARRAY['tier_2_editable']::TEXT[], 'tier_2_editable'),
 ('payment_gateways', 'بوابات الدفع الإلكتروني المحلية (Yemeni Wallets)', 'ربط محافظ الكريمي، جوالي، فلوسك، ون كاش لإتمام الدفع الفوري', 'integration', 120.00, ARRAY['tier_3_catalog']::TEXT[], 'tier_3_catalog'),
-('ai_chatbot', 'المستشار الذكي: اسأل خبير أصلي وتقليد (AI Beauty Bot)', 'شات بوت ذكي يقترح المنتجات ويفحص الأصالة ويجيب العملاء 24/7 بلهجة يمنية راقية', 'addon', 150.00, ARRAY['tier_2_editable']::TEXT[], 'tier_2_editable'),
+('ai_chatbot', 'المستشار الذكي: اسأل خبير لكشف المقلد (AI Beauty Bot)', 'شات بوت ذكي يقترح المنتجات ويفحص الأصالة ويجيب العملاء 24/7 بلهجة يمنية راقية', 'addon', 150.00, ARRAY['tier_2_editable']::TEXT[], 'tier_2_editable'),
 ('whatsapp_channel', 'قناة بوت الواتساب التفاعلية (WhatsApp Bot)', 'الرد الآلي على استفسارات الأسعار والأصالة عبر تطبيق واتساب مباشرة', 'channel', 90.00, ARRAY['ai_chatbot']::TEXT[], 'tier_2_editable'),
 ('telegram_channel', 'قناة بوت التيليجرام المتكاملة (Telegram Bot)', 'متجر متكامل بكتالوج وسلة داخل بوت التيليجرام', 'channel', 50.00, ARRAY['tier_2_editable']::TEXT[], 'tier_2_editable')
 ON CONFLICT (id) DO UPDATE SET
@@ -376,13 +376,13 @@ ON CONFLICT (id) DO UPDATE SET
   requires = EXCLUDED.requires,
   min_tier = EXCLUDED.min_tier;
 
--- Seed Pilot Tenant: "مفتاح الجمال — أصلي وتقليد"
+-- Seed Pilot Tenant: "مفتاح الجمال — لكشف المقلد"
 INSERT INTO tenants (id, slug, name, legal_name, phone, whatsapp, email, noindex, status, tenant_mode, default_currency, theme_id, settings)
 VALUES (
   '11111111-1111-1111-1111-111111111111'::uuid,
   'miftah',
   'مفتاح الجمال',
-  'مفتاح الجمال — أصلي وتقليد',
+  'مفتاح الجمال — لكشف المقلد',
   '967775234989',
   '967775234989',
   'contact@miftah-beauty.ye',

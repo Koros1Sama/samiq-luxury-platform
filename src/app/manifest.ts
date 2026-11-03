@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'مفتاح الجمال — أصلي وتقليد',
+    name: 'مفتاح الجمال — لكشف المقلد',
     short_name: 'مفتاح الجمال',
     description: 'المتجر الرائد لمستحضرات التجميل والعناية بالبشرة الموثوقة مع فحص الأصالة ومقارنة الدفعات',
     start_url: '/',

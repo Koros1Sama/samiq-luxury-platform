@@ -63,6 +63,9 @@ export interface TenantBrandInfo {
   deliveryCoverage: string;
   heroBadge?: string;
   instagram?: string;
+  tiktok?: string;
+  facebook?: string;
+  googleMaps?: string;
   noindex?: boolean;
 }
 

@@ -92,11 +92,11 @@ export function FeatureTierSimulator({
 
   return (
     <>
-      {/* Floating Activation Pill */}
+      {/* Floating Activation Pill (Elevated on mobile above bottom app nav) */}
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-5 start-5 z-40 flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-gradient-to-r from-[#1E1B15] to-[#121217] border border-[#C9A84C]/50 shadow-[0_4px_25px_rgba(201,168,76,0.35)] text-ivory hover:border-[#FCF6BA] hover:scale-105 transition-all duration-300"
+        className="fixed bottom-20 md:bottom-5 start-4 md:start-5 z-40 flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-full bg-gradient-to-r from-[#1E1B15] to-[#121217] border border-[#C9A84C]/50 shadow-[0_4px_25px_rgba(201,168,76,0.35)] text-ivory hover:border-[#FCF6BA] hover:scale-105 transition-all duration-300"
       >
         <TuningSliderIcon size={16} color="#C9A84C" />
         <span className="text-xs font-sans font-bold bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] bg-clip-text text-transparent">
