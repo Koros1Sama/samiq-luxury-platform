@@ -214,35 +214,35 @@ export default function PlatformSuperAdminPage() {
       <button
         type="button"
         onClick={() => toggleFeatureWithCascade(id)}
-        className={`w-full min-h-[44px] p-3 rounded-2xl border text-start transition-all duration-300 relative group flex items-center justify-between gap-2 ${
+        className={`w-full min-h-[44px] p-3.5 rounded-2xl border text-start transition-all duration-300 relative group flex flex-col justify-between gap-2.5 ${
           isSelected
             ? 'bg-elevated border-gold/60 shadow-[0_0_15px_rgba(201,168,76,0.18)]'
             : 'bg-white/[0.02] border-white/5 opacity-60 hover:opacity-100 hover:border-white/20'
         }`}
       >
-        <div className="flex items-center gap-2.5 min-w-0">
+        <div className="flex items-start gap-2.5 w-full">
           <span
-            className={`w-2.5 h-2.5 rounded-full shrink-0 transition-colors ${
+            className={`w-2.5 h-2.5 mt-1.5 rounded-full shrink-0 transition-colors ${
               isSelected ? 'bg-gold animate-pulse' : 'bg-white/20'
             }`}
           />
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <span
-              className={`text-xs sm:text-sm font-sans font-bold block truncate ${
+              className={`text-xs sm:text-sm font-sans font-bold block leading-snug ${
                 isSelected ? 'text-ivory' : 'text-muted-lux'
               }`}
             >
               {label}
             </span>
             {requires && requires.length > 0 && (
-              <span className="text-xs text-muted-dim block truncate">
+              <span className="text-xs text-muted-dim block mt-1 leading-snug">
                 تتطلب: {requires.join(', ')}
               </span>
             )}
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center justify-between w-full pt-2 border-t border-white/5">
           <span className="text-xs font-sans font-bold px-2 py-0.5 rounded bg-gold/15 text-gold border border-gold/30">
             +${price}
           </span>

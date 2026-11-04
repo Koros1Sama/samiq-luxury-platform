@@ -63,8 +63,8 @@ export const FEATURES_REGISTRY: Record<string, FeatureDefinition> = {
   authenticity_guide: {
     id: 'authenticity_guide',
     nameEn: 'Authenticity Interactive Slider',
-    nameAr: 'مقارن الأصلي والتقليد التفاعلي (أصلي vs تقليد)',
-    descriptionAr: 'أداة سحب تفاعلية تقارن تفاصيل العبوة والقوام والباركود لبناء الثقة المطلقة',
+    nameAr: 'مختبر كشف المقلد وفحص الدفعات التفاعلي',
+    descriptionAr: 'أداة سحب تفاعلية وفاحص رقم تشغيلة لمطابقة تفاصيل العبوة والقوام والباركود لبناء الثقة المطلقة',
     category: 'addon',
     basePriceUsd: 75,
     requires: ['tier_1_static'],
