@@ -149,7 +149,7 @@ export default function ProductDetailPage() {
   return (
     <div className="min-h-screen bg-obsidian text-ivory font-sans">
       {/* Top Navigation */}
-      <header className="sticky top-0 z-30 w-full bg-obsidian/90 backdrop-blur-md border-b border-white/[0.08]">
+      <header data-testid="header" className="sticky top-0 z-30 w-full bg-obsidian/90 backdrop-blur-md border-b border-white/[0.08]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <Link href="/" className="flex items-center">
             <MiftahLogoSvg size={46} />
@@ -158,12 +158,13 @@ export default function ProductDetailPage() {
             <CurrencySwitcher currentCurrency={currentCurrency} onCurrencyChange={setCurrentCurrency} />
             <button
               type="button"
+              data-testid="cart-button"
               onClick={() => setIsCartOpen(true)}
-              className="relative p-2.5 rounded-full bg-white/5 border border-white/10 hover:border-gold/40 text-champagne"
+              className="relative min-w-[44px] min-h-[44px] p-2.5 rounded-full bg-white/5 border border-white/10 hover:border-gold/40 text-champagne flex items-center justify-center"
             >
               <BagCartIcon size={18} color="#E6CFA0" />
               {cartItems.length > 0 && (
-                <span className="absolute -top-1 -end-1 w-4 h-4 rounded-full bg-gold text-obsidian-dark text-[10px] font-bold flex items-center justify-center">
+                <span className="absolute -top-1 -end-1 w-4 h-4 rounded-full bg-gold text-obsidian-dark text-xs font-bold flex items-center justify-center">
                   {cartItems.reduce((acc, i) => acc + i.quantity, 0)}
                 </span>
               )}
@@ -174,7 +175,7 @@ export default function ProductDetailPage() {
 
       {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 text-xs text-muted-lux font-sans flex items-center gap-2">
-        <Link href="/" className="hover:text-champagne transition">الرئيسية</Link>
+        <Link href="/" className="min-h-[44px] inline-flex items-center hover:text-champagne transition">الرئيسية</Link>
         <span>/</span>
         <span className="text-gold">{product.brand}</span>
         <span>/</span>
@@ -207,14 +208,14 @@ export default function ProductDetailPage() {
           {/* Product Details & Action (6 cols) */}
           <div className="lg:col-span-6 space-y-6">
             <div className="space-y-2">
-              <span className="text-xs font-sans text-gold font-bold tracking-wider uppercase block">
+              <span className="text-xs font-sans text-gold font-bold block">
                 {product.brand}
               </span>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold text-ivory leading-snug">
                 {product.title}
               </h1>
               {product.subtitle && (
-                <p className="text-sm text-muted-lux font-sans">{product.subtitle}</p>
+                <p className="text-sm text-muted-lux font-sans leading-[1.75]">{product.subtitle}</p>
               )}
             </div>
 
@@ -228,7 +229,7 @@ export default function ProductDetailPage() {
                   {formatCurrency(comparePrice, currentCurrency)}
                 </span>
               )}
-              <span className="px-2.5 py-1 rounded text-[11px] font-sans font-bold bg-emerald-950/60 text-emerald-300 border border-emerald-500/30">
+              <span className="px-2.5 py-1 rounded text-xs font-sans font-bold bg-emerald-950/60 text-emerald-300 border border-emerald-500/30">
                 تسليم فوري بصنعاء
               </span>
             </div>
@@ -247,7 +248,7 @@ export default function ProductDetailPage() {
                         key={v.id}
                         type="button"
                         onClick={() => setSelectedVariantId(v.id)}
-                        className={`px-3.5 py-2 rounded-xl text-xs font-sans font-bold border transition ${
+                        className={`min-h-[44px] px-3.5 py-2 rounded-xl text-xs font-sans font-bold border transition inline-flex items-center ${
                           isSelected
                             ? 'bg-gold/20 border-gold text-champagne'
                             : 'bg-white/5 border-white/10 text-ivory/70 hover:text-ivory'
@@ -266,7 +267,7 @@ export default function ProductDetailPage() {
               <button
                 type="button"
                 onClick={handleAddToCart}
-                className="py-4 px-6 rounded-2xl bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-obsidian-dark font-sans font-bold text-sm shadow-[0_4px_25px_rgba(201,168,76,0.35)] hover:brightness-110 flex items-center justify-center gap-2.5 transition"
+                className="min-h-[44px] py-4 px-6 rounded-2xl bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-obsidian-dark font-sans font-bold text-sm shadow-[0_4px_25px_rgba(201,168,76,0.35)] hover:brightness-110 flex items-center justify-center gap-2.5 transition"
               >
                 <BagCartIcon size={18} color="#070709" />
                 <span>إضافة إلى حقيبة المشتريات</span>
@@ -274,7 +275,7 @@ export default function ProductDetailPage() {
               <button
                 type="button"
                 onClick={handleDirectWhatsApp}
-                className="py-4 px-6 rounded-2xl bg-white/5 hover:bg-emerald-950/60 border border-white/10 hover:border-emerald-500/40 text-ivory hover:text-emerald-300 font-sans font-bold text-sm flex items-center justify-center gap-2.5 transition"
+                className="min-h-[44px] py-4 px-6 rounded-2xl bg-white/5 hover:bg-emerald-950/60 border border-white/10 hover:border-emerald-500/40 text-ivory hover:text-emerald-300 font-sans font-bold text-sm flex items-center justify-center gap-2.5 transition"
               >
                 <WhatsAppIcon size={18} color="currentColor" />
                 <span>طلب مباشر عبر واتساب</span>
@@ -316,10 +317,10 @@ export default function ProductDetailPage() {
                   <VerifiedCheckIcon size={16} color="#34D399" />
                   <span>المواصفات الأصلية المضمونة</span>
                 </span>
-                <p className="text-xs text-ivory/80 font-sans leading-relaxed">
+                <p className="text-sm text-ivory/80 font-sans leading-[1.75]">
                   {authenticityGuide.original?.formulaNotes}
                 </p>
-                <p className="text-xs text-muted-lux font-sans">
+                <p className="text-sm text-muted-lux font-sans leading-[1.75]">
                   {authenticityGuide.original?.packagingNotes}
                 </p>
               </div>
@@ -329,10 +330,10 @@ export default function ProductDetailPage() {
                   <CrossWarningIcon size={16} color="#FB7185" />
                   <span>علامات التقليد التجاري المغشوش</span>
                 </span>
-                <p className="text-xs text-ivory/80 font-sans leading-relaxed">
+                <p className="text-sm text-ivory/80 font-sans leading-[1.75]">
                   {authenticityGuide.counterfeit?.formulaNotes}
                 </p>
-                <p className="text-xs text-muted-lux font-sans">
+                <p className="text-sm text-muted-lux font-sans leading-[1.75]">
                   {authenticityGuide.counterfeit?.packagingNotes}
                 </p>
               </div>
@@ -353,8 +354,8 @@ export default function ProductDetailPage() {
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold text-ivory">{r.customerName}</span>
                     {r.isVerifiedPurchase && (
-                      <span className="text-[10px] font-sans font-bold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30 flex items-center gap-1">
-                        <VerifiedCheckIcon size={10} color="#34D399" />
+                      <span className="text-xs font-sans font-bold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30 flex items-center gap-1">
+                        <VerifiedCheckIcon size={12} color="#34D399" />
                         <span>شراء مؤكد (باتش: {r.batchCodeVerified || '54U700'})</span>
                       </span>
                     )}
@@ -364,7 +365,7 @@ export default function ProductDetailPage() {
                       <StarIcon key={starIdx} size={12} color="#C9A84C" fill="#C9A84C" />
                     ))}
                   </div>
-                  <p className="text-xs text-ivory/90 font-sans leading-relaxed">{r.comment}</p>
+                  <p className="text-sm text-ivory/90 font-sans leading-[1.75]">{r.comment}</p>
                 </div>
               ))}
             </div>
@@ -388,7 +389,7 @@ export default function ProductDetailPage() {
                     required
                     value={reviewerName}
                     onChange={(e) => setReviewerName(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-none"
+                    className="w-full min-h-[44px] px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-none"
                   />
                 </div>
                 <div>
@@ -396,7 +397,7 @@ export default function ProductDetailPage() {
                   <select
                     value={reviewRating}
                     onChange={(e) => setReviewRating(Number(e.target.value))}
-                    className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-none"
+                    className="w-full min-h-[44px] px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-none"
                   >
                     <option value={5} className="bg-surface">5 من 5 نجوم (ممتاز وأصلي)</option>
                     <option value={4} className="bg-surface">4 من 5 نجوم (جيد جداً)</option>
@@ -410,7 +411,7 @@ export default function ProductDetailPage() {
                     placeholder="مثال: 54U700"
                     value={batchCodeInput}
                     onChange={(e) => setBatchCodeInput(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-ivory uppercase focus:border-gold outline-none"
+                    className="w-full min-h-[44px] px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-ivory uppercase focus:border-gold outline-none"
                   />
                 </div>
                 <div>
@@ -420,12 +421,12 @@ export default function ProductDetailPage() {
                     required
                     value={reviewComment}
                     onChange={(e) => setReviewComment(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-none resize-none"
+                    className="w-full min-h-[44px] px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-none resize-none"
                   />
                 </div>
                 <button
                   type="submit"
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-bold text-xs hover:brightness-110 transition"
+                  className="w-full min-h-[44px] py-3 rounded-xl bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-bold text-xs hover:brightness-110 transition inline-flex items-center justify-center"
                 >
                   نشر التقييم الموثق
                 </button>

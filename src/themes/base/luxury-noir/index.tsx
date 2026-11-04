@@ -1,22 +1,52 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { SectionRenderers, ThemeLayoutProps } from '../../contract';
 import { useStorefront } from '@/core/storefront/StorefrontProvider';
 import { SectionsOutlet } from '@/core/storefront/SectionsOutlet';
 import { LuxuryHeader } from './components/LuxuryHeader';
 import { HeroShowcase } from './components/HeroShowcase';
 import { ProductShowcase } from './components/ProductShowcase';
-import { BrandBentoGrid } from './components/BrandBentoGrid';
 import { QuickCategoryStoriesBar } from './components/QuickCategoryStoriesBar';
-import { AuthenticityCompareSlider } from './components/AuthenticityCompareSlider';
-import { SkinRoutineAndIngredients } from './components/SkinRoutineAndIngredients';
-import { StoreLocationAndSocial } from './components/StoreLocationAndSocial';
 import { TrustFooterBar } from './components/TrustFooterBar';
 import { MobileAppBottomNav } from './components/MobileAppBottomNav';
-import { WhatsAppCartDrawer } from './components/WhatsAppCartDrawer';
-import { AiBeautyAdvisor } from './components/AiBeautyAdvisor';
-import { FeatureTierSimulator } from './components/FeatureTierSimulator';
+import { BrandBentoGrid } from './components/BrandBentoGrid';
+import { StoreLocationAndSocial } from './components/StoreLocationAndSocial';
+
+const AuthenticityCompareSlider = dynamic(
+  () => import('./components/AuthenticityCompareSlider').then((m) => m.AuthenticityCompareSlider),
+  { ssr: false }
+);
+const SkinRoutineAndIngredients = dynamic(
+  () => import('./components/SkinRoutineAndIngredients').then((m) => m.SkinRoutineAndIngredients),
+  { ssr: false }
+);
+
+// On-demand loader to defer heavy drawer/modal chunks strictly until user interaction
+function OnDemandSection({
+  loader,
+  props,
+}: {
+  loader: () => Promise<{ default: React.ComponentType<any> }>;
+  props?: any;
+}) {
+  const [Component, setComponent] = useState<React.ComponentType<any> | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    loader().then((mod) => {
+      if (isMounted) setComponent(() => mod.default);
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [loader]);
+
+  if (!Component) return null;
+  return <Component {...props} />;
+}
 
 export const luxuryNoirRenderers: SectionRenderers = {
   hero: (props) => <HeroShowcase {...props} />,
@@ -41,46 +71,56 @@ export const luxuryNoirRenderers: SectionRenderers = {
 };
 
 export function LuxuryNoirTheme(_props: ThemeLayoutProps) {
-  const { features, activeCategory, setActiveCategory } = useStorefront();
-  const [isDemo, setIsDemo] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      setIsDemo(params.get('demo') === '1');
-    }
-  }, []);
+  const { features, activeCategory, setActiveCategory, cart } = useStorefront();
+  const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
 
   return (
-    <div className="min-h-[100dvh] bg-obsidian text-ivory font-sans selection:bg-gold selection:text-obsidian-dark antialiased pb-16 md:pb-0">
-      {/* 1. Header (Desktop & Mobile) */}
-      <LuxuryHeader />
+    <div className="min-h-[100dvh] bg-[#070709] text-ivory font-sans selection:bg-gold selection:text-obsidian-dark antialiased pb-14 md:pb-0">
+      {/* 1. Header (Sticky 56px on Mobile, 64px on Desktop - Utility strip deleted) */}
+      <LuxuryHeader onOpenAdvisor={() => setIsAdvisorOpen(true)} />
 
-      {/* 2. Platform Feature Simulator (Rendered ONLY in demo=1 mode as top inline strip) */}
-      {isDemo && <FeatureTierSimulator />}
-
-      {/* 3. Quick Category Filter Bar */}
+      {/* 2. Category Chips Row (44px, directly under header) */}
       <QuickCategoryStoriesBar
         activeCategory={activeCategory}
         onSelectCategory={setActiveCategory}
       />
 
-      {/* 4. Dynamic Sections Outlet */}
+      {/* 3. Dynamic Sections Outlet */}
       <main>
         <SectionsOutlet renderers={luxuryNoirRenderers} />
       </main>
 
-      {/* 5. Footer Trust Dock */}
+      {/* 4. Footer Trust & Brand Info */}
       <TrustFooterBar />
 
-      {/* 6. Native Mobile App Bottom Navigation Bar (md:hidden) */}
+      {/* 5. Native Mobile App Bottom Navigation Bar (56px, opaque #0A0A0D) */}
       <MobileAppBottomNav />
 
-      {/* 7. WhatsApp Cart Drawer */}
-      {features.cart_whatsapp && <WhatsAppCartDrawer />}
+      {/* 6. WhatsApp Cart Drawer (Loaded strictly on-demand when user opens cart) */}
+      {features.cart_whatsapp && cart.isOpen && (
+        <OnDemandSection
+          loader={() =>
+            import('./components/WhatsAppCartDrawer').then((m) => ({
+              default: m.WhatsAppCartDrawer,
+            }))
+          }
+        />
+      )}
 
-      {/* 8. AI Beauty Advisor Bot */}
-      {features.ai_chatbot && <AiBeautyAdvisor />}
+      {/* 7. AI Beauty Advisor Bottom Sheet (Loaded strictly on-demand when user opens advisor) */}
+      {features.ai_chatbot && isAdvisorOpen && (
+        <OnDemandSection
+          loader={() =>
+            import('./components/AiBeautyAdvisor').then((m) => ({
+              default: m.AiBeautyAdvisor,
+            }))
+          }
+          props={{
+            isOpen: isAdvisorOpen,
+            onClose: () => setIsAdvisorOpen(false),
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -14,9 +14,7 @@ export function PwaInstallPrompt({ className = '', isCompact = false }: PwaInsta
   const [showInstructions, setShowInstructions] = useState(false);
 
   useEffect(() => {
-    // Only intercept if the app intends to prompt the user
     const handleBeforeInstall = (e: Event) => {
-      // Store event for custom install prompt
       e.preventDefault();
       setDeferredPrompt(e);
       setIsInstallable(true);
@@ -24,7 +22,6 @@ export function PwaInstallPrompt({ className = '', isCompact = false }: PwaInsta
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstall);
 
-    // Detect if already installed / in standalone mode
     if (typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches) {
       setIsInstallable(false);
     }
@@ -47,7 +44,6 @@ export function PwaInstallPrompt({ className = '', isCompact = false }: PwaInsta
     }
   };
 
-  // If not installable and no manual trigger needed, stay unobtrusive
   if (!isInstallable && !deferredPrompt) {
     return null;
   }
@@ -58,11 +54,11 @@ export function PwaInstallPrompt({ className = '', isCompact = false }: PwaInsta
         type="button"
         onClick={handleInstallClick}
         title="تثبيت التطبيق على هاتفك"
-        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-gold/10 hover:bg-gold/20 text-champagne border border-gold/30 text-xs font-semibold transition ${className}`}
+        className={`min-w-[40px] min-h-[40px] flex items-center justify-center gap-2 px-3.5 py-2 rounded-full bg-gold/10 hover:bg-gold/20 text-champagne border border-gold/30 text-xs font-sans font-semibold transition ${className}`}
       >
         <svg
-          width="14"
-          height="14"
+          width="16"
+          height="16"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -74,7 +70,7 @@ export function PwaInstallPrompt({ className = '', isCompact = false }: PwaInsta
           <polyline points="7 10 12 15 17 10" />
           <line x1="12" y1="15" x2="12" y2="3" />
         </svg>
-        {!isCompact && <span className="text-[11px] font-sans">تثبيت التطبيق</span>}
+        {!isCompact && <span>تثبيت التطبيق</span>}
       </button>
 
       {/* Instructions Modal */}
@@ -86,9 +82,10 @@ export function PwaInstallPrompt({ className = '', isCompact = false }: PwaInsta
               <button
                 type="button"
                 onClick={() => setShowInstructions(false)}
-                className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center text-muted-lux hover:text-ivory"
+                className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-muted-lux hover:text-ivory"
+                aria-label="إغلاق"
               >
-                <CloseIcon size={14} color="#9A968E" />
+                <CloseIcon size={16} color="#9A968E" />
               </button>
             </div>
 
@@ -98,23 +95,23 @@ export function PwaInstallPrompt({ className = '', isCompact = false }: PwaInsta
 
             <div className="space-y-2.5 p-3 rounded-2xl bg-white/5 border border-white/10">
               <div className="flex items-start gap-2">
-                <span className="w-4 h-4 rounded-full bg-gold/20 text-gold flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
+                <span className="w-5 h-5 rounded-full bg-gold/20 text-gold flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
                   1
                 </span>
-                <span>اضغطي على زر المشاركة (Share) أسفل المتصفح (Safari أو Chrome).</span>
+                <span className="leading-relaxed">اضغطي على زر المشاركة (Share) أسفل المتصفح (Safari أو Chrome).</span>
               </div>
               <div className="flex items-start gap-2">
-                <span className="w-4 h-4 rounded-full bg-gold/20 text-gold flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
+                <span className="w-5 h-5 rounded-full bg-gold/20 text-gold flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
                   2
                 </span>
-                <span>اختاري &quot;إضافة إلى الصفحة الرئيسية&quot; (Add to Home Screen).</span>
+                <span className="leading-relaxed">اختاري &quot;إضافة إلى الصفحة الرئيسية&quot; (Add to Home Screen).</span>
               </div>
             </div>
 
             <button
               type="button"
               onClick={() => setShowInstructions(false)}
-              className="w-full py-2.5 rounded-xl bg-gold/15 text-gold border border-gold/30 font-bold hover:bg-gold/25 transition"
+              className="w-full min-h-[44px] py-2.5 rounded-xl bg-gold/15 text-gold border border-gold/30 font-bold hover:bg-gold/25 transition text-xs"
             >
               تم الفهم
             </button>

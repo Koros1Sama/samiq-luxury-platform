@@ -45,10 +45,10 @@ export function SearchModal({ isOpen, onClose, currentCurrency }: SearchModalPro
 
   if (!isOpen) return null;
 
-  const quickTags = ['فيتامين سي', 'سيرافي', 'نياسيناميد', 'بشرة دهنية', 'تصبغات', 'أحمر شفاه'];
+  const quickTags = ['فيتامين سي', 'غسول رغوي', 'نياسيناميد', 'بشرة دهنية', 'تفتيح وتصبغات', 'أحمر شفاه'];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 bg-black/85 backdrop-blur-md animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-20 px-3 sm:px-4 bg-black/85 backdrop-blur-md animate-fadeIn">
       <div className="relative w-full max-w-2xl rounded-3xl bg-surface border border-gold/40 shadow-2xl overflow-hidden text-ivory">
         {/* Search Input Bar */}
         <div className="p-4 sm:p-5 bg-obsidian border-b border-white/10 flex items-center gap-3">
@@ -59,30 +59,31 @@ export function SearchModal({ isOpen, onClose, currentCurrency }: SearchModalPro
           <input
             type="text"
             autoFocus
-            placeholder="ابحثي عن منتج، ماركة، مكون فعال، أو مشكلة جلدية..."
+            placeholder="ابحثي عن منتج، مكون فعال، أو روتين للعناية..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="flex-1 bg-transparent text-sm sm:text-base text-ivory placeholder-muted-lux outline-none"
+            className="flex-1 bg-transparent text-sm sm:text-base text-ivory placeholder-muted-lux outline-none min-h-[40px]"
           />
 
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-muted-lux text-xs"
+            className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-muted-lux hover:text-ivory"
+            aria-label="إغلاق"
           >
-            <CloseIcon size={16} color="#9A968E" />
+            <CloseIcon size={18} color="#9A968E" />
           </button>
         </div>
 
         {/* Quick Tag Pills */}
         <div className="p-3 bg-obsidian/40 border-b border-white/5 flex items-center gap-2 overflow-x-auto no-scrollbar">
-          <span className="text-[11px] text-muted-lux font-sans whitespace-nowrap">مقترحات:</span>
+          <span className="text-xs text-muted-lux font-sans whitespace-nowrap">مقترحات:</span>
           {quickTags.map((tag) => (
             <button
               key={tag}
               type="button"
               onClick={() => setQuery(tag)}
-              className="text-xs font-sans px-2.5 py-1 rounded-full bg-white/5 hover:bg-gold/15 border border-white/10 hover:border-gold/30 text-champagne whitespace-nowrap transition"
+              className="min-h-[40px] text-xs font-sans px-3.5 py-2 rounded-full bg-white/5 hover:bg-gold/15 border border-white/10 hover:border-gold/30 text-champagne whitespace-nowrap transition flex items-center justify-center"
             >
               {tag}
             </button>
@@ -92,7 +93,7 @@ export function SearchModal({ isOpen, onClose, currentCurrency }: SearchModalPro
         {/* Results Container */}
         <div className="p-4 sm:p-5 max-h-[450px] overflow-y-auto space-y-3">
           {loading && (
-            <div className="py-8 text-center text-xs text-muted-lux font-sans">
+            <div className="py-8 text-center text-xs text-muted-lux font-sans leading-relaxed">
               جاري البحث في كتالوج المنتجات الموثقة...
             </div>
           )}
@@ -100,8 +101,8 @@ export function SearchModal({ isOpen, onClose, currentCurrency }: SearchModalPro
           {!loading && results.length === 0 && (
             <div className="py-12 text-center space-y-2">
               <p className="text-sm font-serif text-ivory">لا توجد نتائج مطابقة لبحثك</p>
-              <p className="text-xs text-muted-lux font-sans">
-                جربي البحث باسم الماركة (مثل CeraVe أو The Ordinary) أو نوع المشكلة (تصبغات، مسامات).
+              <p className="text-xs text-muted-lux font-sans leading-relaxed">
+                جربي البحث باسم المستحضر (مثل سيروم فيتامين سي، غسول مرطب) أو نوع المشكلة (تصبغات، مسامات).
               </p>
             </div>
           )}
@@ -114,7 +115,7 @@ export function SearchModal({ isOpen, onClose, currentCurrency }: SearchModalPro
                   key={product.id}
                   href={`/product/${product.id}`}
                   onClick={onClose}
-                  className="p-3 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-gold/40 flex items-center justify-between gap-4 transition group"
+                  className="p-3 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-gold/40 flex items-center justify-between gap-4 transition group min-h-[48px]"
                 >
                   <div className="flex items-center gap-3.5">
                     <div className="w-14 h-14 rounded-xl overflow-hidden relative flex-shrink-0 bg-white/5">
@@ -128,7 +129,7 @@ export function SearchModal({ isOpen, onClose, currentCurrency }: SearchModalPro
                       />
                     </div>
                     <div>
-                      <span className="text-[10px] font-sans text-gold font-semibold block">
+                      <span className="text-xs font-sans text-gold font-semibold block">
                         {product.brand}
                       </span>
                       <h4 className="text-sm font-serif font-bold text-ivory group-hover:text-champagne transition line-clamp-1">
@@ -139,8 +140,8 @@ export function SearchModal({ isOpen, onClose, currentCurrency }: SearchModalPro
                           {formatCurrency(price, currentCurrency)}
                         </span>
                         {product.isAuthenticGuaranteed && (
-                          <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-sans">
-                            <VerifiedCheckIcon size={10} color="#34D399" />
+                          <span className="inline-flex items-center gap-1 text-xs text-emerald-400 font-sans">
+                            <VerifiedCheckIcon size={12} color="#34D399" />
                             <span>أصلي 100%</span>
                           </span>
                         )}

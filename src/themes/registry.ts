@@ -15,17 +15,10 @@ export const THEMES: Record<ThemeId, ThemeRegistryEntry> = {
     meta: SAMIQ_THEMES['ivory-journal'],
     load: () => import('./base/ivory-journal').then((m) => ({ default: m.IvoryJournalStubLayout })),
   },
+  'clinic-lab': {
+    meta: SAMIQ_THEMES['clinic-lab'],
+    load: () => import('./base/clinic-lab').then((m) => ({ default: m.ClinicLabTheme })),
+  },
 };
 
-export const DEFAULT_THEME_ID: ThemeId = 'luxury-noir';
-
-export function isValidThemeId(themeId: string): themeId is ThemeId {
-  return themeId in THEMES;
-}
-
-export function resolveThemeId(requestedThemeId?: string | null): ThemeId {
-  if (requestedThemeId && isValidThemeId(requestedThemeId)) {
-    return requestedThemeId;
-  }
-  return DEFAULT_THEME_ID;
-}
+export { DEFAULT_THEME_ID, isValidThemeId, resolveThemeId } from './contract';

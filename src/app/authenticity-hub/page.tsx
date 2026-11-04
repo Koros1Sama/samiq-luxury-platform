@@ -42,10 +42,10 @@ export default function AuthenticityHubPage() {
 
   const brandGuides = [
     {
-      brand: 'La Roche-Posay',
+      brand: 'سيرومات نقية',
       product: 'سيروم فيتامين سي Pure Vitamin C10',
       batchCode: '54U700',
-      country: 'فرنسا',
+      country: 'معتمد دولياً',
       originalMarkers: [
         'رقم التشغيلة محفور بالليزر أسفل الزجاج وليس حبراً مطبوعاً',
         'قوام انسيابي نقي بلون كهرماني بدون أي رغوة بيضاء',
@@ -56,30 +56,30 @@ export default function AuthenticityHubPage() {
         'رغوة بيضاء كثيفة تطفو على السطح بعد الرج',
         'رائحة كيميائية لاذعة تسبب حساسية واحمرار فوري',
       ],
-      image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=800&q=80',
+      image: '/media/products/serum-vitamin-c.jpg',
     },
     {
-      brand: 'CeraVe',
+      brand: 'عناية يومية',
       product: 'غسول Hydrating Facial Cleanser 473ml',
       batchCode: '20T900',
-      country: 'الولايات المتحدة',
+      country: 'معتمد دولياً',
       originalMarkers: [
         'مضخة زرقاء مصبوبة ناعمة بدون حواف بلاستيكية خشنة',
         'لوشن أبيض كريمي خفيف لا يصنع رغوة قاسية',
-        'الباركود الأمريكي الدولي يقرأ بلد الصنع والوكالة الرسمية',
+        'الباركود الدولي يقرأ بيانات الدفعة والوكالة الرسمية',
       ],
       fakeRisks: [
         'مضخة رديئة تسرب السائل وتعلق عند الضغط',
         'رائحة عطرية قوية مضافة (الأصلي خالي تماماً من العطور)',
         'قوام مائي شفاف لا يحتوي على السيراميدات',
       ],
-      image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=800&q=80',
+      image: '/media/products/cleanser-hydrating.jpg',
     },
     {
-      brand: 'The Ordinary',
+      brand: 'عناية متقدمة',
       product: 'سيروم Niacinamide 10% + Zinc 1%',
       batchCode: '1A02',
-      country: 'كندا',
+      country: 'معتمد دولياً',
       originalMarkers: [
         'كود الباتش مطبوع بلون رمادي مائل للزرقة على الزجاج الخارجي',
         'ملمس السائل خفيف سريع الامتصاص برائحة خفيفة جداً',
@@ -90,7 +90,7 @@ export default function AuthenticityHubPage() {
         'سائل لزج يشبه الصمغ يترك طبقة بيضاء جافة على الجلد',
         'غطاء القطارة رديء يتفتت بعد أسبوع من الاستخدام',
       ],
-      image: 'https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?auto=format&fit=crop&w=800&q=80',
+      image: '/media/products/serum-niacinamide.jpg',
     },
   ];
 
@@ -110,7 +110,7 @@ export default function AuthenticityHubPage() {
           <div className="flex items-center gap-4">
             <Link
               href="/"
-              className="text-xs font-sans text-ivory/80 hover:text-champagne transition"
+              className="min-h-[44px] inline-flex items-center text-xs font-sans text-ivory/80 hover:text-champagne transition"
             >
               العودة للمتجر الرئيسي ←
             </Link>
@@ -128,7 +128,7 @@ export default function AuthenticityHubPage() {
           <h1 className="text-3xl sm:text-5xl font-serif font-bold text-ivory leading-tight">
             كيف تميزين المنتج الأصلي لكشف المقلد المغشوش؟
           </h1>
-          <p className="text-sm sm:text-base text-muted-lux font-sans leading-relaxed">
+          <p className="text-sm sm:text-base text-muted-lux font-sans leading-[1.75]">
             في متجر مفتاح الجمال، لا نكتفي بضمان الأصالة، بل نمكّنكِ من فحص أي مستحضر تجميلي
             بنفسك عبر مطابقة رقم الدفعة (Batch Code) والخصائص الفيزيائية للعبوة والقوام.
           </p>
@@ -137,7 +137,7 @@ export default function AuthenticityHubPage() {
               href="https://www.tiktok.com/@tamiffttah?_r=1&_t=ZS-9B6mlZDXTA0"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-4 py-2 rounded-full bg-gold/15 text-gold border border-gold/30 hover:bg-gold/25 transition font-semibold"
+              className="min-h-[44px] inline-flex items-center px-4 py-2 rounded-full bg-gold/15 text-gold border border-gold/30 hover:bg-gold/25 transition font-semibold"
             >
               شاهد مقاطع كشف المقلد على تيك توك (@tamiffttah) ←
             </a>
@@ -145,7 +145,7 @@ export default function AuthenticityHubPage() {
               href="https://www.instagram.com/tamifttah?rpxt=dXlocW9teTEyMW53"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-4 py-2 rounded-full bg-white/5 text-ivory border border-white/10 hover:bg-white/10 transition font-semibold"
+              className="min-h-[44px] inline-flex items-center px-4 py-2 rounded-full bg-white/5 text-ivory border border-white/10 hover:bg-white/10 transition font-semibold"
             >
               حساب إنستغرام (@tamifttah) ←
             </a>
@@ -163,7 +163,7 @@ export default function AuthenticityHubPage() {
                 <h3 className="text-lg font-serif font-bold text-ivory">
                   فاحص رقم الدفعة المباشر (Batch Code Verifier)
                 </h3>
-                <p className="text-xs text-muted-lux font-sans">
+                <p className="text-sm text-muted-lux font-sans leading-[1.75]">
                   اكتبي الرمز المحفور في قاع العبوة لمطابقته مع بيانات الوكالة المعتمدة
                 </p>
               </div>
@@ -175,12 +175,12 @@ export default function AuthenticityHubPage() {
                 placeholder="أدخلي رقم الدفعة (مثال: 54U700 أو 20T900)"
                 value={batchCodeInput}
                 onChange={(e) => setBatchCodeInput(e.target.value.toUpperCase())}
-                className="flex-1 px-4 py-3 rounded-2xl bg-white/5 border border-white/10 text-sm text-ivory uppercase focus:border-gold outline-none"
+                className="min-h-[44px] flex-1 px-4 py-3 rounded-2xl bg-white/5 border border-white/10 text-sm text-ivory uppercase focus:border-gold outline-none"
               />
               <button
                 type="submit"
                 disabled={isLoading}
-                className="px-6 py-3 rounded-2xl bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-obsidian-dark font-sans font-bold text-sm shadow-[0_4px_20px_rgba(201,168,76,0.35)] hover:brightness-110 transition disabled:opacity-50"
+                className="min-h-[44px] px-6 py-3 rounded-2xl bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-obsidian-dark font-sans font-bold text-sm shadow-[0_4px_20px_rgba(201,168,76,0.35)] hover:brightness-110 transition disabled:opacity-50 inline-flex items-center justify-center"
               >
                 {isLoading ? 'جاري الفحص...' : 'فحص الباتش كود ↵'}
               </button>
@@ -192,23 +192,23 @@ export default function AuthenticityHubPage() {
               <button
                 type="button"
                 onClick={() => setBatchCodeInput('54U700')}
-                className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-gold/15 text-champagne border border-white/10"
+                className="min-h-[44px] px-3 py-2 inline-flex items-center rounded-lg bg-white/5 hover:bg-gold/15 text-champagne border border-white/10"
               >
-                54U700 (لاروش بوزيه)
+                54U700 (سيروم فيتامين سي)
               </button>
               <button
                 type="button"
                 onClick={() => setBatchCodeInput('20T900')}
-                className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-gold/15 text-champagne border border-white/10"
+                className="min-h-[44px] px-3 py-2 inline-flex items-center rounded-lg bg-white/5 hover:bg-gold/15 text-champagne border border-white/10"
               >
-                20T900 (سيرافي)
+                20T900 (غسول مرطب)
               </button>
               <button
                 type="button"
                 onClick={() => setBatchCodeInput('1A02')}
-                className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-gold/15 text-champagne border border-white/10"
+                className="min-h-[44px] px-3 py-2 inline-flex items-center rounded-lg bg-white/5 hover:bg-gold/15 text-champagne border border-white/10"
               >
-                1A02 (ذا أورديناري)
+                1A02 (سيروم نياسيناميد)
               </button>
             </div>
 
@@ -240,12 +240,12 @@ export default function AuthenticityHubPage() {
                   </div>
                 </div>
 
-                <p className="text-xs text-emerald-200/90 font-sans leading-relaxed pt-1">
+                <p className="text-sm text-emerald-200/90 font-sans leading-[1.75] pt-1">
                   {verificationResult.statusNotes}
                 </p>
 
                 <div className="pt-2 border-t border-emerald-500/20 space-y-1">
-                  <span className="text-[11px] text-muted-lux block font-sans">معايير فحص العبوة باليد:</span>
+                  <span className="text-xs text-muted-lux block font-sans">معايير فحص العبوة باليد:</span>
                   {verificationResult.inspectionChecklist?.map((item: string, i: number) => (
                     <div key={i} className="flex items-center gap-2 text-xs text-ivory/80 font-sans">
                       <VerifiedCheckIcon size={12} color="#34D399" />
@@ -265,19 +265,19 @@ export default function AuthenticityHubPage() {
               <h2 className="text-2xl font-serif font-bold text-ivory">
                 أرشيف المقارنات الموثقة حسب الماركة
               </h2>
-              <p className="text-xs text-muted-lux font-sans mt-0.5">
+              <p className="text-sm text-muted-lux font-sans mt-0.5 leading-[1.75]">
                 مقارنات دقيقة بالصور للمستحضرات الأكثر تعرضاً للغش في السوق المحلي
               </p>
             </div>
 
             {/* Filter Pills */}
             <div className="flex items-center gap-2 flex-wrap">
-              {['all', 'La Roche-Posay', 'CeraVe', 'The Ordinary'].map((brandKey) => (
+              {['all', 'سيرومات نقية', 'عناية يومية', 'عناية متقدمة'].map((brandKey) => (
                 <button
                   key={brandKey}
                   type="button"
                   onClick={() => setActiveBrandFilter(brandKey)}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-sans font-medium transition ${
+                  className={`min-h-[44px] px-3.5 py-1.5 rounded-full text-xs font-sans font-medium transition inline-flex items-center ${
                     activeBrandFilter === brandKey
                       ? 'bg-gold text-obsidian-dark font-bold'
                       : 'bg-white/5 border border-white/10 text-ivory/70 hover:text-ivory'
@@ -306,7 +306,7 @@ export default function AuthenticityHubPage() {
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         className="object-cover object-center"
                       />
-                      <div className="absolute top-3 start-3 px-2.5 py-1 rounded bg-black/80 border border-gold/40 text-[10px] text-champagne font-sans font-bold">
+                      <div className="absolute top-3 start-3 px-2.5 py-1 rounded bg-black/80 border border-gold/40 text-xs text-champagne font-sans font-bold">
                         بلد المنشأ: {guide.country}
                       </div>
                     </div>
@@ -343,7 +343,7 @@ export default function AuthenticityHubPage() {
 
                   <Link
                     href={`/product/prod-${idx + 1}`}
-                    className="w-full py-2.5 mt-2 rounded-xl bg-white/5 hover:bg-gold/15 text-champagne border border-white/10 hover:border-gold/30 text-xs font-sans font-bold text-center block transition"
+                    className="w-full min-h-[44px] py-2.5 mt-2 rounded-xl bg-white/5 hover:bg-gold/15 text-champagne border border-white/10 hover:border-gold/30 text-xs font-sans font-bold inline-flex items-center justify-center transition"
                   >
                     عرض المستحضر الأصلي في المتجر ←
                   </Link>

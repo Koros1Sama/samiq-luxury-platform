@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "qa": "node scripts/qa.mjs"
+    "qa": "node scripts/scan-emojis.mjs && node scripts/scan-brands.mjs && node scripts/qa.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",

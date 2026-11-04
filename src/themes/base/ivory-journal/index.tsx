@@ -1,43 +1,134 @@
 'use client';
 
-import React from 'react';
-import { ThemeLayoutProps } from '../../contract';
+import React, { useState } from 'react';
+import dynamic from 'next/dynamic';
+import { SectionRenderers, ThemeLayoutProps, ProductCardData } from '../../contract';
 import { useStorefront } from '@/core/storefront/StorefrontProvider';
+import { SectionsOutlet } from '@/core/storefront/SectionsOutlet';
 
-export function IvoryJournalStubLayout(_props: ThemeLayoutProps) {
-  const { tenant } = useStorefront();
+// Direct Below-the-Fold and Critical In-Fold Section Components
+import { IvoryHeader } from './components/IvoryHeader';
+import { IvoryHero } from './components/IvoryHero';
+import { IvoryProductMosaic } from './components/IvoryProductMosaic';
+import { IvoryCartPill } from './components/IvoryCartPill';
+import { IvoryCategoryIndex } from './components/IvoryCategoryIndex';
+import { IvoryEditorialQuote } from './components/IvoryEditorialQuote';
+import { IvoryAuthenticityCard } from './components/IvoryAuthenticityCard';
+import { IvoryColophonContact } from './components/IvoryColophonContact';
+import {
+  IvoryFeatureStrip,
+  IvoryGallery,
+  IvoryTestimonials,
+  IvoryFaq,
+  IvoryCta,
+  IvorySkinRoutineBlock,
+} from './components/IvoryGenericSections';
+
+// Interactive Overlays & Modals ONLY (loaded on demand / user interaction)
+const IvoryQuickViewSheet = dynamic(
+  () => import('./components/IvoryQuickViewSheet').then((m) => m.IvoryQuickViewSheet),
+  { ssr: false }
+);
+
+const IvoryCartDrawer = dynamic(
+  () => import('./components/IvoryCartDrawer').then((m) => m.IvoryCartDrawer),
+  { ssr: false }
+);
+
+const IvorySearchModal = dynamic(
+  () => import('./components/IvorySearchModal').then((m) => m.IvorySearchModal),
+  { ssr: false }
+);
+
+const IvoryAdvisorChat = dynamic(
+  () => import('./components/IvoryAdvisorChat').then((m) => m.IvoryAdvisorChat),
+  { ssr: false }
+);
+
+/**
+ * Editorial Section Renderers for Ivory Journal
+ * Implements EVERY generic section type in the SAMIQ contract
+ * plus modular block overrides for authenticity and skin routine.
+ */
+export const createIvoryRenderers = (
+  onSelectProduct?: (product: ProductCardData) => void
+): SectionRenderers => ({
+  hero: (props) => <IvoryHero {...props} />,
+  'product-grid': (props) => (
+    <IvoryProductMosaic onSelectProduct={onSelectProduct} {...props} />
+  ),
+  'category-grid': (props) => <IvoryCategoryIndex {...props} />,
+  'feature-strip': (props) => <IvoryFeatureStrip {...props} />,
+  'rich-text': (props) => <IvoryEditorialQuote {...props} />,
+  gallery: (props) => <IvoryGallery {...props} />,
+  testimonials: (props) => <IvoryTestimonials {...props} />,
+  faq: (props) => <IvoryFaq {...props} />,
+  contact: (props) => <IvoryColophonContact {...props} />,
+  cta: (props) => <IvoryCta {...props} />,
+  blocks: {
+    'authenticity-compare': () => <IvoryAuthenticityCard />,
+    'skin-routine': (props) => <IvorySkinRoutineBlock {...props} />,
+  },
+});
+
+export function IvoryJournalTheme(_props: ThemeLayoutProps) {
+  const { features, cart } = useStorefront();
+
+  // Modals & Sheets State
+  const [selectedProduct, setSelectedProduct] = useState<ProductCardData | null>(null);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
+
+  const renderers = createIvoryRenderers((product) => setSelectedProduct(product));
 
   return (
-    <div className="min-h-[100dvh] bg-[#FAF7F2] text-[#181512] font-sans flex flex-col justify-between p-6 antialiased">
-      <header className="max-w-4xl mx-auto w-full py-6 flex items-center justify-between border-b border-[#181512]/10">
-        <h1 className="text-xl font-serif font-bold text-[#181512]">{tenant.name}</h1>
-        <span className="text-xs uppercase tracking-widest text-[#B8860B] font-mono">Ivory Journal</span>
-      </header>
+    <div className="min-h-[100dvh] bg-[#FAF7F2] text-[#1B1612] font-sans selection:bg-[#B89B5E]/30 selection:text-[#1B1612] antialiased overflow-x-hidden flex flex-col justify-between">
+      {/* 1. Sticky Editorial Header (52px, Hamburger, Wordmark, Bag) */}
+      <IvoryHeader
+        onOpenSearch={() => setIsSearchOpen(true)}
+        onOpenAdvisor={() => setIsAdvisorOpen(true)}
+      />
 
-      <main className="max-w-xl mx-auto text-center space-y-4 my-16">
-        <div className="inline-block px-3 py-1 rounded-full bg-[#B8860B]/10 text-[#B8860B] text-xs font-semibold">
-          قالب جديد قيد التطوير (Phase C)
-        </div>
-        <h2 className="text-3xl font-serif font-bold">قالب مجلة العاج (Ivory Journal)</h2>
-        <p className="text-sm text-[#6E675F] leading-relaxed">
-          هذا القالب التحريري الراقي المخصص للمجلات وعيادات التجميل العالمية يجري بناؤه حالياً ضمن المرحلة C.
-          يمكنك تصفح متجر {tenant.name} عبر القالب الافتراضي Luxury Noir.
-        </p>
-        <div className="pt-4">
-          <a
-            href="/?theme=luxury-noir"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#181512] text-[#FAF7F2] text-xs font-semibold hover:bg-[#332E27] transition"
-          >
-            العودة إلى قالب Luxury Noir ←
-          </a>
-        </div>
+      {/* 2. Dynamic Sections Outlet */}
+      <main className="w-full flex-1">
+        <SectionsOutlet renderers={renderers} />
       </main>
 
-      <footer className="max-w-4xl mx-auto w-full py-6 text-center text-xs text-[#8C8479] border-t border-[#181512]/10">
-        منصة سامق — {tenant.legalName || tenant.name}
-      </footer>
+      {/* 3. Navigation Pattern: Slim Bottom Cart Pill (the ONLY fixed bottom element, NO bottom tab bar) */}
+      {features.cart_whatsapp && <IvoryCartPill />}
+
+      {/* 4. Quick-View Bottom Sheet for Product Detail */}
+      {selectedProduct && (
+        <IvoryQuickViewSheet
+          product={selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+        />
+      )}
+
+      {/* 5. Cart Drawer UI using useCheckout() */}
+      {features.cart_whatsapp && cart.isOpen && <IvoryCartDrawer />}
+
+      {/* 6. Magazine Search Modal UI */}
+      {isSearchOpen && (
+        <IvorySearchModal
+          isOpen={isSearchOpen}
+          onClose={() => setIsSearchOpen(false)}
+          onSelectProduct={(p) => setSelectedProduct(p)}
+        />
+      )}
+
+      {/* 7. Beauty Advisor Chat UI */}
+      {features.ai_chatbot && isAdvisorOpen && (
+        <IvoryAdvisorChat
+          isOpen={isAdvisorOpen}
+          onClose={() => setIsAdvisorOpen(false)}
+          onSelectProduct={(p) => setSelectedProduct(p)}
+        />
+      )}
     </div>
   );
 }
 
-export default IvoryJournalStubLayout;
+// Export aliases for contract & registry backwards compatibility
+export { IvoryJournalTheme as IvoryJournalStubLayout };
+export default IvoryJournalTheme;

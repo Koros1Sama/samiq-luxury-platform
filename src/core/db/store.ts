@@ -223,7 +223,7 @@ function createDefaultSeed(): SamiqDatabaseSchema {
           },
           {
             productId: 'prod-2',
-            title: 'غسول سيرافي المرطب للبشرة العادية والجافة',
+            title: 'غسول السيراميد المرطب للبشرة العادية والجافة',
             variantTitle: '473 مل (عائلي)',
             quantity: 1,
             unitPrice: { YER: 14500, SAR: 98, USD: 26 },
@@ -396,7 +396,7 @@ function createDefaultSeed(): SamiqDatabaseSchema {
 
 المنتجات المقلدة تعتمد عادة على سوائل ماء ملون بدون أي تركيز فعال، أو تحتوي على مواد كيميائية تتأكسد في أيام قليلة وتسبب التهابات حادة للبشرة.
 
-العلامات الحاسمة لفحص سيروم La Roche-Posay Pure Vitamin C10 الأصلي:
+العلامات الحاسمة لفحص سيروم فيتامين سي Pure Vitamin C10 الأصلي:
 1. رقم الباتش (Batch Code):
 يأتي محفوراً بدقة بالغة أسفل الزجاجة بواسطة الليزر (مثال: 54U700)، ومطابقاً تماماً لنفس الكود المطبوع على ظهر الكرتون الخارجي. في المنتجات المقلدة تجد الكود مفقوداً تماماً أو مطبوعاً بحبر سطحي يزول بمسحة إصبع.
 
@@ -404,10 +404,10 @@ function createDefaultSeed(): SamiqDatabaseSchema {
 السيروم الأصلي يتميز بلون ذهبي كهرماني نقي، وقوام انسيابي خفيف سريع الامتصاص دون أي ملمس زيتي لزج. في العبوات المقلدة تلاحظ رغوة بيضاء عائمة عند رج العبوة ورائحة كيميائية نفاذة.
 
 3. نوع ومطاط القطارة:
-العبوة الفرنسية الأصلية مزودة بقطارة طبية ذات سدادة داخلية محكمة للغاية تمنع تسرب جزيئات الأكسجين لحماية الفيتامين من التلف.
+العبوة الأصلية مزودة بقطارة طبية ذات سدادة داخلية محكمة للغاية تمنع تسرب جزيئات الأكسجين لحماية الفيتامين من التلف.
         `,
         author: 'خبيرات مفتاح الجمال',
-        coverImage: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=1200&q=80',
+        coverImage: '/media/hero/hero-noir.jpg',
         tags: ['العناية بالبشرة', 'فيتامين سي', 'كشف الأصلي والتقليد'],
         readTimeMinutes: 4,
         publishedAt: '2026-10-25',
@@ -416,11 +416,11 @@ function createDefaultSeed(): SamiqDatabaseSchema {
       {
         id: 'post-2',
         tenantId: '11111111-1111-1111-1111-111111111111',
-        slug: 'cerave-cleanser-original-guide',
-        title: 'دليل غسول سيرافي الأصلي: كيف تضمنين وجود السيراميدات الثلاث الأساسية؟',
-        excerpt: 'مقارنة دقيقة في الباركود وحجم العبوة ولون المضخة لغسول CeraVe Hydrating Cleanser.',
+        slug: 'hydrating-cleanser-original-guide',
+        title: 'دليل الغسول المرطب الأصلي: كيف تضمنين وجود السيراميدات الثلاث الأساسية؟',
+        excerpt: 'مقارنة دقيقة في الباركود وحجم العبوة ولون المضخة للغسول المرطب الأصلي Hydrating Cleanser.',
         content: `
-يُعد غسول CeraVe Hydrating Cleanser المستحضر الأكثر توصية من أطباء الجلد حول العالم للبشرة الجافة والعادية، نظراً لاحتوائه على 3 سيراميدات متطابقة جينياً مع حاجز الجلد الطبيعي (1، 3، 6-II) وحمض الهيالورونيك.
+يُعد الغسول المرطب Hydrating Cleanser المستحضر الأكثر توصية من أطباء الجلد حول العالم للبشرة الجافة والعادية، نظراً لاحتوائه على 3 سيراميدات متطابقة جينياً مع حاجز الجلد الطبيعي (1، 3، 6-II) وحمض الهيالورونيك.
 
 كيف تميزين العبوة الأصلية؟
 - المضخة (Pump): رأس المضخة في العبوة الأصلية مصبوب بلون أزرق موحد متقن دون أي نتوءات بلاستيكية خشنة، وتحتوي آلية أمان قفل وفتح ناعمة للغاية.
@@ -428,8 +428,8 @@ function createDefaultSeed(): SamiqDatabaseSchema {
 - الباركود الدولي: الباركود يبدأ برقم الوكالة المعتمد ويظهر تاريخ الإنتاج وبلد المنشأ مباشرة.
         `,
         author: 'فريق التوثيق المخبري',
-        coverImage: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=1200&q=80',
-        tags: ['سيرافي', 'ترطيب البشرة', 'السيراميدات'],
+        coverImage: '/media/hero/hero-ivory.jpg',
+        tags: ['غسول مرطب', 'ترطيب البشرة', 'السيراميدات'],
         readTimeMinutes: 5,
         publishedAt: '2026-10-28',
         isFeatured: false,
@@ -453,7 +453,7 @@ function createDefaultSeed(): SamiqDatabaseSchema {
         productId: 'prod-2',
         customerName: 'منال الشامي',
         rating: 5,
-        comment: 'غسول سيرافي ممتاز جداً للبشرة الجافة، التوصيل في صنعاء استغرق 3 ساعات فقط مع فحص العبوة قبل الدفع.',
+        comment: 'غسول السيراميد ممتاز جداً للبشرة الجافة، التوصيل في صنعاء استغرق 3 ساعات فقط مع فحص العبوة قبل الدفع.',
         isVerifiedPurchase: true,
         createdAt: '2026-10-22T15:30:00Z',
       },
@@ -463,7 +463,7 @@ function createDefaultSeed(): SamiqDatabaseSchema {
         productId: 'prod-3',
         customerName: 'هند القاسمي',
         rating: 5,
-        comment: 'سيروم نياسيناميد ذا أورديناري أصلي بدون شك، الزجاجة ثقيلة وملمس المحلول خفيف، المسامات صغرت بشكل ملحوظ.',
+        comment: 'سيروم نياسيناميد المركز أصلي وموثوق، الزجاجة ثقيلة وملمس المحلول خفيف، المسامات صغرت بشكل ملحوظ.',
         isVerifiedPurchase: true,
         createdAt: '2026-10-29T18:15:00Z',
       },
@@ -500,7 +500,7 @@ function createDefaultSeed(): SamiqDatabaseSchema {
         channel: 'whatsapp',
         customerName: 'أم ريان — صنعاء',
         customerIdentifier: '+967 771 234 567',
-        lastMessage: 'كيف أفرق بين غسول سيرافي الأصلي والتقليد قبل فتح العبوة؟',
+        lastMessage: 'كيف أتحقق من مطابقة غسول السيراميد لمعايير الجودة قبل فتح العبوة؟',
         lastMessageTime: 'منذ 10 دقائق',
         unreadCount: 1,
         isBotActive: true,
@@ -510,7 +510,7 @@ function createDefaultSeed(): SamiqDatabaseSchema {
             id: 'm1',
             sender: 'customer',
             senderName: 'أم ريان',
-            text: 'السلام عليكم، هل غسول سيرافي للبشرة الدهنية متوفر بحجم 473 مل؟',
+            text: 'السلام عليكم، هل غسول السيراميد للبشرة الدهنية متوفر بحجم 473 مل؟',
             timestamp: '14:20',
           },
           {
@@ -524,7 +524,7 @@ function createDefaultSeed(): SamiqDatabaseSchema {
             id: 'm3',
             sender: 'customer',
             senderName: 'أم ريان',
-            text: 'كيف أفرق بين غسول سيرافي الأصلي والتقليد قبل فتح العبوة؟',
+            text: 'كيف أتحقق من مطابقة غسول السيراميد لمعايير الجودة قبل فتح العبوة؟',
             timestamp: '14:23',
           },
         ],
@@ -773,25 +773,25 @@ export function verifyBatchCode(batchCode: string): {
   // Benchmark database of authentic batches
   const KNOWN_BATCHES: Record<string, { brand: string; product: string; date: string; life: string; notes: string }> = {
     '54U700': {
-      brand: 'La Roche-Posay',
+      brand: 'سيرومات نقية',
       product: 'Pure Vitamin C10 Serum 30ml',
       date: 'يوليو 2026',
       life: '36 شهراً (غير مفتوح) / 6 أشهر بعد الفتح',
-      notes: 'رقم دفعة فرنسي أصلي معتمد لدى الوكالة، محفور بالليزر أسفل القارورة.',
+      notes: 'رقم دفعة أصلي معتمد محفور بالليزر أسفل القارورة.',
     },
     '20T900': {
-      brand: 'CeraVe',
+      brand: 'عناية يومية',
       product: 'Hydrating Facial Cleanser 473ml',
       date: 'سبتمبر 2026',
       life: '36 شهراً',
-      notes: 'دفعة أمريكية أصلية، باركود وكالة معتمد مع مضخة زرقاء أصلية.',
+      notes: 'دفعة أصلية موثقة، باركود معتمد مع مضخة أصلية.',
     },
     '1A02': {
-      brand: 'The Ordinary',
+      brand: 'سيرومات نقية',
       product: 'Niacinamide 10% + Zinc 1% 30ml',
       date: 'أغسطس 2026',
       life: '36 شهراً (12 شهراً بعد الفتح)',
-      notes: 'دفعة كندية أصلية، كود حبري رمادي خفيف مطابق للمعيار الرسمي.',
+      notes: 'دفعة أصلية موثقة، كود حبري رمادي خفيف مطابق للمعيار الرسمي.',
     },
   };
 

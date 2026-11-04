@@ -21,26 +21,26 @@ export async function POST(req: Request) {
       'خلو التركيبة تماماً من الروائح الكيميائية الحادة أو الرغوة الشائبة',
     ];
 
-    if (t.includes('laroche') || t.includes('لاروش') || t.includes('vitaminc') || t.includes('فيتامين')) {
-      brand = 'La Roche-Posay';
+    if (t.includes('سيروم') || t.includes('vitaminc') || t.includes('فيتامين')) {
+      brand = 'سيرومات نقية';
       categorySlug = 'serums';
       ingredients = ['Pure Vitamin C 10%', 'Salicylic Acid', 'Neurosensine', 'Hyaluronic Acid'];
       arabicDescription = 'سيروم فيتامين سي النقي المركز بنسبة 10%، مصمم خصيصاً لإعادة الحيوية والنضارة الفورية للبشرة وتوحيد لونها ومكافحة التجاعيد الدقيقة دون أي تحسس.';
       englishDescription = 'Pure 10% Vitamin C anti-aging serum with salicylic acid and neurosensine to visibly boost skin radiance and smooth texture.';
-    } else if (t.includes('cerave') || t.includes('سيرافي') || t.includes('غسول')) {
-      brand = 'CeraVe';
-      categorySlug = 'cleansers';
+    } else if (t.includes('غسول') || t.includes('مرطب') || t.includes('cleanser')) {
+      brand = 'عناية يومية';
+      categorySlug = 'cleansers-moisturizers';
       ingredients = ['Ceramide NP', 'Ceramide AP', 'Ceramide EOP', 'Hyaluronic Acid', 'Niacinamide'];
       arabicDescription = 'غسول علاجي مركب بالتعاون مع أطباء الجلد يحتوي على 3 سيراميدات أساسية مطابقة للبشرة لترميم الحاجز الواقي وحبس الرطوبة طوال اليوم.';
       englishDescription = 'Dermatologist-developed cleanser formulated with three essential ceramides and hyaluronic acid to cleanse without stripping natural moisture.';
-    } else if (t.includes('ordinary') || t.includes('اورديناري') || t.includes('niacinamide') || t.includes('نياسيناميد')) {
-      brand = 'The Ordinary';
+    } else if (t.includes('niacinamide') || t.includes('نياسيناميد')) {
+      brand = 'سيرومات نقية';
       categorySlug = 'serums';
       ingredients = ['Niacinamide 10%', 'Zinc PCA 1%'];
       arabicDescription = 'تركيبة عالية التركيز من فيتامين B3 (النياسيناميد) مع ملح الزنك لتنظيم إفراز الدهون وتضييق المسامات الواسعة وتهدئة آثار الحبوب.';
       englishDescription = 'High-strength vitamin and mineral blemish formula with 10% pure niacinamide and 1% zinc PCA to reduce skin congestion and visible pores.';
-    } else if (t.includes('ysl') || t.includes('روج') || t.includes('lipstick') || t.includes('مكياج')) {
-      brand = 'YSL Beauty';
+    } else if (t.includes('روج') || t.includes('lipstick') || t.includes('مكياج')) {
+      brand = 'مكياج مخملي';
       categorySlug = 'makeup';
       ingredients = ['زبدة الشيا النقية', 'شمع طبيعي مرطب', 'مستخلصات الذهب الدقيقة'];
       arabicDescription = 'أحمر شفاه كوتور الفاخر بقوام حريري يمنح الشفاه لوناً غنياً بتمريرة واحدة مع ترطيب عميق يدوم 12 ساعة في علبة ذهبية ملكية.';

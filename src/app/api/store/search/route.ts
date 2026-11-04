@@ -13,11 +13,11 @@ export async function GET(req: Request) {
   // Concern synonym dictionary
   const concernMap: Record<string, string[]> = {
     'حب شباب': ['niacinamide', 'salicylic', 'cleansers'],
-    'مسامات': ['niacinamide', 'ordinary', 'serums'],
-    'تصبغات': ['vitamin c', 'laroche', 'pure'],
-    'جفاف': ['cerave', 'moisturizing', 'hyaluronic'],
+    'مسامات': ['niacinamide', 'zinc', 'serums'],
+    'تصبغات': ['vitamin c', 'pure', 'serums'],
+    'جفاف': ['moisturizing', 'hyaluronic', 'ceramides'],
     'نضارة': ['vitamin c', 'serum', 'glow'],
-    'شفايف': ['rouge', 'lipstick', 'ysl'],
+    'شفايف': ['rouge', 'lipstick', 'couture'],
   };
 
   let matchingKeys = [q];

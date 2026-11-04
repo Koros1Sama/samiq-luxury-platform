@@ -1,381 +1,258 @@
 import React from 'react';
 
-interface IconProps {
+export interface IconProps {
   className?: string;
   size?: number;
   strokeWidth?: number;
   color?: string;
+  fill?: string;
 }
 
-/**
- * Bespoke Ultra-Thin Monoline Icons for SAMIQ Luxury Noir
- * Standard strokeWidth: 1.25, Color: #C9A84C (Gold) or currentColor
- * Replaces 100% of emojis with high-fashion agency vector art.
- */
-
-// 1. Drop Skin Icon (for Oily Skin: monoline drop with 3 micro-dots beneath)
-export function DropSkinIcon({ className = '', size = 22, strokeWidth = 1.25, color = 'currentColor' }: IconProps) {
+function Svg({
+  size = 20,
+  color = 'currentColor',
+  strokeWidth = 1.25,
+  className = '',
+  viewBox = '0 0 24 24',
+  fill = 'none',
+  children,
+}: IconProps & { viewBox?: string; children: React.ReactNode }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} stroke={color}>
-      <path
-        d="M12 2.5C12 2.5 5.5 10 5.5 14.5C5.5 18.09 8.41 21 12 21C15.59 21 18.5 18.09 18.5 14.5C18.5 10 12 2.5 12 2.5Z"
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx="9.5" cy="15.5" r="0.75" fill={color} />
-      <circle cx="12" cy="16.5" r="0.75" fill={color} />
-      <circle cx="14.5" cy="15.5" r="0.75" fill={color} />
+    <svg
+      width={size}
+      height={size}
+      viewBox={viewBox}
+      fill={fill}
+      className={className}
+      stroke={color}
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {children}
     </svg>
   );
 }
 
-// 2. Wave Skin Icon (for Dry Skin: triple gentle undulating waves)
-export function WaveSkinIcon({ className = '', size = 22, strokeWidth = 1.25, color = 'currentColor' }: IconProps) {
+export function DropSkinIcon(p: IconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} stroke={color}>
-      <path
-        d="M3 8C5.5 6.5 8.5 6.5 11 8C13.5 9.5 16.5 9.5 19 8C20 7.4 20.8 7 21 7"
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M3 13C5.5 11.5 8.5 11.5 11 13C13.5 14.5 16.5 14.5 19 13C20 12.4 20.8 12 21 12"
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M3 18C5.5 16.5 8.5 16.5 11 18C13.5 19.5 16.5 19.5 19 18C20 17.4 20.8 17 21 17"
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <Svg {...p} size={p.size || 22}>
+      <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+      <path d="M12 7v5" strokeDasharray="1 1" />
+    </Svg>
   );
 }
 
-// 3. Feather Skin Icon (for Sensitive Skin: delicate monoline leaf/quill)
-export function FeatherSkinIcon({ className = '', size = 22, strokeWidth = 1.25, color = 'currentColor' }: IconProps) {
+export function WaveSkinIcon(p: IconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} stroke={color}>
-      <path
-        d="M20.24 3.76C17.5 3 13 4.5 9.5 8C5.5 12 4 17 4 19.5C6.5 19.5 11.5 18 15.5 14C19 10.5 20.5 6 19.74 3.26"
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M4 19.5L12 11.5"
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M14.5 9C13 9.5 11 11 11 11"
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-      />
-      <path
-        d="M17 6.5C15.5 7 13.5 8.5 13.5 8.5"
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-      />
-    </svg>
+    <Svg {...p} size={p.size || 22}>
+      <path d="M2 12c2.5-3 5.5-3 8 0s5.5 3 8 0 5.5-3 8 0" />
+      <path d="M2 7c2.5-3 5.5-3 8 0s5.5 3 8 0 5.5-3 8 0" opacity="0.6" />
+      <path d="M2 17c2.5-3 5.5-3 8 0s5.5 3 8 0 5.5-3 8 0" opacity="0.6" />
+    </Svg>
   );
 }
 
-// 4. Citrus Ingredient Icon (Vitamin C: geometric radial citrus wheel)
-export function CitrusIngredientIcon({ className = '', size = 22, strokeWidth = 1.25, color = 'currentColor' }: IconProps) {
+export function FeatherSkinIcon(p: IconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} stroke={color}>
-      <circle cx="12" cy="12" r="9" strokeWidth={strokeWidth} />
-      <circle cx="12" cy="12" r="7.5" strokeWidth={0.75} strokeDasharray="1.5 1.5" />
-      <circle cx="12" cy="12" r="1.5" strokeWidth={strokeWidth} />
-      <line x1="12" y1="4.5" x2="12" y2="10.5" strokeWidth={strokeWidth} strokeLinecap="round" />
-      <line x1="12" y1="13.5" x2="12" y2="19.5" strokeWidth={strokeWidth} strokeLinecap="round" />
-      <line x1="4.5" y1="12" x2="10.5" y2="12" strokeWidth={strokeWidth} strokeLinecap="round" />
-      <line x1="13.5" y1="12" x2="19.5" y2="12" strokeWidth={strokeWidth} strokeLinecap="round" />
-      <line x1="6.7" y1="6.7" x2="10.9" y2="10.9" strokeWidth={strokeWidth} strokeLinecap="round" />
-      <line x1="13.1" y1="13.1" x2="17.3" y2="17.3" strokeWidth={strokeWidth} strokeLinecap="round" />
-      <line x1="6.7" y1="17.3" x2="10.9" y2="13.1" strokeWidth={strokeWidth} strokeLinecap="round" />
-      <line x1="13.1" y1="10.9" x2="17.3" y2="6.7" strokeWidth={strokeWidth} strokeLinecap="round" />
-    </svg>
+    <Svg {...p} size={p.size || 22}>
+      <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z" />
+      <line x1="16" y1="8" x2="2" y2="22" />
+      <line x1="17.5" y1="15" x2="9" y2="15" />
+    </Svg>
   );
 }
 
-// 5. Hydra Drop Ingredient Icon (Hyaluronic Acid: delicate double contour hydration drop)
-export function HydraDropIngredientIcon({ className = '', size = 22, strokeWidth = 1.25, color = 'currentColor' }: IconProps) {
+export function CitrusIngredientIcon(p: IconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} stroke={color}>
-      <path
-        d="M12 3C12 3 6 10.5 6 15C6 18.31 8.69 21 12 21C15.31 21 18 18.31 18 15C18 10.5 12 3 12 3Z"
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M12 7C12 7 8.5 12 8.5 15C8.5 16.93 10.07 18.5 12 18.5"
-        strokeWidth={0.9}
-        strokeLinecap="round"
-      />
-    </svg>
+    <Svg {...p} size={p.size || 22}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 12L7.5 7.5M12 12l4.5-4.5M12 12v6.5M12 12H5.5M12 12h6.5" />
+    </Svg>
   );
 }
 
-// 6. Hex Molecule Ingredient Icon (Niacinamide: geometric hexagon benzoid ring)
-export function HexMoleculeIngredientIcon({ className = '', size = 22, strokeWidth = 1.25, color = 'currentColor' }: IconProps) {
+export function HydraDropIngredientIcon(p: IconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} stroke={color}>
-      <path
-        d="M12 3L19 7V15L12 19L5 15V7L12 3Z"
-        strokeWidth={strokeWidth}
-        strokeLinejoin="round"
-      />
-      <circle cx="12" cy="3" r="1.5" fill={color} />
-      <circle cx="19" cy="7" r="1.5" fill={color} />
-      <circle cx="19" cy="15" r="1.5" fill={color} />
-      <circle cx="12" cy="19" r="1.5" fill={color} />
-      <circle cx="5" cy="15" r="1.5" fill={color} />
-      <circle cx="5" cy="7" r="1.5" fill={color} />
-      <circle cx="12" cy="11" r="2.5" strokeWidth={0.75} />
-    </svg>
+    <Svg {...p} size={p.size || 22}>
+      <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+      <circle cx="12" cy="14" r="2.5" />
+    </Svg>
   );
 }
 
-// 7. Shield Check Icon (ضمان الأصالة)
-export function ShieldCheckIcon({ className = '', size = 22, strokeWidth = 1.25, color = 'currentColor' }: IconProps) {
+export function HexMoleculeIngredientIcon(p: IconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} stroke={color}>
-      <path
-        d="M12 3L4 6.5V12C4 16.5 7.5 20.5 12 21.5C16.5 20.5 20 16.5 20 12V6.5L12 3Z"
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M9 12L11 14L15 10"
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <Svg {...p} size={p.size || 22}>
+      <path d="M12 2l7.5 4.33v8.66L12 22l-7.5-4.33V6.33z" />
+      <circle cx="12" cy="12" r="2" />
+    </Svg>
   );
 }
 
-// 8. Delivery Van Icon (شحن سريع)
-export function DeliveryVanIcon({ className = '', size = 22, strokeWidth = 1.25, color = 'currentColor' }: IconProps) {
+export function ShieldCheckIcon(p: IconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} stroke={color}>
-      <rect x="2" y="6" width="13" height="11" rx="1.5" strokeWidth={strokeWidth} />
-      <path d="M15 9H19.5L22 12.5V17H15V9Z" strokeWidth={strokeWidth} strokeLinejoin="round" />
-      <circle cx="6.5" cy="18" r="2" strokeWidth={strokeWidth} />
-      <circle cx="17.5" cy="18" r="2" strokeWidth={strokeWidth} />
-      <line x1="8.5" y1="18" x2="15.5" y2="18" strokeWidth={strokeWidth} />
-    </svg>
+    <Svg {...p} size={p.size || 22}>
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      <path d="M9 12l2 2 4-4" strokeWidth={p.strokeWidth || 1.5} />
+    </Svg>
   );
 }
 
-// 9. Concierge Headset Icon (دعم متخصص)
-export function ConciergeHeadsetIcon({ className = '', size = 22, strokeWidth = 1.25, color = 'currentColor' }: IconProps) {
+export function DeliveryVanIcon(p: IconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} stroke={color}>
-      <path
-        d="M4 13C4 8.58 7.58 5 12 5C16.42 5 20 8.58 20 13V17C20 18.1 19.1 19 18 19H17V13H19"
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-      />
-      <rect x="3" y="12" width="3" height="6" rx="1.5" strokeWidth={strokeWidth} />
-      <path
-        d="M17 19C17 20.1 16.1 21 15 21H12"
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-      />
-    </svg>
+    <Svg {...p} size={p.size || 22}>
+      <rect x="1" y="4" width="13" height="13" rx="2" />
+      <path d="M14 9h4l3 3v5h-7V9z" />
+      <circle cx="5.5" cy="18.5" r="2.5" />
+      <circle cx="17.5" cy="18.5" r="2.5" />
+    </Svg>
   );
 }
 
-// 10. Verified Check Icon (الأصلي المضمون)
-export function VerifiedCheckIcon({ className = '', size = 18, strokeWidth = 1.5, color = '#34D399' }: IconProps) {
+export function ConciergeHeadsetIcon(p: IconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} stroke={color}>
-      <path d="M20 6L9 17L4 12" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
+    <Svg {...p} size={p.size || 22}>
+      <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
+      <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
+    </Svg>
   );
 }
 
-// 11. Cross Warning Icon (التقليد المغشوش)
-export function CrossWarningIcon({ className = '', size = 18, strokeWidth = 1.5, color = '#FB7185' }: IconProps) {
+export function VerifiedCheckIcon(p: IconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} stroke={color}>
-      <path d="M18 6L6 18M6 6L18 18" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
+    <Svg {...p} size={p.size || 18} color={p.color || '#34D399'} strokeWidth={p.strokeWidth || 1.5}>
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+      <polyline points="22 4 12 14.01 9 11.01" />
+    </Svg>
   );
 }
 
-// 12. Sparkle Star Icon (Monoline luxury star)
-export function SparkleStarIcon({ className = '', size = 18, strokeWidth = 1.25, color = '#C9A84C' }: IconProps) {
+export function CrossWarningIcon(p: IconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} stroke={color}>
-      <path
-        d="M12 2L13.8 8.2C14.4 10.3 16 11.9 18.1 12.5L24 14L18.1 15.5C16 16.1 14.4 17.7 13.8 19.8L12 26L10.2 19.8C9.6 17.7 8 16.1 5.9 15.5L0 14L5.9 12.5C8 11.9 9.6 10.3 10.2 8.2L12 2Z"
-        transform="scale(0.8) translate(3, 1)"
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <Svg {...p} size={p.size || 18} color={p.color || '#FB7185'} strokeWidth={p.strokeWidth || 1.5}>
+      <circle cx="12" cy="12" r="10" />
+      <line x1="15" y1="9" x2="9" y2="15" />
+      <line x1="9" y1="9" x2="15" y2="15" />
+    </Svg>
   );
 }
 
-// 13. Shopping Bag Icon
-export function BagCartIcon({ className = '', size = 20, strokeWidth = 1.25, color = 'currentColor' }: IconProps) {
+export function SparkleStarIcon(p: IconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} stroke={color}>
-      <path
-        d="M6 7V5C6 3.34 7.34 2 9 2H15C16.66 2 18 3.34 18 5V7"
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-      />
-      <rect x="4" y="7" width="16" height="14" rx="2" strokeWidth={strokeWidth} />
-      <circle cx="10" cy="11" r="1" fill={color} />
-      <circle cx="14" cy="11" r="1" fill={color} />
-    </svg>
+    <Svg {...p} size={p.size || 18} color={p.color || '#C9A84C'}>
+      <path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4z" />
+    </Svg>
   );
 }
 
-// 14. WhatsApp Monoline Icon
-export function WhatsAppIcon({ className = '', size = 20, strokeWidth = 1.25, color = 'currentColor' }: IconProps) {
+export function BagCartIcon(p: IconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} stroke={color}>
-      <path
-        d="M21 11.5C21 16.19 17.19 20 12.5 20C10.96 20 9.51 19.59 8.25 18.88L3 20.5L4.65 15.34C3.89 14.07 3.5 12.58 3.5 11.5C3.5 6.81 7.31 3 12 3C16.69 3 21 6.81 21 11.5Z"
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M9.5 8.5C9.2 8 8.8 8 8.5 8C8.2 8 8 8.2 7.8 8.4C7.5 8.7 7 9.2 7 10.2C7 11.2 7.7 12.2 8 12.5C8.3 12.8 9.8 15.2 12.2 16.1C14.1 16.8 14.5 16.6 14.9 16.5C15.4 16.4 16.3 15.8 16.5 15.2C16.7 14.6 16.7 14.1 16.6 14C16.5 13.9 16.2 13.8 15.8 13.6C15.4 13.4 13.5 12.4 13.2 12.3C12.9 12.2 12.7 12.1 12.5 12.4C12.2 12.8 11.6 13.6 11.4 13.8C11.2 14 11 14 10.6 13.8C10.2 13.6 9 13.2 8.2 12.5"
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-      />
-    </svg>
+    <Svg {...p} size={p.size || 20}>
+      <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <path d="M16 10a4 4 0 0 1-8 0" />
+    </Svg>
   );
 }
 
-// 15. Play Video Icon
-export function PlayVideoIcon({ className = '', size = 18, strokeWidth = 1.25, color = 'currentColor' }: IconProps) {
+export function WhatsAppIcon(p: IconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} stroke={color}>
-      <polygon points="6,3 20,12 6,21" strokeWidth={strokeWidth} strokeLinejoin="round" />
-    </svg>
+    <Svg {...p} size={p.size || 20} viewBox="0 0 24 24">
+      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+    </Svg>
   );
 }
 
-// 16. Trash Icon
-export function TrashIcon({ className = '', size = 18, strokeWidth = 1.25, color = 'currentColor' }: IconProps) {
+export function PlayVideoIcon(p: IconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} stroke={color}>
-      <path d="M4 7H20M10 11V17M14 11V17M5 7L6 19C6 20.1 6.9 21 8 21H16C17.1 21 18 20.1 18 19L19 7M9 7V4C9 3.4 9.4 3 10 3H14C14.6 3 15 3.4 15 4V7" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
+    <Svg {...p} size={p.size || 18}>
+      <polygon points="5 3 19 12 5 21 5 3" />
+    </Svg>
   );
 }
 
-// 17. Tuning / Controls Icon (for Simulator)
-export function TuningSliderIcon({ className = '', size = 18, strokeWidth = 1.25, color = 'currentColor' }: IconProps) {
+export function TrashIcon(p: IconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} stroke={color}>
-      <line x1="4" y1="21" x2="4" y2="14" strokeWidth={strokeWidth} strokeLinecap="round" />
-      <line x1="4" y1="10" x2="4" y2="3" strokeWidth={strokeWidth} strokeLinecap="round" />
-      <line x1="12" y1="21" x2="12" y2="12" strokeWidth={strokeWidth} strokeLinecap="round" />
-      <line x1="12" y1="8" x2="12" y2="3" strokeWidth={strokeWidth} strokeLinecap="round" />
-      <line x1="20" y1="21" x2="20" y2="16" strokeWidth={strokeWidth} strokeLinecap="round" />
-      <line x1="20" y1="12" x2="20" y2="3" strokeWidth={strokeWidth} strokeLinecap="round" />
-      <circle cx="4" cy="12" r="2" strokeWidth={strokeWidth} />
-      <circle cx="12" cy="10" r="2" strokeWidth={strokeWidth} />
-      <circle cx="20" cy="14" r="2" strokeWidth={strokeWidth} />
-    </svg>
+    <Svg {...p} size={p.size || 18}>
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+    </Svg>
   );
 }
 
-// 18. Close Icon
-export function CloseIcon({ className = '', size = 16, strokeWidth = 1.5, color = 'currentColor' }: IconProps) {
+export function TuningSliderIcon(p: IconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} stroke={color}>
-      <path d="M18 6L6 18M6 6L18 18" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
+    <Svg {...p} size={p.size || 18}>
+      <line x1="4" y1="21" x2="4" y2="14" />
+      <line x1="4" y1="10" x2="4" y2="3" />
+      <line x1="12" y1="21" x2="12" y2="12" />
+      <line x1="12" y1="8" x2="12" y2="3" />
+      <line x1="20" y1="21" x2="20" y2="16" />
+      <line x1="20" y1="12" x2="20" y2="3" />
+      <line x1="1" y1="14" x2="7" y2="14" />
+      <line x1="9" y1="8" x2="15" y2="8" />
+      <line x1="17" y1="16" x2="23" y2="16" />
+    </Svg>
   );
 }
 
-// 19. Star Rating Icon
-export function StarIcon({ className = '', size = 14, strokeWidth = 1.25, color = 'currentColor', fill = 'none' }: IconProps & { fill?: string }) {
+export function CloseIcon(p: IconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} className={className} stroke={color}>
-      <polygon
-        points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <Svg {...p} size={p.size || 16} strokeWidth={p.strokeWidth || 1.5}>
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </Svg>
   );
 }
 
-// 20. TikTok Monoline Icon
-export function TikTokIcon({ className = '', size = 18, strokeWidth = 1.25, color = 'currentColor' }: IconProps) {
+export function StarIcon({ fill = 'none', ...p }: IconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} stroke={color}>
-      <path
-        d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <Svg {...p} size={p.size || 14} fill={fill}>
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+    </Svg>
   );
 }
 
-// 21. Instagram Monoline Icon
-export function InstagramIcon({ className = '', size = 18, strokeWidth = 1.25, color = 'currentColor' }: IconProps) {
+export function TikTokIcon(p: IconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} stroke={color}>
-      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" strokeWidth={strokeWidth} />
-      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" strokeWidth={strokeWidth} />
-      <circle cx="17.5" cy="6.5" r="1" fill={color} />
-    </svg>
+    <Svg {...p} size={p.size || 18}>
+      <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
+    </Svg>
   );
 }
 
-// 22. Facebook Monoline Icon
-export function FacebookIcon({ className = '', size = 18, strokeWidth = 1.25, color = 'currentColor' }: IconProps) {
+export function InstagramIcon(p: IconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} stroke={color}>
-      <path
-        d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <Svg {...p} size={p.size || 18}>
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+    </Svg>
   );
 }
 
-// 23. Map Pin Monoline Icon
-export function MapPinIcon({ className = '', size = 18, strokeWidth = 1.25, color = 'currentColor' }: IconProps) {
+export function FacebookIcon(p: IconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} stroke={color}>
-      <path
-        d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx="12" cy="10" r="3" strokeWidth={strokeWidth} />
-    </svg>
+    <Svg {...p} size={p.size || 18}>
+      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+    </Svg>
   );
 }
 
+export function MapPinIcon(p: IconProps) {
+  return (
+    <Svg {...p} size={p.size || 18}>
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+      <circle cx="12" cy="10" r="3" />
+    </Svg>
+  );
+}
 
-
-
+export function PhoneCallIcon(p: IconProps) {
+  return (
+    <Svg {...p} size={p.size || 18}>
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+    </Svg>
+  );
+}

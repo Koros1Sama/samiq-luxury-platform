@@ -89,7 +89,7 @@ export default function BookingsPage() {
           <Link href="/" className="flex items-center">
             <MiftahLogoSvg size={46} />
           </Link>
-          <Link href="/" className="text-xs font-sans text-ivory/80 hover:text-champagne transition">
+          <Link href="/" className="min-h-[44px] inline-flex items-center text-xs font-sans text-ivory/80 hover:text-champagne transition">
             العودة للمتجر الرئيسي ←
           </Link>
         </div>
@@ -104,7 +104,7 @@ export default function BookingsPage() {
           <h1 className="text-3xl sm:text-4xl font-serif font-bold text-ivory">
             استشارة مخصصة لجمالكِ مع خبيراتنا
           </h1>
-          <p className="text-xs sm:text-sm text-muted-lux font-sans leading-relaxed">
+          <p className="text-sm text-muted-lux font-sans leading-[1.75]">
             احجزي جلستكِ الشخصية حضورياً في فرع صنعاء (حدة) أو عبر اتصال مرئي موجه لتحديد الروتين المناسب لبشرتكِ.
           </p>
         </div>
@@ -117,13 +117,13 @@ export default function BookingsPage() {
             <h2 className="text-2xl font-serif font-bold text-ivory">
               تم تأكيد حجز موعدكِ بنجاح
             </h2>
-            <p className="text-xs sm:text-sm text-muted-lux font-sans max-w-md mx-auto leading-relaxed">
+            <p className="text-sm text-muted-lux font-sans max-w-md mx-auto leading-[1.75]">
               سنتواصل معكِ على الرقم ({customerPhone}) للتأكيد وإرسال رابط الجلسة أو تفاصيل زيارة الفرع في صنعاء.
             </p>
             <div className="pt-2">
               <Link
                 href="/"
-                className="inline-flex px-6 py-3 rounded-full bg-gold text-obsidian-dark font-sans font-bold text-xs"
+                className="inline-flex items-center min-h-[44px] px-6 py-3 rounded-full bg-gold text-obsidian-dark font-sans font-bold text-xs"
               >
                 العودة إلى المتجر
               </Link>
@@ -133,7 +133,7 @@ export default function BookingsPage() {
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Step 1: Select Service */}
             <div className="space-y-3">
-              <span className="text-xs font-sans text-gold font-bold uppercase tracking-wider block">
+              <span className="text-xs font-sans text-gold font-bold block">
                 1. اختاري نوع الاستشارة:
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -151,10 +151,10 @@ export default function BookingsPage() {
                     >
                       <div className="flex items-center justify-between mb-1">
                         <h3 className="text-sm font-serif font-bold text-ivory">{srv.title}</h3>
-                        <span className="text-[10px] text-gold font-sans font-bold">{srv.priceYer}</span>
+                        <span className="text-xs text-gold font-sans font-bold">{srv.priceYer}</span>
                       </div>
-                      <p className="text-xs text-muted-lux font-sans leading-relaxed">{srv.description}</p>
-                      <span className="text-[10px] text-muted-lux mt-2 block font-sans">المدة: {srv.duration}</span>
+                      <p className="text-sm text-muted-lux font-sans leading-[1.75]">{srv.description}</p>
+                      <span className="text-xs text-muted-lux mt-2 block font-sans">المدة: {srv.duration}</span>
                     </div>
                   );
                 })}
@@ -163,7 +163,7 @@ export default function BookingsPage() {
 
             {/* Step 2: Location and Timing */}
             <div className="space-y-3">
-              <span className="text-xs font-sans text-gold font-bold uppercase tracking-wider block">
+              <span className="text-xs font-sans text-gold font-bold block">
                 2. المكان والموعد المناسب:
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -172,7 +172,7 @@ export default function BookingsPage() {
                   <select
                     value={selectedBranch}
                     onChange={(e) => setSelectedBranch(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl bg-surface border border-white/10 text-xs text-ivory focus:border-gold outline-none"
+                    className="w-full min-h-[44px] px-3 py-2.5 rounded-xl bg-surface border border-white/10 text-xs text-ivory focus:border-gold outline-none"
                   >
                     <option value="branch-sanaa">فرع صنعاء الرئيسي (شارع حدة)</option>
                     <option value="branch-aden">نقطة تسليم عدن (المنصورة)</option>
@@ -185,7 +185,7 @@ export default function BookingsPage() {
                     type="date"
                     value={bookingDate}
                     onChange={(e) => setBookingDate(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl bg-surface border border-white/10 text-xs text-ivory focus:border-gold outline-none"
+                    className="w-full min-h-[44px] px-3 py-2.5 rounded-xl bg-surface border border-white/10 text-xs text-ivory focus:border-gold outline-none"
                   />
                 </div>
                 <div>
@@ -193,7 +193,7 @@ export default function BookingsPage() {
                   <select
                     value={bookingTime}
                     onChange={(e) => setBookingTime(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl bg-surface border border-white/10 text-xs text-ivory focus:border-gold outline-none"
+                    className="w-full min-h-[44px] px-3 py-2.5 rounded-xl bg-surface border border-white/10 text-xs text-ivory focus:border-gold outline-none"
                   >
                     <option value="11:00 AM">11:00 صباحاً</option>
                     <option value="04:30 PM">04:30 عصراً</option>
@@ -206,7 +206,7 @@ export default function BookingsPage() {
 
             {/* Step 3: Contact Info */}
             <div className="space-y-3">
-              <span className="text-xs font-sans text-gold font-bold uppercase tracking-wider block">
+              <span className="text-xs font-sans text-gold font-bold block">
                 3. بيانات التواصل:
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -216,7 +216,7 @@ export default function BookingsPage() {
                   placeholder="الاسم الكريم"
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
-                  className="px-4 py-3 rounded-xl bg-surface border border-white/10 text-xs text-ivory focus:border-gold outline-none"
+                  className="min-h-[44px] px-4 py-3 rounded-xl bg-surface border border-white/10 text-xs text-ivory focus:border-gold outline-none"
                 />
                 <input
                   type="tel"
@@ -224,7 +224,7 @@ export default function BookingsPage() {
                   placeholder="رقم الهاتف أو الواتساب للتأكيد"
                   value={customerPhone}
                   onChange={(e) => setCustomerPhone(e.target.value)}
-                  className="px-4 py-3 rounded-xl bg-surface border border-white/10 text-xs text-ivory focus:border-gold outline-none"
+                  className="min-h-[44px] px-4 py-3 rounded-xl bg-surface border border-white/10 text-xs text-ivory focus:border-gold outline-none"
                 />
               </div>
               <textarea
@@ -232,7 +232,7 @@ export default function BookingsPage() {
                 placeholder="أية ملاحظات أو استفسار عن نوع بشرتكِ أو المشكلة التي تعانين منها..."
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl bg-surface border border-white/10 text-xs text-ivory focus:border-gold outline-none resize-none"
+                className="w-full min-h-[44px] px-4 py-2.5 rounded-xl bg-surface border border-white/10 text-xs text-ivory focus:border-gold outline-none resize-none"
               />
             </div>
 
@@ -240,7 +240,7 @@ export default function BookingsPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-obsidian-dark font-sans font-bold text-sm shadow-[0_4px_25px_rgba(201,168,76,0.35)] hover:brightness-110 transition disabled:opacity-50"
+              className="w-full min-h-[44px] py-4 rounded-2xl bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-obsidian-dark font-sans font-bold text-sm shadow-[0_4px_25px_rgba(201,168,76,0.35)] hover:brightness-110 transition disabled:opacity-50 inline-flex items-center justify-center"
             >
               {isLoading ? 'جاري تثبيت الحجز...' : 'تأكيد حجز الموعد المجاني ↵'}
             </button>

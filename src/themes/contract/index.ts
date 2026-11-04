@@ -11,7 +11,7 @@ import React from 'react';
 
 export type ThemeCurrencyCode = 'YER' | 'SAR' | 'USD';
 
-export type ThemeId = 'luxury-noir' | 'ivory-journal';
+export type ThemeId = 'luxury-noir' | 'ivory-journal' | 'clinic-lab';
 
 export interface ThemeMeta {
   id: ThemeId;
@@ -42,7 +42,29 @@ export const SAMIQ_THEMES: Record<ThemeId, ThemeMeta> = {
     accentColor: '#B8860B',
     badge: 'طابع المجلات العالمية',
   },
+  'clinic-lab': {
+    id: 'clinic-lab',
+    nameAr: 'مختبر سريري نقي (Clinic Lab)',
+    nameEn: 'Clinic Lab',
+    paletteDescription: 'الأبيض والضباب الهادئ مع تركواز كلينيكال عميق وأخضر نعناعي طبي',
+    primaryColor: '#FFFFFF',
+    accentColor: '#0F4C4A',
+    badge: 'طبي معتمد',
+  },
 };
+
+export const DEFAULT_THEME_ID: ThemeId = 'luxury-noir';
+
+export function isValidThemeId(themeId: string): themeId is ThemeId {
+  return themeId in SAMIQ_THEMES;
+}
+
+export function resolveThemeId(requestedThemeId?: string | null): ThemeId {
+  if (requestedThemeId && isValidThemeId(requestedThemeId)) {
+    return requestedThemeId;
+  }
+  return DEFAULT_THEME_ID;
+}
 
 // Generic Section Types
 export type SectionType =
@@ -111,6 +133,12 @@ export interface TenantBrandInfo {
   deliveryCoverage: string;
   heroBadge?: string;
   themeId?: ThemeId;
+  heroImages?: {
+    noir?: string;
+    ivory?: string;
+    clinic?: string;
+    [key: string]: string | undefined;
+  };
   noindex?: boolean;
   contact: TenantContactInfo;
   homeSections: Section[];

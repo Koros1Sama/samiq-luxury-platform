@@ -34,7 +34,7 @@ export default function MerchantAdminPage() {
   // New product form
   const [showAddProductModal, setShowAddProductModal] = useState(false);
   const [newTitle, setNewTitle] = useState('');
-  const [newBrand, setNewBrand] = useState('La Roche-Posay');
+  const [newBrand, setNewBrand] = useState('سيرومات نقية');
   const [newCategory, setNewCategory] = useState('serums');
   const [newPriceYer, setNewPriceYer] = useState(25000);
   const [newPriceSar, setNewPriceSar] = useState(175);
@@ -199,7 +199,7 @@ export default function MerchantAdminPage() {
       title: newTitle,
       brand: newBrand,
       categorySlug: newCategory,
-      image: 'https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?auto=format&fit=crop&w=800&q=80',
+      image: '/media/products/serum-vitamin-c.jpg',
       prices: {
         YER: newPriceYer,
         SAR: newPriceSar,
@@ -264,7 +264,7 @@ export default function MerchantAdminPage() {
                 placeholder="أدخل رمز المرور..."
                 value={passcode}
                 onChange={(e) => setPasscode(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-ivory placeholder-muted-dim text-sm focus:border-gold outline-none text-center tracking-widest"
+                className="w-full min-h-[44px] px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-ivory placeholder-muted-dim text-sm focus:border-gold outline-none text-center"
               />
             </div>
 
@@ -276,7 +276,7 @@ export default function MerchantAdminPage() {
 
             <button
               type="submit"
-              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-bold text-sm hover:brightness-110 shadow-md transition"
+              className="w-full min-h-[44px] py-3.5 rounded-xl bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-bold text-sm hover:brightness-110 shadow-md transition inline-flex items-center justify-center"
             >
               تسجيل الدخول إلى اللوحة
             </button>
@@ -284,18 +284,18 @@ export default function MerchantAdminPage() {
 
           {/* Quick Demo Login Helper */}
           <div className="pt-4 border-t border-white/10 text-center space-y-2.5">
-            <p className="text-[11px] text-muted-lux">
+            <p className="text-xs text-muted-lux">
               رمز المرور الافتراضي للتجربة السريعة: <code className="text-gold font-mono">miftah2026</code>
             </p>
             <button
               type="button"
               onClick={handleQuickDemoLogin}
-              className="w-full py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-gold border border-gold/30 text-xs font-semibold transition"
+              className="w-full min-h-[44px] py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-gold border border-gold/30 text-xs font-semibold transition inline-flex items-center justify-center"
             >
               دخول سريع للتجربة بنقرة واحدة (Demo Quick Login)
             </button>
             <div>
-              <Link href="/" className="text-xs text-muted-lux hover:text-ivory transition">
+              <Link href="/" className="min-h-[44px] inline-flex items-center text-xs text-muted-lux hover:text-ivory transition">
                 ← العودة إلى المتجر الرئيسي
               </Link>
             </div>
@@ -330,20 +330,20 @@ export default function MerchantAdminPage() {
           <div className="flex items-center gap-2.5 flex-wrap">
             <Link
               href="/"
-              className="px-3.5 py-2 rounded-xl bg-gold/15 hover:bg-gold/25 text-champagne border border-gold/40 text-xs font-bold transition flex items-center gap-1.5"
+              className="min-h-[44px] px-3.5 py-2 rounded-xl bg-gold/15 hover:bg-gold/25 text-champagne border border-gold/40 text-xs font-bold transition inline-flex items-center gap-1.5"
             >
               <span>المتجر</span>
               <span>←</span>
             </Link>
             <Link
               href="/platform"
-              className="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-ivory border border-white/10 text-xs font-semibold transition"
+              className="min-h-[44px] px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-ivory border border-white/10 text-xs font-semibold transition inline-flex items-center"
             >
               المنصة
             </Link>
             <button
               onClick={handleLogout}
-              className="px-3.5 py-2 rounded-xl bg-rose-950/40 hover:bg-rose-950/70 text-rose-300 border border-rose-500/30 text-xs font-semibold transition"
+              className="min-h-[44px] px-3.5 py-2 rounded-xl bg-rose-950/40 hover:bg-rose-950/70 text-rose-300 border border-rose-500/30 text-xs font-semibold transition inline-flex items-center"
             >
               تسجيل الخروج
             </button>
@@ -390,21 +390,21 @@ export default function MerchantAdminPage() {
           <button
             type="button"
             onClick={() => setActiveTab('inbox')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-sans font-bold transition flex items-center gap-1.5 ${
+            className={`min-h-[44px] px-4 py-2.5 rounded-xl text-xs font-sans font-bold transition inline-flex items-center gap-1.5 ${
               activeTab === 'inbox'
                 ? 'bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark shadow-md'
                 : 'text-ivory/70 hover:text-ivory hover:bg-white/5'
             }`}
           >
             <span>صندوق المحادثات الموحد (Omnichannel Inbox)</span>
-            <span className="px-1.5 py-0.2 rounded-full bg-black/40 text-[10px]">
+            <span className="px-1.5 py-0.5 rounded-full bg-black/40 text-xs">
               {conversations.length}
             </span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('inventory')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-sans font-bold transition ${
+            className={`min-h-[44px] px-4 py-2.5 rounded-xl text-xs font-sans font-bold transition inline-flex items-center ${
               activeTab === 'inventory'
                 ? 'bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark shadow-md'
                 : 'text-ivory/70 hover:text-ivory hover:bg-white/5'
@@ -415,7 +415,7 @@ export default function MerchantAdminPage() {
           <button
             type="button"
             onClick={() => setActiveTab('orders')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-sans font-bold transition ${
+            className={`min-h-[44px] px-4 py-2.5 rounded-xl text-xs font-sans font-bold transition inline-flex items-center ${
               activeTab === 'orders'
                 ? 'bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark shadow-md'
                 : 'text-ivory/70 hover:text-ivory hover:bg-white/5'
@@ -426,7 +426,7 @@ export default function MerchantAdminPage() {
           <button
             type="button"
             onClick={() => setActiveTab('bookings')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-sans font-bold transition ${
+            className={`min-h-[44px] px-4 py-2.5 rounded-xl text-xs font-sans font-bold transition inline-flex items-center ${
               activeTab === 'bookings'
                 ? 'bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark shadow-md'
                 : 'text-ivory/70 hover:text-ivory hover:bg-white/5'
@@ -437,18 +437,18 @@ export default function MerchantAdminPage() {
           <button
             type="button"
             onClick={() => setActiveTab('authenticity')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-sans font-bold transition ${
+            className={`min-h-[44px] px-4 py-2.5 rounded-xl text-xs font-sans font-bold transition inline-flex items-center ${
               activeTab === 'authenticity'
                 ? 'bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark shadow-md'
                 : 'text-ivory/70 hover:text-ivory hover:bg-white/5'
             }`}
           >
-            دليل الأصلي والتقليد
+            دليل فحص الأصالة والتوثيق
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('coupons')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-sans font-bold transition ${
+            className={`min-h-[44px] px-4 py-2.5 rounded-xl text-xs font-sans font-bold transition inline-flex items-center ${
               activeTab === 'coupons'
                 ? 'bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark shadow-md'
                 : 'text-ivory/70 hover:text-ivory hover:bg-white/5'
@@ -467,7 +467,7 @@ export default function MerchantAdminPage() {
             <div className="lg:col-span-4 p-4 rounded-3xl bg-surface border border-white/5 space-y-3">
               <div className="flex items-center justify-between pb-3 border-b border-white/10">
                 <h3 className="text-sm font-serif font-bold text-ivory">محادثات القنوات الحية</h3>
-                <span className="text-[10px] text-muted-lux">واتساب • تيليجرام • شات الموقع</span>
+                <span className="text-xs text-muted-lux">واتساب • تيليجرام • شات الموقع</span>
               </div>
 
               <div className="space-y-2">
@@ -490,7 +490,7 @@ export default function MerchantAdminPage() {
                     <button
                       key={c.id}
                       onClick={() => setSelectedConvId(c.id)}
-                      className={`w-full text-start p-3.5 rounded-2xl border transition-all ${
+                      className={`w-full min-h-[44px] text-start p-3.5 rounded-2xl border transition-all ${
                         isSelected
                           ? 'bg-gold/10 border-gold/40 shadow-sm'
                           : 'bg-white/5 border-transparent hover:bg-white/10'
@@ -500,14 +500,14 @@ export default function MerchantAdminPage() {
                         <span className="text-xs font-bold text-ivory truncate max-w-[150px]">
                           {c.customerName}
                         </span>
-                        <span className={`text-[10px] font-sans px-2 py-0.5 rounded-full border ${channelColor}`}>
+                        <span className={`text-xs font-sans px-2 py-0.5 rounded-full border ${channelColor}`}>
                           {channelLabel}
                         </span>
                       </div>
                       <p className="text-xs text-muted-lux truncate leading-snug">
                         {c.lastMessage}
                       </p>
-                      <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-white/5 text-[10px] text-muted-lux">
+                      <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-white/5 text-xs text-muted-lux">
                         <span>{c.lastMessageTime}</span>
                         <span className={`font-semibold ${c.isBotActive ? 'text-emerald-400' : 'text-amber-400'}`}>
                           {c.isBotActive ? 'البوت نشط' : 'رد بشري مفعّل'}
@@ -544,7 +544,7 @@ export default function MerchantAdminPage() {
                       <button
                         type="button"
                         onClick={() => handleToggleBot(activeConv.id, activeConv.isBotActive)}
-                        className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-2 border ${
+                        className={`min-h-[44px] px-3.5 py-1.5 rounded-full text-xs font-bold transition inline-flex items-center gap-2 border ${
                           activeConv.isBotActive
                             ? 'bg-amber-950/40 text-amber-300 border-amber-500/40 hover:bg-amber-950/70'
                             : 'bg-emerald-950/40 text-emerald-300 border-emerald-500/40 hover:bg-emerald-950/70'
@@ -575,10 +575,10 @@ export default function MerchantAdminPage() {
                           className={`flex flex-col ${isCustomer ? 'items-start' : 'items-end'}`}
                         >
                           <div className="flex items-center gap-2 mb-1 px-1">
-                            <span className="text-[10px] font-bold text-muted-lux">
+                            <span className="text-xs font-bold text-muted-lux">
                               {m.senderName}
                             </span>
-                            <span className="text-[9px] text-muted-dim font-mono">{m.timestamp}</span>
+                            <span className="text-xs text-muted-dim font-mono">{m.timestamp}</span>
                           </div>
                           <div
                             className={`max-w-md p-3.5 rounded-2xl text-xs font-sans leading-relaxed ${
@@ -608,12 +608,12 @@ export default function MerchantAdminPage() {
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
                       disabled={activeConv.isBotActive || isSendingReply}
-                      className="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-ivory placeholder-muted-dim text-xs focus:border-gold outline-none disabled:opacity-50"
+                      className="flex-1 min-h-[44px] px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-ivory placeholder-muted-dim text-xs focus:border-gold outline-none disabled:opacity-50"
                     />
                     <button
                       type="submit"
                       disabled={activeConv.isBotActive || !replyText.trim() || isSendingReply}
-                      className="px-5 py-3 rounded-xl bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-bold text-xs hover:brightness-110 shadow-md transition disabled:opacity-40"
+                      className="min-h-[44px] px-5 py-3 rounded-xl bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-bold text-xs hover:brightness-110 shadow-md transition disabled:opacity-40 inline-flex items-center justify-center"
                     >
                       {isSendingReply ? 'جارٍ الإرسال...' : 'إرسال الرد البشري'}
                     </button>
@@ -640,7 +640,7 @@ export default function MerchantAdminPage() {
               <button
                 type="button"
                 onClick={() => setShowAddProductModal(true)}
-                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-bold text-xs hover:brightness-110 shadow-md transition flex items-center gap-1.5"
+                className="min-h-[44px] px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-bold text-xs hover:brightness-110 shadow-md transition inline-flex items-center gap-1.5"
               >
                 <span>+</span>
                 <span>إضافة مستحضر جديد بالذكاء الاصطناعي</span>
@@ -654,10 +654,10 @@ export default function MerchantAdminPage() {
                   className="p-5 rounded-3xl bg-surface border border-white/5 space-y-3 relative group"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gold font-serif font-bold uppercase tracking-wider">
+                    <span className="text-xs text-gold font-serif font-bold">
                       {p.brand}
                     </span>
-                    <span className="text-[10px] text-emerald-400 bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                    <span className="text-xs text-emerald-400 bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-500/30">
                       أصلي موثق
                     </span>
                   </div>
@@ -668,7 +668,7 @@ export default function MerchantAdminPage() {
                     <div className="text-champagne font-bold text-sm">
                       {formatCurrency(p.prices.YER, 'YER')}
                     </div>
-                    <div className="text-[11px] text-muted-lux">
+                    <div className="text-xs text-muted-lux">
                       (${p.prices.USD} / {p.prices.SAR} ر.س)
                     </div>
                   </div>
@@ -701,7 +701,7 @@ export default function MerchantAdminPage() {
                     <div className="text-champagne font-bold text-base">
                       {formatCurrency(o.totalYer, 'YER')}
                     </div>
-                    <span className="text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30">
+                    <span className="text-xs text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30">
                       {o.status === 'confirmed' ? 'مؤكد وجارٍ التجهيز' : 'طلب جديد'}
                     </span>
                   </div>
@@ -747,14 +747,14 @@ export default function MerchantAdminPage() {
         {activeTab === 'authenticity' && (
           <div className="p-6 rounded-3xl bg-surface border border-white/5 space-y-4">
             <h3 className="text-lg font-serif font-bold text-ivory">
-              أدلة مقارنة الأصلي والتقليد النشطة
+              أدلة مقارنة وفحص الأصالة النشطة
             </h3>
             <p className="text-xs text-muted-lux">
-              مفتاح الجمال يوفر أدلة فحص صارمة لـ La Roche-Posay و The Ordinary و CeraVe مع مطابقة أرقام الباتش كود.
+              مفتاح الجمال يوفر أدلة فحص صارمة لتركيبات العناية المعتمدة مع مطابقة أرقام الباتش كود.
             </p>
             <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
               <span className="text-xs text-gold font-bold">رقم التشغيلة المعتمد للتحقق:</span>
-              <div className="font-mono text-sm text-ivory">54U700 (سيروم فيتامين سي 10% — لاروش بوزيه)</div>
+              <div className="font-mono text-sm text-ivory">54U700 (سيروم فيتامين سي 10% — تركيبة نقية)</div>
             </div>
           </div>
         )}
@@ -771,11 +771,11 @@ export default function MerchantAdminPage() {
                 placeholder="كود الخصم (مثال: YEMEN2026)"
                 value={newCouponCode}
                 onChange={(e) => setNewCouponCode(e.target.value)}
-                className="flex-1 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-ivory text-xs uppercase focus:border-gold outline-none"
+                className="flex-1 min-h-[44px] px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-ivory text-xs uppercase focus:border-gold outline-none"
               />
               <button
                 type="submit"
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-bold text-xs"
+                className="min-h-[44px] px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-bold text-xs inline-flex items-center justify-center"
               >
                 تفعيل الكوبون
               </button>
@@ -795,9 +795,9 @@ export default function MerchantAdminPage() {
               <button
                 type="button"
                 onClick={() => setShowAddProductModal(false)}
-                className="w-7 h-7 rounded-full bg-white/5 flex items-center justify-center text-muted-lux hover:text-ivory text-xs"
+                className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-white/5 flex items-center justify-center text-muted-lux hover:text-ivory text-xs"
               >
-                <CloseIcon size={14} color="#9A968E" />
+                <CloseIcon size={16} color="#9A968E" />
               </button>
             </div>
 
@@ -810,14 +810,14 @@ export default function MerchantAdminPage() {
                     required
                     value={newTitle}
                     onChange={(e) => setNewTitle(e.target.value)}
-                    placeholder="مثال: CeraVe SA Smoothing Cleanser 236ml"
-                    className="flex-1 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-none"
+                    placeholder="مثال: غسول منعم للبشرة بحمض الساليسيليك 236ml"
+                    className="flex-1 min-h-[44px] px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-none"
                   />
                   <button
                     type="button"
                     onClick={handleAiGenerate}
                     disabled={isAiGenerating || !newTitle}
-                    className="px-3 py-2 rounded-xl bg-gold/15 hover:bg-gold/25 border border-gold/40 text-champagne font-bold shrink-0 transition"
+                    className="min-h-[44px] px-3 py-2 rounded-xl bg-gold/15 hover:bg-gold/25 border border-gold/40 text-champagne font-bold shrink-0 transition inline-flex items-center justify-center"
                   >
                     {isAiGenerating ? 'جارٍ التوليد...' : 'صياغة بالذكاء الاصطناعي'}
                   </button>
@@ -830,13 +830,12 @@ export default function MerchantAdminPage() {
                   <select
                     value={newBrand}
                     onChange={(e) => setNewBrand(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-surface border border-white/10 text-ivory focus:border-gold outline-none"
+                    className="w-full min-h-[44px] px-3 py-2 rounded-xl bg-surface border border-white/10 text-ivory focus:border-gold outline-none"
                   >
-                    <option value="La Roche-Posay">La Roche-Posay</option>
-                    <option value="CeraVe">CeraVe</option>
-                    <option value="The Ordinary">The Ordinary</option>
-                    <option value="Yves Saint Laurent">Yves Saint Laurent</option>
-                    <option value="Huda Beauty">Huda Beauty</option>
+                    <option value="سيرومات نقية">سيرومات نقية</option>
+                    <option value="عناية يومية">عناية يومية</option>
+                    <option value="مكياج مخملي">مكياج مخملي</option>
+                    <option value="عناية متقدمة">عناية متقدمة</option>
                   </select>
                 </div>
                 <div>
@@ -844,7 +843,7 @@ export default function MerchantAdminPage() {
                   <select
                     value={newCategory}
                     onChange={(e) => setNewCategory(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-surface border border-white/10 text-ivory focus:border-gold outline-none"
+                    className="w-full min-h-[44px] px-3 py-2 rounded-xl bg-surface border border-white/10 text-ivory focus:border-gold outline-none"
                   >
                     <option value="serums">سيرومات علاجية</option>
                     <option value="cleansers">غسولات طبية</option>
@@ -861,7 +860,7 @@ export default function MerchantAdminPage() {
                     type="number"
                     value={newPriceYer}
                     onChange={(e) => setNewPriceYer(Number(e.target.value))}
-                    className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-none"
+                    className="w-full min-h-[44px] px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-none"
                   />
                 </div>
                 <div>
@@ -870,7 +869,7 @@ export default function MerchantAdminPage() {
                     type="number"
                     value={newPriceSar}
                     onChange={(e) => setNewPriceSar(Number(e.target.value))}
-                    className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-none"
+                    className="w-full min-h-[44px] px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-none"
                   />
                 </div>
                 <div>
@@ -879,7 +878,7 @@ export default function MerchantAdminPage() {
                     type="number"
                     value={newPriceUsd}
                     onChange={(e) => setNewPriceUsd(Number(e.target.value))}
-                    className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-none"
+                    className="w-full min-h-[44px] px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-none"
                   />
                 </div>
               </div>
@@ -890,13 +889,13 @@ export default function MerchantAdminPage() {
                   rows={3}
                   value={newDescription}
                   onChange={(e) => setNewDescription(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-none resize-none"
+                  className="w-full min-h-[44px] px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-none resize-none"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-bold text-xs hover:brightness-110 shadow-md transition"
+                className="w-full min-h-[44px] py-3.5 rounded-xl bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-bold text-xs hover:brightness-110 shadow-md transition inline-flex items-center justify-center"
               >
                 حفظ وإدراج المستحضر في الكتالوج المباشر
               </button>

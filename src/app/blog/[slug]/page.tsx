@@ -29,11 +29,11 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             <MiftahLogoSvg size={46} />
           </Link>
           <div className="flex items-center gap-4 text-xs font-sans">
-            <Link href="/blog" className="text-muted-lux hover:text-champagne transition">
+            <Link href="/blog" className="min-h-[44px] inline-flex items-center text-muted-lux hover:text-champagne transition">
               أرشيف المجلة
             </Link>
             <span className="text-white/20">|</span>
-            <Link href="/" className="text-champagne hover:text-gold transition">
+            <Link href="/" className="min-h-[44px] inline-flex items-center text-champagne hover:text-gold transition">
               المتجر الرئيسي ←
             </Link>
           </div>
@@ -71,7 +71,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         </div>
 
         {/* Content Body */}
-        <article className="prose prose-invert max-w-none text-sm sm:text-base leading-relaxed text-ivory/90 space-y-6 whitespace-pre-line font-sans border-b border-white/10 pb-10">
+        <article className="prose prose-invert max-w-none text-sm sm:text-base leading-[1.75] text-ivory/90 space-y-6 whitespace-pre-line font-sans border-b border-white/10 pb-10">
           {post.content}
         </article>
 
@@ -82,13 +82,13 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               <ShieldCheckIcon size={18} color="#C9A84C" />
               <span>تسوقي المستحضرات الأصلية المذكورة في المقال</span>
             </div>
-            <p className="text-xs text-muted-lux font-sans">
+            <p className="text-sm text-muted-lux font-sans leading-[1.75]">
               جميع المنتجات متوفرة بتسليم فوري في صنعاء وشحن لكافة المحافظات مع ضمان مطابقة الباركود.
             </p>
           </div>
           <Link
             href="/"
-            className="px-6 py-3 rounded-full bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-sans font-bold text-xs whitespace-nowrap hover:brightness-110 transition flex-shrink-0"
+            className="min-h-[44px] inline-flex items-center justify-center px-6 py-3 rounded-full bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-sans font-bold text-xs whitespace-nowrap hover:brightness-110 transition flex-shrink-0"
           >
             تصفح الكتالوج المعتمد ←
           </Link>

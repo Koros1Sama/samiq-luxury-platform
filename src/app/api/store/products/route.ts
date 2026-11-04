@@ -23,7 +23,7 @@ export async function POST(req: Request) {
       subtitle: body.subtitle || '',
       brand: body.brand,
       categorySlug: body.categorySlug || 'skincare',
-      image: body.image || 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=800&q=80',
+      image: body.image || '/media/products/serum-vitamin-c.jpg',
       prices: body.prices,
       comparePrices: body.comparePrices,
       isAuthenticGuaranteed: body.isAuthenticGuaranteed !== false,

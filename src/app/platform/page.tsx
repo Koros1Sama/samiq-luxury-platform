@@ -53,14 +53,14 @@ export default function PlatformSuperAdminPage() {
           <div className="flex items-center gap-3">
             <Link
               href="/"
-              className="px-4 py-2 rounded-xl bg-gold/15 hover:bg-gold/25 text-champagne border border-gold/40 text-xs font-bold transition flex items-center gap-1.5"
+              className="min-h-[44px] px-4 py-2 rounded-xl bg-gold/15 hover:bg-gold/25 text-champagne border border-gold/40 text-xs font-bold transition inline-flex items-center gap-1.5"
             >
               <span>معاينة متجر مفتاح الجمال</span>
               <span>←</span>
             </Link>
             <Link
               href="/admin"
-              className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-ivory border border-white/10 text-xs font-semibold transition"
+              className="min-h-[44px] px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-ivory border border-white/10 text-xs font-semibold transition inline-flex items-center"
             >
               لوحة المحل (Admin)
             </Link>
@@ -140,11 +140,11 @@ export default function PlatformSuperAdminPage() {
                           {feat.nameAr}
                         </span>
                       </div>
-                      <p className="text-[11px] text-muted-lux leading-relaxed">
+                      <p className="text-sm text-muted-lux leading-[1.75]">
                         {feat.descriptionAr}
                       </p>
                       {feat.requires.length > 0 && (
-                        <span className="text-[10px] text-gold/80 block mt-1">
+                        <span className="text-xs text-gold/80 block mt-1">
                           تتطلب: {feat.requires.join(', ')}
                         </span>
                       )}
@@ -166,7 +166,7 @@ export default function PlatformSuperAdminPage() {
           {/* Pricing Summary (4 cols) */}
           <div className="lg:col-span-4 p-6 rounded-3xl bg-gradient-to-b from-elevated to-surface border border-gold/40 flex flex-col justify-between space-y-6">
             <div className="space-y-5">
-              <span className="text-xs text-gold font-bold uppercase tracking-wider block">
+              <span className="text-xs text-gold font-bold block">
                 ملخص التسعير المباشر
               </span>
 
@@ -213,7 +213,7 @@ export default function PlatformSuperAdminPage() {
             <button
               type="button"
               onClick={() => alert(`تم حفظ تكوين باقة متجر مفتاح الجمال بقيمة $${pricing.totalUsd}`)}
-              className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-obsidian-dark font-sans font-bold text-sm shadow-[0_4px_20px_rgba(201,168,76,0.4)] hover:brightness-110 transition"
+              className="w-full min-h-[44px] py-4 rounded-2xl bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-obsidian-dark font-sans font-bold text-sm shadow-[0_4px_20px_rgba(201,168,76,0.4)] hover:brightness-110 transition inline-flex items-center justify-center"
             >
               حفظ وتطبيق الباقة على المحل ↵
             </button>

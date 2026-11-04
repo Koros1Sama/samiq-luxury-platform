@@ -24,6 +24,12 @@ export interface TenantProfile {
   deliveryCoverage: string;
   instagram?: string;
   heroBadge?: string;
+  heroImages?: {
+    noir?: string;
+    ivory?: string;
+    clinic?: string;
+    [key: string]: string | undefined;
+  };
   contact: TenantContactInfo;
   homeSections: Section[];
 }
@@ -56,6 +62,11 @@ export const DEFAULT_PILOT_TENANT: TenantProfile = {
   deliveryCoverage: 'توصيل فوري لجميع مديريات صنعاء وشحن آمن لكافة المحافظات',
   instagram: '@tamifttah',
   heroBadge: 'مضمون أصلي 100%',
+  heroImages: {
+    noir: '/media/hero/hero-noir.jpg',
+    ivory: '/media/hero/hero-ivory.jpg',
+    clinic: '/media/hero/hero-clinic.jpg',
+  },
   contact: {
     whatsapp: '775234989',
     phone: '775234989',

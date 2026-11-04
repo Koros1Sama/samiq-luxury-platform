@@ -96,7 +96,7 @@ export default function CustomerAccountPage() {
           <Link href="/" className="flex items-center">
             <MiftahLogoSvg size={46} />
           </Link>
-          <Link href="/" className="text-xs font-sans text-ivory/80 hover:text-champagne transition">
+          <Link href="/" className="min-h-[44px] inline-flex items-center text-xs font-sans text-ivory/80 hover:text-champagne transition">
             العودة للمتجر الرئيسي ←
           </Link>
         </div>
@@ -114,7 +114,7 @@ export default function CustomerAccountPage() {
                 <h1 className="text-2xl font-serif font-bold text-ivory">
                   بوابة حسابات عملاء مفتاح الجمال
                 </h1>
-                <p className="text-xs text-muted-lux font-sans">
+                <p className="text-sm text-muted-lux font-sans leading-[1.75]">
                   سجلي دخولكِ برقم الهاتف لتتبع شحناتكِ والاطلاع على نقاط الولاء والمفضلة
                 </p>
               </div>
@@ -128,7 +128,7 @@ export default function CustomerAccountPage() {
                     placeholder="مثال: ريم العنسي"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-none"
+                    className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-none"
                   />
                 </div>
                 <div>
@@ -139,7 +139,7 @@ export default function CustomerAccountPage() {
                     placeholder="96777xxxxxxx"
                     value={phoneOrEmail}
                     onChange={(e) => setPhoneOrEmail(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-none"
+                    className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-none"
                   />
                 </div>
                 <div>
@@ -147,7 +147,7 @@ export default function CustomerAccountPage() {
                   <select
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-none"
+                    className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-none"
                   >
                     <option value="صنعاء">صنعاء</option>
                     <option value="عدن">عدن</option>
@@ -159,7 +159,7 @@ export default function CustomerAccountPage() {
                 </div>
                 <button
                   type="submit"
-                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-obsidian-dark font-bold text-xs hover:brightness-110 shadow-md transition"
+                  className="w-full min-h-[44px] py-3.5 rounded-xl bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-obsidian-dark font-bold text-xs hover:brightness-110 shadow-md transition inline-flex items-center justify-center"
                 >
                   دخول الحساب الموثق ↵
                 </button>
@@ -183,7 +183,7 @@ export default function CustomerAccountPage() {
 
               <div className="flex items-center gap-4">
                 <div className="p-3 px-4 rounded-2xl bg-white/5 border border-white/10 text-center">
-                  <span className="text-[11px] text-muted-lux block font-sans">نقاط الولاء المكتسبة:</span>
+                  <span className="text-xs text-muted-lux block font-sans">نقاط الولاء المكتسبة:</span>
                   <span className="text-xl font-serif font-bold text-champagne">
                     {customer?.loyaltyPoints || 350} نقطة
                   </span>
@@ -191,7 +191,7 @@ export default function CustomerAccountPage() {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="px-3.5 py-2 rounded-xl text-xs font-sans text-rose-300 hover:bg-rose-950/30 border border-rose-500/30 transition"
+                  className="min-h-[44px] inline-flex items-center px-3.5 py-2 rounded-xl text-xs font-sans text-rose-300 hover:bg-rose-950/30 border border-rose-500/30 transition"
                 >
                   تسجيل الخروج
                 </button>
@@ -203,7 +203,7 @@ export default function CustomerAccountPage() {
               <button
                 type="button"
                 onClick={() => setActiveTab('orders')}
-                className={`px-5 py-2.5 rounded-xl text-xs font-sans font-bold transition ${
+                className={`min-h-[44px] inline-flex items-center px-5 py-2.5 rounded-xl text-xs font-sans font-bold transition ${
                   activeTab === 'orders'
                     ? 'bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark shadow-md'
                     : 'text-ivory/70 hover:text-ivory hover:bg-white/5'
@@ -214,7 +214,7 @@ export default function CustomerAccountPage() {
               <button
                 type="button"
                 onClick={() => setActiveTab('wishlist')}
-                className={`px-5 py-2.5 rounded-xl text-xs font-sans font-bold transition ${
+                className={`min-h-[44px] inline-flex items-center px-5 py-2.5 rounded-xl text-xs font-sans font-bold transition ${
                   activeTab === 'wishlist'
                     ? 'bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark shadow-md'
                     : 'text-ivory/70 hover:text-ivory hover:bg-white/5'
@@ -235,7 +235,7 @@ export default function CustomerAccountPage() {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-white/5">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-bold text-ivory">طلب #{ord.orderNumber}</span>
-                        <span className="px-2.5 py-0.5 rounded text-[10px] font-sans font-bold bg-gold/15 text-gold border border-gold/30">
+                        <span className="px-2.5 py-0.5 rounded text-xs font-sans font-bold bg-gold/15 text-gold border border-gold/30">
                           {ord.status === 'delivered' ? 'تم التوصيل' : ord.status === 'shipped' ? 'قيد الشحن' : 'قيد المعالجة'}
                         </span>
                       </div>
@@ -267,7 +267,7 @@ export default function CustomerAccountPage() {
                           href={`https://wa.me/967775234989?text=مرحباً%20مفتاح%20الجمال،%20أستفسر%20عن%20حالة%20طلبي%20رقم%20${ord.orderNumber}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-3 py-1.5 rounded-lg bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/40 text-emerald-300 text-[11px] font-bold flex items-center gap-1 transition"
+                          className="min-h-[44px] px-3 py-1.5 rounded-lg bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/40 text-emerald-300 text-xs font-bold inline-flex items-center gap-1 transition"
                         >
                           <WhatsAppIcon size={12} color="#34D399" />
                           <span>متابعة الشحنة</span>
@@ -291,7 +291,7 @@ export default function CustomerAccountPage() {
                       <div className="h-40 w-full rounded-2xl overflow-hidden relative bg-white/5">
                         <SmartImage src={p.image} alt={p.title} fill sizes="(max-width: 640px) 100vw, 300px" className="object-cover" />
                       </div>
-                      <span className="text-[10px] text-gold font-sans font-bold block">{p.brand}</span>
+                      <span className="text-xs text-gold font-sans font-bold block">{p.brand}</span>
                       <h4 className="text-sm font-serif font-bold text-ivory line-clamp-1">{p.title}</h4>
                       <div className="flex items-center justify-between pt-2 border-t border-white/5">
                         <span className="text-sm font-serif font-bold text-champagne">
@@ -299,7 +299,7 @@ export default function CustomerAccountPage() {
                         </span>
                         <Link
                           href={`/product/${p.id}`}
-                          className="px-3 py-1.5 rounded-xl bg-gold/15 text-champagne text-xs font-bold hover:bg-gold/25 transition"
+                          className="min-h-[44px] inline-flex items-center px-3 py-1.5 rounded-xl bg-gold/15 text-champagne text-xs font-bold hover:bg-gold/25 transition"
                         >
                           عرض المستحضر ←
                         </Link>

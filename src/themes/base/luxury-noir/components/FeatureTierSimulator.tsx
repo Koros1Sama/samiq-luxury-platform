@@ -159,7 +159,7 @@ export function FeatureTierSimulator(props: FeatureTierSimulatorProps) {
                   }`}
                 >
                   <span className="truncate">{feat.nameAr}</span>
-                  <span className="text-[10px] font-mono text-gold shrink-0 ms-2">
+                  <span className="text-xs font-mono text-gold shrink-0 ms-2">
                     {isEnabled ? 'مفعل' : 'معطل'}
                   </span>
                 </button>

@@ -2,10 +2,10 @@ import React from 'react';
 import { resolveTenant } from '@/core/tenant/resolver';
 import { getDb } from '@/core/db/store';
 import { StorefrontProvider } from '@/core/storefront/StorefrontProvider';
-import { THEMES, resolveThemeId, DEFAULT_THEME_ID } from '@/themes/registry';
+import { ThemeHost } from '@/themes/ThemeHost';
 import { loadAllBlocksData } from '@/modules/blocks/registry';
 import { DEMO_RESTAURANT_PRODUCTS, DEMO_RESTAURANT_CATEGORIES } from '@/core/store/mockData';
-import { TenantBrandInfo, ThemeId } from '@/themes/contract';
+import { TenantBrandInfo, ThemeId, resolveThemeId } from '@/themes/contract';
 
 export const revalidate = 0; // Dynamic real-time persistence
 
@@ -19,7 +19,10 @@ interface PageProps {
 
 export default async function StorefrontHomePage(props: PageProps) {
   const searchParams = await props.searchParams;
-  const isDevOrDemo = process.env.NODE_ENV !== 'production' || searchParams.demo === '1';
+  const isDevOrDemo =
+    process.env.NODE_ENV !== 'production' ||
+    searchParams.demo === '1' ||
+    searchParams.demo === 'panel';
 
   // 1. Resolve tenant context (supports dev acceptance testing for demo-restaurant)
   const tenantSlug = isDevOrDemo && searchParams.tenant ? searchParams.tenant : undefined;
@@ -33,14 +36,10 @@ export default async function StorefrontHomePage(props: PageProps) {
     : db.tenant?.themeId || tenantContext.tenant.themeId;
   const themeId: ThemeId = resolveThemeId(rawThemeId);
 
-  // 3. Dynamically load theme layout
-  const themeEntry = THEMES[themeId] || THEMES[DEFAULT_THEME_ID];
-  const { default: ThemeLayout } = await themeEntry.load();
-
-  // 4. Load modular blocks data from registry
+  // 3. Load modular blocks data from registry
   const blocksData = loadAllBlocksData(db);
 
-  // 5. Build tenant storefront data
+  // 4. Build tenant storefront data
   const tenantData: TenantBrandInfo = {
     ...tenantContext.tenant,
     ...(!isDemoRestaurant ? db.tenant : {}),
@@ -61,7 +60,7 @@ export default async function StorefrontHomePage(props: PageProps) {
       blocksData={blocksData}
       initialCurrency="YER"
     >
-      <ThemeLayout />
+      <ThemeHost themeId={themeId} />
     </StorefrontProvider>
   );
 }

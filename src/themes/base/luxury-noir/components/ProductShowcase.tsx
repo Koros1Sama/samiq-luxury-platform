@@ -1,11 +1,18 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { SmartImage } from '@/core/ui/SmartImage';
 import { ProductCardData, ThemeCurrencyCode, SectionComponentProps } from '../../../contract';
 import { formatCurrency } from '@/core/currency/formatter';
-import { VerifiedCheckIcon, WhatsAppIcon, BagCartIcon } from './LuxuryIcons';
+import {
+  VerifiedCheckIcon,
+  WhatsAppIcon,
+  BagCartIcon,
+  ShieldCheckIcon,
+  DeliveryVanIcon,
+  ConciergeHeadsetIcon,
+} from './LuxuryIcons';
 import { useStorefront } from '@/core/storefront/StorefrontProvider';
 
 interface ProductShowcaseProps extends Partial<SectionComponentProps> {
@@ -29,72 +36,152 @@ export function ProductShowcase(props: ProductShowcaseProps) {
     });
   const activeFilter = props.activeFilter || sf.activeCategory;
 
-  const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
-
-  const handleVariantSelect = (productId: string, variantId: string) => {
-    setSelectedVariants((prev) => ({ ...prev, [productId]: variantId }));
-  };
-
   const filteredProducts = products.filter((p) => {
-    if (!activeFilter || activeFilter === 'all' || activeFilter === 'authenticity') return true;
-    if (activeFilter === 'serums') return p.categorySlug === 'serums';
-    if (activeFilter === 'cleansers') return p.categorySlug === 'cleansers';
-    if (activeFilter === 'makeup') return p.categorySlug === 'makeup';
-    if (activeFilter === 'cerave') return p.brand.toLowerCase().includes('cerave');
-    if (activeFilter === 'the-ordinary') return p.brand.toLowerCase().includes('ordinary');
-    if (activeFilter === p.categorySlug) return true;
+    if (!activeFilter || activeFilter === 'all') return true;
+    if (activeFilter === p.categorySlug || activeFilter === p.id) return true;
     return true;
   });
 
+  // Featured snap rail products ("الأكثر طلباً")
+  const featuredProducts = products.slice(0, 4);
+
   return (
-    <section id="products-catalog" className="py-8 sm:py-16 bg-obsidian relative">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 pb-3 border-b border-white/5">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-gold/10 border border-gold/30 text-champagne text-[11px] font-sans font-semibold mb-1">
-              <span>قائمة المنتجات المعتمدة</span>
+    <section id="products-catalog" className="py-2.5 sm:py-6 bg-[#070709] relative">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-5 sm:space-y-8">
+        {/* ==================================================================== */}
+        {/* 4. "الأكثر طلباً" Horizontal Snap Rail (Visible in First Screen)      */}
+        {/* ==================================================================== */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between px-1">
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
+              <h2 className="text-sm sm:text-base lg:text-lg font-serif font-bold text-ivory">
+                الأكثر طلباً
+              </h2>
             </div>
-            <h2 className="text-xl sm:text-3xl font-serif font-bold text-ivory">
-              كتالوج المنتجات الفاخرة — تسوق فوراً
-            </h2>
+            <span className="text-xs text-champagne/80 font-sans lg:hidden">
+              اسحبي للمزيد ←
+            </span>
           </div>
-          <span className="text-xs text-muted-lux font-sans">
-            فحص الباركود والمطابقة قبل الدفع • توصيل فوري لكافة المناطق
-          </span>
+
+          {/* Horizontal Snap Rail on Mobile / 4-Col Grid on Desktop */}
+          <div className="flex lg:grid lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4 overflow-x-auto lg:overflow-visible snap-x snap-mandatory pb-2 no-scrollbar scroll-smooth">
+            {featuredProducts.map((product) => {
+              const price = product.prices[currentCurrency] || product.prices.YER || 0;
+              const formattedPrice = formatCurrency(price, currentCurrency);
+
+              return (
+                <div
+                  key={`rail-${product.id}`}
+                  data-product-card
+                  className="w-[136px] sm:w-[165px] lg:w-auto shrink-0 snap-start rounded-2xl bg-[#0E0E12] border border-white/[0.08] hover:border-gold/40 transition-all p-2 flex flex-col justify-between shadow-lg"
+                >
+                  {/* Square Packshot on warm greige backdrop */}
+                  <Link
+                    href={`/product/${product.id}`}
+                    className="block w-full h-[105px] sm:h-[120px] lg:h-[180px] rounded-xl overflow-hidden relative bg-gradient-to-b from-[#CFC8BE] to-[#B9B1A6]"
+                  >
+                    <SmartImage
+                      src={product.image}
+                      alt={product.title}
+                      priority={false}
+                      sizes="(max-width: 640px) 150px, (max-width: 1024px) 200px, 300px"
+                      className="object-cover object-center brightness-95 hover:scale-105 transition-transform duration-500"
+                    />
+                  </Link>
+
+                  {/* Product Title Link (min-h-[44px] interactive hit target) */}
+                  <div className="mt-1.5">
+                    <Link
+                      href={`/product/${product.id}`}
+                      className="min-h-[44px] flex items-center"
+                    >
+                      <h3
+                        data-product-title
+                        className="text-xs font-serif font-bold text-ivory line-clamp-2 leading-snug hover:text-champagne transition"
+                      >
+                        {product.title}
+                      </h3>
+                    </Link>
+                  </div>
+
+                  {/* Formatted Price Leaf Node */}
+                  <div className="mt-1 flex items-baseline justify-between">
+                    <span className="text-xs font-sans font-bold text-champagne">
+                      {formattedPrice}
+                    </span>
+                  </div>
+
+                  {/* 44px Add Button */}
+                  <div className="mt-2">
+                    <button
+                      type="button"
+                      onClick={() => onAddToCart(product)}
+                      className="w-full min-h-[44px] h-11 rounded-xl bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-sans font-bold text-xs hover:brightness-110 active:scale-[0.98] transition flex items-center justify-center gap-1.5 shadow-sm"
+                    >
+                      <BagCartIcon size={14} color="#070709" />
+                      <span>إضافة للسلة</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
-        {/* 2 Columns on Mobile, 3 on Tablet, 4 on Desktop */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
-          {filteredProducts.map((product) => {
-            const price = product.prices[currentCurrency] || product.prices.YER;
-            const comparePrice = product.comparePrices?.[currentCurrency];
-            const activeVariantId = selectedVariants[product.id] || product.variants?.[0]?.id;
+        {/* ==================================================================== */}
+        {/* 5. Full 2-Column Product Grid                                        */}
+        {/* ==================================================================== */}
+        <div className="space-y-4 pt-2">
+          {/* Grid Header */}
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 pb-2 border-b border-white/[0.08]">
+            <div>
+              <span className="text-xs font-sans text-gold font-semibold block mb-0.5">
+                مفتاح الجمال — المنتجات المعتمدة
+              </span>
+              <h2 className="text-base sm:text-2xl font-serif font-bold text-ivory">
+                كتالوج المنتجات الفاخرة
+              </h2>
+            </div>
+            <p className="text-xs text-muted-lux font-sans leading-relaxed">
+              فحص ومطابقة الباركود والتشغيلة قبل الدفع • توصيل فوري
+            </p>
+          </div>
 
-            return (
-              <div
-                key={product.id}
-                className="group p-1 sm:p-1.5 rounded-2xl sm:rounded-3xl bg-white/[0.03] border border-white/[0.08] hover:border-gold/40 transition-all duration-300 shadow-xl flex flex-col justify-between"
-              >
-                <div className="rounded-[calc(1rem-0.125rem)] sm:rounded-[calc(1.5rem-0.25rem)] bg-[#0E0E12] p-2.5 sm:p-4 flex flex-col justify-between h-full space-y-3">
+          {/* 2 Columns on Mobile, 3 on Tablet, 4 on Desktop */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 lg:gap-6">
+            {filteredProducts.map((product) => {
+              const price = product.prices[currentCurrency] || product.prices.YER || 0;
+              const comparePrice = product.comparePrices ? product.comparePrices[currentCurrency] : undefined;
+              const formattedPrice = formatCurrency(price, currentCurrency);
+              const hasDiscount = Boolean(comparePrice && comparePrice > price && price > 0);
+              const formattedComparePrice =
+                hasDiscount && comparePrice ? formatCurrency(comparePrice, currentCurrency) : undefined;
+
+              return (
+                <div
+                  key={product.id}
+                  data-product-card
+                  className="rounded-2xl sm:rounded-3xl bg-[#0E0E12] border border-white/[0.08] hover:border-gold/40 transition-all duration-300 p-2.5 sm:p-3.5 flex flex-col justify-between shadow-xl group"
+                >
                   <div>
-                    {/* Top Badges */}
+                    {/* Top Verified Badge */}
                     <div className="flex items-center justify-between gap-1 mb-2">
-                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-sans font-bold bg-emerald-950/80 border border-emerald-500/30 text-emerald-300">
-                        <VerifiedCheckIcon size={10} color="#34D399" />
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-sans font-bold bg-emerald-950/80 border border-emerald-500/30 text-emerald-300">
+                        <VerifiedCheckIcon size={12} color="#34D399" />
                         <span className="truncate">أصلي موثق</span>
                       </span>
                       {product.badge && (
-                        <span className="hidden sm:inline-block px-1.5 py-0.5 rounded text-[9px] font-sans font-bold bg-gold/15 text-gold border border-gold/30 truncate">
+                        <span className="hidden sm:inline-block px-2 py-0.5 rounded text-xs font-sans font-bold bg-gold/15 text-gold border border-gold/30 truncate">
                           {product.badge}
                         </span>
                       )}
                     </div>
 
-                    {/* Product Image Link with SmartImage */}
+                    {/* Product Image Link (Square warm greige backdrop) */}
                     <Link
                       href={`/product/${product.id}`}
-                      className="block h-32 sm:h-44 w-full rounded-xl sm:rounded-2xl relative overflow-hidden bg-white/[0.02] group-hover:scale-[1.02] transition-transform duration-300"
+                      className="block aspect-square w-full rounded-xl sm:rounded-2xl relative overflow-hidden bg-gradient-to-b from-[#CFC8BE] to-[#B9B1A6] group-hover:scale-[1.02] transition-transform duration-300 min-h-[44px]"
                     >
                       <SmartImage
                         src={product.image}
@@ -103,83 +190,114 @@ export function ProductShowcase(props: ProductShowcaseProps) {
                         sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                         className="object-cover object-center brightness-95 group-hover:brightness-105 transition-all duration-500"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#0E0E12]/80 via-transparent to-transparent opacity-50" />
                     </Link>
 
-                    {/* Brand & Title */}
-                    <div className="mt-2.5 space-y-1">
-                      <span className="text-[10px] sm:text-xs font-sans text-gold font-semibold uppercase block truncate">
+                    {/* Brand & Title Link (min-h-[40px] interactive hit target) */}
+                    <div className="mt-2 space-y-1">
+                      <span className="text-xs font-sans text-gold font-semibold block truncate">
                         {product.brand}
                       </span>
-                      <Link href={`/product/${product.id}`}>
-                        <h3 className="text-xs sm:text-sm font-serif font-bold text-ivory line-clamp-2 group-hover:text-champagne transition leading-snug">
+                      <Link
+                        href={`/product/${product.id}`}
+                        className="min-h-[40px] flex items-center"
+                      >
+                        <h3
+                          data-product-title
+                          className="text-xs sm:text-sm font-serif font-bold text-ivory line-clamp-2 group-hover:text-champagne transition leading-snug"
+                        >
                           {product.title}
                         </h3>
                       </Link>
                     </div>
-
-                    {/* Variant Selector (if any) */}
-                    {product.variants && product.variants.length > 1 && (
-                      <div className="mt-2 flex items-center gap-1 flex-wrap">
-                        {product.variants.map((v) => {
-                          const isVarSelected = activeVariantId === v.id;
-                          return (
-                            <button
-                              key={v.id}
-                              type="button"
-                              onClick={() => handleVariantSelect(product.id, v.id)}
-                              className={`px-1.5 py-0.5 rounded text-[9px] sm:text-[10px] font-sans border transition ${
-                                isVarSelected
-                                  ? 'bg-gold/20 border-gold text-champagne font-bold'
-                                  : 'bg-white/5 border-white/10 text-ivory/60 hover:text-ivory'
-                              }`}
-                            >
-                              {v.title}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
                   </div>
 
-                  {/* Pricing & Add to Cart */}
-                  <div className="pt-2 border-t border-white/5 space-y-2">
+                  {/* Pricing & Actions */}
+                  <div className="pt-2 mt-2 border-t border-white/5 space-y-2">
                     <div className="flex items-baseline justify-between gap-1">
-                      <span className="text-xs sm:text-base font-serif font-bold text-champagne">
-                        {formatCurrency(price, currentCurrency)}
+                      <span className="text-xs sm:text-base font-sans font-bold text-champagne">
+                        {formattedPrice}
                       </span>
-                      {comparePrice && (
-                        <span className="text-[10px] sm:text-xs text-muted-dim line-through">
-                          {formatCurrency(comparePrice, currentCurrency)}
+                      {hasDiscount && formattedComparePrice && (
+                        <span className="text-xs text-muted-dim line-through">
+                          {formattedComparePrice}
                         </span>
                       )}
                     </div>
 
-                    {/* Action Buttons */}
+                    {/* Action Buttons (All min 44x44 primary) */}
                     <div className="grid grid-cols-2 gap-1.5">
                       <button
                         type="button"
-                        onClick={() => onAddToCart(product, activeVariantId)}
-                        className="w-full py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-sans font-bold text-[10px] sm:text-xs hover:brightness-110 transition flex items-center justify-center gap-1 shadow-sm"
+                        onClick={() => onAddToCart(product)}
+                        className="w-full min-h-[44px] py-2 rounded-xl bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-sans font-bold text-xs hover:brightness-110 active:scale-[0.98] transition flex items-center justify-center gap-1 shadow-sm"
                       >
-                        <BagCartIcon size={12} color="#070709" />
+                        <BagCartIcon size={14} color="#070709" />
                         <span>السلة</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => onDirectWhatsApp(product)}
-                        className="w-full py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-[#25D366]/15 hover:bg-[#25D366]/25 border border-[#25D366]/40 text-[#25D366] font-sans font-bold text-[10px] sm:text-xs transition flex items-center justify-center gap-1"
-                        title="طلب عبر واتساب"
+                        className="w-full min-h-[44px] py-2 rounded-xl bg-[#25D366]/15 hover:bg-[#25D366]/25 border border-[#25D366]/40 text-[#25D366] font-sans font-bold text-xs transition flex items-center justify-center gap-1"
+                        title="طلب فوري عبر واتساب"
                       >
-                        <WhatsAppIcon size={12} color="#25D366" />
+                        <WhatsAppIcon size={14} color="#25D366" />
                         <span>واتساب</span>
                       </button>
                     </div>
                   </div>
                 </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ==================================================================== */}
+        {/* 6. Compact Trust Strip Under Products Grid                           */}
+        {/* ==================================================================== */}
+        <div className="pt-3 border-t border-white/[0.08]">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-3.5 sm:p-5 rounded-2xl bg-[#0E0E12] border border-white/[0.08]">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl bg-gold/10 border border-gold/30 flex items-center justify-center text-gold shrink-0">
+                <ShieldCheckIcon size={22} color="#C9A84C" />
               </div>
-            );
-          })}
+              <div>
+                <h4 className="text-xs sm:text-sm font-serif font-bold text-ivory">
+                  ضمان الأصالة 100%
+                </h4>
+                <p className="text-xs text-muted-lux font-sans leading-relaxed">
+                  فحص ومطابقة الباركود والتشغيلة قبل الاستلام
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl bg-gold/10 border border-gold/30 flex items-center justify-center text-gold shrink-0">
+                <DeliveryVanIcon size={22} color="#C9A84C" />
+              </div>
+              <div>
+                <h4 className="text-xs sm:text-sm font-serif font-bold text-ivory">
+                  توصيل فوري وشحن آمن
+                </h4>
+                <p className="text-xs text-muted-lux font-sans leading-relaxed">
+                  توصيل سريع بصنعاء وشحن لكافة المحافظات
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl bg-gold/10 border border-gold/30 flex items-center justify-center text-gold shrink-0">
+                <ConciergeHeadsetIcon size={22} color="#C9A84C" />
+              </div>
+              <div>
+                <h4 className="text-xs sm:text-sm font-serif font-bold text-ivory">
+                  دعم واستشارات مباشرة
+                </h4>
+                <p className="text-xs text-muted-lux font-sans leading-relaxed">
+                  مستشارون متخصصون لمساعدتك عبر واتساب 24/7
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

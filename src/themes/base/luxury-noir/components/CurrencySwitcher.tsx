@@ -31,10 +31,10 @@ export function CurrencySwitcher({
             key={curr.code}
             type="button"
             onClick={() => onCurrencyChange(curr.code)}
-            className={`px-2 py-0.5 sm:px-2.5 sm:py-1 text-[10px] sm:text-xs font-sans font-medium rounded-full transition-all duration-300 ${
+            className={`min-w-[40px] min-h-[40px] px-3 py-2 text-xs font-sans font-medium rounded-full transition-all duration-300 flex items-center justify-center ${
               isActive
                 ? 'bg-gold/20 text-[#FCF6BA] border border-gold/60 font-bold shadow-[0_0_12px_rgba(201,168,76,0.35)]'
-                : 'text-ivory/60 hover:text-ivory hover:bg-white/5 border border-transparent'
+                : 'text-ivory/70 hover:text-ivory hover:bg-white/5 border border-transparent'
             }`}
           >
             {curr.label}

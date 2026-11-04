@@ -6,7 +6,7 @@ function DefaultAuthenticityRenderer({ data }: { data?: any }) {
   if (!data) return null;
   return (
     <div className="my-8 p-6 rounded-2xl bg-neutral-900 border border-neutral-800 text-neutral-100 max-w-5xl mx-auto">
-      <h3 className="text-xl font-bold mb-2">فحص ومطابقة الأصلي والتقليد ({data.productTitle || data.productId})</h3>
+      <h3 className="text-xl font-bold mb-2">دليل المطابقة والتحقق ({data.productTitle || data.productId})</h3>
       <p className="text-sm text-neutral-400 mb-4">{data.brand}</p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="p-4 rounded-xl bg-neutral-800/50 border border-neutral-700">
