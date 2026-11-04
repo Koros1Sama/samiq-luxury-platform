@@ -14,7 +14,7 @@ import {
 } from './IvoryIcons';
 
 export function IvoryColophonContact(_props: Partial<SectionComponentProps>) {
-  const { tenant } = useStorefront();
+  const { tenant, platformMeta } = useStorefront();
 
   const mapUrl = tenant.contact?.map?.url || tenant.googleMaps || 'https://maps.google.com';
   const whatsappNum = tenant.contact?.whatsapp || tenant.whatsapp || '775234989';
@@ -167,15 +167,58 @@ export function IvoryColophonContact(_props: Partial<SectionComponentProps>) {
           </div>
         </div>
 
+        {/* Dedicated SAMIQ Engine Developer Signature Bar */}
+        <div className="border border-[#DCD3C5] bg-[#EFE9DC] p-5 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-sans">
+          <div className="text-center md:text-start space-y-1">
+            <p className="font-serif font-bold text-[#1B1612] text-sm">
+              يعمل بمحرك سَامِق (SAMIQ) للمتاجر الفاخرة — هل ترغب بمتجر مماثل لعلامتك التجارية؟
+            </p>
+            <p className="text-[#6B6157] text-xs">
+              منصة هندسة المتاجر الرقمية الفاخرة والذكاء الاصطناعي للمتاجر التخصصية
+            </p>
+          </div>
+          <div className="flex items-center gap-3 flex-wrap justify-center">
+            <a
+              href={platformMeta?.showcasePath || '/samiq'}
+              className="min-h-[44px] px-4 rounded-full bg-[#1B1612] hover:bg-[#3D332A] text-[#FAF7F2] text-xs font-bold transition inline-flex items-center"
+            >
+              استعراض المزايا وقائمة الأسعار
+            </a>
+            <a
+              href={platformMeta?.developerTelegramUrl || 'https://t.me/KorosSenpai'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="min-h-[44px] px-4 rounded-full bg-[#FAF7F2] hover:bg-[#E8E2D8] text-[#1B1612] border border-[#DCD3C5] text-xs font-bold transition inline-flex items-center gap-1.5"
+            >
+              <span>تواصل مع المطور عبر تيليجرام (@{platformMeta?.developerTelegramHandle || 'KorosSenpai'})</span>
+            </a>
+          </div>
+        </div>
+
         {/* Bottom Colophon Hairline & Copyright */}
         <div className="border-t border-[#E8E2D8] pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-sans text-[#877E75]">
           <p className="text-sm">
-            جميع الحقوق محفوظة لـ {tenant.name} © 2026 · صُمم بنظام المجلة التحريرية العاجية
+            جميع الحقوق محفوظة لـ {tenant.legalName || tenant.name} © 2026 · صُمم بنظام المجلة التحريرية العاجية
           </p>
-          <div className="flex items-center gap-4">
-            <span className="font-mono text-[#5E6B5A]">SAMIQ IVORY JOURNAL</span>
-            <span>·</span>
-            <span>الأصالة أولاً</span>
+          <div className="flex items-center gap-3 flex-wrap">
+            <a
+              href="/account"
+              className="min-h-[44px] px-3.5 rounded-full bg-[#FAF7F2] border border-[#E8E2D8] text-[#1B1612] hover:bg-[#1B1612] hover:text-[#FAF7F2] transition inline-flex items-center"
+            >
+              حسابي والولاء
+            </a>
+            <a
+              href="/admin"
+              className="min-h-[44px] px-3.5 rounded-full bg-[#FAF7F2] border border-[#E8E2D8] text-[#1B1612] hover:bg-[#1B1612] hover:text-[#FAF7F2] transition inline-flex items-center"
+            >
+              الإدارة
+            </a>
+            <a
+              href="/platform"
+              className="min-h-[44px] px-3.5 rounded-full bg-[#FAF7F2] border border-[#E8E2D8] text-[#1B1612] hover:bg-[#1B1612] hover:text-[#FAF7F2] transition inline-flex items-center"
+            >
+              منصة سامق
+            </a>
           </div>
         </div>
       </div>

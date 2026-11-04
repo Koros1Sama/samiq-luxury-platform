@@ -9,7 +9,17 @@ import {
   CategoryItem,
   ThemeCurrencyCode,
   CartItem,
+  PlatformMeta,
 } from '@/themes/contract';
+
+const DEFAULT_PLATFORM_META: PlatformMeta = {
+  platformNameAr: 'سَامِق',
+  platformNameEn: 'SAMIQ',
+  taglineAr: 'منصة هندسة المتاجر الرقمية الفاخرة والذكاء الاصطناعي',
+  developerTelegramHandle: 'KorosSenpai',
+  developerTelegramUrl: 'https://t.me/KorosSenpai',
+  showcasePath: '/samiq',
+};
 
 const StorefrontContext = createContext<StorefrontContextValue | null>(null);
 
@@ -26,6 +36,7 @@ interface StorefrontProviderProps {
   categories: CategoryItem[];
   blocksData?: Record<string, unknown>;
   initialCurrency?: ThemeCurrencyCode;
+  platformMeta?: PlatformMeta;
   children: React.ReactNode;
 }
 
@@ -36,6 +47,7 @@ export function StorefrontProvider({
   categories,
   blocksData = {},
   initialCurrency = 'YER',
+  platformMeta,
   children,
 }: StorefrontProviderProps) {
   // 1. Currency State (hydrated safely in useEffect)
@@ -51,6 +63,23 @@ export function StorefrontProvider({
   // 4. Search & Category Filter State
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
+  const [activeTag, setActiveTag] = useState<string | null>(null);
+
+  // 5. Smart Tags Computed Available List (sorted by frequency, top 10)
+  const availableTags = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const p of products) {
+      if (p.tags && Array.isArray(p.tags)) {
+        for (const t of p.tags) {
+          counts[t] = (counts[t] || 0) + 1;
+        }
+      }
+    }
+    return Object.entries(counts)
+      .map(([tag, count]) => ({ tag, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+  }, [products]);
 
   // SSR hydration guard: Load from localStorage only on client mount
   useEffect(() => {
@@ -277,14 +306,19 @@ export function StorefrontProvider({
       },
       activeCategory,
       setActiveCategory,
+      activeTag,
+      setActiveTag,
+      availableTags,
       whatsapp: {
         orderUrl: buildOrderWhatsAppUrl,
         productUrl: buildProductWhatsAppUrl,
       },
+      platformMeta: platformMeta || tenant.platformMeta || DEFAULT_PLATFORM_META,
       blocksData,
     }),
     [
       tenant,
+      platformMeta,
       features,
       products,
       categories,
@@ -305,6 +339,8 @@ export function StorefrontProvider({
       searchQuery,
       searchResults,
       activeCategory,
+      activeTag,
+      availableTags,
       buildOrderWhatsAppUrl,
       buildProductWhatsAppUrl,
       blocksData,

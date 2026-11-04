@@ -58,6 +58,7 @@ export default async function StorefrontHomePage(props: PageProps) {
       products={products}
       categories={categories}
       blocksData={blocksData}
+      platformMeta={db.platformMeta}
       initialCurrency="YER"
     >
       <ThemeHost themeId={themeId} />

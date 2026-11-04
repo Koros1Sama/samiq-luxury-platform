@@ -88,7 +88,8 @@
     "payment_gateways": false,
     "ai_chatbot": true,
     "whatsapp_channel": false,
-    "telegram_channel": false
+    "telegram_channel": false,
+    "smart_tags_ai": true
   },
   "products": [
     {
@@ -117,7 +118,10 @@
           "title": "30 مل (الأصلي)",
           "inStock": true
         }
-      ]
+      ],
+      "tags": ["تفتيح التصبغات", "مضاد أكسدة", "نضارة فورية", "بشرة باهتة", "استخدام صباحي"],
+      "skinTypes": ["dry", "combination", "all"],
+      "aiCategoryConfidence": 99
     },
     {
       "id": "prod-2",
@@ -145,7 +149,10 @@
           "title": "236 مل",
           "inStock": true
         }
-      ]
+      ],
+      "tags": ["ترطيب عميق", "سيراميد طبيعي", "خالي من العطور", "بشرة جافة وحساسة", "تنظيف لطيف"],
+      "skinTypes": ["dry", "sensitive", "all"],
+      "aiCategoryConfidence": 98
     },
     {
       "id": "prod-3",
@@ -168,7 +175,10 @@
           "title": "30 مل",
           "inStock": true
         }
-      ]
+      ],
+      "tags": ["مسامات واسعة", "تنظيم الدهون", "بشرة دهنية", "مقاومة الشوائب", "خالي من الزيوت"],
+      "skinTypes": ["oily", "combination"],
+      "aiCategoryConfidence": 99
     },
     {
       "id": "prod-4",
@@ -196,7 +206,10 @@
           "title": "درجة 70 - نيود طبيعي",
           "inStock": true
         }
-      ]
+      ],
+      "tags": ["ثبات مخملي", "ترطيب الشفاه", "مكياج فاخر", "درجة روز كوتور", "مقاوم للتكتل"],
+      "skinTypes": ["all"],
+      "aiCategoryConfidence": 97
     },
     {
       "id": "prod-5",
@@ -219,7 +232,10 @@
           "title": "18 لون متدرج",
           "inStock": true
         }
-      ]
+      ],
+      "tags": ["ألوان دافئة", "دمج حريري", "مكياج سهرات", "ثبات 12 ساعة", "شيمر ومطفي"],
+      "skinTypes": ["all"],
+      "aiCategoryConfidence": 98
     },
     {
       "id": "prod-6",
@@ -242,7 +258,10 @@
           "title": "340 جم",
           "inStock": true
         }
-      ]
+      ],
+      "tags": ["ترميم الحاجز", "ترطيب 24 ساعة", "بشرة جافة وحساسة", "حمض الهيالورونيك", "ليلي ونهاري"],
+      "skinTypes": ["dry", "sensitive"],
+      "aiCategoryConfidence": 99
     }
   ],
   "categories": [
@@ -550,6 +569,11 @@
         "prod-1",
         "prod-4"
       ],
+      "skinType": "dry",
+      "concerns": [
+        "تفتيح التصبغات",
+        "الترطيب العميق"
+      ],
       "createdAt": "2026-09-15T10:00:00Z"
     }
   ],
@@ -664,5 +688,13 @@
       "isMain": false,
       "isActive": true
     }
-  ]
+  ],
+  "platformMeta": {
+    "platformNameAr": "سَامِق",
+    "platformNameEn": "SAMIQ",
+    "taglineAr": "منصة هندسة المتاجر الرقمية الفاخرة والذكاء الاصطناعي",
+    "developerTelegramHandle": "KorosSenpai",
+    "developerTelegramUrl": "https://t.me/KorosSenpai",
+    "showcasePath": "/samiq"
+  }
 }

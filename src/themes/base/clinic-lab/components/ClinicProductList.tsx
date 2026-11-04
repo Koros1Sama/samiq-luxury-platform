@@ -12,7 +12,7 @@ interface ClinicProductListProps {
 }
 
 export function ClinicProductList({ products }: ClinicProductListProps) {
-  const { cart, currency } = useStorefront();
+  const { cart, currency, activeTag, setActiveTag } = useStorefront();
 
   if (!products || products.length === 0) {
     return (
@@ -78,6 +78,29 @@ export function ClinicProductList({ products }: ClinicProductListProps) {
                   <span>{chip2}</span>
                 </span>
               </div>
+
+              {/* Clickable Micro-chips for up to 2 tags on larger viewports */}
+              {product.tags && product.tags.length > 0 && (
+                <div className="hidden sm:flex flex-wrap items-center gap-1.5 pt-0.5">
+                  {product.tags.slice(0, 2).map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveTag(activeTag === t ? null : t);
+                      }}
+                      className={`min-h-[40px] px-2.5 rounded-md text-xs font-medium transition-colors inline-flex items-center justify-center ${
+                        activeTag === t
+                          ? 'bg-[#0F4C4A] text-white font-bold'
+                          : 'bg-[#F2F7F5] text-[#0F4C4A] hover:bg-[#CFE8E1] border border-[#D4E5E0]'
+                      }`}
+                    >
+                      #{t}
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {/* Lab Verification Badge */}
               <div className="flex items-center gap-1 text-xs font-medium text-[#0F4C4A]">

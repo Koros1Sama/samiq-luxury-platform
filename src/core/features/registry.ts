@@ -4,7 +4,7 @@
  * Enforces strict dependency graph validation (requires)
  */
 
-export type FeatureCategory = 'tier' | 'addon' | 'channel' | 'integration';
+export type FeatureCategory = 'tier' | 'addon' | 'channel' | 'integration' | 'intelligence';
 
 export interface FeatureDefinition {
   id: string;
@@ -77,6 +77,15 @@ export const FEATURES_REGISTRY: Record<string, FeatureDefinition> = {
     category: 'addon',
     basePriceUsd: 60,
     requires: ['tier_1_static'],
+  },
+  smart_tags_ai: {
+    id: 'smart_tags_ai',
+    nameEn: 'AI Smart Multi-Tags & Auto Classification',
+    nameAr: 'الوسوم الذكية والتصنيف بالذكاء الاصطناعي (AI Smart Tags)',
+    descriptionAr: 'توليد وسوم متعددة الأبعاد تلقائياً بالذكاء الاصطناعي وتصنيف المنتجات حسب مشاكل البشرة والمكونات مع فلترة فورية.',
+    category: 'intelligence',
+    basePriceUsd: 75,
+    requires: ['tier_3_catalog'],
   },
   customer_accounts: {
     id: 'customer_accounts',

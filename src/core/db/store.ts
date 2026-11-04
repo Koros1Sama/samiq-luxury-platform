@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { MOCK_STOREFRONT_DATA } from '../store/mockData';
-import { ProductCardData, ThemeCurrencyCode, TenantBrandInfo } from '@/themes/contract';
+import { ProductCardData, ThemeCurrencyCode, TenantBrandInfo, PlatformMeta } from '@/themes/contract';
 import { AuthenticityComparisonData } from '@/modules/blocks/types';
 
 export interface CouponRecord {
@@ -69,6 +69,9 @@ export interface CustomerRecord {
   defaultAddress: string;
   loyaltyPoints: number;
   wishlistProductIds: string[];
+  skinType?: 'oily' | 'dry' | 'combination' | 'sensitive' | 'all';
+  concerns?: string[];
+  role?: 'customer' | 'admin' | 'owner';
   createdAt: string;
 }
 
@@ -145,6 +148,7 @@ export interface SamiqDatabaseSchema {
   reviews: ReviewRecord[];
   branches: BranchRecord[];
   conversations: OmnichannelConversation[];
+  platformMeta?: PlatformMeta;
 }
 
 export type ChannelType = 'web' | 'whatsapp' | 'telegram';
@@ -203,6 +207,7 @@ function createDefaultSeed(): SamiqDatabaseSchema {
       'prod-1': MOCK_STOREFRONT_DATA.authenticityGuide,
       '54U700': MOCK_STOREFRONT_DATA.authenticityGuide,
     },
+    platformMeta: MOCK_STOREFRONT_DATA.platformMeta,
     orders: [
       {
         id: 'ord-101',
@@ -366,6 +371,8 @@ function createDefaultSeed(): SamiqDatabaseSchema {
         defaultAddress: 'حدة - الحي الدبلوماسي',
         loyaltyPoints: 350,
         wishlistProductIds: ['prod-1', 'prod-4'],
+        skinType: 'dry',
+        concerns: ['تفتيح التصبغات', 'الترطيب العميق'],
         createdAt: '2026-09-15T10:00:00Z',
       },
     ],
@@ -607,6 +614,9 @@ export function getDb(): SamiqDatabaseSchema {
     }
     if (!parsed.tenant.themeId) {
       parsed.tenant.themeId = 'luxury-noir';
+    }
+    if (!parsed.platformMeta) {
+      parsed.platformMeta = createDefaultSeed().platformMeta;
     }
     return parsed;
   } catch (err) {
@@ -974,5 +984,20 @@ export function toggleBotStatus(conversationId: string, isBotActive: boolean): O
   conv.isBotActive = isBotActive;
   saveDb(db);
   return conv;
+}
+
+export function getPlatformMeta(): PlatformMeta {
+  const db = getDb();
+  return db.platformMeta || MOCK_STOREFRONT_DATA.platformMeta;
+}
+
+export function savePlatformMeta(meta: Partial<PlatformMeta>): PlatformMeta {
+  const db = getDb();
+  db.platformMeta = {
+    ...(db.platformMeta || MOCK_STOREFRONT_DATA.platformMeta),
+    ...meta,
+  };
+  saveDb(db);
+  return db.platformMeta;
 }
 

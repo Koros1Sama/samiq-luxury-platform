@@ -46,7 +46,7 @@ export function ClinicHeader({ onOpenAdvisor, onOpenCart }: ClinicHeaderProps) {
           </div>
         </a>
 
-        {/* End Actions: Advisor, Currency, Cart */}
+        {/* End Actions: Advisor, Account, Currency, Cart */}
         <div className="flex items-center gap-1 sm:gap-2">
           {/* AI Clinical Advisor Button */}
           <button
@@ -60,6 +60,19 @@ export function ClinicHeader({ onOpenAdvisor, onOpenCart }: ClinicHeaderProps) {
             <StethoscopeIcon size={18} />
             <span className="hidden sm:inline">استشارة</span>
           </button>
+
+          {/* Account & Medical Profile Link */}
+          <a
+            href="/account"
+            className="min-w-[44px] min-h-[44px] px-2.5 py-1.5 rounded-lg border border-[#D4E5E0] bg-[#F2F7F5] text-[#0F4C4A] hover:bg-[#CFE8E1]/50 inline-flex items-center justify-center gap-1.5 text-xs font-semibold focus:outline-hidden focus:ring-2 focus:ring-[#0F4C4A] transition-colors"
+            title="حسابي والملف الطبي"
+            aria-label="حسابي والملف الطبي"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            <span className="hidden md:inline">الملف الطبي</span>
+          </a>
 
           {/* Currency Switcher */}
           <div className="relative inline-flex items-center">

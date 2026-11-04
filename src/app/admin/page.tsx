@@ -12,8 +12,15 @@ import {
   CloseIcon,
   ShieldCheckIcon,
 } from '@/themes/base/luxury-noir/components/LuxuryIcons';
-import { ProductCardData } from '@/themes/contract';
+import { ProductCardData, ThemeId, SAMIQ_THEMES } from '@/themes/contract';
 import { OmnichannelConversation } from '@/core/db/store';
+
+const CATEGORY_NAMES_AR: Record<string, string> = {
+  serums: 'السيرومات',
+  'cleansers-moisturizers': 'المنظفات والمرطبات',
+  makeup: 'المكياج',
+  skincare: 'العناية بالبشرة',
+};
 
 export default function MerchantAdminPage() {
   // Authentication State
@@ -21,8 +28,11 @@ export default function MerchantAdminPage() {
   const [passcode, setPasscode] = useState('');
   const [authError, setAuthError] = useState('');
 
-  // Active Tab
-  const [activeTab, setActiveTab] = useState<'inbox' | 'inventory' | 'orders' | 'bookings' | 'authenticity' | 'coupons'>('inbox');
+  // Active Tab: inbox | inventory | orders | bookings | authenticity | coupons | settings
+  const [activeTab, setActiveTab] = useState<
+    'inbox' | 'inventory' | 'orders' | 'bookings' | 'authenticity' | 'coupons' | 'settings'
+  >('inbox');
+
   const [products, setProducts] = useState<ProductCardData[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [bookings, setBookings] = useState<any[]>([]);
@@ -40,11 +50,32 @@ export default function MerchantAdminPage() {
   const [newPriceSar, setNewPriceSar] = useState(175);
   const [newPriceUsd, setNewPriceUsd] = useState(48);
   const [newDescription, setNewDescription] = useState('');
+  const [newTags, setNewTags] = useState<string[]>(['تفتيح التصبغات', 'نضارة فورية']);
+  const [customTagInput, setCustomTagInput] = useState('');
+  const [aiConfidence, setAiConfidence] = useState<number | null>(null);
   const [isAiGenerating, setIsAiGenerating] = useState(false);
+
+  // Batch auto-tagging toast & state
+  const [isBatchTagging, setIsBatchTagging] = useState(false);
+  const [batchToast, setBatchToast] = useState('');
+
+  // Inline product tag editor
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  const [inlineNewTag, setInlineNewTag] = useState('');
 
   // New coupon form
   const [newCouponCode, setNewCouponCode] = useState('');
   const [newCouponDiscount, setNewCouponDiscount] = useState(15);
+
+  // Store & Template Settings
+  const [activeTheme, setActiveTheme] = useState<ThemeId>('luxury-noir');
+  const [storeName, setStoreName] = useState('مفتاح الجمال');
+  const [storeLegalName, setStoreLegalName] = useState('مفتاح الجمال — لكشف المقلد');
+  const [storeTagline, setStoreTagline] = useState('بوابتك الموثوقة لعالم الجمال الأصلي في اليمن');
+  const [storeWhatsapp, setStoreWhatsapp] = useState('775234989');
+  const [storeCity, setStoreCity] = useState('صنعاء');
+  const [settingsSuccessMsg, setSettingsSuccessMsg] = useState('');
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
 
   useEffect(() => {
     const authSaved = localStorage.getItem('samiq_admin_auth');
@@ -55,11 +86,34 @@ export default function MerchantAdminPage() {
     fetchOrders();
     fetchBookings();
     fetchConversations();
+    fetchStoreConfig();
   }, []);
+
+  const fetchStoreConfig = async () => {
+    try {
+      const res = await fetch('/api/platform/config');
+      const data = await res.json();
+      if (data.success) {
+        if (data.themeId) setActiveTheme(data.themeId);
+        if (data.tenant) {
+          setStoreName(data.tenant.name || 'مفتاح الجمال');
+          setStoreLegalName(data.tenant.legalName || 'مفتاح الجمال — لكشف المقلد');
+          setStoreTagline(data.tenant.tagline || 'بوابتك الموثوقة لعالم الجمال الأصلي في اليمن');
+          setStoreWhatsapp(data.tenant.whatsapp || '775234989');
+          setStoreCity(data.tenant.city || 'صنعاء');
+        }
+      }
+    } catch (e) {}
+  };
 
   const handleLogin = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (passcode.trim() === 'miftah2026' || passcode.trim() === 'admin2026' || passcode.trim() === '1234') {
+    if (
+      passcode.trim() === 'miftah2026' ||
+      passcode.trim() === 'admin2026' ||
+      passcode.trim() === 'samiq2026' ||
+      passcode.trim() === '1234'
+    ) {
       setIsAuthenticated(true);
       localStorage.setItem('samiq_admin_auth', 'true');
       setAuthError('');
@@ -166,7 +220,7 @@ export default function MerchantAdminPage() {
     }
   };
 
-  // AI Assistant generator
+  // AI Assistant generator for single product
   const handleAiGenerate = async () => {
     if (!newTitle) return;
     setIsAiGenerating(true);
@@ -175,14 +229,21 @@ export default function MerchantAdminPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          productTitle: newTitle,
+          title: newTitle,
           brand: newBrand,
-          category: newCategory,
         }),
       });
       const data = await res.json();
-      if (data.success) {
-        setNewDescription(data.copy.luxuryDescription);
+      if (data.success && data.data) {
+        const d = data.data;
+        if (d.brand) setNewBrand(d.brand);
+        if (d.suggestedCategory) setNewCategory(d.suggestedCategory);
+        if (d.arabicDescription) setNewDescription(d.arabicDescription);
+        if (d.suggestedTags) setNewTags(d.suggestedTags);
+        if (d.confidence) setAiConfidence(d.confidence);
+        if (d.suggestedPriceYer) setNewPriceYer(d.suggestedPriceYer);
+        if (d.suggestedPriceSar) setNewPriceSar(d.suggestedPriceSar);
+        if (d.suggestedPriceUsd) setNewPriceUsd(d.suggestedPriceUsd);
       }
     } catch (e) {
     } finally {
@@ -190,6 +251,30 @@ export default function MerchantAdminPage() {
     }
   };
 
+  // Batch Auto-Tag All Products in database
+  const handleBatchAutoTagAll = async () => {
+    setIsBatchTagging(true);
+    setBatchToast('');
+    try {
+      const res = await fetch('/api/ai/product-assistant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'batch_reclassify' }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setBatchToast(data.message || 'تمت فهرسة وتصنيف كافة المنتجات بالذكاء الاصطناعي بنجاح');
+        fetchProducts();
+        setTimeout(() => setBatchToast(''), 5000);
+      }
+    } catch (e) {
+      setBatchToast('فشل التوليد الآلي للوسوم');
+    } finally {
+      setIsBatchTagging(false);
+    }
+  };
+
+  // Add Product to database
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle) return;
@@ -208,6 +293,9 @@ export default function MerchantAdminPage() {
       isAuthenticGuaranteed: true,
       badge: 'إصدار موثق جديد',
       subtitle: newDescription.slice(0, 70),
+      tags: newTags,
+      aiCategoryConfidence: aiConfidence || 98,
+      skinTypes: ['all'],
     };
 
     try {
@@ -221,11 +309,67 @@ export default function MerchantAdminPage() {
         setShowAddProductModal(false);
         setNewTitle('');
         setNewDescription('');
+        setNewTags(['تفتيح التصبغات', 'نضارة فورية']);
+        setAiConfidence(null);
         fetchProducts();
       }
     } catch (e) {}
   };
 
+  // Inline Tag Add for Existing Product
+  const handleAddInlineTag = async (product: ProductCardData) => {
+    if (!inlineNewTag.trim()) return;
+    const cleanTag = inlineNewTag.trim().replace(/^#/, '');
+    const currentTags = product.tags || [];
+    if (currentTags.includes(cleanTag)) {
+      setInlineNewTag('');
+      setEditingProductId(null);
+      return;
+    }
+
+    const updatedTags = [...currentTags, cleanTag];
+    try {
+      const res = await fetch('/api/store/products', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: product.id,
+          tags: updatedTags,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setProducts((prev) =>
+          prev.map((p) => (p.id === product.id ? { ...p, tags: updatedTags } : p))
+        );
+        setInlineNewTag('');
+        setEditingProductId(null);
+      }
+    } catch (e) {}
+  };
+
+  // Inline Tag Remove for Existing Product
+  const handleRemoveInlineTag = async (product: ProductCardData, tagToRemove: string) => {
+    const updatedTags = (product.tags || []).filter((t) => t !== tagToRemove);
+    try {
+      const res = await fetch('/api/store/products', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: product.id,
+          tags: updatedTags,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setProducts((prev) =>
+          prev.map((p) => (p.id === product.id ? { ...p, tags: updatedTags } : p))
+        );
+      }
+    } catch (e) {}
+  };
+
+  // Add Coupon
   const handleAddCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCouponCode) return;
@@ -235,8 +379,39 @@ export default function MerchantAdminPage() {
     } catch (e) {}
   };
 
+  // Save Store Settings & Template
+  const handleSaveStoreSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingSettings(true);
+    setSettingsSuccessMsg('');
+    try {
+      const res = await fetch('/api/platform/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          themeId: activeTheme,
+          tenant: {
+            name: storeName,
+            legalName: storeLegalName,
+            tagline: storeTagline,
+            whatsapp: storeWhatsapp,
+            city: storeCity,
+          },
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSettingsSuccessMsg('تم حفظ وتحديث إعدادات المتجر والقالب بنجاح في قاعدة البيانات.');
+        setTimeout(() => setSettingsSuccessMsg(''), 4000);
+      }
+    } catch (e) {
+    } finally {
+      setIsSavingSettings(false);
+    }
+  };
+
   // --------------------------------------------------------------------------
-  // LUXURY AUTHENTICATION GATE
+  // AUTHENTICATION GATE
   // --------------------------------------------------------------------------
   if (!isAuthenticated) {
     return (
@@ -264,7 +439,7 @@ export default function MerchantAdminPage() {
                 placeholder="أدخل رمز المرور..."
                 value={passcode}
                 onChange={(e) => setPasscode(e.target.value)}
-                className="w-full min-h-[44px] px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-ivory placeholder-muted-dim text-sm focus:border-gold outline-none text-center"
+                className="w-full min-h-[44px] px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-ivory placeholder-muted-dim text-xs focus:border-gold outline-none text-center"
               />
             </div>
 
@@ -276,7 +451,7 @@ export default function MerchantAdminPage() {
 
             <button
               type="submit"
-              className="w-full min-h-[44px] py-3.5 rounded-xl bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-bold text-sm hover:brightness-110 shadow-md transition inline-flex items-center justify-center"
+              className="w-full min-h-[44px] py-3.5 rounded-xl bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-bold text-xs hover:brightness-110 shadow-md transition inline-flex items-center justify-center"
             >
               تسجيل الدخول إلى اللوحة
             </button>
@@ -309,7 +484,7 @@ export default function MerchantAdminPage() {
   const activeConv = conversations.find((c) => c.id === selectedConvId) || conversations[0];
 
   return (
-    <div className="min-h-screen bg-obsidian text-ivory p-6 sm:p-10 font-sans">
+    <div className="min-h-screen bg-obsidian text-ivory p-4 sm:p-8 lg:p-10 font-sans">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Top Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-white/10 gap-4">
@@ -322,7 +497,7 @@ export default function MerchantAdminPage() {
                 لوحة إدارة متجر مفتاح الجمال (صنعاء)
               </h1>
               <p className="text-xs text-muted-lux">
-                إدارة المخزون، صندوق المحادثات الموحد، مساعد المنتجات الذكي، والحجوزات الفورية
+                إدارة المخزون، الوسوم الذكية، المساعد الذكي، الطلبات، وإعدادات القالب
               </p>
             </div>
           </div>
@@ -332,14 +507,20 @@ export default function MerchantAdminPage() {
               href="/"
               className="min-h-[44px] px-3.5 py-2 rounded-xl bg-gold/15 hover:bg-gold/25 text-champagne border border-gold/40 text-xs font-bold transition inline-flex items-center gap-1.5"
             >
-              <span>المتجر</span>
+              <span>المتجر الحي</span>
               <span>←</span>
             </Link>
             <Link
               href="/platform"
               className="min-h-[44px] px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-ivory border border-white/10 text-xs font-semibold transition inline-flex items-center"
             >
-              المنصة
+              لوحة المنصة (Platform)
+            </Link>
+            <Link
+              href="/account"
+              className="min-h-[44px] px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-ivory border border-white/10 text-xs font-semibold transition inline-flex items-center"
+            >
+              بوابة العملاء (/account)
             </Link>
             <button
               onClick={handleLogout}
@@ -372,7 +553,7 @@ export default function MerchantAdminPage() {
             <span className="text-xs text-muted-lux font-medium">المستحضرات في الكتالوج</span>
             <div className="flex items-baseline justify-between">
               <span className="text-3xl font-serif font-bold text-ivory">{products.length}</span>
-              <span className="text-xs text-gold font-sans font-bold">موثقة 100%</span>
+              <span className="text-xs text-gold font-sans font-bold">وسوم ذكية مفهرسة</span>
             </div>
           </div>
 
@@ -385,7 +566,7 @@ export default function MerchantAdminPage() {
           </div>
         </div>
 
-        {/* Tab Switcher */}
+        {/* 7-Tab Switcher */}
         <div className="flex items-center gap-2 border-b border-white/10 pb-4 flex-wrap">
           <button
             type="button"
@@ -396,7 +577,7 @@ export default function MerchantAdminPage() {
                 : 'text-ivory/70 hover:text-ivory hover:bg-white/5'
             }`}
           >
-            <span>صندوق المحادثات الموحد (Omnichannel Inbox)</span>
+            <span>صندوق المحادثات</span>
             <span className="px-1.5 py-0.5 rounded-full bg-black/40 text-xs">
               {conversations.length}
             </span>
@@ -410,7 +591,7 @@ export default function MerchantAdminPage() {
                 : 'text-ivory/70 hover:text-ivory hover:bg-white/5'
             }`}
           >
-            إدارة المخزون ({products.length})
+            إدارة المخزون والوسوم ({products.length})
           </button>
           <button
             type="button"
@@ -443,7 +624,7 @@ export default function MerchantAdminPage() {
                 : 'text-ivory/70 hover:text-ivory hover:bg-white/5'
             }`}
           >
-            دليل فحص الأصالة والتوثيق
+            دليل فحص الأصالة
           </button>
           <button
             type="button"
@@ -456,17 +637,28 @@ export default function MerchantAdminPage() {
           >
             كوبونات الخصم
           </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('settings')}
+            className={`min-h-[44px] px-4 py-2.5 rounded-xl text-xs font-sans font-bold transition inline-flex items-center ${
+              activeTab === 'settings'
+                ? 'bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark shadow-md'
+                : 'text-ivory/70 hover:text-ivory hover:bg-white/5'
+            }`}
+          >
+            إعدادات المتجر والقالب
+          </button>
         </div>
 
         {/* ------------------------------------------------------------------ */}
-        {/* TAB 1: OMNICHANNEL INBOX & HUMAN TAKEOVER                          */}
+        {/* TAB 1: OMNICHANNEL INBOX                                           */}
         {/* ------------------------------------------------------------------ */}
         {activeTab === 'inbox' && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Conversation List (4 cols) */}
             <div className="lg:col-span-4 p-4 rounded-3xl bg-surface border border-white/5 space-y-3">
               <div className="flex items-center justify-between pb-3 border-b border-white/10">
-                <h3 className="text-sm font-serif font-bold text-ivory">محادثات القنوات الحية</h3>
+                <h3 className="text-xs font-serif font-bold text-ivory">محادثات القنوات الحية</h3>
                 <span className="text-xs text-muted-lux">واتساب • تيليجرام • شات الموقع</span>
               </div>
 
@@ -523,7 +715,6 @@ export default function MerchantAdminPage() {
             <div className="lg:col-span-8 p-6 rounded-3xl bg-surface border border-white/5 space-y-4 flex flex-col justify-between min-h-[500px]">
               {activeConv ? (
                 <>
-                  {/* Thread Header */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-white/10 gap-3">
                     <div>
                       <div className="flex items-center gap-2">
@@ -539,7 +730,6 @@ export default function MerchantAdminPage() {
                       </p>
                     </div>
 
-                    {/* Bot Pause / Resume Toggle Button */}
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
@@ -555,17 +745,13 @@ export default function MerchantAdminPage() {
                             activeConv.isBotActive ? 'bg-amber-400' : 'bg-emerald-400'
                           }`}
                         />
-                        <span>
-                          {activeConv.isBotActive
-                            ? 'إيقاف البوت والرد كموظف بشري'
-                            : 'إعادة تفعيل الرد الآلي بالذكاء الاصطناعي'}
-                        </span>
+                        <span>{activeConv.isBotActive ? 'إيقاف البوت مؤقتاً للرد' : 'استئناف رد البوت الآلي'}</span>
                       </button>
                     </div>
                   </div>
 
                   {/* Messages Feed */}
-                  <div className="space-y-3.5 overflow-y-auto max-h-[350px] p-2">
+                  <div className="space-y-3 overflow-y-auto max-h-[350px] p-2">
                     {activeConv.messages.map((m) => {
                       const isCustomer = m.sender === 'customer';
                       const isBot = m.sender === 'bot';
@@ -629,51 +815,167 @@ export default function MerchantAdminPage() {
         )}
 
         {/* ------------------------------------------------------------------ */}
-        {/* TAB 2: INVENTORY MANAGEMENT                                        */}
+        {/* TAB 2: INVENTORY & SMART TAGS MANAGEMENT                           */}
         {/* ------------------------------------------------------------------ */}
         {activeTab === 'inventory' && (
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-serif font-bold text-ivory">
-                كتالوج المستحضرات الفاخرة ({products.length})
-              </h3>
-              <button
-                type="button"
-                onClick={() => setShowAddProductModal(true)}
-                className="min-h-[44px] px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-bold text-xs hover:brightness-110 shadow-md transition inline-flex items-center gap-1.5"
-              >
-                <span>+</span>
-                <span>إضافة مستحضر جديد بالذكاء الاصطناعي</span>
-              </button>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-serif font-bold text-ivory">
+                  كتالوج المستحضرات والوسوم الذكية ({products.length})
+                </h3>
+                <p className="text-xs text-muted-lux">
+                  تصنيف ذكي متعدد الأبعاد عبر AI Smart Tags مع فلترة فورية وحفظ دائم
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <button
+                  type="button"
+                  onClick={handleBatchAutoTagAll}
+                  disabled={isBatchTagging}
+                  className="min-h-[44px] px-4 py-2 rounded-xl bg-gold/15 hover:bg-gold/25 text-champagne border border-gold/40 text-xs font-bold transition inline-flex items-center gap-1.5"
+                >
+                  <SparkleStarIcon size={16} color="#C9A84C" />
+                  <span>{isBatchTagging ? 'جارٍ التصنيف...' : 'فهرسة وتصنيف الكتالوج تلقائياً بالذكاء الاصطناعي'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowAddProductModal(true)}
+                  className="min-h-[44px] px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-bold text-xs hover:brightness-110 shadow-md transition inline-flex items-center gap-1.5"
+                >
+                  <span>+</span>
+                  <span>إضافة مستحضر جديد بالذكاء الاصطناعي</span>
+                </button>
+              </div>
             </div>
 
+            {batchToast && (
+              <div className="p-4 rounded-2xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs text-center font-sans">
+                {batchToast}
+              </div>
+            )}
+
+            {/* Product Cards with Smart Tags & Inline Tag Editor */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map((p) => (
-                <div
-                  key={p.id}
-                  className="p-5 rounded-3xl bg-surface border border-white/5 space-y-3 relative group"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gold font-serif font-bold">
-                      {p.brand}
-                    </span>
-                    <span className="text-xs text-emerald-400 bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-500/30">
-                      أصلي موثق
-                    </span>
-                  </div>
+              {products.map((p) => {
+                const categoryAr = CATEGORY_NAMES_AR[p.categorySlug] || p.categorySlug;
+                const isEditing = editingProductId === p.id;
 
-                  <h4 className="text-sm font-semibold text-ivory line-clamp-1">{p.title}</h4>
+                return (
+                  <div
+                    key={p.id}
+                    className="p-5 rounded-3xl bg-surface border border-white/5 space-y-3 relative group flex flex-col justify-between"
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="text-xs text-gold font-serif font-bold">
+                          {p.brand}
+                        </span>
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs text-emerald-400 bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                            {categoryAr}
+                          </span>
+                          {p.aiCategoryConfidence && (
+                            <span className="text-xs text-champagne bg-gold/10 px-2 py-0.5 rounded-full border border-gold/30">
+                              {p.aiCategoryConfidence}% AI
+                            </span>
+                          )}
+                        </div>
+                      </div>
 
-                  <div className="flex items-baseline justify-between pt-2 border-t border-white/5">
-                    <div className="text-champagne font-bold text-sm">
-                      {formatCurrency(p.prices.YER, 'YER')}
+                      <h4 className="text-sm font-semibold text-ivory line-clamp-2">{p.title}</h4>
+
+                      {/* Smart Tags Display & Removal */}
+                      <div className="space-y-1.5 pt-1">
+                        <span className="text-xs text-muted-lux block font-medium">الوسوم الذكية النشطة:</span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {p.tags && p.tags.length > 0 ? (
+                            p.tags.map((t) => (
+                              <span
+                                key={t}
+                                className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-champagne"
+                              >
+                                <span>#{t}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveInlineTag(p, t)}
+                                  className="w-4 h-4 rounded-full hover:bg-white/10 flex items-center justify-center text-muted-dim hover:text-rose-400"
+                                  title="حذف الوسم"
+                                >
+                                  ×
+                                </button>
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-xs text-muted-dim">لا توجد وسوم مخصصة</span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Inline Add Tag */}
+                      <div className="pt-2">
+                        {isEditing ? (
+                          <div className="flex items-center gap-1.5">
+                            <input
+                              type="text"
+                              autoFocus
+                              placeholder="اكتبي الوسم الجديد..."
+                              value={inlineNewTag}
+                              onChange={(e) => setInlineNewTag(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  handleAddInlineTag(p);
+                                }
+                              }}
+                              className="flex-1 min-h-[40px] px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-ivory text-xs focus:border-gold outline-none"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleAddInlineTag(p)}
+                              className="min-h-[40px] px-3 rounded-lg bg-gold text-obsidian-dark font-bold text-xs"
+                            >
+                              حفظ
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingProductId(null);
+                                setInlineNewTag('');
+                              }}
+                              className="min-h-[40px] px-2 rounded-lg text-xs text-muted-lux hover:text-ivory"
+                            >
+                              إلغاء
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingProductId(p.id);
+                              setInlineNewTag('');
+                            }}
+                            className="min-h-[40px] px-3 rounded-lg bg-white/5 hover:bg-white/10 text-xs text-champagne font-medium transition inline-flex items-center gap-1"
+                          >
+                            <span>+ إضافة وسم ذكي للمنتج</span>
+                          </button>
+                        )}
+                      </div>
                     </div>
-                    <div className="text-xs text-muted-lux">
-                      (${p.prices.USD} / {p.prices.SAR} ر.س)
+
+                    <div className="flex items-baseline justify-between pt-3 border-t border-white/5">
+                      <div className="text-champagne font-bold text-sm">
+                        {formatCurrency(p.prices.YER, 'YER')}
+                      </div>
+                      <div className="text-xs text-muted-lux">
+                        (${p.prices.USD} / {p.prices.SAR} ر.س)
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
@@ -686,7 +988,10 @@ export default function MerchantAdminPage() {
             <h3 className="text-lg font-serif font-bold text-ivory">سجل طلبات المتجر المباشرة</h3>
             <div className="space-y-3">
               {orders.map((o) => (
-                <div key={o.id} className="p-5 rounded-2xl bg-surface border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div
+                  key={o.id}
+                  className="p-5 rounded-2xl bg-surface border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                >
                   <div className="space-y-1">
                     <div className="flex items-center gap-3">
                       <span className="font-mono text-xs text-gold font-bold">{o.orderNumber}</span>
@@ -719,7 +1024,10 @@ export default function MerchantAdminPage() {
             <h3 className="text-lg font-serif font-bold text-ivory">حجوزات الاستشارات التجميلية</h3>
             <div className="space-y-3">
               {bookings.map((b) => (
-                <div key={b.id} className="p-5 rounded-2xl bg-surface border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div
+                  key={b.id}
+                  className="p-5 rounded-2xl bg-surface border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                >
                   <div className="space-y-1">
                     <div className="flex items-center gap-3">
                       <span className="text-sm font-semibold text-ivory">{b.customerName}</span>
@@ -782,6 +1090,127 @@ export default function MerchantAdminPage() {
             </form>
           </div>
         )}
+
+        {/* ------------------------------------------------------------------ */}
+        {/* TAB 7: STORE & TEMPLATE SETTINGS                                   */}
+        {/* ------------------------------------------------------------------ */}
+        {activeTab === 'settings' && (
+          <div className="p-6 sm:p-8 rounded-3xl bg-surface border border-white/5 space-y-6">
+            <div>
+              <h3 className="text-lg font-serif font-bold text-ivory">
+                إعدادات المتجر والقالب المعماري (Store & Template Settings)
+              </h3>
+              <p className="text-xs text-muted-lux">
+                تغيير القالب النشط للمتجر وتحديث بيانات العلامة التجارية وحفظها في قاعدة البيانات
+              </p>
+            </div>
+
+            {settingsSuccessMsg && (
+              <div className="p-4 rounded-2xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs text-center font-sans">
+                {settingsSuccessMsg}
+              </div>
+            )}
+
+            {/* Template Selector Cards */}
+            <div className="space-y-3">
+              <label className="text-xs font-sans font-bold text-gold block">
+                القالب المعماري المعتمد للمتجر:
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {Object.values(SAMIQ_THEMES).map((th) => {
+                  const isCur = activeTheme === th.id;
+                  return (
+                    <button
+                      key={th.id}
+                      type="button"
+                      onClick={() => setActiveTheme(th.id)}
+                      className={`min-h-[44px] p-4 rounded-2xl border text-start transition-all ${
+                        isCur
+                          ? 'bg-elevated border-gold shadow-md'
+                          : 'bg-white/[0.02] border-white/5 hover:border-white/20'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-bold text-ivory">{th.nameAr}</span>
+                        {isCur && (
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-gold text-obsidian-dark font-bold">
+                            النشط
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-lux leading-relaxed">
+                        {th.paletteDescription}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Store Metadata Form */}
+            <form onSubmit={handleSaveStoreSettings} className="space-y-4 pt-4 border-t border-white/10 text-xs font-sans">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-muted-lux font-semibold block mb-1">اسم المتجر العام:</label>
+                  <input
+                    type="text"
+                    value={storeName}
+                    onChange={(e) => setStoreName(e.target.value)}
+                    className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-ivory text-xs focus:border-gold outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-muted-lux font-semibold block mb-1">الاسم القانوني والشعار:</label>
+                  <input
+                    type="text"
+                    value={storeLegalName}
+                    onChange={(e) => setStoreLegalName(e.target.value)}
+                    className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-ivory text-xs focus:border-gold outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-muted-lux font-semibold block mb-1">رقم الواتساب للطلبات:</label>
+                  <input
+                    type="text"
+                    value={storeWhatsapp}
+                    onChange={(e) => setStoreWhatsapp(e.target.value)}
+                    className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-ivory text-xs focus:border-gold outline-none dir-ltr text-end"
+                  />
+                </div>
+                <div>
+                  <label className="text-muted-lux font-semibold block mb-1">المدينة الرئيسية:</label>
+                  <input
+                    type="text"
+                    value={storeCity}
+                    onChange={(e) => setStoreCity(e.target.value)}
+                    className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-ivory text-xs focus:border-gold outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-muted-lux font-semibold block mb-1">الشعار والوصف التسويقي:</label>
+                <textarea
+                  rows={2}
+                  value={storeTagline}
+                  onChange={(e) => setStoreTagline(e.target.value)}
+                  className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl bg-white/5 border border-white/10 text-ivory text-xs focus:border-gold outline-none resize-none"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSavingSettings}
+                className="w-full min-h-[44px] py-3.5 rounded-2xl bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-bold text-xs hover:brightness-110 shadow-md transition inline-flex items-center justify-center"
+              >
+                {isSavingSettings ? 'جارٍ الحفظ...' : 'حفظ إعدادات المتجر والقالب في قاعدة البيانات'}
+              </button>
+            </form>
+          </div>
+        )}
       </div>
 
       {/* Add Product Modal */}
@@ -789,9 +1218,12 @@ export default function MerchantAdminPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
           <div className="w-full max-w-lg p-6 rounded-3xl bg-surface border border-gold/40 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-white/10">
-              <h3 className="text-base font-serif font-bold text-ivory">
-                إضافة مستحضر تجميل جديد للكتالوج
-              </h3>
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-gold" />
+                <h3 className="text-base font-serif font-bold text-ivory">
+                  إضافة مستحضر جديد وتصنيفه بالذكاء الاصطناعي
+                </h3>
+              </div>
               <button
                 type="button"
                 onClick={() => setShowAddProductModal(false)}
@@ -810,19 +1242,31 @@ export default function MerchantAdminPage() {
                     required
                     value={newTitle}
                     onChange={(e) => setNewTitle(e.target.value)}
-                    placeholder="مثال: غسول منعم للبشرة بحمض الساليسيليك 236ml"
-                    className="flex-1 min-h-[44px] px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-none"
+                    placeholder="مثال: سيروم فيتامين سي 10% نقي لنضارة فورية"
+                    className="flex-1 min-h-[44px] px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-none"
                   />
                   <button
                     type="button"
                     onClick={handleAiGenerate}
                     disabled={isAiGenerating || !newTitle}
-                    className="min-h-[44px] px-3 py-2 rounded-xl bg-gold/15 hover:bg-gold/25 border border-gold/40 text-champagne font-bold shrink-0 transition inline-flex items-center justify-center"
+                    className="min-h-[44px] px-3.5 py-2 rounded-xl bg-gold/15 hover:bg-gold/25 border border-gold/40 text-champagne font-bold shrink-0 transition inline-flex items-center justify-center gap-1.5"
                   >
-                    {isAiGenerating ? 'جارٍ التوليد...' : 'صياغة بالذكاء الاصطناعي'}
+                    <SparkleStarIcon size={16} color="#C9A84C" />
+                    <span>{isAiGenerating ? 'جارٍ التحليل...' : 'تصنيف وتوليد بالذكاء الاصطناعي'}</span>
                   </button>
                 </div>
               </div>
+
+              {aiConfidence && (
+                <div className="p-3 rounded-2xl bg-emerald-950/50 border border-emerald-500/30 flex items-center justify-between">
+                  <span className="text-xs text-emerald-300 font-bold">
+                    دقة التصنيف الذكي: {aiConfidence}%
+                  </span>
+                  <span className="text-xs text-emerald-400">
+                    تم التنبؤ بالتصنيف والوسوم بنجاح
+                  </span>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -845,11 +1289,68 @@ export default function MerchantAdminPage() {
                     onChange={(e) => setNewCategory(e.target.value)}
                     className="w-full min-h-[44px] px-3 py-2 rounded-xl bg-surface border border-white/10 text-ivory focus:border-gold outline-none"
                   >
-                    <option value="serums">سيرومات علاجية</option>
-                    <option value="cleansers">غسولات طبية</option>
-                    <option value="moisturizers">مرطبات مكثفة</option>
-                    <option value="makeup">مكياج فاخر</option>
+                    <option value="serums">السيرومات</option>
+                    <option value="cleansers-moisturizers">المنظفات والمرطبات</option>
+                    <option value="makeup">المكياج</option>
+                    <option value="skincare">العناية بالبشرة</option>
                   </select>
+                </div>
+              </div>
+
+              {/* Smart Tags Interactive Chip Editor */}
+              <div className="space-y-2">
+                <label className="text-muted-lux block font-medium">
+                  الوسوم الذكية للمنتج (Smart Tags):
+                </label>
+                <div className="flex flex-wrap gap-1.5 p-2 rounded-xl bg-white/[0.03] border border-white/10 min-h-[44px]">
+                  {newTags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-gold/15 text-champagne border border-gold/30 font-medium"
+                    >
+                      <span>#{tag}</span>
+                      <button
+                        type="button"
+                        onClick={() => setNewTags((prev) => prev.filter((t) => t !== tag))}
+                        className="w-4 h-4 rounded-full hover:bg-white/10 flex items-center justify-center text-muted-dim hover:text-rose-400"
+                        title="حذف الوسم"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+
+                {/* Add Custom Tag */}
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="أضيفي وسماً مخصصاً (مثال: ترطيب مكثف)..."
+                    value={customTagInput}
+                    onChange={(e) => setCustomTagInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (customTagInput.trim()) {
+                          setNewTags((prev) => [...prev, customTagInput.trim().replace(/^#/, '')]);
+                          setCustomTagInput('');
+                        }
+                      }
+                    }}
+                    className="flex-1 min-h-[40px] px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-none text-xs"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (customTagInput.trim()) {
+                        setNewTags((prev) => [...prev, customTagInput.trim().replace(/^#/, '')]);
+                        setCustomTagInput('');
+                      }
+                    }}
+                    className="min-h-[40px] px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-ivory font-bold shrink-0 text-xs"
+                  >
+                    + إضافة وسم
+                  </button>
                 </div>
               </div>
 

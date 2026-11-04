@@ -138,6 +138,23 @@ export function IvoryHeader({ onOpenSearch, onOpenAdvisor }: IvoryHeaderProps) {
             <AdvisorStarIcon size={20} color="#5E6B5A" />
           </button>
 
+          {/* Account Portal Link */}
+          <a
+            href="/account"
+            aria-label="حسابي ونقاط الولاء"
+            title="حسابي ونقاط الولاء"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center text-[#1B1612] hover:text-[#5E6B5A] transition-colors rounded-sm"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.75}
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              />
+            </svg>
+          </a>
+
           {/* Bag Trigger */}
           <button
             type="button"
@@ -233,6 +250,61 @@ export function IvoryHeader({ onOpenSearch, onOpenAdvisor }: IvoryHeaderProps) {
                 <ArrowIcon size={24} color="#5E6B5A" />
               </span>
             </button>
+
+            <a
+              href="/account"
+              className="w-full py-4 text-start font-serif font-bold text-2xl sm:text-4xl text-[#1B1612] hover:text-[#5E6B5A] border-b border-[#E8E2D8]/60 flex items-center justify-between group transition-colors min-h-[56px]"
+            >
+              <span>حسابي ونادي الولاء</span>
+              <span className="rtl:-scale-x-100 transition-transform duration-300 group-hover:-translate-x-2">
+                <ArrowIcon size={24} color="#5E6B5A" />
+              </span>
+            </a>
+
+            <a
+              href="/authenticity-hub"
+              className="w-full py-4 text-start font-serif font-bold text-2xl sm:text-4xl text-[#1B1612] hover:text-[#5E6B5A] border-b border-[#E8E2D8]/60 flex items-center justify-between group transition-colors min-h-[56px]"
+            >
+              <span>مختبر كشف المقلد التفاعلي</span>
+              <span className="rtl:-scale-x-100 transition-transform duration-300 group-hover:-translate-x-2">
+                <ArrowIcon size={24} color="#5E6B5A" />
+              </span>
+            </a>
+
+            <a
+              href="/bookings"
+              className="w-full py-4 text-start font-serif font-bold text-2xl sm:text-4xl text-[#1B1612] hover:text-[#5E6B5A] border-b border-[#E8E2D8]/60 flex items-center justify-between group transition-colors min-h-[56px]"
+            >
+              <span>حجز استشارة خاصة</span>
+              <span className="rtl:-scale-x-100 transition-transform duration-300 group-hover:-translate-x-2">
+                <ArrowIcon size={24} color="#5E6B5A" />
+              </span>
+            </a>
+
+            <a
+              href="/blog"
+              className="w-full py-4 text-start font-serif font-bold text-2xl sm:text-4xl text-[#1B1612] hover:text-[#5E6B5A] border-b border-[#E8E2D8]/60 flex items-center justify-between group transition-colors min-h-[56px]"
+            >
+              <span>المجلة التحريرية</span>
+              <span className="rtl:-scale-x-100 transition-transform duration-300 group-hover:-translate-x-2">
+                <ArrowIcon size={24} color="#5E6B5A" />
+              </span>
+            </a>
+
+            <div className="pt-4 flex items-center gap-3">
+              <a
+                href="/admin"
+                className="min-h-[44px] px-4 py-2 rounded-sm bg-[#1B1612] text-[#FAF7F2] text-xs font-sans font-semibold inline-flex items-center"
+              >
+                لوحة إدارة المتجر (Admin)
+              </a>
+              <a
+                href="/platform"
+                className="min-h-[44px] px-4 py-2 rounded-sm bg-[#FAF7F2] border border-[#1B1612]/30 text-[#1B1612] text-xs font-sans font-semibold inline-flex items-center"
+              >
+                لوحة منصة سامق (Platform)
+              </a>
+            </div>
           </div>
 
           {/* Bottom Bar: Currency & Social Channels */}

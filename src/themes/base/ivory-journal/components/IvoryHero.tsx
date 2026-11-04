@@ -35,7 +35,7 @@ export function IvoryHero({ section }: IvoryHeroProps) {
         We mirror the image wrapper horizontally via -scale-x-100 so the empty cream area 
         sits on the right (start side in RTL) and the face sits on the left (end side in RTL).
       */}
-      <div className="relative w-full min-h-[170px] sm:min-h-[340px] lg:min-h-[58dvh] flex items-center">
+      <div className="relative w-full min-h-[135px] sm:min-h-[340px] lg:min-h-[58dvh] flex items-center">
         {/* Mirrored Image Wrapper (ONLY on the image container, NEVER on the text) */}
         <div className="absolute inset-0 w-full h-full -scale-x-100 overflow-hidden pointer-events-none">
           <SmartImage
@@ -50,8 +50,8 @@ export function IvoryHero({ section }: IvoryHeroProps) {
         </div>
 
         {/* Content Container (placed on the start side over the calm cream area) */}
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-3 sm:px-8 lg:px-12 pt-3 pb-6 sm:pt-10 sm:pb-14 lg:pt-16 lg:pb-20">
-          <div className="max-w-xl text-start space-y-1.5 sm:space-y-4">
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-3 sm:px-8 lg:px-12 pt-2 pb-3 sm:pt-10 sm:pb-14 lg:pt-16 lg:pb-20">
+          <div className="max-w-xl text-start space-y-1 sm:space-y-4">
             {/* Editorial Metadata / Issue Badge */}
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border border-[#5E6B5A]/30 bg-[#F4EFE6]/80 text-[#5E6B5A]">
               <VerifiedStampIcon size={12} color="#5E6B5A" />
@@ -61,12 +61,12 @@ export function IvoryHero({ section }: IvoryHeroProps) {
             </div>
 
             {/* Headline in Royal Amiri Serif */}
-            <h1 className="font-serif font-bold text-xl sm:text-4xl lg:text-6xl text-[#1B1612] leading-[1.2]">
+            <h1 className="font-serif font-bold text-lg sm:text-4xl lg:text-6xl text-[#1B1612] leading-[1.2]">
               {title}
             </h1>
 
             {/* Subtitle in Clean Arabic Sans */}
-            <p className="font-sans text-sm sm:text-base text-[#554D46] leading-[1.75] line-clamp-2 sm:line-clamp-none max-w-lg">
+            <p className="font-sans text-xs sm:text-base text-[#554D46] leading-[1.6] line-clamp-1 sm:line-clamp-none max-w-lg hidden xs:block">
               {subtitle}
             </p>
 

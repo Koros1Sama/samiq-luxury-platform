@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getAllProducts, saveProduct, deleteProduct } from '@/core/db/store';
+import { getAllProducts, saveProduct, deleteProduct, getDb, saveDb } from '@/core/db/store';
 import { ProductCardData } from '@/themes/contract';
 
 export async function GET() {
@@ -31,6 +31,9 @@ export async function POST(req: Request) {
       badge: body.badge,
       variants: body.variants || [],
       description: body.description,
+      tags: Array.isArray(body.tags) ? body.tags : [],
+      skinTypes: Array.isArray(body.skinTypes) ? body.skinTypes : ['all'],
+      aiCategoryConfidence: typeof body.aiCategoryConfidence === 'number' ? body.aiCategoryConfidence : 98,
     };
 
     const saved = saveProduct(product);
@@ -40,6 +43,37 @@ export async function POST(req: Request) {
       { success: false, message: 'حدث خطأ أثناء حفظ المنتج' },
       { status: 500 }
     );
+  }
+}
+
+export async function PUT(req: Request) {
+  try {
+    const body = await req.json();
+    if (!body.id) {
+      return NextResponse.json({ success: false, message: 'معرف المنتج مطلوب' }, { status: 400 });
+    }
+
+    const db = getDb();
+    const productIdx = db.products.findIndex((p) => p.id === body.id);
+    if (productIdx === -1) {
+      return NextResponse.json({ success: false, message: 'المنتج غير موجود' }, { status: 404 });
+    }
+
+    const existing = db.products[productIdx];
+    const updated: ProductCardData = {
+      ...existing,
+      ...body,
+      id: existing.id, // preserve ID
+      tags: Array.isArray(body.tags) ? body.tags : existing.tags || [],
+      prices: body.prices || existing.prices,
+    };
+
+    db.products[productIdx] = updated;
+    saveDb(db);
+
+    return NextResponse.json({ success: true, product: updated });
+  } catch (error) {
+    return NextResponse.json({ success: false, message: 'فشل تحديث بيانات المنتج' }, { status: 500 });
   }
 }
 

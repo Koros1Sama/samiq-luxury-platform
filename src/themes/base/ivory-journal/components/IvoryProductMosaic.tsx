@@ -12,13 +12,25 @@ interface IvoryProductMosaicProps extends Partial<SectionComponentProps> {
 }
 
 export function IvoryProductMosaic({ onSelectProduct }: IvoryProductMosaicProps) {
-  const { products, categories, activeCategory, setActiveCategory, cart, currency } = useStorefront();
+  const {
+    products,
+    categories,
+    activeCategory,
+    setActiveCategory,
+    activeTag,
+    setActiveTag,
+    availableTags,
+    cart,
+    currency,
+  } = useStorefront();
 
-  // Filter products by active category (treating 'all', '', or undefined as all products)
+  // Filter products by active category and active tag
   const isAll = !activeCategory || activeCategory === 'all' || activeCategory === '';
-  const filteredProducts = isAll
-    ? products
-    : products.filter((p) => p.categorySlug === activeCategory);
+  const filteredProducts = products.filter((p) => {
+    if (!isAll && p.categorySlug !== activeCategory) return false;
+    if (activeTag && (!p.tags || !p.tags.includes(activeTag))) return false;
+    return true;
+  });
 
   // Split into mobile 2 columns and desktop 3 columns cleanly without duplication
   const mobileCols = [
@@ -79,6 +91,41 @@ export function IvoryProductMosaic({ onSelectProduct }: IvoryProductMosaicProps)
         </div>
       </div>
 
+      {/* Desktop Smart Multi-Tags Horizontal Scrollable Bar */}
+      {availableTags.length > 0 && (
+        <div className="hidden lg:flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1.5 mb-6">
+          <button
+            type="button"
+            onClick={() => setActiveTag(null)}
+            className={`min-h-[40px] px-3.5 rounded-full text-xs font-sans font-medium whitespace-nowrap transition-all shrink-0 inline-flex items-center justify-center ${
+              activeTag === null
+                ? 'bg-[#1B1612] text-[#FAF7F2] font-bold shadow-sm'
+                : 'bg-[#F4EFE6] text-[#554D46] hover:bg-[#E8E2D8]'
+            }`}
+          >
+            كل الوسوم
+          </button>
+          {availableTags.map(({ tag, count }) => {
+            const isSelected = activeTag === tag;
+            return (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => setActiveTag(isSelected ? null : tag)}
+                className={`min-h-[40px] px-3.5 rounded-full text-xs font-sans transition-all shrink-0 inline-flex items-center gap-1.5 ${
+                  isSelected
+                    ? 'bg-[#5E6B5A] text-white font-bold shadow-sm'
+                    : 'bg-[#F4EFE6] text-[#554D46] hover:bg-[#E8E2D8] border border-[#E8E2D8]'
+                }`}
+              >
+                <span>#{tag}</span>
+                <span className="text-xs opacity-75">({count})</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       {/* Mobile 2-column layout (<= lg) */}
       <div className="grid grid-cols-2 gap-2 sm:gap-6 items-start lg:hidden">
         {mobileCols.map((col, colIdx) => (
@@ -94,11 +141,48 @@ export function IvoryProductMosaic({ onSelectProduct }: IvoryProductMosaicProps)
                 currency={currency}
                 onSelect={onSelectProduct}
                 onAdd={() => cart.add(product)}
+                activeTag={activeTag}
+                setActiveTag={setActiveTag}
               />
             ))}
           </div>
         ))}
       </div>
+
+      {/* Mobile Smart Multi-Tags Bar (Below the fold) */}
+      {availableTags.length > 0 && (
+        <div className="lg:hidden flex items-center gap-1.5 overflow-x-auto no-scrollbar py-2 my-3 border-t border-[#E8E2D8]">
+          <button
+            type="button"
+            onClick={() => setActiveTag(null)}
+            className={`min-h-[40px] px-3.5 rounded-full text-xs font-sans font-medium whitespace-nowrap transition-all shrink-0 inline-flex items-center justify-center ${
+              activeTag === null
+                ? 'bg-[#1B1612] text-[#FAF7F2] font-bold shadow-sm'
+                : 'bg-[#F4EFE6] text-[#554D46] hover:bg-[#E8E2D8]'
+            }`}
+          >
+            كل الوسوم
+          </button>
+          {availableTags.map(({ tag, count }) => {
+            const isSelected = activeTag === tag;
+            return (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => setActiveTag(isSelected ? null : tag)}
+                className={`min-h-[40px] px-3.5 rounded-full text-xs font-sans transition-all shrink-0 inline-flex items-center gap-1.5 ${
+                  isSelected
+                    ? 'bg-[#5E6B5A] text-white font-bold shadow-sm'
+                    : 'bg-[#F4EFE6] text-[#554D46] hover:bg-[#E8E2D8] border border-[#E8E2D8]'
+                }`}
+              >
+                <span>#{tag}</span>
+                <span className="text-xs opacity-75">({count})</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Desktop 3-column layout (lg+) */}
       <div className="hidden lg:grid lg:grid-cols-3 lg:gap-8 items-start">
@@ -115,6 +199,8 @@ export function IvoryProductMosaic({ onSelectProduct }: IvoryProductMosaicProps)
                 currency={currency}
                 onSelect={onSelectProduct}
                 onAdd={() => cart.add(product)}
+                activeTag={activeTag}
+                setActiveTag={setActiveTag}
               />
             ))}
           </div>
@@ -130,9 +216,11 @@ interface IvoryCardProps {
   currency: any;
   onSelect?: (product: ProductCardData) => void;
   onAdd: () => void;
+  activeTag: string | null;
+  setActiveTag: (tag: string | null) => void;
 }
 
-function IvoryCard({ product, isTall, currency, onSelect, onAdd }: IvoryCardProps) {
+function IvoryCard({ product, isTall, currency, onSelect, onAdd, activeTag, setActiveTag }: IvoryCardProps) {
   const info = getProductQuickInfo(product, currency);
 
   return (
@@ -182,6 +270,29 @@ function IvoryCard({ product, isTall, currency, onSelect, onAdd }: IvoryCardProp
           >
             {product.title}
           </h3>
+
+          {/* Clickable Micro-chips for up to 2 tags */}
+          {product.tags && product.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1 pt-1">
+              {product.tags.slice(0, 2).map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveTag(activeTag === t ? null : t);
+                  }}
+                  className={`min-h-[40px] px-2.5 rounded-sm text-xs font-sans transition-colors inline-flex items-center justify-center ${
+                    activeTag === t
+                      ? 'bg-[#1B1612] text-[#FAF7F2] font-bold'
+                      : 'bg-[#F4EFE6] text-[#554D46] hover:bg-[#E8E2D8] border border-[#E8E2D8]'
+                  }`}
+                >
+                  #{t}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Price & Plain '+' Add Control */}

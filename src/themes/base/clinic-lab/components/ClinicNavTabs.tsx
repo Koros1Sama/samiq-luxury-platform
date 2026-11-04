@@ -6,15 +6,20 @@ const TABS = [
   { id: 'tab-store', label: 'المتجر', href: '#products' },
   { id: 'tab-routine', label: 'روتيني', href: '#routine' },
   { id: 'tab-auth', label: 'تحقق من الدفعة', href: '#authenticity' },
+  { id: 'tab-account', label: 'الملف الطبي وحسابي', href: '/account' },
+  { id: 'tab-bookings', label: 'حجز استشارة', href: '/bookings' },
+  { id: 'tab-blog', label: 'المجلة السريرية', href: '/blog' },
   { id: 'tab-contact', label: 'تواصل', href: '#contact' },
 ];
 
 export function ClinicNavTabs() {
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    e.preventDefault();
-    const target = document.querySelector(href);
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (href.startsWith('#')) {
+      e.preventDefault();
+      const target = document.querySelector(href);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
   };
 

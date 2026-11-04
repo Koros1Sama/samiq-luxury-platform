@@ -131,7 +131,7 @@ export function LuxuryHeader(props: LuxuryHeaderProps) {
                 if (props.onOpenSearch) props.onOpenSearch();
                 else setSearchModalOpen(true);
               }}
-              className="w-11 h-11 rounded-full flex items-center justify-center text-ivory/80 hover:text-champagne hover:bg-white/5 transition"
+              className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center text-ivory/80 hover:text-champagne hover:bg-white/5 transition"
               aria-label="بحث في المنتجات"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -144,12 +144,29 @@ export function LuxuryHeader(props: LuxuryHeaderProps) {
               </svg>
             </button>
 
+            {/* Account Portal Link */}
+            <Link
+              href="/account"
+              className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center text-ivory/80 hover:text-champagne hover:bg-white/5 transition"
+              aria-label="حسابي ونقاط الولاء"
+              title="حسابي ونقاط الولاء"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.75}
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
+              </svg>
+            </Link>
+
             {/* AI Advisor Button */}
             {features.ai_chatbot && (
               <button
                 type="button"
                 onClick={props.onOpenAdvisor}
-                className="w-11 h-11 rounded-full flex items-center justify-center text-champagne bg-gold/10 hover:bg-gold/20 border border-gold/30 transition shadow-sm"
+                className="hidden sm:flex w-11 h-11 min-w-[44px] min-h-[44px] rounded-full items-center justify-center text-champagne bg-gold/10 hover:bg-gold/20 border border-gold/30 transition shadow-sm"
                 aria-label="المستشار الذكي لكشف المقلد"
                 title="المستشار الذكي"
               >
@@ -163,7 +180,7 @@ export function LuxuryHeader(props: LuxuryHeaderProps) {
                 type="button"
                 data-testid="cart-button"
                 onClick={onOpenCart}
-                className="relative w-11 h-11 rounded-full flex items-center justify-center bg-white/5 hover:bg-gold/15 border border-white/10 hover:border-gold/30 text-ivory hover:text-champagne transition shadow-[0_2px_10px_rgba(0,0,0,0.5)]"
+                className="relative w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center bg-white/5 hover:bg-gold/15 border border-white/10 hover:border-gold/30 text-ivory hover:text-champagne transition shadow-[0_2px_10px_rgba(0,0,0,0.5)]"
                 aria-label="سلة المشتريات"
               >
                 <BagCartIcon size={20} color="currentColor" strokeWidth={1.5} />

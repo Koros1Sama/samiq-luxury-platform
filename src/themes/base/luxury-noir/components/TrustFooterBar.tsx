@@ -1,11 +1,12 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { MiftahLogoSvg } from './MiftahLogoSvg';
 import { useStorefront } from '@/core/storefront/StorefrontProvider';
 
 export function TrustFooterBar() {
-  const { tenant } = useStorefront();
+  const { tenant, platformMeta } = useStorefront();
 
   const contact = tenant.contact || {
     whatsapp: tenant.whatsapp || '775234989',
@@ -38,9 +39,57 @@ export function TrustFooterBar() {
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-gold/30">
               <span className="w-2 h-2 rounded-full bg-gold" />
               <span className="text-xs font-serif font-bold text-champagne">
-                منصة سَامِق (SAMIQ Engine)
+                {tenant.legalName || 'مفتاح الجمال — لكشف المقلد'}
               </span>
             </div>
+            <div className="flex items-center gap-3 pt-1 flex-wrap justify-start md:justify-end">
+              <Link
+                href="/account"
+                className="min-h-[44px] px-3.5 rounded-lg bg-white/5 hover:bg-gold/15 border border-white/10 hover:border-gold/30 text-xs font-sans text-ivory/80 hover:text-champagne transition inline-flex items-center"
+              >
+                حسابي ونقاط الولاء
+              </Link>
+              <Link
+                href="/admin"
+                className="min-h-[44px] px-3.5 rounded-lg bg-white/5 hover:bg-gold/15 border border-white/10 hover:border-gold/30 text-xs font-sans text-ivory/80 hover:text-champagne transition inline-flex items-center"
+              >
+                لوحة الإدارة
+              </Link>
+              <Link
+                href="/platform"
+                className="min-h-[44px] px-3.5 rounded-lg bg-white/5 hover:bg-gold/15 border border-white/10 hover:border-gold/30 text-xs font-sans text-ivory/80 hover:text-champagne transition inline-flex items-center"
+              >
+                هندسة المنصة
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Dedicated SAMIQ Engine Developer Signature Bar */}
+        <div className="pt-6 border-t border-gold/20 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-sans bg-gold/[0.04] p-4 rounded-2xl border border-gold/20">
+          <div className="text-center md:text-start space-y-1">
+            <p className="font-serif font-bold text-champagne text-sm">
+              يعمل بمحرك سَامِق (SAMIQ) للمتاجر الفاخرة — هل ترغب بمتجر مماثل لعلامتك التجارية؟
+            </p>
+            <p className="text-muted-lux text-xs">
+              منصة هندسة المتاجر الرقمية الفاخرة والذكاء الاصطناعي للمتاجر التخصصية
+            </p>
+          </div>
+          <div className="flex items-center gap-3 flex-wrap justify-center">
+            <Link
+              href={platformMeta?.showcasePath || '/samiq'}
+              className="min-h-[44px] px-4 rounded-xl bg-gold/20 hover:bg-gold/30 text-champagne border border-gold/40 text-xs font-bold transition inline-flex items-center"
+            >
+              استعراض المزايا وقائمة الأسعار
+            </Link>
+            <a
+              href={platformMeta?.developerTelegramUrl || 'https://t.me/KorosSenpai'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="min-h-[44px] px-4 rounded-xl bg-white/5 hover:bg-white/10 text-ivory border border-white/15 text-xs font-bold transition inline-flex items-center gap-1.5"
+            >
+              <span>تواصل مع المطور عبر تيليجرام (@{platformMeta?.developerTelegramHandle || 'KorosSenpai'})</span>
+            </a>
           </div>
         </div>
 

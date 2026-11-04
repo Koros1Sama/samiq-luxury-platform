@@ -14,7 +14,7 @@ import {
 } from './ClinicIcons';
 
 export function ClinicProductSection(_props?: SectionComponentProps) {
-  const { products, search, activeCategory, cart, currency } = useStorefront();
+  const { products, search, activeCategory, activeTag, setActiveTag, availableTags, cart, currency } = useStorefront();
   const [selectedSkinType, setSelectedSkinType] = useState<SkinTypeId>('all');
   const [priceMax, setPriceMax] = useState<number>(30000);
   const [inStockOnly, setInStockOnly] = useState<boolean>(false);
@@ -58,7 +58,12 @@ export function ClinicProductSection(_props?: SectionComponentProps) {
         return false;
       }
 
-      // 4. Price Filter (YER reference)
+      // 4. Smart Tag Filter
+      if (activeTag && (!p.tags || !p.tags.includes(activeTag))) {
+        return false;
+      }
+
+      // 5. Price Filter (YER reference)
       const yerPrice = p.prices.YER ?? 0;
       if (yerPrice > priceMax) {
         return false;
@@ -66,7 +71,7 @@ export function ClinicProductSection(_props?: SectionComponentProps) {
 
       return true;
     });
-  }, [products, search.query, selectedSkinType, activeCategory, priceMax]);
+  }, [products, search.query, selectedSkinType, activeCategory, activeTag, priceMax]);
 
   return (
     <section id="products" className="w-full py-4 sm:py-8 bg-white">
@@ -79,9 +84,44 @@ export function ClinicProductSection(_props?: SectionComponentProps) {
             resultCount={filteredProducts.length}
           />
 
-          <div className="mt-3">
+          <div className="mt-2">
             <ClinicProductList products={filteredProducts} />
           </div>
+
+          {/* Smart Multi-Tags Horizontal Scrollable Bar (Mobile - Below the fold) */}
+          {availableTags.length > 0 && (
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-2 mt-4 border-t border-[#E2ECE9]">
+              <button
+                type="button"
+                onClick={() => setActiveTag(null)}
+                className={`min-h-[40px] px-3.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all shrink-0 inline-flex items-center justify-center ${
+                  activeTag === null
+                    ? 'bg-[#0F4C4A] text-white shadow-sm'
+                    : 'bg-[#F2F7F5] text-[#0F4C4A] hover:bg-[#CFE8E1]/60 border border-[#D4E5E0]'
+                }`}
+              >
+                كل الوسوم
+              </button>
+              {availableTags.map(({ tag, count }) => {
+                const isSelected = activeTag === tag;
+                return (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => setActiveTag(isSelected ? null : tag)}
+                    className={`min-h-[40px] px-3.5 rounded-lg text-xs font-semibold transition-all shrink-0 inline-flex items-center gap-1.5 ${
+                      isSelected
+                        ? 'bg-[#0F4C4A] text-white shadow-sm'
+                        : 'bg-[#F2F7F5] text-[#0F4C4A] hover:bg-[#CFE8E1]/60 border border-[#D4E5E0]'
+                    }`}
+                  >
+                    <span>#{tag}</span>
+                    <span className="text-xs opacity-75">({count})</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Desktop View: Left Filter Sidebar, Results Grid/List, Sticky Cart Summary */}
@@ -169,6 +209,41 @@ export function ClinicProductSection(_props?: SectionComponentProps) {
                 </button>
               )}
             </div>
+
+            {/* Smart Multi-Tags Horizontal Scrollable Bar (Desktop) */}
+            {availableTags.length > 0 && (
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+                <button
+                  type="button"
+                  onClick={() => setActiveTag(null)}
+                  className={`min-h-[40px] px-3.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all shrink-0 inline-flex items-center justify-center ${
+                    activeTag === null
+                      ? 'bg-[#0F4C4A] text-white shadow-sm'
+                      : 'bg-[#F2F7F5] text-[#0F4C4A] hover:bg-[#CFE8E1]/60 border border-[#D4E5E0]'
+                  }`}
+                >
+                  كل الوسوم
+                </button>
+                {availableTags.map(({ tag, count }) => {
+                  const isSelected = activeTag === tag;
+                  return (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => setActiveTag(isSelected ? null : tag)}
+                      className={`min-h-[40px] px-3.5 rounded-lg text-xs font-semibold transition-all shrink-0 inline-flex items-center gap-1.5 ${
+                        isSelected
+                          ? 'bg-[#0F4C4A] text-white shadow-sm'
+                          : 'bg-[#F2F7F5] text-[#0F4C4A] hover:bg-[#CFE8E1]/60 border border-[#D4E5E0]'
+                      }`}
+                    >
+                      <span>#{tag}</span>
+                      <span className="text-xs opacity-75">({count})</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
 
             <ClinicProductList products={filteredProducts} />
           </div>

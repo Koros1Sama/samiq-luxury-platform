@@ -4,7 +4,17 @@ import {
   ProductCardData,
   CategoryItem,
   ThemeCurrencyCode,
+  PlatformMeta,
 } from '@/themes/contract';
+
+export const MOCK_PLATFORM_META: PlatformMeta = {
+  platformNameAr: 'سَامِق',
+  platformNameEn: 'SAMIQ',
+  taglineAr: 'منصة هندسة المتاجر الرقمية الفاخرة والذكاء الاصطناعي',
+  developerTelegramHandle: 'KorosSenpai',
+  developerTelegramUrl: 'https://t.me/KorosSenpai',
+  showcasePath: '/samiq',
+};
 import {
   AuthenticityComparisonData,
   SkinRoutineData,
@@ -199,6 +209,7 @@ export const MOCK_STOREFRONT_DATA = {
     ai_chatbot: true,
     whatsapp_channel: false,
     telegram_channel: false,
+    smart_tags_ai: true,
   } as FeatureFlags,
   initialCurrency: 'YER' as ThemeCurrencyCode,
   categories: [
@@ -260,6 +271,9 @@ export const MOCK_STOREFRONT_DATA = {
         USD: 62,
       },
       variants: [{ id: 'v1', title: '30 مل (الأصلي)', inStock: true }],
+      tags: ['تفتيح التصبغات', 'مضاد أكسدة', 'نضارة فورية', 'بشرة باهتة', 'استخدام صباحي'],
+      skinTypes: ['dry', 'combination', 'all'],
+      aiCategoryConfidence: 99,
     },
     {
       id: 'prod-2',
@@ -280,6 +294,9 @@ export const MOCK_STOREFRONT_DATA = {
         { id: 'v2-1', title: '473 مل (عائلي)', inStock: true },
         { id: 'v2-2', title: '236 مل', inStock: true },
       ],
+      tags: ['ترطيب عميق', 'سيراميد طبيعي', 'خالي من العطور', 'بشرة جافة وحساسة', 'تنظيف لطيف'],
+      skinTypes: ['dry', 'sensitive', 'all'],
+      aiCategoryConfidence: 98,
     },
     {
       id: 'prod-3',
@@ -297,6 +314,9 @@ export const MOCK_STOREFRONT_DATA = {
         USD: 17,
       },
       variants: [{ id: 'v3-1', title: '30 مل', inStock: true }],
+      tags: ['مسامات واسعة', 'تنظيم الدهون', 'بشرة دهنية', 'مقاومة الشوائب', 'خالي من الزيوت'],
+      skinTypes: ['oily', 'combination'],
+      aiCategoryConfidence: 99,
     },
     {
       id: 'prod-4',
@@ -317,6 +337,9 @@ export const MOCK_STOREFRONT_DATA = {
         { id: 'v4-1', title: 'درجة 01 - كلاسيكي ملكي', inStock: true },
         { id: 'v4-2', title: 'درجة 70 - نيود طبيعي', inStock: true },
       ],
+      tags: ['ثبات مخملي', 'ترطيب الشفاه', 'مكياج فاخر', 'درجة روز كوتور', 'مقاوم للتكتل'],
+      skinTypes: ['all'],
+      aiCategoryConfidence: 97,
     },
     {
       id: 'prod-5',
@@ -334,6 +357,9 @@ export const MOCK_STOREFRONT_DATA = {
         USD: 40,
       },
       variants: [{ id: 'v5-1', title: '18 لون متدرج', inStock: true }],
+      tags: ['ألوان دافئة', 'دمج حريري', 'مكياج سهرات', 'ثبات 12 ساعة', 'شيمر ومطفي'],
+      skinTypes: ['all'],
+      aiCategoryConfidence: 98,
     },
     {
       id: 'prod-6',
@@ -351,6 +377,9 @@ export const MOCK_STOREFRONT_DATA = {
         USD: 30,
       },
       variants: [{ id: 'v6-1', title: '340 جم', inStock: true }],
+      tags: ['ترميم الحاجز', 'ترطيب 24 ساعة', 'بشرة جافة وحساسة', 'حمض الهيالورونيك', 'ليلي ونهاري'],
+      skinTypes: ['dry', 'sensitive'],
+      aiCategoryConfidence: 99,
     },
   ] as ProductCardData[],
   content: {
@@ -363,6 +392,7 @@ export const MOCK_STOREFRONT_DATA = {
   },
   authenticityGuide: MOCK_AUTHENTICITY_GUIDE,
   skinRoutine: MOCK_SKIN_ROUTINE,
+  platformMeta: MOCK_PLATFORM_META,
 };
 
 export const DEMO_RESTAURANT_CATEGORIES: CategoryItem[] = [

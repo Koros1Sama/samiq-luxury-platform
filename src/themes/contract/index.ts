@@ -102,6 +102,15 @@ export type SectionRenderers = Partial<Record<SectionType, React.ComponentType<S
   blocks?: Record<string, React.ComponentType<BlockRendererProps>>;
 };
 
+export interface PlatformMeta {
+  platformNameAr: string;
+  platformNameEn: string;
+  taglineAr: string;
+  developerTelegramHandle: string;
+  developerTelegramUrl: string;
+  showcasePath: string;
+}
+
 export interface TenantSocialChannels {
   tiktok?: string;
   instagram?: string;
@@ -142,6 +151,7 @@ export interface TenantBrandInfo {
   noindex?: boolean;
   contact: TenantContactInfo;
   homeSections: Section[];
+  platformMeta?: PlatformMeta;
   // Direct shortcuts for convenience
   whatsapp?: string;
   phone?: string;
@@ -161,7 +171,8 @@ export interface FeatureFlags {
   ai_chatbot: boolean;
   whatsapp_channel: boolean;
   telegram_channel: boolean;
-  [key: string]: boolean;
+  smart_tags_ai?: boolean;
+  [key: string]: boolean | undefined;
 }
 
 export interface ProductVariantData {
@@ -185,6 +196,9 @@ export interface ProductCardData {
   badge?: string;
   variants?: ProductVariantData[];
   description?: string;
+  tags?: string[];
+  skinTypes?: ('oily' | 'dry' | 'combination' | 'sensitive' | 'all')[];
+  aiCategoryConfidence?: number;
 }
 
 export interface CartItem {
@@ -254,7 +268,11 @@ export interface StorefrontContextValue {
   search: StorefrontSearch;
   activeCategory: string;
   setActiveCategory: (cat: string) => void;
+  activeTag: string | null;
+  setActiveTag: (tag: string | null) => void;
+  availableTags: { tag: string; count: number }[];
   whatsapp: StorefrontWhatsApp;
+  platformMeta?: PlatformMeta;
   blocksData: Record<string, unknown>;
 }
 

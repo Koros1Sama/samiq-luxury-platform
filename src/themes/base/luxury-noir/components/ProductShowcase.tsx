@@ -35,10 +35,15 @@ export function ProductShowcase(props: ProductShowcaseProps) {
       window.open(sf.whatsapp.productUrl(p), '_blank');
     });
   const activeFilter = props.activeFilter || sf.activeCategory;
+  const { activeTag, setActiveTag, availableTags } = sf;
 
   const filteredProducts = products.filter((p) => {
-    if (!activeFilter || activeFilter === 'all') return true;
-    if (activeFilter === p.categorySlug || activeFilter === p.id) return true;
+    if (activeFilter && activeFilter !== 'all' && activeFilter !== p.categorySlug && activeFilter !== p.id) {
+      return false;
+    }
+    if (activeTag && (!p.tags || !p.tags.includes(activeTag))) {
+      return false;
+    }
     return true;
   });
 
@@ -148,6 +153,41 @@ export function ProductShowcase(props: ProductShowcaseProps) {
             </p>
           </div>
 
+          {/* Smart Multi-Tags Horizontal Scrollable Bar */}
+          {availableTags.length > 0 && (
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+              <button
+                type="button"
+                onClick={() => setActiveTag(null)}
+                className={`min-h-[40px] px-3.5 rounded-full text-xs font-sans font-medium whitespace-nowrap transition-all shrink-0 inline-flex items-center justify-center ${
+                  activeTag === null
+                    ? 'bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-bold shadow-sm'
+                    : 'bg-white/5 text-ivory/80 hover:bg-white/10 hover:text-ivory border border-white/10'
+                }`}
+              >
+                كل الوسوم
+              </button>
+              {availableTags.map(({ tag, count }) => {
+                const isSelected = activeTag === tag;
+                return (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => setActiveTag(isSelected ? null : tag)}
+                    className={`min-h-[40px] px-3.5 rounded-full text-xs font-sans transition-all shrink-0 inline-flex items-center gap-1.5 ${
+                      isSelected
+                        ? 'bg-gold/20 text-champagne border border-gold font-bold shadow-[0_0_10px_rgba(201,168,76,0.2)]'
+                        : 'bg-[#15151B] text-muted-lux hover:text-ivory border border-white/5 hover:border-gold/30'
+                    }`}
+                  >
+                    <span>#{tag}</span>
+                    <span className="text-xs opacity-75">({count})</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
           {/* 2 Columns on Mobile, 3 on Tablet, 4 on Desktop */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 lg:gap-6">
             {filteredProducts.map((product) => {
@@ -194,9 +234,16 @@ export function ProductShowcase(props: ProductShowcaseProps) {
 
                     {/* Brand & Title Link (min-h-[40px] interactive hit target) */}
                     <div className="mt-2 space-y-1">
-                      <span className="text-xs font-sans text-gold font-semibold block truncate">
-                        {product.brand}
-                      </span>
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="text-xs font-sans text-gold font-semibold block truncate">
+                          {product.brand}
+                        </span>
+                        {product.aiCategoryConfidence && (
+                          <span className="text-xs font-sans font-medium text-emerald-400 bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-500/20 shrink-0">
+                            {product.aiCategoryConfidence}% AI
+                          </span>
+                        )}
+                      </div>
                       <Link
                         href={`/product/${product.id}`}
                         className="min-h-[40px] flex items-center"
@@ -208,6 +255,29 @@ export function ProductShowcase(props: ProductShowcaseProps) {
                           {product.title}
                         </h3>
                       </Link>
+
+                      {/* Clickable Micro-chips for up to 2 tags */}
+                      {product.tags && product.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 pt-1">
+                          {product.tags.slice(0, 2).map((t) => (
+                            <button
+                              key={t}
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveTag(activeTag === t ? null : t);
+                              }}
+                              className={`min-h-[40px] px-2.5 rounded-lg text-xs font-sans transition-colors inline-flex items-center justify-center ${
+                                activeTag === t
+                                  ? 'bg-gold text-obsidian-dark font-bold'
+                                  : 'bg-white/5 text-champagne/90 hover:bg-gold/20 hover:text-champagne border border-white/10'
+                              }`}
+                            >
+                              #{t}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
 
