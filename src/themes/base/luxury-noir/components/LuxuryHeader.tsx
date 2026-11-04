@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { MiftahLogoSvg } from './MiftahLogoSvg';
 import { CurrencySwitcher } from './CurrencySwitcher';
-import { ThemeSwitcher } from './ThemeSwitcher';
 import { SearchModal } from './SearchModal';
 import { PwaInstallPrompt } from './PwaInstallPrompt';
 import {
@@ -15,59 +14,74 @@ import {
   FacebookIcon,
   BagCartIcon,
 } from './LuxuryIcons';
+import { useStorefront } from '@/core/storefront/StorefrontProvider';
 import { ThemeCurrencyCode, FeatureFlags } from '../../../contract';
 
 interface LuxuryHeaderProps {
-  currentCurrency: ThemeCurrencyCode;
-  onCurrencyChange: (currency: ThemeCurrencyCode) => void;
-  features: FeatureFlags;
-  cartCount: number;
-  onOpenCart: () => void;
+  currentCurrency?: ThemeCurrencyCode;
+  onCurrencyChange?: (currency: ThemeCurrencyCode) => void;
+  features?: FeatureFlags;
+  cartCount?: number;
+  onOpenCart?: () => void;
   onOpenSearch?: () => void;
 }
 
-export function LuxuryHeader({
-  currentCurrency,
-  onCurrencyChange,
-  features,
-  cartCount,
-  onOpenCart,
-  onOpenSearch,
-}: LuxuryHeaderProps) {
+export function LuxuryHeader(props: LuxuryHeaderProps) {
+  const sf = useStorefront();
+
+  const currentCurrency = props.currentCurrency || sf.currency;
+  const onCurrencyChange = props.onCurrencyChange || sf.setCurrency;
+  const features = props.features || sf.features;
+  const cartCount = props.cartCount !== undefined ? props.cartCount : sf.cart.count;
+  const onOpenCart = props.onOpenCart || sf.cart.open;
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [activeNav, setActiveNav] = useState('الرئيسية');
 
+  const contact = sf.tenant.contact || {
+    whatsapp: sf.tenant.whatsapp || '775234989',
+    phone: sf.tenant.phone || '775234989',
+    social: {
+      tiktok: sf.tenant.tiktok,
+      instagram: sf.tenant.instagram,
+      facebook: sf.tenant.facebook,
+    },
+    map: {
+      url: sf.tenant.googleMaps || 'https://maps.app.goo.gl/DxsZTHrv2r386bXa9',
+      label: 'فرع صنعاء الرئيسي (حدة)',
+      city: sf.tenant.city || 'صنعاء',
+    },
+  };
+
   const navLinks = [
     { label: 'الرئيسية', href: '/' },
-    { label: 'المنتجات الفاخرة', href: '/#products-catalog' },
+    { label: 'المنتجات', href: '/#products-catalog' },
     { label: 'مختبر كشف المقلد', href: '/authenticity-hub' },
-    { label: 'روتين ومكونات البشرة', href: '/#skin-routine' },
-    { label: 'المجلة الجمالية', href: '/blog' },
+    { label: 'المجلة', href: '/blog' },
     { label: 'حجز استشارة', href: '/bookings' },
   ];
 
   return (
     <header className="sticky top-0 z-30 w-full transition-all shadow-md">
-      {/* 1. Top Utility Micro-Bar (Height 28-30px) */}
+      {/* 1. Top Utility Micro-Bar */}
       <div className="w-full bg-[#050507] border-b border-white/[0.06] py-1 px-3 sm:px-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between text-[11px] font-sans text-muted-lux">
-          {/* Right/Start: Official Map Link */}
+          {/* Start: Official Map Link */}
           <a
-            href="https://maps.app.goo.gl/DxsZTHrv2r386bXa9"
+            href={contact.map.url}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 hover:text-champagne transition-colors"
           >
             <MapPinIcon size={12} color="#C9A84C" />
             <span className="truncate max-w-[160px] sm:max-w-none">
-              صنعاء — شارع حدة (الموقع على الخريطة)
+              {contact.map.label}
             </span>
           </a>
 
-          {/* Left/End: Micro Utilities (Theme + Currency + PWA) */}
+          {/* End: Micro Utilities (Currency + PWA) - Note: Fake ThemeSwitcher removed */}
           <div className="flex items-center gap-2 sm:gap-3">
-            <ThemeSwitcher isCompact />
             <CurrencySwitcher
               currentCurrency={currentCurrency}
               onCurrencyChange={onCurrencyChange}
@@ -77,43 +91,27 @@ export function LuxuryHeader({
         </div>
       </div>
 
-      {/* 2. Main Navigation Bar (h-14 on mobile, h-20 on desktop) */}
+      {/* 2. Main Navigation Bar */}
       <div className="w-full bg-obsidian/95 backdrop-blur-md border-b border-white/[0.08]">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 md:h-20 flex items-center justify-between">
-          {/* Right / Start (In Arabic RTL): Hamburger Menu + Brand Logo */}
+          {/* Start: Hamburger Menu + Brand Logo */}
           <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-            {/* Mobile Hamburger Toggle Button */}
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="md:hidden w-8 h-8 rounded-full flex items-center justify-center text-ivory/80 hover:text-champagne hover:bg-white/5 transition shrink-0"
               aria-label="القائمة"
             >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {mobileMenuOpen ? (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 ) : (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 )}
               </svg>
             </button>
 
-            {/* Logo Link with Non-wrapping Text */}
+            {/* Logo Link */}
             <Link href="/" className="flex items-center group min-w-0">
               <MiftahLogoSvg size={38} className="md:hidden" />
               <MiftahLogoSvg size={50} className="hidden md:flex" />
@@ -130,9 +128,7 @@ export function LuxuryHeader({
                   href={link.href}
                   onClick={() => setActiveNav(link.label)}
                   className={`relative py-1 text-xs lg:text-sm font-sans font-medium transition-colors ${
-                    isActive
-                      ? 'text-champagne font-bold'
-                      : 'text-ivory/70 hover:text-ivory'
+                    isActive ? 'text-champagne font-bold' : 'text-ivory/70 hover:text-ivory'
                   }`}
                 >
                   {link.label}
@@ -144,24 +140,19 @@ export function LuxuryHeader({
             })}
           </nav>
 
-          {/* Left / End: Actions (Search, Account, Cart) */}
+          {/* End: Actions (Search, Account, Cart) */}
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             {/* Search Button */}
             <button
               type="button"
               onClick={() => {
-                if (onOpenSearch) onOpenSearch();
+                if (props.onOpenSearch) props.onOpenSearch();
                 else setSearchModalOpen(true);
               }}
               className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-ivory/80 hover:text-champagne hover:bg-white/5 transition"
               aria-label="بحث"
             >
-              <svg
-                className="w-4 h-4 sm:w-5 sm:h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -171,19 +162,14 @@ export function LuxuryHeader({
               </svg>
             </button>
 
-            {/* Customer Account (Desktop) */}
+            {/* Customer Account */}
             {features.customer_accounts && (
               <Link
                 href="/account"
                 className="hidden sm:flex w-10 h-10 rounded-full items-center justify-center text-ivory/80 hover:text-champagne hover:bg-white/5 transition"
                 aria-label="حسابي"
               >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -194,7 +180,7 @@ export function LuxuryHeader({
               </Link>
             )}
 
-            {/* Cart Trigger Button */}
+            {/* Cart Trigger */}
             {features.cart_whatsapp && (
               <button
                 type="button"
@@ -243,60 +229,70 @@ export function LuxuryHeader({
           {/* Social Links inside Mobile Drawer */}
           <div className="pt-2">
             <span className="text-[10px] text-muted-lux block mb-2 font-semibold">
-              القنوات ومقاطع كشف المقلد الرسمية:
+              القنوات الرسمية:
             </span>
             <div className="flex items-center gap-2">
-              <a
-                href="https://www.tiktok.com/@tamiffttah?_r=1&_t=ZS-9B6mlZDXTA0"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-champagne"
-                title="تيك توك"
-              >
-                <TikTokIcon size={18} color="#C9A84C" />
-              </a>
-              <a
-                href="https://www.instagram.com/tamifttah?rpxt=dXlocW9teTEyMW53"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-champagne"
-                title="إنستغرام"
-              >
-                <InstagramIcon size={18} color="#C9A84C" />
-              </a>
-              <a
-                href="https://wa.me/967775234989"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-champagne"
-                title="واتساب"
-              >
-                <WhatsAppIcon size={18} color="#C9A84C" />
-              </a>
-              <a
-                href="https://www.facebook.com/share/1XjEnK4CeM/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-champagne"
-                title="فيسبوك"
-              >
-                <FacebookIcon size={18} color="#C9A84C" />
-              </a>
-              <a
-                href="https://maps.app.goo.gl/DxsZTHrv2r386bXa9"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-champagne"
-                title="خرائط جوجل"
-              >
-                <MapPinIcon size={18} color="#C9A84C" />
-              </a>
+              {contact.social.tiktok && (
+                <a
+                  href={contact.social.tiktok}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-champagne"
+                  title="تيك توك"
+                >
+                  <TikTokIcon size={18} color="#C9A84C" />
+                </a>
+              )}
+              {contact.social.instagram && (
+                <a
+                  href={contact.social.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-champagne"
+                  title="إنستغرام"
+                >
+                  <InstagramIcon size={18} color="#C9A84C" />
+                </a>
+              )}
+              {contact.whatsapp && (
+                <a
+                  href={`https://wa.me/${contact.whatsapp.startsWith('967') ? contact.whatsapp : `967${contact.whatsapp}`}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-champagne"
+                  title="واتساب"
+                >
+                  <WhatsAppIcon size={18} color="#C9A84C" />
+                </a>
+              )}
+              {contact.social.facebook && (
+                <a
+                  href={contact.social.facebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-champagne"
+                  title="فيسبوك"
+                >
+                  <FacebookIcon size={18} color="#C9A84C" />
+                </a>
+              )}
+              {contact.map.url && (
+                <a
+                  href={contact.map.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-champagne"
+                  title="خرائط جوجل"
+                >
+                  <MapPinIcon size={18} color="#C9A84C" />
+                </a>
+              )}
             </div>
           </div>
         </div>
       )}
 
-      {/* Global Instant Search Modal */}
+      {/* Global Search Modal */}
       <SearchModal
         isOpen={searchModalOpen}
         onClose={() => setSearchModalOpen(false)}

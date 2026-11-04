@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useRef, useCallback } from 'react';
-import Image from 'next/image';
-import { AuthenticityComparisonData } from '../../../contract';
+import { SmartImage } from '@/core/ui/SmartImage';
+import { AuthenticityComparisonData } from '@/modules/blocks/types';
+import { useStorefront } from '@/core/storefront/StorefrontProvider';
 import {
   ShieldCheckIcon,
   VerifiedCheckIcon,
@@ -12,14 +13,19 @@ import {
 } from './LuxuryIcons';
 
 interface AuthenticityCompareSliderProps {
-  guideData: AuthenticityComparisonData;
+  guideData?: AuthenticityComparisonData;
 }
 
-export function AuthenticityCompareSlider({ guideData }: AuthenticityCompareSliderProps) {
+export function AuthenticityCompareSlider(props: AuthenticityCompareSliderProps) {
+  const sf = useStorefront();
+  const guideData = props.guideData || (sf.blocksData['authenticity-compare'] as AuthenticityComparisonData);
+
   const [sliderPosition, setSliderPosition] = useState(50); // percentage 0 - 100
   const [isDragging, setIsDragging] = useState(false);
   const [showVideoModal, setShowVideoModal] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  if (!guideData) return null;
 
   const handleMove = useCallback((clientX: number) => {
     if (!containerRef.current) return;
@@ -93,10 +99,12 @@ export function AuthenticityCompareSlider({ guideData }: AuthenticityCompareSlid
                 {/* 1. RIGHT SIDE: Fake / Counterfeit Product Studio Photographic Render */}
                 <div className="absolute inset-0 w-full h-full bg-[#111016] flex items-center justify-center p-6">
                   <div className="relative w-full h-full rounded-xl overflow-hidden flex items-center justify-center">
-                    <Image
-                      src="https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=800&q=80"
+                    <SmartImage
+                      src={guideData.counterfeit?.image || "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=800&q=80"}
                       alt="التقليد المغشوش"
                       fill
+                      priority={false}
+                      sizes="(max-width: 1024px) 100vw, 600px"
                       className="object-cover object-center filter blur-[0.5px] contrast-75 brightness-75 mix-blend-luminosity"
                     />
                     <div className="absolute inset-0 bg-rose-950/40 mix-blend-multiply" />
@@ -114,10 +122,12 @@ export function AuthenticityCompareSlider({ guideData }: AuthenticityCompareSlid
                   }}
                 >
                   <div className="relative w-full h-full rounded-xl overflow-hidden flex items-center justify-center">
-                    <Image
-                      src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=800&q=80"
+                    <SmartImage
+                      src={guideData.original?.image || "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=800&q=80"}
                       alt="الأصلي المضمون"
                       fill
+                      priority={false}
+                      sizes="(max-width: 1024px) 100vw, 600px"
                       className="object-cover object-center contrast-110 brightness-95"
                     />
                     <div className="absolute inset-0 bg-gold/10 mix-blend-overlay" />

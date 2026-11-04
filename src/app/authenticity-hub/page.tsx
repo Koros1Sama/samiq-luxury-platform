@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import { SmartImage } from '@/core/ui/SmartImage';
 import { MiftahLogoSvg } from '@/themes/base/luxury-noir/components/MiftahLogoSvg';
 import {
   ShieldCheckIcon,
@@ -298,10 +298,12 @@ export default function AuthenticityHubPage() {
                 <div className="rounded-[calc(1.75rem-0.375rem)] bg-surface p-5 space-y-4 flex-1 flex flex-col justify-between">
                   <div>
                     <div className="h-44 w-full rounded-2xl overflow-hidden relative mb-4 bg-white/5">
-                      <Image
+                      <SmartImage
                         src={guide.image}
                         alt={guide.product}
                         fill
+                        priority={false}
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         className="object-cover object-center"
                       />
                       <div className="absolute top-3 start-3 px-2.5 py-1 rounded bg-black/80 border border-gold/40 text-[10px] text-champagne font-sans font-bold">

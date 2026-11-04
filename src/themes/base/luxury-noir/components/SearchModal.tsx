@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import { SmartImage } from '@/core/ui/SmartImage';
 import { ProductCardData, ThemeCurrencyCode } from '../../../contract';
 import { formatCurrency } from '@/core/currency/formatter';
 import { CloseIcon, VerifiedCheckIcon } from './LuxuryIcons';
@@ -118,10 +118,12 @@ export function SearchModal({ isOpen, onClose, currentCurrency }: SearchModalPro
                 >
                   <div className="flex items-center gap-3.5">
                     <div className="w-14 h-14 rounded-xl overflow-hidden relative flex-shrink-0 bg-white/5">
-                      <Image
+                      <SmartImage
                         src={product.image}
                         alt={product.title}
                         fill
+                        priority={false}
+                        sizes="60px"
                         className="object-cover object-center group-hover:scale-105 transition"
                       />
                     </div>

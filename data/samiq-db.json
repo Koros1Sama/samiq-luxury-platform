@@ -3,14 +3,39 @@
     "id": "11111111-1111-1111-1111-111111111111",
     "name": "مفتاح الجمال",
     "legalName": "مفتاح الجمال — لكشف المقلد",
-    "tagline": "لكشف المقلد — بوابتك الموثوقة لأرقى مستحضرات العناية والتجميل الأصلية",
-    "whatsapp": "967775234989",
-    "phone": "967775234989",
+    "tagline": "بوابتك الموثوقة لعالم الجمال الأصلي في اليمن",
+    "whatsapp": "775234989",
+    "phone": "775234989",
     "city": "صنعاء",
     "deliveryCoverage": "توصيل فوري لجميع مديريات صنعاء وشحن آمن لكافة المحافظات",
     "heroBadge": "مضمون أصلي 100%",
-    "instagram": "https://www.instagram.com/tamifttah?rpxt=dXlocW9teTEyMW53",
+    "themeId": "luxury-noir",
     "noindex": true,
+    "contact": {
+      "whatsapp": "775234989",
+      "phone": "775234989",
+      "social": {
+        "tiktok": "https://www.tiktok.com/@tamiffttah?_r=1&_t=ZS-9B6mlZDXTA0",
+        "instagram": "https://www.instagram.com/tamifttah?rpxt=dXlocW9teTEyMW53",
+        "facebook": "https://www.facebook.com/share/1XjEnK4CeM/",
+        "tiktokHandle": "@tamiffttah",
+        "instagramHandle": "@tamifttah"
+      },
+      "map": {
+        "url": "https://maps.app.goo.gl/DxsZTHrv2r386bXa9",
+        "label": "فرع صنعاء الرئيسي (حدة)",
+        "city": "صنعاء"
+      }
+    },
+    "homeSections": [
+      { "id": "sec-hero", "type": "hero", "visible": true },
+      { "id": "sec-products", "type": "product-grid", "visible": true },
+      { "id": "sec-authenticity", "type": "block", "props": { "blockKey": "authenticity-compare" }, "visible": true, "requiresFeature": "authenticity_guide" },
+      { "id": "sec-categories", "type": "category-grid", "visible": true },
+      { "id": "sec-skin-routine", "type": "block", "props": { "blockKey": "skin-routine" }, "visible": true, "requiresFeature": "skin_routine_advisor" },
+      { "id": "sec-contact", "type": "contact", "visible": true }
+    ],
+    "instagram": "https://www.instagram.com/tamifttah?rpxt=dXlocW9teTEyMW53",
     "tiktok": "https://www.tiktok.com/@tamiffttah?_r=1&_t=ZS-9B6mlZDXTA0",
     "facebook": "https://www.facebook.com/share/1XjEnK4CeM/",
     "googleMaps": "https://maps.app.goo.gl/DxsZTHrv2r386bXa9"

@@ -7,16 +7,18 @@ import {
   ShieldCheckIcon,
   MapPinIcon,
 } from './LuxuryIcons';
+import { useStorefront } from '@/core/storefront/StorefrontProvider';
 
 interface MobileAppBottomNavProps {
-  cartCount: number;
-  onOpenCart: () => void;
+  cartCount?: number;
+  onOpenCart?: () => void;
 }
 
-export function MobileAppBottomNav({
-  cartCount,
-  onOpenCart,
-}: MobileAppBottomNavProps) {
+export function MobileAppBottomNav(props: MobileAppBottomNavProps) {
+  const sf = useStorefront();
+  const cartCount = props.cartCount !== undefined ? props.cartCount : sf.cart.count;
+  const onOpenCart = props.onOpenCart || sf.cart.open;
+
   const [activeTab, setActiveTab] = useState<'home' | 'products' | 'authenticity' | 'cart' | 'location'>('home');
 
   const scrollToSection = (id: string, tab: typeof activeTab) => {

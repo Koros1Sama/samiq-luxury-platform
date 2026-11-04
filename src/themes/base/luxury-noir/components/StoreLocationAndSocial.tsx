@@ -7,47 +7,83 @@ import {
   FacebookIcon,
   WhatsAppIcon,
   MapPinIcon,
-  ShieldCheckIcon,
 } from './LuxuryIcons';
+import { useStorefront } from '@/core/storefront/StorefrontProvider';
+import { SectionComponentProps } from '../../../contract';
 
-export function StoreLocationAndSocial() {
+export function StoreLocationAndSocial(_props: Partial<SectionComponentProps>) {
+  const { tenant } = useStorefront();
+
+  const contact = tenant.contact || {
+    whatsapp: tenant.whatsapp || '775234989',
+    phone: tenant.phone || '775234989',
+    social: {
+      tiktok: tenant.tiktok || 'https://www.tiktok.com/@tamiffttah?_r=1&_t=ZS-9B6mlZDXTA0',
+      instagram: tenant.instagram || 'https://www.instagram.com/tamifttah?rpxt=dXlocW9teTEyMW53',
+      facebook: tenant.facebook || 'https://www.facebook.com/share/1XjEnK4CeM/',
+      tiktokHandle: '@tamiffttah',
+      instagramHandle: '@tamifttah',
+    },
+    map: {
+      url: tenant.googleMaps || 'https://maps.app.goo.gl/DxsZTHrv2r386bXa9',
+      label: 'فرع صنعاء الرئيسي (حدة)',
+      city: tenant.city || 'صنعاء',
+    },
+  };
+
   const channels = [
-    {
-      id: 'tiktok',
-      name: 'تيك توك الرسمي (@tamiffttah)',
-      role: 'مقاطع فحص الباركود وكشف المقلد عملياً',
-      handle: '@tamiffttah',
-      url: 'https://www.tiktok.com/@tamiffttah?_r=1&_t=ZS-9B6mlZDXTA0',
-      icon: <TikTokIcon size={20} color="#C9A84C" />,
-      cta: 'مشاهدة المقاطع الحصرية ←',
-    },
-    {
-      id: 'instagram',
-      name: 'إنستغرام مفتاح الجمال',
-      role: 'إعلانات الشحنات الأصلية والإطلالات',
-      handle: '@tamifttah',
-      url: 'https://www.instagram.com/tamifttah?rpxt=dXlocW9teTEyMW53',
-      icon: <InstagramIcon size={20} color="#C9A84C" />,
-      cta: 'متابعة الحساب الموثق ←',
-    },
-    {
-      id: 'whatsapp',
-      name: 'واتساب خدمة العملاء والطلبات',
-      role: 'استشارة أخصائية العناية والطلب المباشر',
-      handle: '+967 775 234 989',
-      url: 'https://wa.me/967775234989',
-      icon: <WhatsAppIcon size={20} color="#C9A84C" />,
-      cta: 'محادثة فورية عبر واتساب ←',
-    },
-    {
-      id: 'facebook',
-      name: 'فيسبوك الرسمي',
-      role: 'مجتمع مفتاح الجمال ومشاركات العملاء',
-      handle: 'مفتاح الجمال',
-      url: 'https://www.facebook.com/share/1XjEnK4CeM/',
-      icon: <FacebookIcon size={20} color="#C9A84C" />,
-      cta: 'زيارة الصفحة الرسمية ←',
-    },
+    ...(contact.social.tiktok
+      ? [
+          {
+            id: 'tiktok',
+            name: `تيك توك الرسمي (${contact.social.tiktokHandle || '@tamiffttah'})`,
+            role: 'مقاطع فحص الباركود ومراجعات المستحضرات',
+            handle: contact.social.tiktokHandle || '@tamiffttah',
+            url: contact.social.tiktok,
+            icon: <TikTokIcon size={20} color="#C9A84C" />,
+            cta: 'مشاهدة المقاطع الحصرية ←',
+          },
+        ]
+      : []),
+    ...(contact.social.instagram
+      ? [
+          {
+            id: 'instagram',
+            name: `إنستغرام ${tenant.name}`,
+            role: 'إعلانات الشحنات وتجارب العملاء',
+            handle: contact.social.instagramHandle || '@tamifttah',
+            url: contact.social.instagram,
+            icon: <InstagramIcon size={20} color="#C9A84C" />,
+            cta: 'متابعة الحساب الموثق ←',
+          },
+        ]
+      : []),
+    ...(contact.whatsapp
+      ? [
+          {
+            id: 'whatsapp',
+            name: 'واتساب خدمة العملاء والطلبات',
+            role: 'استشارة فورية والطلب المباشر',
+            handle: contact.whatsapp,
+            url: `https://wa.me/${contact.whatsapp.startsWith('967') ? contact.whatsapp : `967${contact.whatsapp}`}`,
+            icon: <WhatsAppIcon size={20} color="#C9A84C" />,
+            cta: 'محادثة فورية عبر واتساب ←',
+          },
+        ]
+      : []),
+    ...(contact.social.facebook
+      ? [
+          {
+            id: 'facebook',
+            name: `فيسبوك ${tenant.name}`,
+            role: 'مجتمع المتجر ومشاركات العملاء',
+            handle: tenant.name,
+            url: contact.social.facebook,
+            icon: <FacebookIcon size={20} color="#C9A84C" />,
+            cta: 'زيارة الصفحة الرسمية ←',
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -60,10 +96,10 @@ export function StoreLocationAndSocial() {
             <span>زورونا وتواصلوا معنا</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-serif font-bold text-ivory">
-            القنوات الرسمية وموقع الفرع الرئيسي
+            القنوات الرسمية وموقع المتجر
           </h2>
           <p className="text-xs sm:text-sm text-muted-lux font-sans leading-relaxed">
-            تابعي مقاطع فحص وكشف المقلد الحصرية على منصاتنا الرسمية أو تفضلي بزيارتنا في فرعنا بصنعاء
+            تابعي مقاطع الفحص الحصرية على منصاتنا الرسمية أو تفضلي بزيارتنا
           </p>
         </div>
 
@@ -91,9 +127,7 @@ export function StoreLocationAndSocial() {
                   <h3 className="text-xs font-semibold text-ivory group-hover:text-champagne transition-colors">
                     {ch.name}
                   </h3>
-                  <p className="text-[11px] text-muted-lux mt-0.5 leading-snug">
-                    {ch.role}
-                  </p>
+                  <p className="text-[11px] text-muted-lux mt-0.5 leading-snug">{ch.role}</p>
                 </div>
                 <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-gold font-medium">
                   <span>{ch.cta}</span>
@@ -108,7 +142,7 @@ export function StoreLocationAndSocial() {
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-champagne flex items-center gap-1.5">
                   <MapPinIcon size={15} color="#C9A84C" />
-                  <span>فرع صنعاء الرئيسي (حدة)</span>
+                  <span>{contact.map.label || `فرع ${tenant.name}`}</span>
                 </span>
                 <span className="text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30">
                   مفتوح الآن
@@ -116,10 +150,10 @@ export function StoreLocationAndSocial() {
               </div>
 
               <h3 className="text-base font-serif font-bold text-ivory">
-                شارع حدة — مقابل مجمع الكميم التجاري
+                {contact.map.label}
               </h3>
               <p className="text-xs text-muted-lux font-sans leading-relaxed">
-                أمانة العاصمة صنعاء. متوفر خدمة فحص الباركود للأصلي بالفرع، ومعاينة المنتجات، واستشارات البشرة المجانية.
+                {contact.map.city}. متوفر خدمة معاينة المنتجات وفحص الباركود والاستشارات المباشرة.
               </p>
 
               <div className="space-y-1.5 pt-2 border-t border-white/10 text-xs text-muted-lux font-sans">
@@ -128,19 +162,19 @@ export function StoreLocationAndSocial() {
                   <span className="text-ivory font-medium">9:00 ص — 10:00 م</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span>خدمة التوصيل داخل صنعاء:</span>
-                  <span className="text-gold font-medium">خلال 3 إلى 5 ساعات</span>
+                  <span>خدمة التوصيل:</span>
+                  <span className="text-gold font-medium">{tenant.deliveryCoverage || 'توصيل فوري'}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span>رقم الهاتف المباشر:</span>
-                  <span className="text-ivory font-mono">967775234989+</span>
+                  <span>رقم التواصل المباشر:</span>
+                  <span className="text-ivory font-mono">{contact.phone}</span>
                 </div>
               </div>
             </div>
 
             <div className="pt-4 border-t border-white/10 space-y-2">
               <a
-                href="https://maps.app.goo.gl/DxsZTHrv2r386bXa9"
+                href={contact.map.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full py-3 rounded-xl bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-bold text-xs hover:brightness-110 shadow-md transition flex items-center justify-center gap-2"

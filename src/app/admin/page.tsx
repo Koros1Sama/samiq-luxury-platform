@@ -12,7 +12,6 @@ import {
   CloseIcon,
   ShieldCheckIcon,
 } from '@/themes/base/luxury-noir/components/LuxuryIcons';
-import { ThemeSwitcher } from '@/themes/base/luxury-noir/components/ThemeSwitcher';
 import { ProductCardData } from '@/themes/contract';
 import { OmnichannelConversation } from '@/core/db/store';
 
@@ -329,7 +328,6 @@ export default function MerchantAdminPage() {
           </div>
 
           <div className="flex items-center gap-2.5 flex-wrap">
-            <ThemeSwitcher />
             <Link
               href="/"
               className="px-3.5 py-2 rounded-xl bg-gold/15 hover:bg-gold/25 text-champagne border border-gold/40 text-xs font-bold transition flex items-center gap-1.5"

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { CartItem, ThemeCurrencyCode } from '../../../contract';
 import { formatCurrency, convertCurrency } from '@/core/currency/formatter';
 import { BagCartIcon, TrashIcon, WhatsAppIcon, VerifiedCheckIcon, CloseIcon } from './LuxuryIcons';
+import { useStorefront } from '@/core/storefront/StorefrontProvider';
 
 interface ShippingZone {
   id: string;
@@ -24,24 +25,31 @@ const SHIPPING_ZONES: ShippingZone[] = [
 ];
 
 interface WhatsAppCartDrawerProps {
-  isOpen: boolean;
-  onClose: () => void;
-  items: CartItem[];
-  onUpdateQuantity: (itemId: string, newQuantity: number) => void;
-  onRemoveItem: (itemId: string) => void;
-  currentCurrency: ThemeCurrencyCode;
-  whatsappNumber: string;
+  isOpen?: boolean;
+  onClose?: () => void;
+  items?: CartItem[];
+  onUpdateQuantity?: (itemId: string, newQuantity: number) => void;
+  onRemoveItem?: (itemId: string) => void;
+  currentCurrency?: ThemeCurrencyCode;
+  whatsappNumber?: string;
 }
 
-export function WhatsAppCartDrawer({
-  isOpen,
-  onClose,
-  items,
-  onUpdateQuantity,
-  onRemoveItem,
-  currentCurrency,
-  whatsappNumber,
-}: WhatsAppCartDrawerProps) {
+export function WhatsAppCartDrawer(props: WhatsAppCartDrawerProps) {
+  const sf = useStorefront();
+
+  const isOpen = props.isOpen !== undefined ? props.isOpen : sf.cart.isOpen;
+  const onClose = props.onClose || sf.cart.close;
+  const items = props.items || sf.cart.items;
+  const onUpdateQuantity =
+    props.onUpdateQuantity ||
+    ((id: string, qty: number) => {
+      sf.cart.setQty(id, qty);
+    });
+  const onRemoveItem = props.onRemoveItem || sf.cart.remove;
+  const currentCurrency = props.currentCurrency || sf.currency;
+  const whatsappNumber =
+    props.whatsappNumber || sf.tenant.contact?.whatsapp || sf.tenant.whatsapp || '775234989';
+
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerAddress, setCustomerAddress] = useState('شارع حدة');
@@ -144,7 +152,7 @@ export function WhatsAppCartDrawer({
 
       // 2. Build formatted WhatsApp message
       let message = `*طلب موثق جديد: ${orderNumber}*\n`;
-      message += `متجر مفتاح الجمال (لكشف المقلد)\n\n`;
+      message += `متجر ${sf.tenant.name}\n\n`;
       message += `الاسم: ${orderPayload.customerName}\n`;
       message += `الهاتف: ${orderPayload.customerPhone}\n`;
       message += `المنطقة: ${selectedZone.nameAr} - ${orderPayload.address}\n`;

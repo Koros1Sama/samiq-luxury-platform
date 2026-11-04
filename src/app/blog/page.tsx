@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import { SmartImage } from '@/core/ui/SmartImage';
 import { getAllBlogPosts } from '@/core/db/store';
 import { MiftahLogoSvg } from '@/themes/base/luxury-noir/components/MiftahLogoSvg';
 import { SparkleStarIcon } from '@/themes/base/luxury-noir/components/LuxuryIcons';
@@ -46,11 +46,12 @@ export default function BlogIndexPage() {
           <div className="p-2 sm:p-3 rounded-[2rem] bg-white/[0.03] border border-gold/30 shadow-2xl">
             <div className="rounded-[calc(2rem-0.5rem)] bg-surface grid grid-cols-1 lg:grid-cols-12 overflow-hidden items-center">
               <div className="lg:col-span-7 relative h-72 lg:h-[400px] w-full">
-                <Image
+                <SmartImage
                   src={featuredPost.coverImage}
                   alt={featuredPost.title}
                   fill
-                  priority
+                  priority={false}
+                  sizes="(max-width: 1024px) 100vw, 700px"
                   className="object-cover object-center"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent lg:bg-gradient-to-r lg:from-transparent lg:to-surface" />
@@ -93,10 +94,12 @@ export default function BlogIndexPage() {
               <div className="rounded-[calc(1.75rem-0.375rem)] bg-surface p-5 space-y-4 flex flex-col justify-between h-full">
                 <div>
                   <div className="h-44 w-full rounded-2xl overflow-hidden relative mb-4 bg-white/5">
-                    <Image
+                    <SmartImage
                       src={post.coverImage}
                       alt={post.title}
                       fill
+                      priority={false}
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       className="object-cover object-center"
                     />
                   </div>

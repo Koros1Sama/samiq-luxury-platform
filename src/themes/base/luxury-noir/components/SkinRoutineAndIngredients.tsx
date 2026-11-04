@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import Image from 'next/image';
-import { SkinRoutineData } from '../../../contract';
+import { SmartImage } from '@/core/ui/SmartImage';
+import { SkinRoutineData } from '@/modules/blocks/types';
+import { useStorefront } from '@/core/storefront/StorefrontProvider';
 import {
   DropSkinIcon,
   WaveSkinIcon,
@@ -13,15 +14,18 @@ import {
 } from './LuxuryIcons';
 
 interface SkinRoutineAndIngredientsProps {
-  skinData: SkinRoutineData;
+  skinData?: SkinRoutineData;
   onExploreProducts?: (categorySlug: string) => void;
 }
 
-export function SkinRoutineAndIngredients({
-  skinData,
-  onExploreProducts,
-}: SkinRoutineAndIngredientsProps) {
+export function SkinRoutineAndIngredients(props: SkinRoutineAndIngredientsProps) {
+  const sf = useStorefront();
+  const skinData = props.skinData || (sf.blocksData['skin-routine'] as SkinRoutineData);
+  const onExploreProducts = props.onExploreProducts;
+
   const [activeSkinTypeId, setActiveSkinTypeId] = useState<'oily' | 'dry' | 'sensitive'>('oily');
+
+  if (!skinData || !skinData.skinTypes) return null;
 
   const currentRoutine =
     skinData.skinTypes.find((t) => t.id === activeSkinTypeId) || skinData.skinTypes[0];
@@ -54,10 +58,12 @@ export function SkinRoutineAndIngredients({
             <div className="relative rounded-[2rem] overflow-hidden bg-surface border border-white/10 shadow-2xl p-6 sm:p-8 flex flex-col justify-between min-h-[460px]">
               {/* Background Model Photograph with Radiant Glowing Skin */}
               <div className="absolute inset-0 opacity-40 mix-blend-luminosity">
-                <Image
+                <SmartImage
                   src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=1200&q=80"
-                  alt="روتين العناية بالبشرة لإشراقة تدوم"
+                  alt={skinData.title || "روتين العناية بالبشرة"}
                   fill
+                  priority={false}
+                  sizes="(max-width: 1024px) 100vw, 500px"
                   className="object-cover object-top"
                 />
               </div>

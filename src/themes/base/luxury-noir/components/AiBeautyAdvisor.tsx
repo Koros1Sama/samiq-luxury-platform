@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import { SmartImage } from '@/core/ui/SmartImage';
 import { SparkleStarIcon, CloseIcon, WhatsAppIcon, VerifiedCheckIcon } from './LuxuryIcons';
 import { ProductCardData } from '../../../contract';
 
@@ -185,7 +185,7 @@ export function AiBeautyAdvisor() {
                           >
                             <div className="flex items-center gap-2.5">
                               <div className="w-10 h-10 rounded-lg overflow-hidden relative bg-white/5 flex-shrink-0">
-                                <Image src={p.image} alt={p.title} fill className="object-cover" />
+                                <SmartImage src={p.image} alt={p.title} fill sizes="40px" className="object-cover" />
                               </div>
                               <div className="space-y-0.5">
                                 <span className="text-[10px] text-gold block font-sans">{p.brand}</span>

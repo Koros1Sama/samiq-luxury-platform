@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import { SmartImage } from '@/core/ui/SmartImage';
 import { MiftahLogoSvg } from '@/themes/base/luxury-noir/components/MiftahLogoSvg';
 import {
   VerifiedCheckIcon,
@@ -289,7 +289,7 @@ export default function CustomerAccountPage() {
                   >
                     <div className="rounded-[calc(1.75rem-0.375rem)] bg-surface p-4 space-y-3">
                       <div className="h-40 w-full rounded-2xl overflow-hidden relative bg-white/5">
-                        <Image src={p.image} alt={p.title} fill className="object-cover" />
+                        <SmartImage src={p.image} alt={p.title} fill sizes="(max-width: 640px) 100vw, 300px" className="object-cover" />
                       </div>
                       <span className="text-[10px] text-gold font-sans font-bold block">{p.brand}</span>
                       <h4 className="text-sm font-serif font-bold text-ivory line-clamp-1">{p.title}</h4>

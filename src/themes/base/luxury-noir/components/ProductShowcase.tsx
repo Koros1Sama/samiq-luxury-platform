@@ -1,27 +1,34 @@
 'use client';
 
 import React, { useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
-import { ProductCardData, ThemeCurrencyCode } from '../../../contract';
+import { SmartImage } from '@/core/ui/SmartImage';
+import { ProductCardData, ThemeCurrencyCode, SectionComponentProps } from '../../../contract';
 import { formatCurrency } from '@/core/currency/formatter';
 import { VerifiedCheckIcon, WhatsAppIcon, BagCartIcon } from './LuxuryIcons';
+import { useStorefront } from '@/core/storefront/StorefrontProvider';
 
-interface ProductShowcaseProps {
-  products: ProductCardData[];
-  currentCurrency: ThemeCurrencyCode;
-  onAddToCart: (product: ProductCardData, variantId?: string) => void;
-  onDirectWhatsApp: (product: ProductCardData) => void;
+interface ProductShowcaseProps extends Partial<SectionComponentProps> {
+  products?: ProductCardData[];
+  currentCurrency?: ThemeCurrencyCode;
+  onAddToCart?: (product: ProductCardData, variantId?: string) => void;
+  onDirectWhatsApp?: (product: ProductCardData) => void;
   activeFilter?: string;
 }
 
-export function ProductShowcase({
-  products,
-  currentCurrency,
-  onAddToCart,
-  onDirectWhatsApp,
-  activeFilter = 'all',
-}: ProductShowcaseProps) {
+export function ProductShowcase(props: ProductShowcaseProps) {
+  const sf = useStorefront();
+
+  const products = props.products || sf.products || [];
+  const currentCurrency = props.currentCurrency || sf.currency;
+  const onAddToCart = props.onAddToCart || sf.cart.add;
+  const onDirectWhatsApp =
+    props.onDirectWhatsApp ||
+    ((p: ProductCardData) => {
+      window.open(sf.whatsapp.productUrl(p), '_blank');
+    });
+  const activeFilter = props.activeFilter || sf.activeCategory;
+
   const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
 
   const handleVariantSelect = (productId: string, variantId: string) => {
@@ -35,6 +42,7 @@ export function ProductShowcase({
     if (activeFilter === 'makeup') return p.categorySlug === 'makeup';
     if (activeFilter === 'cerave') return p.brand.toLowerCase().includes('cerave');
     if (activeFilter === 'the-ordinary') return p.brand.toLowerCase().includes('ordinary');
+    if (activeFilter === p.categorySlug) return true;
     return true;
   });
 
@@ -45,14 +53,14 @@ export function ProductShowcase({
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 pb-3 border-b border-white/5">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-gold/10 border border-gold/30 text-champagne text-[11px] font-sans font-semibold mb-1">
-              <span>المستحضرات الأصلية المضمونة 100%</span>
+              <span>قائمة المنتجات المعتمدة</span>
             </div>
             <h2 className="text-xl sm:text-3xl font-serif font-bold text-ivory">
-              كتالوج المنتجات الفاخرة — تسوقي فوراً
+              كتالوج المنتجات الفاخرة — تسوق فوراً
             </h2>
           </div>
           <span className="text-xs text-muted-lux font-sans">
-            فحص الباركود ورقم التشغيلة قبل الدفع • توصيل فوري بصنعاء
+            فحص الباركود والمطابقة قبل الدفع • توصيل فوري لكافة المناطق
           </span>
         </div>
 
@@ -83,15 +91,16 @@ export function ProductShowcase({
                       )}
                     </div>
 
-                    {/* Product Image Link */}
+                    {/* Product Image Link with SmartImage */}
                     <Link
                       href={`/product/${product.id}`}
                       className="block h-32 sm:h-44 w-full rounded-xl sm:rounded-2xl relative overflow-hidden bg-white/[0.02] group-hover:scale-[1.02] transition-transform duration-300"
                     >
-                      <Image
+                      <SmartImage
                         src={product.image}
                         alt={product.title}
-                        fill
+                        priority={false}
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                         className="object-cover object-center brightness-95 group-hover:brightness-105 transition-all duration-500"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-[#0E0E12]/80 via-transparent to-transparent opacity-50" />

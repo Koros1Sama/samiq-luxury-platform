@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
+import { SmartImage } from '@/core/ui/SmartImage';
 import { formatCurrency } from '@/core/currency/formatter';
 import { ThemeCurrencyCode, ProductCardData, CartItem } from '@/themes/contract';
 import {
@@ -188,11 +188,12 @@ export default function ProductDetailPage() {
           <div className="lg:col-span-6 space-y-4">
             <div className="p-2 rounded-[2rem] bg-white/[0.03] border border-white/[0.08] shadow-2xl">
               <div className="relative rounded-[calc(2rem-0.5rem)] overflow-hidden aspect-[4/3] bg-surface">
-                <Image
+                <SmartImage
                   src={product.image}
                   alt={product.title}
                   fill
-                  priority
+                  priority={true}
+                  sizes="(max-width: 1024px) 100vw, 600px"
                   className="object-cover object-center contrast-105"
                 />
                 <div className="absolute top-4 start-4 px-3 py-1.5 rounded-full bg-emerald-950/90 border border-emerald-500/40 text-emerald-300 text-xs font-sans font-bold flex items-center gap-1.5">

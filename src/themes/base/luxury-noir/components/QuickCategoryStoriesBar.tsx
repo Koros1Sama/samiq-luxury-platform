@@ -1,17 +1,19 @@
 'use client';
 
 import React from 'react';
+import { useStorefront } from '@/core/storefront/StorefrontProvider';
 
 interface QuickCategoryStoriesBarProps {
-  activeCategory: string;
-  onSelectCategory: (category: string) => void;
+  activeCategory?: string;
+  onSelectCategory?: (category: string) => void;
 }
 
-export function QuickCategoryStoriesBar({
-  activeCategory,
-  onSelectCategory,
-}: QuickCategoryStoriesBarProps) {
-  const stories = [
+export function QuickCategoryStoriesBar(props: QuickCategoryStoriesBarProps) {
+  const sf = useStorefront();
+  const activeCategory = props.activeCategory || sf.activeCategory || 'all';
+  const onSelectCategory = props.onSelectCategory || sf.setActiveCategory;
+
+  const defaultStories = [
     { id: 'all', title: 'الكل', brand: '', target: '#products-catalog' },
     { id: 'serums', title: 'سيرومات البشرة', brand: 'La Roche-Posay', target: '#products-catalog' },
     { id: 'cerave', title: 'مرطبات CeraVe', brand: 'CeraVe', target: '#products-catalog' },
@@ -20,6 +22,20 @@ export function QuickCategoryStoriesBar({
     { id: 'makeup', title: 'المكياج الفاخر', brand: 'YSL & Huda', target: '#products-catalog' },
     { id: 'authenticity', title: 'مختبر كشف المقلد', brand: 'Batch Check', target: '#authenticity-lab' },
   ];
+
+  // If merchant has custom categories, use them; otherwise use default stories
+  const stories =
+    sf.categories && sf.categories.length > 0 && sf.tenant.id !== '11111111-1111-1111-1111-111111111111'
+      ? [
+          { id: 'all', title: 'الكل', brand: '', target: '#products-catalog' },
+          ...sf.categories.map((c) => ({
+            id: c.id,
+            title: c.title,
+            brand: c.brand || '',
+            target: '#products-catalog',
+          })),
+        ]
+      : defaultStories;
 
   const handleClick = (s: typeof stories[0]) => {
     onSelectCategory(s.id);

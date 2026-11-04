@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import { SmartImage } from '@/core/ui/SmartImage';
 import { notFound } from 'next/navigation';
 import { getBlogPostBySlug, getAllBlogPosts } from '@/core/db/store';
 import { MiftahLogoSvg } from '@/themes/base/luxury-noir/components/MiftahLogoSvg';
@@ -60,11 +60,12 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
         {/* Cover Photo */}
         <div className="relative rounded-[2rem] overflow-hidden aspect-[16/9] w-full border border-white/10 shadow-2xl">
-          <Image
+          <SmartImage
             src={post.coverImage}
             alt={post.title}
             fill
-            priority
+            priority={true}
+            sizes="(max-width: 1024px) 100vw, 900px"
             className="object-cover object-center"
           />
         </div>

@@ -1,7 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import { MOCK_STOREFRONT_DATA } from '../store/mockData';
-import { ProductCardData, AuthenticityComparisonData, ThemeCurrencyCode } from '@/themes/contract';
+import { ProductCardData, ThemeCurrencyCode, TenantBrandInfo } from '@/themes/contract';
+import { AuthenticityComparisonData } from '@/modules/blocks/types';
 
 export interface CouponRecord {
   code: string;
@@ -126,11 +127,15 @@ export interface BranchRecord {
 }
 
 export interface SamiqDatabaseSchema {
-  tenant: typeof MOCK_STOREFRONT_DATA.tenant;
+  tenant: TenantBrandInfo;
   features: typeof MOCK_STOREFRONT_DATA.features;
   products: ProductCardData[];
   categories: typeof MOCK_STOREFRONT_DATA.categories;
   authenticityGuides: Record<string, AuthenticityComparisonData>;
+  content?: {
+    blocks?: Record<string, any>;
+    [key: string]: any;
+  };
   orders: OrderRecord[];
   coupons: CouponRecord[];
   shippingZones: ShippingZoneRecord[];
@@ -193,6 +198,7 @@ function createDefaultSeed(): SamiqDatabaseSchema {
     features: MOCK_STOREFRONT_DATA.features,
     products: MOCK_STOREFRONT_DATA.products,
     categories: MOCK_STOREFRONT_DATA.categories,
+    content: MOCK_STOREFRONT_DATA.content,
     authenticityGuides: {
       'prod-1': MOCK_STOREFRONT_DATA.authenticityGuide,
       '54U700': MOCK_STOREFRONT_DATA.authenticityGuide,
@@ -589,6 +595,18 @@ export function getDb(): SamiqDatabaseSchema {
     const parsed = JSON.parse(raw) as SamiqDatabaseSchema;
     if (!parsed.conversations) {
       parsed.conversations = createDefaultSeed().conversations;
+    }
+    if (!parsed.content) {
+      parsed.content = createDefaultSeed().content;
+    }
+    if (!parsed.tenant.homeSections) {
+      parsed.tenant.homeSections = createDefaultSeed().tenant.homeSections;
+    }
+    if (!parsed.tenant.contact) {
+      parsed.tenant.contact = createDefaultSeed().tenant.contact;
+    }
+    if (!parsed.tenant.themeId) {
+      parsed.tenant.themeId = 'luxury-noir';
     }
     return parsed;
   } catch (err) {

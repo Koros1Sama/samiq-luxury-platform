@@ -1,27 +1,29 @@
+import React from 'react';
+
 /**
  * SAMIQ Theme Contract
  * Pure presentational interface definitions for storefront themes.
  *
  * STRICT ARCHITECTURAL RULE:
  * Themes MUST NOT import Supabase, database clients, or server actions.
- * They consume only typed properties defined in this contract.
+ * They consume only typed properties defined in this contract and via useStorefront().
  */
 
 export type ThemeCurrencyCode = 'YER' | 'SAR' | 'USD';
 
-export type SamiqThemeId = 'luxury-noir' | 'editorial-ivory' | 'emerald-botanical';
+export type ThemeId = 'luxury-noir' | 'ivory-journal';
 
 export interface ThemeMeta {
-  id: SamiqThemeId;
+  id: ThemeId;
   nameAr: string;
   nameEn: string;
   paletteDescription: string;
   primaryColor: string;
   accentColor: string;
-  badge: string;
+  badge?: string;
 }
 
-export const SAMIQ_THEMES: Record<SamiqThemeId, ThemeMeta> = {
+export const SAMIQ_THEMES: Record<ThemeId, ThemeMeta> = {
   'luxury-noir': {
     id: 'luxury-noir',
     nameAr: 'أسود رخامي فاخر (Luxury Noir)',
@@ -31,42 +33,94 @@ export const SAMIQ_THEMES: Record<SamiqThemeId, ThemeMeta> = {
     accentColor: '#C9A84C',
     badge: 'الأكثر فخامة',
   },
-  'editorial-ivory': {
-    id: 'editorial-ivory',
-    nameAr: 'حرير عاجي تحريري (Editorial Ivory)',
-    nameEn: 'Editorial Ivory',
+  'ivory-journal': {
+    id: 'ivory-journal',
+    nameAr: 'حرير عاجي تحريري (Ivory Journal)',
+    nameEn: 'Ivory Journal',
     paletteDescription: 'حرير عاجي دافئ، نصوص إسبريسو، ولمسات شامبانيا عيادات التجميل السويسرية',
     primaryColor: '#FAF7F2',
     accentColor: '#B8860B',
     badge: 'طابع المجلات العالمية',
   },
-  'emerald-botanical': {
-    id: 'emerald-botanical',
-    nameAr: 'زمرد نباتي ملكي (Emerald Botanical)',
-    nameEn: 'Emerald Botanical',
-    paletteDescription: 'الأخضر الزمردي العميق مع الذهب المصقول للمنتجات العضوية والطبيعية',
-    primaryColor: '#061410',
-    accentColor: '#D4AF37',
-    badge: 'للمستحضرات العضوية',
-  },
 };
 
+// Generic Section Types
+export type SectionType =
+  | 'hero'
+  | 'category-grid'
+  | 'product-grid'
+  | 'feature-strip'
+  | 'rich-text'
+  | 'gallery'
+  | 'testimonials'
+  | 'faq'
+  | 'contact'
+  | 'cta'
+  | 'block';
+
+export interface Section {
+  id: string;
+  type: SectionType;
+  props?: Record<string, unknown>;
+  visible: boolean;
+  requiresFeature?: string;
+}
+
+export interface SectionComponentProps {
+  section: Section;
+}
+
+export interface BlockRendererProps {
+  blockKey: string;
+  data?: unknown;
+  props?: Record<string, unknown>;
+}
+
+export type SectionRenderers = Partial<Record<SectionType, React.ComponentType<SectionComponentProps>>> & {
+  blocks?: Record<string, React.ComponentType<BlockRendererProps>>;
+};
+
+export interface TenantSocialChannels {
+  tiktok?: string;
+  instagram?: string;
+  facebook?: string;
+  tiktokHandle?: string;
+  instagramHandle?: string;
+  [key: string]: string | undefined;
+}
+
+export interface TenantMapLocation {
+  url: string;
+  label: string;
+  city: string;
+}
+
+export interface TenantContactInfo {
+  whatsapp: string;
+  phone: string;
+  social: TenantSocialChannels;
+  map: TenantMapLocation;
+}
 
 export interface TenantBrandInfo {
   id: string;
   name: string;
   tagline: string;
   legalName: string;
-  whatsapp: string;
-  phone: string;
   city: string;
   deliveryCoverage: string;
   heroBadge?: string;
+  themeId?: ThemeId;
+  noindex?: boolean;
+  contact: TenantContactInfo;
+  homeSections: Section[];
+  // Direct shortcuts for convenience
+  whatsapp?: string;
+  phone?: string;
   instagram?: string;
   tiktok?: string;
   facebook?: string;
   googleMaps?: string;
-  noindex?: boolean;
 }
 
 export interface FeatureFlags {
@@ -74,8 +128,6 @@ export interface FeatureFlags {
   tier_2_editable: boolean;
   tier_3_catalog: boolean;
   cart_whatsapp: boolean;
-  authenticity_guide: boolean;
-  skin_routine_advisor: boolean;
   customer_accounts: boolean;
   payment_gateways: boolean;
   ai_chatbot: boolean;
@@ -100,7 +152,7 @@ export interface ProductCardData {
   image: string;
   prices: Record<ThemeCurrencyCode, number>;
   comparePrices?: Record<ThemeCurrencyCode, number>;
-  isAuthenticGuaranteed: boolean;
+  isAuthenticGuaranteed?: boolean;
   isFeatured?: boolean;
   badge?: string;
   variants?: ProductVariantData[];
@@ -108,7 +160,7 @@ export interface ProductCardData {
 }
 
 export interface CartItem {
-  id: string; // unique item key
+  id: string;
   productId: string;
   variantId?: string;
   title: string;
@@ -118,79 +170,76 @@ export interface CartItem {
   image: string;
 }
 
-export interface AuthenticityCheckPoint {
-  title: string;
-  originalFeature: string;
-  fakeRisk: string;
-}
-
-export interface AuthenticityComparisonData {
-  productId: string;
-  productTitle: string;
-  brand: string;
-  original: {
-    title: string;
-    image: string;
-    batchCode: string;
-    formulaNotes: string;
-    packagingNotes: string;
-  };
-  counterfeit: {
-    title: string;
-    image: string;
-    batchCode: string;
-    formulaNotes: string;
-    packagingNotes: string;
-  };
-  checklist: AuthenticityCheckPoint[];
-  videoUrl?: string;
-}
-
-export interface SkinTypeRoutine {
-  id: 'oily' | 'dry' | 'sensitive';
-  label: string;
-  icon: string;
-  tagline: string;
-  routineDescription: string;
-  steps: string[];
-  recommendedProductIds: string[];
-  activeIngredientIds: string[];
-}
-
-export interface ActiveIngredientDetail {
-  id: string;
-  nameEn: string;
-  nameAr: string;
-  iconType: 'citrus' | 'drop' | 'molecule';
-  benefitsAr: string;
-  concentration: string;
-}
-
-export interface SkinRoutineData {
-  title: string;
-  subtitle: string;
-  skinTypes: SkinTypeRoutine[];
-  ingredients: ActiveIngredientDetail[];
-}
-
-export interface CategoryBentoItem {
+export interface CategoryItem {
   id: string;
   title: string;
   subtitle?: string;
-  brand: string;
+  brand?: string;
   image: string;
   ctaText: string;
   href: string;
   badge?: string;
 }
 
-export interface StorefrontProps {
+export type CategoryBentoItem = CategoryItem;
+
+export interface StorefrontCart {
+  items: CartItem[];
+  count: number;
+  total: number;
+  add: (product: ProductCardData, variantId?: string) => void;
+  setQty: (id: string, qty: number) => void;
+  remove: (id: string) => void;
+  clear: () => void;
+  isOpen: boolean;
+  open: () => void;
+  close: () => void;
+}
+
+export interface StorefrontWishlist {
+  ids: string[];
+  toggle: (id: string) => void;
+  has: (id: string) => boolean;
+}
+
+export interface StorefrontSearch {
+  query: string;
+  setQuery: (q: string) => void;
+  results: ProductCardData[];
+}
+
+export interface StorefrontWhatsApp {
+  orderUrl: (items: CartItem[]) => string;
+  productUrl: (product: ProductCardData) => string;
+}
+
+export interface StorefrontContextValue {
   tenant: TenantBrandInfo;
   features: FeatureFlags;
-  initialCurrency?: ThemeCurrencyCode;
-  initialTheme?: SamiqThemeId;
   products: ProductCardData[];
-  categories: CategoryBentoItem[];
-  authenticityGuide: AuthenticityComparisonData;
-  skinRoutine: SkinRoutineData;
+  categories: CategoryItem[];
+  currency: ThemeCurrencyCode;
+  setCurrency: (currency: ThemeCurrencyCode) => void;
+  formatPrice: (prices: Record<ThemeCurrencyCode, number> | number) => string;
+  cart: StorefrontCart;
+  wishlist: StorefrontWishlist;
+  search: StorefrontSearch;
+  activeCategory: string;
+  setActiveCategory: (cat: string) => void;
+  whatsapp: StorefrontWhatsApp;
+  blocksData: Record<string, unknown>;
 }
+
+export interface ThemeLayoutProps {
+  content?: Record<string, unknown>;
+}
+
+export interface ThemeDefinition {
+  id: ThemeId;
+  name: string;
+  description: string;
+  Layout: React.ComponentType<ThemeLayoutProps>;
+}
+
+// Deprecated alias for backwards compatibility during migration
+export type SamiqThemeId = ThemeId;

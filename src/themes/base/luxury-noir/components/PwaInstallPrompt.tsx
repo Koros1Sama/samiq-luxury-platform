@@ -14,7 +14,9 @@ export function PwaInstallPrompt({ className = '', isCompact = false }: PwaInsta
   const [showInstructions, setShowInstructions] = useState(false);
 
   useEffect(() => {
+    // Only intercept if the app intends to prompt the user
     const handleBeforeInstall = (e: Event) => {
+      // Store event for custom install prompt
       e.preventDefault();
       setDeferredPrompt(e);
       setIsInstallable(true);
@@ -22,8 +24,8 @@ export function PwaInstallPrompt({ className = '', isCompact = false }: PwaInsta
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstall);
 
-    // Check if already in standalone mode
-    if (window.matchMedia('(display-mode: standalone)').matches) {
+    // Detect if already installed / in standalone mode
+    if (typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches) {
       setIsInstallable(false);
     }
 
@@ -41,17 +43,21 @@ export function PwaInstallPrompt({ className = '', isCompact = false }: PwaInsta
       }
       setDeferredPrompt(null);
     } else {
-      // Fallback instructions for iOS or browsers without direct prompt
       setShowInstructions(true);
     }
   };
+
+  // If not installable and no manual trigger needed, stay unobtrusive
+  if (!isInstallable && !deferredPrompt) {
+    return null;
+  }
 
   return (
     <>
       <button
         type="button"
         onClick={handleInstallClick}
-        title="تثبيت تطبيق مفتاح الجمال على هاتفك"
+        title="تثبيت التطبيق على هاتفك"
         className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-gold/10 hover:bg-gold/20 text-champagne border border-gold/30 text-xs font-semibold transition ${className}`}
       >
         <svg
@@ -71,14 +77,12 @@ export function PwaInstallPrompt({ className = '', isCompact = false }: PwaInsta
         {!isCompact && <span className="text-[11px] font-sans">تثبيت التطبيق</span>}
       </button>
 
-      {/* iOS & Manual Installation Instructions Modal */}
+      {/* Instructions Modal */}
       {showInstructions && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
           <div className="w-full max-w-sm p-6 rounded-3xl bg-surface border border-gold/40 shadow-2xl space-y-4 text-ivory text-xs font-sans">
             <div className="flex items-center justify-between pb-3 border-b border-white/10">
-              <h4 className="text-sm font-serif font-bold text-champagne">
-                تثبيت تطبيق مفتاح الجمال
-              </h4>
+              <h4 className="text-sm font-serif font-bold text-champagne">تثبيت التطبيق</h4>
               <button
                 type="button"
                 onClick={() => setShowInstructions(false)}
@@ -89,7 +93,7 @@ export function PwaInstallPrompt({ className = '', isCompact = false }: PwaInsta
             </div>
 
             <p className="text-muted-lux leading-relaxed">
-              لتثبيت المتجر كتطبيق فوري على شاشة هاتفك الرئيسية بدون الحاجة لمتجر التطبيقات:
+              لتثبيت المتجر كتطبيق فوري على شاشة هاتفك الرئيسية:
             </p>
 
             <div className="space-y-2.5 p-3 rounded-2xl bg-white/5 border border-white/10">
@@ -97,19 +101,13 @@ export function PwaInstallPrompt({ className = '', isCompact = false }: PwaInsta
                 <span className="w-4 h-4 rounded-full bg-gold/20 text-gold flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
                   1
                 </span>
-                <span>اضغطي على زر المشاركة (Share) أسفل المتصفح (في Safari أو Chrome).</span>
+                <span>اضغطي على زر المشاركة (Share) أسفل المتصفح (Safari أو Chrome).</span>
               </div>
               <div className="flex items-start gap-2">
                 <span className="w-4 h-4 rounded-full bg-gold/20 text-gold flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
                   2
                 </span>
-                <span>اختاري "إضافة إلى الصفحة الرئيسية" (Add to Home Screen).</span>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="w-4 h-4 rounded-full bg-gold/20 text-gold flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
-                  3
-                </span>
-                <span>استمتعي بتجربة تطبيق تسوق سريع وفوري مع فاحص كشف المقلد.</span>
+                <span>اختاري &quot;إضافة إلى الصفحة الرئيسية&quot; (Add to Home Screen).</span>
               </div>
             </div>
 
