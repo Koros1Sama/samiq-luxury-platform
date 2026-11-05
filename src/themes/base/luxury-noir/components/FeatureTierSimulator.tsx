@@ -1,10 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   FEATURES_REGISTRY,
   calculateTierPrice,
   resolveEffectiveFeatures,
+  PlatformPricingConfig,
+  DEFAULT_PRICING_CONFIG,
 } from '@/core/features/registry';
 import { FeatureFlags } from '../../../contract';
 import { TuningSliderIcon } from './LuxuryIcons';
@@ -28,10 +30,52 @@ export function FeatureTierSimulator(props: FeatureTierSimulatorProps) {
   };
 
   const [isExpanded, setIsExpanded] = useState(false);
+  const [pricingConfig, setPricingConfig] = useState<PlatformPricingConfig>(DEFAULT_PRICING_CONFIG);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const loadConfig = () => {
+      try {
+        const saved = localStorage.getItem('samiq_live_pricing_config');
+        if (saved) {
+          setPricingConfig(JSON.parse(saved));
+        }
+      } catch {
+        // Fallback to default
+      }
+    };
+    loadConfig();
+    window.addEventListener('storage', loadConfig);
+    window.addEventListener('samiq_pricing_updated', loadConfig);
+    return () => {
+      window.removeEventListener('storage', loadConfig);
+      window.removeEventListener('samiq_pricing_updated', loadConfig);
+    };
+  }, []);
 
   // Active feature list as array of keys
   const activeKeys = Object.keys(currentFeatures).filter((k) => currentFeatures[k]);
-  const pricing = calculateTierPrice(activeKeys);
+  const pricing = calculateTierPrice(
+    activeKeys,
+    pricingConfig.priceOverrides,
+    pricingConfig
+  );
+
+  const t1Pricing = calculateTierPrice(
+    ['tier_1_static'],
+    pricingConfig.priceOverrides,
+    pricingConfig
+  );
+  const t2Pricing = calculateTierPrice(
+    ['tier_1_static', 'tier_2_editable'],
+    pricingConfig.priceOverrides,
+    pricingConfig
+  );
+  const t3Pricing = calculateTierPrice(
+    ['tier_1_static', 'tier_2_editable', 'tier_3_catalog', 'cart_whatsapp'],
+    pricingConfig.priceOverrides,
+    pricingConfig
+  );
 
   const toggleFeature = (featureId: string) => {
     const isCurrentlyOn = !!currentFeatures[featureId];
@@ -144,7 +188,10 @@ export function FeatureTierSimulator(props: FeatureTierSimulatorProps) {
               ? 'الدرجة 2: تعريفي بلوحة إدارة'
               : 'الدرجة 3: كتالوج منتجات كامل'}
           </span>
-          <span className="text-xs font-bold font-mono text-gold">${pricing.totalUsd}</span>
+          {pricing.isDiscountEnabled && pricing.discountUsd > 0 && (
+            <span className="text-[11px] font-mono text-[#8E8B85] line-through ms-1">${pricing.subtotalUsd}</span>
+          )}
+          <span className="text-xs font-bold font-mono text-gold ms-1">${pricing.totalUsd}</span>
         </div>
 
         <button
@@ -170,7 +217,7 @@ export function FeatureTierSimulator(props: FeatureTierSimulatorProps) {
                   : 'bg-white/5 hover:bg-white/10 border-white/10 text-ivory'
               }`}
             >
-              الدرجة 1: موقع تعريفي ثابت ($80)
+              الدرجة 1: موقع تعريفي ثابت (${t1Pricing.totalUsd})
             </button>
             <button
               type="button"
@@ -181,7 +228,7 @@ export function FeatureTierSimulator(props: FeatureTierSimulatorProps) {
                   : 'bg-white/5 hover:bg-white/10 border-white/10 text-ivory'
               }`}
             >
-              الدرجة 2: تعريفي بلوحة إدارة ($130)
+              الدرجة 2: تعريفي بلوحة إدارة (${t2Pricing.totalUsd})
             </button>
             <button
               type="button"
@@ -192,7 +239,7 @@ export function FeatureTierSimulator(props: FeatureTierSimulatorProps) {
                   : 'bg-white/5 hover:bg-white/10 border-white/10 text-ivory'
               }`}
             >
-              الدرجة 3: كتالوج وسلة واتساب ($235)
+              الدرجة 3: كتالوج وسلة واتساب (${t3Pricing.totalUsd})
             </button>
             <button
               type="button"

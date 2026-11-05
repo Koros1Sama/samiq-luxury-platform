@@ -325,6 +325,11 @@ export default function SamiqShowcasePage() {
     return getPackagePricing(currentPackageObj.features);
   }, [currentPackageObj, getPackagePricing]);
 
+  // Dynamic pricing for the 3 foundation tiers in hero
+  const tier1Pricing = useMemo(() => getPackagePricing(['tier_1_static']), [getPackagePricing]);
+  const tier2Pricing = useMemo(() => getPackagePricing(['tier_1_static', 'tier_2_editable']), [getPackagePricing]);
+  const tier3Pricing = useMemo(() => getPackagePricing(['tier_1_static', 'tier_2_editable', 'tier_3_catalog']), [getPackagePricing]);
+
   const effectivePrice =
     activeTab === 'packages' && selectedPackagePricing
       ? selectedPackagePricing.totalUsd
@@ -469,7 +474,13 @@ export default function SamiqShowcasePage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 space-y-6">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#C9A84C]/10 border border-[#C9A84C]/30 text-[#E8D390] text-xs font-semibold">
             <span className="w-2 h-2 rounded-full bg-[#C9A84C]" />
-            <span>محرك معماري مستقل فائق السرعة يبدأ من $80 فقط</span>
+            <span>
+              محرك معماري مستقل فائق السرعة يبدأ من{' '}
+              {pricingConfig.isDiscountEnabled && tier1Pricing.discountUsd > 0 && (
+                <span className="line-through text-[#8E8B85] font-mono text-[11px]">${tier1Pricing.subtotalUsd}{' '}</span>
+              )}
+              <strong className="text-champagne font-bold">${tier1Pricing.totalUsd}</strong> فقط
+            </span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-serif font-bold text-[#FAF7F2] leading-tight">
@@ -481,7 +492,7 @@ export default function SamiqShowcasePage() {
           </h1>
 
           <p className="text-sm sm:text-lg text-[#A09D94] max-w-3xl mx-auto leading-relaxed">
-            محرك سَامِق (SAMIQ) يقدم لك 3 درجات أساسية تراكمية: موقع تعريفي ثابت بدون منتجات ($80)، ثم قابل للتعديل مع لوحة تحكم المدير ($130)، ثم كتالوج المنتجات والأقسام والوسوم ($200)، مع إضافات مستقلة تختار منها ما يناسب ميزانيتك وطبيعة نشاطك.
+            محرك سَامِق (SAMIQ) يقدم لك 3 درجات أساسية تراكمية: موقع تعريفي ثابت بدون منتجات (${tier1Pricing.totalUsd})، ثم قابل للتعديل مع لوحة تحكم المدير (${tier2Pricing.totalUsd})، ثم كتالوج المنتجات والأقسام والوسوم (${tier3Pricing.totalUsd})، مع إضافات مستقلة تختار منها ما يناسب ميزانيتك وطبيعة نشاطك.
           </p>
 
           {/* Quick Advantage Badges */}
@@ -1192,7 +1203,14 @@ export default function SamiqShowcasePage() {
                 </div>
                 <div className="pt-2">
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-serif font-bold text-[#E8D390]">$80 - $500+</span>
+                    <span className="text-3xl font-serif font-bold text-[#E8D390]">
+                      {pricingConfig.isDiscountEnabled && tier1Pricing.discountUsd > 0 && (
+                        <span className="line-through text-[#8E8B85] text-lg font-mono me-2">
+                          ${tier1Pricing.subtotalUsd}
+                        </span>
+                      )}
+                      ${tier1Pricing.totalUsd} - $500+
+                    </span>
                     <span className="text-xs text-muted-lux">حسب الباقة المعتمدة</span>
                   </div>
                 </div>
@@ -1240,7 +1258,7 @@ export default function SamiqShowcasePage() {
                 <div className="pt-2">
                   <div className="flex items-baseline gap-1">
                     <span className="text-3xl font-serif font-bold text-[#E8D390]">
-                      {selectedDomainOption === 'free' ? '$0' : selectedDomainOption === 'com' ? '$20' : '$35'}
+                      ${domainCostUsd}
                     </span>
                     <span className="text-xs text-muted-lux">/ سنوياً</span>
                   </div>
@@ -1258,7 +1276,7 @@ export default function SamiqShowcasePage() {
                       <span className="font-bold block">نطاق فرعي مجاني (*.samiq.shop)</span>
                       <span className="text-muted-dim text-xs">مدى الحياة بدون أي تجديد</span>
                     </div>
-                    <span className="font-mono text-emerald-400 font-bold">$0</span>
+                    <span className="font-mono text-emerald-400 font-bold">${pricingConfig.domainTierPrices?.subdomain_free ?? 0}</span>
                   </div>
 
                   <div
@@ -1273,7 +1291,7 @@ export default function SamiqShowcasePage() {
                       <span className="font-bold block">دومين عالمي خاص (.com / .net)</span>
                       <span className="text-muted-dim text-xs">شامل حماية SSL وسيرفرات Cloudflare</span>
                     </div>
-                    <span className="font-mono text-gold font-bold">$20/سنة</span>
+                    <span className="font-mono text-gold font-bold">${pricingConfig.domainTierPrices?.custom_com ?? 20}/سنة</span>
                   </div>
 
                   <div
@@ -1288,7 +1306,7 @@ export default function SamiqShowcasePage() {
                       <span className="font-bold block">دومين يمني رسمي (.ye / .com.ye)</span>
                       <span className="text-muted-dim text-xs">وفق رسوم الهيئة العامة للاتصالات</span>
                     </div>
-                    <span className="font-mono text-gold font-bold">$35/سنة</span>
+                    <span className="font-mono text-gold font-bold">${pricingConfig.domainTierPrices?.custom_ye ?? 35}/سنة</span>
                   </div>
                 </div>
               </div>
@@ -1308,8 +1326,8 @@ export default function SamiqShowcasePage() {
                 </div>
                 <div className="pt-2">
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-serif font-bold text-emerald-400">$45</span>
-                    <span className="text-xs text-muted-lux">/ سنوياً (أقل من $4/شهرياً)</span>
+                    <span className="text-3xl font-serif font-bold text-emerald-400">${annualHostingCostUsd}</span>
+                    <span className="text-xs text-muted-lux">/ سنوياً (أقل من ${Math.max(1, Math.round(annualHostingCostUsd / 12))}/شهرياً)</span>
                   </div>
                 </div>
                 <ul className="space-y-2 pt-2 border-t border-white/5 text-xs text-[#A09D94]">
