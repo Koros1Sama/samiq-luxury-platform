@@ -21,6 +21,8 @@ export interface PdfInvoiceModalProps {
   annualDomainUsd?: number;
   annualHostingUsd?: number;
   aiPlanType?: 'none' | 'byok' | 'managed_annual';
+  annualAiUsd?: number;
+  firstYearHostingUsd?: number;
   customRef?: string;
 }
 
@@ -37,6 +39,8 @@ export function PdfInvoiceModal({
   annualDomainUsd = 20,
   annualHostingUsd = 45,
   aiPlanType = 'none',
+  annualAiUsd,
+  firstYearHostingUsd = 0,
   customRef,
 }: PdfInvoiceModalProps) {
   const instanceId = useId().replace(/:/g, '');
@@ -88,8 +92,16 @@ export function PdfInvoiceModal({
   }, [selectedFeatureIds, pricing.itemizedPrices]);
 
   // Annual recurring calculation
-  const aiAnnualCost = aiPlanType === 'managed_annual' ? 90 : 0;
-  const annualTotalStartingYearTwo = annualDomainUsd + annualHostingUsd + aiAnnualCost;
+  const aiAnnualCost =
+    annualAiUsd !== undefined
+      ? annualAiUsd
+      : aiPlanType === 'managed_annual'
+      ? 90
+      : 0;
+  const annualTotalStartingYearTwo =
+    annualDomainUsd +
+    annualHostingUsd +
+    (aiPlanType === 'none' && annualAiUsd === undefined ? 0 : aiAnnualCost);
 
   const handlePrint = () => {
     const origTitle = document.title;
@@ -367,7 +379,11 @@ export function PdfInvoiceModal({
                 <h3 className="text-sm font-serif font-bold text-ivory print:text-black">
                   3. الملخص المالي لتكلفة التأسيس (تُدفع لمرة واحدة عند الإنشاء والتسليم)
                 </h3>
-                <span className="text-xs text-muted-lux print:text-neutral-600">شاملة استضافة السنة الأولى مجاناً ($0)</span>
+                <span className="text-xs text-muted-lux print:text-neutral-600">
+                  {firstYearHostingUsd > 0
+                    ? `شاملة استضافة السنة الأولى ($${firstYearHostingUsd})`
+                    : 'شاملة استضافة السنة الأولى مجاناً ($0)'}
+                </span>
               </div>
 
               <div className="space-y-2 text-xs font-sans">
@@ -429,7 +445,9 @@ export function PdfInvoiceModal({
                   <span className="text-ivory print:text-black font-semibold block">الاستضافة والصيانة السحابية:</span>
                   <span className="font-mono font-bold text-gold print:text-neutral-900 block">${annualHostingUsd} / سنوياً</span>
                   <span className="text-muted-dim print:text-neutral-500 block leading-tight">
-                    السنة الأولى مشمولة مجاناً ($0). التجديد يبدأ من السنة الثانية
+                    {firstYearHostingUsd > 0
+                      ? `السنة الأولى: $${firstYearHostingUsd}. التجديد يبدأ من السنة الثانية`
+                      : 'السنة الأولى مشمولة مجاناً ($0). التجديد يبدأ من السنة الثانية'}
                   </span>
                 </div>
 
@@ -439,7 +457,7 @@ export function PdfInvoiceModal({
                   <span className="text-muted-dim print:text-neutral-500 block leading-tight">
                     {aiPlanType === 'byok'
                       ? 'مفتاح العميل المباشر BYOK ($0 للمنصة)'
-                      : aiPlanType === 'managed_annual'
+                      : aiAnnualCost > 0
                       ? 'استهلاك سحابي شامل ومدار للرسائل والوسوم'
                       : 'بدون اشتراك ذكاء اصطناعي إضافي'}
                   </span>

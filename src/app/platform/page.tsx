@@ -12,6 +12,42 @@ import { ThemeId, SAMIQ_THEMES, isValidThemeId } from '@/themes/contract';
 import { SamiqProjectRecord } from '@/core/db/store';
 import { PdfInvoiceModal } from '@/core/features/PdfInvoiceModal';
 
+function PencilIcon({ className = 'w-3 h-3' }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+    </svg>
+  );
+}
+
+function CloseIcon({ className = 'w-2.5 h-2.5' }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  );
+}
+
 export default function PlatformSuperAdminPage() {
   // Fleet of Projects State
   const [projects, setProjects] = useState<SamiqProjectRecord[]>([]);
@@ -41,9 +77,16 @@ export default function PlatformSuperAdminPage() {
 
   // Operational & Recurring Costs State
   const [projectDomainType, setProjectDomainType] = useState<'subdomain_free' | 'custom_com' | 'custom_ye'>('custom_com');
+  const [domainTierPrices, setDomainTierPrices] = useState({
+    subdomain_free: 0,
+    custom_com: 20,
+    custom_ye: 35,
+  });
   const [projectAnnualDomainUsd, setProjectAnnualDomainUsd] = useState<number>(20);
+  const [projectFirstYearHostingUsd, setProjectFirstYearHostingUsd] = useState<number>(0);
   const [projectAnnualHostingUsd, setProjectAnnualHostingUsd] = useState<number>(45);
   const [projectAiPlan, setProjectAiPlan] = useState<'none' | 'byok' | 'managed_annual'>('byok');
+  const [projectAnnualAiUsd, setProjectAnnualAiUsd] = useState<number>(90);
 
   // Create Project Modal State
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -177,19 +220,72 @@ export default function PlatformSuperAdminPage() {
   const selectedProjectAnnualTotal = useMemo(() => {
     const domain = projectAnnualDomainUsd;
     const hosting = projectAnnualHostingUsd;
-    const ai = projectAiPlan === 'managed_annual' ? 90 : 0;
+    const ai = projectAiPlan === 'managed_annual' ? projectAnnualAiUsd : 0;
     return domain + hosting + ai;
-  }, [projectAnnualDomainUsd, projectAnnualHostingUsd, projectAiPlan]);
+  }, [projectAnnualDomainUsd, projectAnnualHostingUsd, projectAiPlan, projectAnnualAiUsd]);
 
   // Handle Domain Tier Change
   const handleDomainTierChange = (type: 'subdomain_free' | 'custom_com' | 'custom_ye') => {
     setProjectDomainType(type);
-    if (type === 'subdomain_free') {
-      setProjectAnnualDomainUsd(0);
-    } else if (type === 'custom_com') {
-      setProjectAnnualDomainUsd(20);
-    } else if (type === 'custom_ye') {
-      setProjectAnnualDomainUsd(35);
+    setProjectAnnualDomainUsd(domainTierPrices[type]);
+  };
+
+  // Handle Domain Tier Price Override
+  const handleSetDomainTierPrice = (type: 'subdomain_free' | 'custom_com' | 'custom_ye') => {
+    const current = domainTierPrices[type];
+    const typeNames = {
+      subdomain_free: 'النطاق الفرعي المجاني (*.samiq.shop)',
+      custom_com: 'النطاق العالمي الرسمي (.com / .net)',
+      custom_ye: 'النطاق المحلي الرسمي (.ye / .com.ye)',
+    };
+    const input = prompt(`أدخل سعر حجز وتجديد «${typeNames[type]}» بالدولار ($/سنوياً):`, String(current));
+    if (input !== null) {
+      const num = Math.max(0, Number(input) || 0);
+      setDomainTierPrices((prev) => ({ ...prev, [type]: num }));
+      if (projectDomainType === type) {
+        setProjectAnnualDomainUsd(num);
+      }
+    }
+  };
+
+  // Reset single price override
+  const handleResetSinglePrice = (featId: string) => {
+    setPriceOverrides((prev) => {
+      const next = { ...prev };
+      delete next[featId];
+      return next;
+    });
+  };
+
+  // Reset all price overrides & discounts to default
+  const handleResetAllPrices = () => {
+    setPriceOverrides({});
+    setCustomDiscountUsd(0);
+    setProjectFirstYearHostingUsd(0);
+    setProjectAnnualHostingUsd(45);
+    setProjectAnnualDomainUsd(20);
+    setProjectAnnualAiUsd(90);
+    setDomainTierPrices({ subdomain_free: 0, custom_com: 20, custom_ye: 35 });
+    setSaveSuccessMsg('تمت إعادة ضبط جميع الأسعار والخصومات إلى القيم القياسية الافتراضية.');
+    setTimeout(() => setSaveSuccessMsg(''), 3000);
+  };
+
+  // Handle setting target net total directly
+  const handleSetTargetNetTotal = () => {
+    const val = prompt('أدخل السعر الصافي المقطوع المطلوب لعقد التأسيس بالدولار ($):', String(pricing.totalUsd));
+    if (val !== null) {
+      const target = Math.max(0, Number(val) || 0);
+      if (target <= pricing.subtotalUsd) {
+        setCustomDiscountUsd(pricing.subtotalUsd - target);
+      } else {
+        setCustomDiscountUsd(0);
+        const extra = target - pricing.subtotalUsd;
+        const currentTierPrice = priceOverrides[pricing.selectedTier] ?? FEATURES_REGISTRY[pricing.selectedTier]?.basePriceUsd ?? 80;
+        setPriceOverrides((prev) => ({
+          ...prev,
+          [pricing.selectedTier]: currentTierPrice + extra,
+        }));
+      }
     }
   };
 
@@ -222,8 +318,10 @@ export default function PlatformSuperAdminPage() {
 
   // Handle manual price override for a feature
   const handleSetPriceOverride = (featId: string) => {
-    const currentPrice = priceOverrides[featId] ?? FEATURES_REGISTRY[featId]?.basePriceUsd ?? 0;
-    const input = prompt(`أدخل السعر المخصص لميزة «${FEATURES_REGISTRY[featId]?.nameAr}» بالدولار ($):`, String(currentPrice));
+    const feat = FEATURES_REGISTRY[featId];
+    const currentPrice = priceOverrides[featId] ?? feat?.basePriceUsd ?? 0;
+    const label = feat ? feat.nameAr : featId;
+    const input = prompt(`أدخل السعر المخصص لميزة «${label}» بالدولار ($):`, String(currentPrice));
     if (input !== null) {
       const num = Number(input);
       if (!isNaN(num) && num >= 0) {
@@ -231,6 +329,49 @@ export default function PlatformSuperAdminPage() {
           ...prev,
           [featId]: num,
         }));
+      }
+    }
+  };
+
+  // Quick edit for fleet card setup price
+  const handleEditFleetSetupPrice = async (proj: SamiqProjectRecord) => {
+    const val = prompt(`أدخل سعر عقد التأسيس لمشروع «${proj.name}» بالدولار ($):`, String(proj.setupPriceUsd));
+    if (val !== null) {
+      const num = Math.max(0, Number(val) || 0);
+      setProjects((prev) => prev.map((p) => p.id === proj.id ? { ...p, setupPriceUsd: num } : p));
+      try {
+        await fetch('/api/platform/config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ projectId: proj.id, setupPriceUsd: num }),
+        });
+        setSaveSuccessMsg(`تم تحديث عقد التأسيس لمشروع «${proj.name}» إلى $${num}`);
+        setTimeout(() => setSaveSuccessMsg(''), 3000);
+      } catch {
+        // local state already updated
+      }
+    }
+  };
+
+  // Quick edit for fleet card renewal price
+  const handleEditFleetRenewalPrice = async (proj: SamiqProjectRecord) => {
+    const currentTotal = (proj.annualDomainUsd || 0) + (proj.annualHostingMaintenanceUsd || 0) + (proj.aiPlanType === 'managed_annual' ? 90 : 0);
+    const val = prompt(`أدخل إجمالي التجديد السنوي لمشروع «${proj.name}» بالدولار ($):`, String(currentTotal));
+    if (val !== null) {
+      const num = Math.max(0, Number(val) || 0);
+      const domain = proj.annualDomainUsd || 0;
+      const newHosting = Math.max(0, num - domain);
+      setProjects((prev) => prev.map((p) => p.id === proj.id ? { ...p, annualHostingMaintenanceUsd: newHosting } : p));
+      try {
+        await fetch('/api/platform/config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ projectId: proj.id, annualHostingMaintenanceUsd: newHosting }),
+        });
+        setSaveSuccessMsg(`تم تحديث التجديد السنوي لمشروع «${proj.name}» إلى $${num}/سنوياً`);
+        setTimeout(() => setSaveSuccessMsg(''), 3000);
+      } catch {
+        // local state already updated
       }
     }
   };
@@ -471,16 +612,27 @@ export default function PlatformSuperAdminPage() {
           </div>
         </button>
 
-        <div className="flex items-center justify-between w-full pt-2 border-t border-white/5">
-          <div className="flex items-center gap-1.5">
+        <div className="flex items-center justify-between w-full pt-2 border-t border-white/5 flex-wrap gap-2">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <button
               type="button"
               onClick={() => handleSetPriceOverride(id)}
               title="انقر لتعديل السعر لهذا العرض يدوياً"
-              className="text-xs font-sans font-bold px-2 py-0.5 rounded bg-gold/15 text-gold border border-gold/30 hover:bg-gold/25 transition cursor-pointer"
+              className="text-xs font-sans font-bold px-2.5 py-1 rounded-lg bg-gold/15 text-gold border border-gold/30 hover:bg-gold/30 hover:border-gold transition cursor-pointer inline-flex items-center gap-1"
             >
-              {overridePrice !== undefined ? `$${displayPrice} (معدل)` : `+$${displayPrice}`}
+              <span>{overridePrice !== undefined ? `$${displayPrice} (معدل)` : `+$${displayPrice}`}</span>
+              <PencilIcon className="w-2.5 h-2.5" />
             </button>
+            {overridePrice !== undefined && (
+              <button
+                type="button"
+                onClick={() => handleResetSinglePrice(id)}
+                title="إعادة السعر للافتراضي"
+                className="text-muted-dim hover:text-rose-400 p-1 rounded transition flex items-center justify-center"
+              >
+                <CloseIcon />
+              </button>
+            )}
             {incrementalDiff && (
               <span className="text-xs text-muted-lux font-semibold">
                 ({incrementalDiff})
@@ -517,6 +669,8 @@ export default function PlatformSuperAdminPage() {
         annualDomainUsd={projectAnnualDomainUsd}
         annualHostingUsd={projectAnnualHostingUsd}
         aiPlanType={projectAiPlan}
+        annualAiUsd={projectAiPlan === 'managed_annual' ? projectAnnualAiUsd : 0}
+        firstYearHostingUsd={projectFirstYearHostingUsd}
       />
 
       {/* Top Header */}
@@ -794,11 +948,27 @@ export default function PlatformSuperAdminPage() {
                       </div>
                       <div className="flex items-center justify-between">
                         <span>عقد التأسيس (Setup):</span>
-                        <span className="font-bold text-gold">${proj.setupPriceUsd}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleEditFleetSetupPrice(proj)}
+                          title="انقر لتعديل عقد التأسيس لهذا المشروع"
+                          className="font-bold text-gold hover:text-champagne transition inline-flex items-center gap-1 cursor-pointer"
+                        >
+                          <span>${proj.setupPriceUsd}</span>
+                          <PencilIcon className="w-2.5 h-2.5 text-gold/70" />
+                        </button>
                       </div>
                       <div className="flex items-center justify-between">
                         <span>التجديد السنوي (Renewal):</span>
-                        <span className="font-bold text-emerald-400">${annualSum} / سنوياً</span>
+                        <button
+                          type="button"
+                          onClick={() => handleEditFleetRenewalPrice(proj)}
+                          title="انقر لتعديل التجديد السنوي لهذا المشروع"
+                          className="font-bold text-emerald-400 hover:text-emerald-300 transition inline-flex items-center gap-1 cursor-pointer"
+                        >
+                          <span>${annualSum} / سنوياً</span>
+                          <PencilIcon className="w-2.5 h-2.5 text-emerald-400/70" />
+                        </button>
                       </div>
                       <div className="flex items-center justify-between">
                         <span>القالب المعتمد:</span>
@@ -1043,42 +1213,89 @@ export default function PlatformSuperAdminPage() {
                 <span className="text-xs font-mono font-bold text-gold">${projectAnnualDomainUsd} / سنوياً</span>
               </div>
               <div className="space-y-2">
-                <button
-                  type="button"
-                  onClick={() => handleDomainTierChange('subdomain_free')}
-                  className={`w-full p-2.5 rounded-xl border text-start text-xs transition flex items-center justify-between min-h-[44px] ${
-                    projectDomainType === 'subdomain_free'
-                      ? 'bg-gold/15 border-gold text-ivory font-bold'
-                      : 'bg-white/5 border-white/5 text-muted-lux hover:border-white/20'
-                  }`}
-                >
-                  <span>نطاق فرعي مجاني (*.samiq.shop)</span>
-                  <span className="font-mono text-emerald-400">$0 / سنوياً</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleDomainTierChange('custom_com')}
-                  className={`w-full p-2.5 rounded-xl border text-start text-xs transition flex items-center justify-between min-h-[44px] ${
-                    projectDomainType === 'custom_com'
-                      ? 'bg-gold/15 border-gold text-ivory font-bold'
-                      : 'bg-white/5 border-white/5 text-muted-lux hover:border-white/20'
-                  }`}
-                >
-                  <span>نطاق عالمي رسمي (.com / .net)</span>
-                  <span className="font-mono text-gold">$20 / سنوياً</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleDomainTierChange('custom_ye')}
-                  className={`w-full p-2.5 rounded-xl border text-start text-xs transition flex items-center justify-between min-h-[44px] ${
-                    projectDomainType === 'custom_ye'
-                      ? 'bg-gold/15 border-gold text-ivory font-bold'
-                      : 'bg-white/5 border-white/5 text-muted-lux hover:border-white/20'
-                  }`}
-                >
-                  <span>نطاق محلي رسمي (.ye / .com.ye)</span>
-                  <span className="font-mono text-gold">$35 / سنوياً</span>
-                </button>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => handleDomainTierChange('subdomain_free')}
+                    className={`flex-1 p-2.5 rounded-xl border text-start text-xs transition flex items-center justify-between min-h-[44px] ${
+                      projectDomainType === 'subdomain_free'
+                        ? 'bg-gold/15 border-gold text-ivory font-bold'
+                        : 'bg-white/5 border-white/5 text-muted-lux hover:border-white/20'
+                    }`}
+                  >
+                    <span>نطاق فرعي مجاني (*.samiq.shop)</span>
+                    <span className="font-mono text-emerald-400">${domainTierPrices.subdomain_free} / سنوياً</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSetDomainTierPrice('subdomain_free')}
+                    title="تعديل سعر هذا النطاق"
+                    className="min-h-[44px] px-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-gold/80 hover:text-gold border border-white/10 transition flex items-center justify-center shrink-0"
+                  >
+                    <PencilIcon className="w-3 h-3" />
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => handleDomainTierChange('custom_com')}
+                    className={`flex-1 p-2.5 rounded-xl border text-start text-xs transition flex items-center justify-between min-h-[44px] ${
+                      projectDomainType === 'custom_com'
+                        ? 'bg-gold/15 border-gold text-ivory font-bold'
+                        : 'bg-white/5 border-white/5 text-muted-lux hover:border-white/20'
+                    }`}
+                  >
+                    <span>نطاق عالمي رسمي (.com / .net)</span>
+                    <span className="font-mono text-gold">${domainTierPrices.custom_com} / سنوياً</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSetDomainTierPrice('custom_com')}
+                    title="تعديل سعر هذا النطاق"
+                    className="min-h-[44px] px-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-gold/80 hover:text-gold border border-white/10 transition flex items-center justify-center shrink-0"
+                  >
+                    <PencilIcon className="w-3 h-3" />
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => handleDomainTierChange('custom_ye')}
+                    className={`flex-1 p-2.5 rounded-xl border text-start text-xs transition flex items-center justify-between min-h-[44px] ${
+                      projectDomainType === 'custom_ye'
+                        ? 'bg-gold/15 border-gold text-ivory font-bold'
+                        : 'bg-white/5 border-white/5 text-muted-lux hover:border-white/20'
+                    }`}
+                  >
+                    <span>نطاق محلي رسمي (.ye / .com.ye)</span>
+                    <span className="font-mono text-gold">${domainTierPrices.custom_ye} / سنوياً</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSetDomainTierPrice('custom_ye')}
+                    title="تعديل سعر هذا النطاق"
+                    className="min-h-[44px] px-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-gold/80 hover:text-gold border border-white/10 transition flex items-center justify-center shrink-0"
+                  >
+                    <PencilIcon className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Direct number input for adopted annual domain fee */}
+              <div className="space-y-1.5 pt-2 border-t border-white/5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs text-muted-lux font-semibold">رسم النطاق السنوي المعتمد ($/سنوياً):</label>
+                  <span className="text-xs text-gold font-mono font-bold">${projectAnnualDomainUsd} / سنوياً</span>
+                </div>
+                <input
+                  type="number"
+                  min="0"
+                  value={projectAnnualDomainUsd}
+                  onChange={(e) => setProjectAnnualDomainUsd(Math.max(0, Number(e.target.value) || 0))}
+                  className="w-full min-h-[44px] px-3.5 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-hidden text-xs font-mono font-bold"
+                />
               </div>
               <p className="text-xs text-muted-dim leading-snug">
                 يشمل الدومين حجز الاسم السنوي الرسمي، شهادة الأمان SSL وحماية سحابية عالمية.
@@ -1091,18 +1308,44 @@ export default function PlatformSuperAdminPage() {
                 <span className="text-xs font-bold text-champagne block">الاستضافة والصيانة السحابية:</span>
                 <span className="text-xs font-mono font-bold text-gold">${projectAnnualHostingUsd} / سنوياً</span>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/20 text-xs text-emerald-300">
-                  <span className="font-bold block">السنة الأولى مشمولة مجاناً ($0)</span>
+                  <span className="font-bold block">
+                    {projectFirstYearHostingUsd === 0
+                      ? 'السنة الأولى مشمولة مجاناً ($0)'
+                      : `رسوم استضافة السنة الأولى: $${projectFirstYearHostingUsd}`}
+                  </span>
                   <span className="text-muted-lux block mt-0.5">مع عقد التأسيس للباقة المختارة.</span>
                 </div>
-                <div className="space-y-1">
-                  <label className="text-xs text-muted-lux block">رسم التجديد السنوي ابتداءً من السنة الثانية ($):</label>
+
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs text-muted-lux block">تكلفة استضافة السنة الأولى ($):</label>
+                    <span className="text-xs font-mono text-champagne font-bold">
+                      {projectFirstYearHostingUsd === 0 ? '$0 (مجاناً)' : `$${projectFirstYearHostingUsd}`}
+                    </span>
+                  </div>
                   <input
                     type="number"
+                    min="0"
+                    value={projectFirstYearHostingUsd}
+                    onChange={(e) => setProjectFirstYearHostingUsd(Math.max(0, Number(e.target.value) || 0))}
+                    placeholder="0 (مجاناً)"
+                    className="w-full min-h-[44px] px-3.5 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-hidden text-xs font-mono font-bold"
+                  />
+                </div>
+
+                <div className="space-y-1.5 pt-1">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs text-muted-lux block">رسم التجديد السنوي ابتداءً من السنة الثانية ($):</label>
+                    <span className="text-xs font-mono text-gold font-bold">${projectAnnualHostingUsd} / سنوياً</span>
+                  </div>
+                  <input
+                    type="number"
+                    min="0"
                     value={projectAnnualHostingUsd}
-                    onChange={(e) => setProjectAnnualHostingUsd(Number(e.target.value) || 0)}
-                    className="w-full min-h-[44px] px-3 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-hidden text-xs font-mono"
+                    onChange={(e) => setProjectAnnualHostingUsd(Math.max(0, Number(e.target.value) || 0))}
+                    className="w-full min-h-[44px] px-3.5 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-hidden text-xs font-mono font-bold"
                   />
                 </div>
               </div>
@@ -1116,7 +1359,7 @@ export default function PlatformSuperAdminPage() {
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-champagne block">خطة استهلاك الذكاء الاصطناعي (AI Plan):</span>
                 <span className="text-xs font-mono font-bold text-gold">
-                  {projectAiPlan === 'managed_annual' ? '$90 / سنوياً' : '$0'}
+                  {projectAiPlan === 'managed_annual' ? `$${projectAnnualAiUsd} / سنوياً` : '$0'}
                 </span>
               </div>
               <div className="space-y-2">
@@ -1154,8 +1397,23 @@ export default function PlatformSuperAdminPage() {
                   }`}
                 >
                   <span>استهلاك سحابي شامل ومدار</span>
-                  <span className="font-mono text-gold">$90 / سنوياً</span>
+                  <span className="font-mono text-gold">${projectAnnualAiUsd} / سنوياً</span>
                 </button>
+              </div>
+
+              {/* Direct number input for AI plan annual cost */}
+              <div className="space-y-1.5 pt-2 border-t border-white/5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs text-muted-lux font-semibold">تكلفة اشتراك الذكاء الاصطناعي السنوي ($/سنوياً):</label>
+                  <span className="text-xs text-gold font-mono font-bold">${projectAnnualAiUsd} / سنوياً</span>
+                </div>
+                <input
+                  type="number"
+                  min="0"
+                  value={projectAnnualAiUsd}
+                  onChange={(e) => setProjectAnnualAiUsd(Math.max(0, Number(e.target.value) || 0))}
+                  className="w-full min-h-[44px] px-3.5 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-hidden text-xs font-mono font-bold"
+                />
               </div>
               <p className="text-xs text-muted-dim leading-snug">
                 تغطي تكاليف استهلاك نماذج Gemini API للوسوم الذكية والشات بوت التفاعلي.
@@ -1260,6 +1518,14 @@ export default function PlatformSuperAdminPage() {
             >
               مصفوفة الميزات فقط
             </button>
+            <button
+              type="button"
+              onClick={handleResetAllPrices}
+              className="min-h-[40px] px-3.5 rounded-xl text-xs font-sans font-bold text-muted-lux hover:text-ivory bg-white/5 hover:bg-white/10 border border-white/10 transition inline-flex items-center gap-1.5"
+              title="إعادة جميع الأسعار والخصومات للافتراضي"
+            >
+              <span>إعادة ضبط الأسعار للافتراضي</span>
+            </button>
           </div>
 
           <div className="flex items-center gap-2.5">
@@ -1303,394 +1569,284 @@ export default function PlatformSuperAdminPage() {
         )}
 
         {/* ==================================================================== */}
-        {/* SYNCHRONIZED INTERACTIVE DEPENDENCY TREE VIEW                        */}
+        {/* INTERACTIVE DEPENDENCY TREE VIEW (Rendered in sync or tree mode)    */}
         {/* ==================================================================== */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* LEFT/CENTER: TREE VIEW (Rendered in 'sync' or 'tree' modes) */}
-          {(viewMode === 'sync' || viewMode === 'tree') && (
-            <div
-              className={`${
-                viewMode === 'tree' ? 'lg:col-span-12' : 'lg:col-span-8'
-              } p-6 sm:p-8 rounded-3xl bg-surface border border-white/5 space-y-8`}
-            >
-              <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                <div>
-                  <h3 className="text-base sm:text-xl font-serif font-bold text-ivory">
-                    المخطط الشجري للترابطات الهندسية — {effectiveProjectTitle}
-                  </h3>
-                  <p className="text-xs text-muted-lux mt-1">
-                    انقري على أي عقدة شجرية لتفعيلها تلقائياً مع كافة متطلباتها، أو انقري على السعر لتعديله يدوياً.
-                  </p>
-                </div>
+        {(viewMode === 'sync' || viewMode === 'tree') && (
+          <div className="w-full p-6 sm:p-8 rounded-3xl bg-surface border border-white/5 space-y-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+              <div>
+                <h3 className="text-base sm:text-xl font-serif font-bold text-ivory">
+                  المخطط الشجري للترابطات الهندسية — {effectiveProjectTitle}
+                </h3>
+                <p className="text-xs text-muted-lux mt-1">
+                  انقري على أي عقدة شجرية لتفعيلها تلقائياً مع كافة متطلباتها، أو انقري على السعر لتعديله يدوياً.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
                 <span className="text-xs text-gold font-bold">
                   {selectedFeatures.length} ميزة نشطة
                 </span>
+                <button
+                  type="button"
+                  onClick={handleResetAllPrices}
+                  className="text-xs text-muted-lux hover:text-ivory px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 transition"
+                  title="إعادة تعيين كافة الأسعار للافتراضي"
+                >
+                  إعادة ضبط الأسعار للافتراضي
+                </button>
+              </div>
+            </div>
+
+            {/* TREE STRUCTURE */}
+            <div className="space-y-6">
+              {/* Level 1: Root - Tier 1 Static Landing Page */}
+              <div className="space-y-3">
+                <span className="text-xs font-sans font-bold text-gold block">
+                  المستوى 1 (الجذر الأساسي — موقع تعريفي فخم بدون منتجات وبدون لوحة تحكم):
+                </span>
+                <TreeNode
+                  id="tier_1_static"
+                  label={FEATURES_REGISTRY.tier_1_static.nameAr}
+                  price={FEATURES_REGISTRY.tier_1_static.basePriceUsd}
+                />
+
+                {/* Branches directly from Tier 1 */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 ps-3 sm:ps-6 border-s-2 border-gold/30">
+                  <TreeNode
+                    id="custom_domain"
+                    label={FEATURES_REGISTRY.custom_domain.nameAr}
+                    price={FEATURES_REGISTRY.custom_domain.basePriceUsd}
+                    requires={['tier_1_static']}
+                  />
+                  <TreeNode
+                    id="second_language"
+                    label={FEATURES_REGISTRY.second_language.nameAr}
+                    price={FEATURES_REGISTRY.second_language.basePriceUsd}
+                    requires={['tier_1_static']}
+                  />
+                  <TreeNode
+                    id="pwa_app"
+                    label={FEATURES_REGISTRY.pwa_app.nameAr}
+                    price={FEATURES_REGISTRY.pwa_app.basePriceUsd}
+                    requires={['tier_1_static']}
+                  />
+                  <TreeNode
+                    id="analytics_stats"
+                    label={FEATURES_REGISTRY.analytics_stats.nameAr}
+                    price={FEATURES_REGISTRY.analytics_stats.basePriceUsd}
+                    requires={['tier_1_static']}
+                  />
+                </div>
               </div>
 
-              {/* TREE STRUCTURE */}
-              <div className="space-y-6">
-                {/* Level 1: Root - Tier 1 Static Landing Page */}
-                <div className="space-y-3">
-                  <span className="text-xs font-sans font-bold text-gold block">
-                    المستوى 1 (الجذر الأساسي — موقع تعريفي فخم بدون منتجات وبدون لوحة تحكم):
-                  </span>
-                  <TreeNode
-                    id="tier_1_static"
-                    label={FEATURES_REGISTRY.tier_1_static.nameAr}
-                    price={FEATURES_REGISTRY.tier_1_static.basePriceUsd}
-                  />
+              {/* Level 2: Editable Site + Admin */}
+              <div className="ps-4 sm:ps-8 border-s-2 border-gold/40 space-y-3">
+                <span className="text-xs font-sans font-bold text-champagne block">
+                  ──► المستوى 2 (موقع تعريفي قابل للتعديل + مدخل سري للوحة تحكم المدير):
+                </span>
+                <TreeNode
+                  id="tier_2_editable"
+                  label={FEATURES_REGISTRY.tier_2_editable.nameAr}
+                  price={FEATURES_REGISTRY.tier_2_editable.basePriceUsd}
+                  requires={['tier_1_static']}
+                  incrementalDiff="+$50 فوق الدرجة 1"
+                />
 
-                  {/* Branches directly from Tier 1 */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 ps-3 sm:ps-6 border-s-2 border-gold/30">
+                {/* Branches directly from Tier 2 */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 ps-3 sm:ps-6 border-s-2 border-gold/30">
+                  <TreeNode
+                    id="bookings"
+                    label={FEATURES_REGISTRY.bookings.nameAr}
+                    price={FEATURES_REGISTRY.bookings.basePriceUsd}
+                    requires={['tier_2_editable']}
+                  />
+                  <TreeNode
+                    id="blog"
+                    label={FEATURES_REGISTRY.blog.nameAr}
+                    price={FEATURES_REGISTRY.blog.basePriceUsd}
+                    requires={['tier_2_editable']}
+                  />
+                  <div className="space-y-2">
                     <TreeNode
-                      id="custom_domain"
-                      label={FEATURES_REGISTRY.custom_domain.nameAr}
-                      price={FEATURES_REGISTRY.custom_domain.basePriceUsd}
-                      requires={['tier_1_static']}
+                      id="ai_chatbot"
+                      label={FEATURES_REGISTRY.ai_chatbot.nameAr}
+                      price={FEATURES_REGISTRY.ai_chatbot.basePriceUsd}
+                      requires={['tier_2_editable']}
                     />
-                    <TreeNode
-                      id="second_language"
-                      label={FEATURES_REGISTRY.second_language.nameAr}
-                      price={FEATURES_REGISTRY.second_language.basePriceUsd}
-                      requires={['tier_1_static']}
-                    />
-                    <TreeNode
-                      id="pwa_app"
-                      label={FEATURES_REGISTRY.pwa_app.nameAr}
-                      price={FEATURES_REGISTRY.pwa_app.basePriceUsd}
-                      requires={['tier_1_static']}
-                    />
-                    <TreeNode
-                      id="analytics_stats"
-                      label={FEATURES_REGISTRY.analytics_stats.nameAr}
-                      price={FEATURES_REGISTRY.analytics_stats.basePriceUsd}
-                      requires={['tier_1_static']}
-                    />
+                    {/* Sub-branches from AI Chatbot (Degree 7) */}
+                    <div className="ps-3 border-s-2 border-sky-400/40 space-y-2 pt-1">
+                      <span className="text-xs text-sky-400 font-bold block">
+                        قنوات التواصل الاجتماعي المربوطة بالشات بوت:
+                      </span>
+                      <TreeNode
+                        id="telegram_channel"
+                        label={FEATURES_REGISTRY.telegram_channel.nameAr}
+                        price={FEATURES_REGISTRY.telegram_channel.basePriceUsd}
+                        requires={['ai_chatbot']}
+                      />
+                      <TreeNode
+                        id="whatsapp_channel"
+                        label={FEATURES_REGISTRY.whatsapp_channel.nameAr}
+                        price={FEATURES_REGISTRY.whatsapp_channel.basePriceUsd}
+                        requires={['ai_chatbot']}
+                      />
+                      <TreeNode
+                        id="instagram_channel"
+                        label={FEATURES_REGISTRY.instagram_channel.nameAr}
+                        price={FEATURES_REGISTRY.instagram_channel.basePriceUsd}
+                        requires={['ai_chatbot']}
+                      />
+                    </div>
                   </div>
                 </div>
+              </div>
 
-                {/* Level 2: Editable Site + Admin */}
-                <div className="ps-4 sm:ps-8 border-s-2 border-gold/40 space-y-3">
-                  <span className="text-xs font-sans font-bold text-champagne block">
-                    ──► المستوى 2 (موقع تعريفي قابل للتعديل + مدخل سري للوحة تحكم المدير):
-                  </span>
-                  <TreeNode
-                    id="tier_2_editable"
-                    label={FEATURES_REGISTRY.tier_2_editable.nameAr}
-                    price={FEATURES_REGISTRY.tier_2_editable.basePriceUsd}
-                    requires={['tier_1_static']}
-                    incrementalDiff="+$50 فوق الدرجة 1"
-                  />
+              {/* Level 3: Full Interactive Product Catalog */}
+              <div className="ps-8 sm:ps-16 border-s-2 border-gold/60 space-y-4">
+                <span className="text-xs font-sans font-bold text-gold block">
+                  ──► المستوى 3 (كتالوج المنتجات والأقسام والوسوم + 3 أنماط عملات والبحث):
+                </span>
+                <TreeNode
+                  id="tier_3_catalog"
+                  label={FEATURES_REGISTRY.tier_3_catalog.nameAr}
+                  price={FEATURES_REGISTRY.tier_3_catalog.basePriceUsd}
+                  requires={['tier_2_editable']}
+                  incrementalDiff="+$70 فوق الدرجة 2"
+                />
 
-                  {/* Branches directly from Tier 2 */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 ps-3 sm:ps-6 border-s-2 border-gold/30">
-                    <TreeNode
-                      id="bookings"
-                      label={FEATURES_REGISTRY.bookings.nameAr}
-                      price={FEATURES_REGISTRY.bookings.basePriceUsd}
-                      requires={['tier_2_editable']}
-                    />
-                    <TreeNode
-                      id="blog"
-                      label={FEATURES_REGISTRY.blog.nameAr}
-                      price={FEATURES_REGISTRY.blog.basePriceUsd}
-                      requires={['tier_2_editable']}
-                    />
+                {/* BRANCHES FROM TIER 3 */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                  {/* Branch A: Commerce & Orders */}
+                  <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3">
+                    <span className="text-xs font-sans font-bold text-emerald-400 block border-b border-white/5 pb-1.5">
+                      فرع التجارة وسلة واتساب (Commerce & Checkout Branch)
+                    </span>
                     <div className="space-y-2">
                       <TreeNode
-                        id="ai_chatbot"
-                        label={FEATURES_REGISTRY.ai_chatbot.nameAr}
-                        price={FEATURES_REGISTRY.ai_chatbot.basePriceUsd}
-                        requires={['tier_2_editable']}
+                        id="cart_whatsapp"
+                        label={FEATURES_REGISTRY.cart_whatsapp.nameAr}
+                        price={FEATURES_REGISTRY.cart_whatsapp.basePriceUsd}
+                        requires={['tier_3_catalog']}
                       />
-                      {/* Sub-branches from AI Chatbot (Degree 7) */}
-                      <div className="ps-3 border-s-2 border-sky-400/40 space-y-2 pt-1">
-                        <span className="text-xs text-sky-400 font-bold block">
-                          قنوات التواصل الاجتماعي المربوطة بالشات بوت:
+                      {/* Sub-branches from Cart */}
+                      <div className="ps-3 border-s-2 border-emerald-500/40 space-y-2 pt-1">
+                        <span className="text-xs text-emerald-400/90 font-bold block">
+                          تفريعات سلة المشتريات:
                         </span>
                         <TreeNode
-                          id="telegram_channel"
-                          label={FEATURES_REGISTRY.telegram_channel.nameAr}
-                          price={FEATURES_REGISTRY.telegram_channel.basePriceUsd}
-                          requires={['ai_chatbot']}
+                          id="delivery_zones"
+                          label={FEATURES_REGISTRY.delivery_zones.nameAr}
+                          price={FEATURES_REGISTRY.delivery_zones.basePriceUsd}
+                          requires={['cart_whatsapp']}
                         />
                         <TreeNode
-                          id="whatsapp_channel"
-                          label={FEATURES_REGISTRY.whatsapp_channel.nameAr}
-                          price={FEATURES_REGISTRY.whatsapp_channel.basePriceUsd}
-                          requires={['ai_chatbot']}
+                          id="coupons"
+                          label={FEATURES_REGISTRY.coupons.nameAr}
+                          price={FEATURES_REGISTRY.coupons.basePriceUsd}
+                          requires={['cart_whatsapp']}
                         />
                         <TreeNode
-                          id="instagram_channel"
-                          label={FEATURES_REGISTRY.instagram_channel.nameAr}
-                          price={FEATURES_REGISTRY.instagram_channel.basePriceUsd}
-                          requires={['ai_chatbot']}
+                          id="owner_notifications"
+                          label={FEATURES_REGISTRY.owner_notifications.nameAr}
+                          price={FEATURES_REGISTRY.owner_notifications.basePriceUsd}
+                          requires={['cart_whatsapp']}
+                        />
+                        <TreeNode
+                          id="payment_gateways"
+                          label={FEATURES_REGISTRY.payment_gateways.nameAr}
+                          price={FEATURES_REGISTRY.payment_gateways.basePriceUsd}
+                          requires={['cart_whatsapp']}
                         />
                       </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Level 3: Full Interactive Product Catalog */}
-                <div className="ps-8 sm:ps-16 border-s-2 border-gold/60 space-y-4">
-                  <span className="text-xs font-sans font-bold text-gold block">
-                    ──► المستوى 3 (كتالوج المنتجات والأقسام والوسوم + 3 أنماط عملات والبحث):
-                  </span>
-                  <TreeNode
-                    id="tier_3_catalog"
-                    label={FEATURES_REGISTRY.tier_3_catalog.nameAr}
-                    price={FEATURES_REGISTRY.tier_3_catalog.basePriceUsd}
-                    requires={['tier_2_editable']}
-                    incrementalDiff="+$70 فوق الدرجة 2"
-                  />
-
-                  {/* BRANCHES FROM TIER 3 */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                    {/* Branch A: Commerce & Orders */}
-                    <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3">
-                      <span className="text-xs font-sans font-bold text-emerald-400 block border-b border-white/5 pb-1.5">
-                        فرع التجارة وسلة واتساب (Commerce & Checkout Branch)
-                      </span>
-                      <div className="space-y-2">
+                  {/* Branch B: Catalog Intelligence & Customer Auth */}
+                  <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3">
+                    <span className="text-xs font-sans font-bold text-gold block border-b border-white/5 pb-1.5">
+                      فرع الذكاء، المخزون، وحسابات الزبائن (Intelligence & Accounts)
+                    </span>
+                    <div className="space-y-2">
+                      <TreeNode
+                        id="inventory_variants"
+                        label={FEATURES_REGISTRY.inventory_variants.nameAr}
+                        price={FEATURES_REGISTRY.inventory_variants.basePriceUsd}
+                        requires={['tier_3_catalog']}
+                      />
+                      <TreeNode
+                        id="smart_tags_ai"
+                        label={FEATURES_REGISTRY.smart_tags_ai.nameAr}
+                        price={FEATURES_REGISTRY.smart_tags_ai.basePriceUsd}
+                        requires={['tier_3_catalog']}
+                      />
+                      <TreeNode
+                        id="customer_accounts"
+                        label={FEATURES_REGISTRY.customer_accounts.nameAr}
+                        price={FEATURES_REGISTRY.customer_accounts.basePriceUsd}
+                        requires={['tier_3_catalog']}
+                      />
+                      {/* Sub-branch from Customer Accounts */}
+                      <div className="ps-3 border-s-2 border-gold/40 space-y-2 pt-1">
                         <TreeNode
-                          id="cart_whatsapp"
-                          label={FEATURES_REGISTRY.cart_whatsapp.nameAr}
-                          price={FEATURES_REGISTRY.cart_whatsapp.basePriceUsd}
-                          requires={['tier_3_catalog']}
-                        />
-                        {/* Sub-branches from Cart */}
-                        <div className="ps-3 border-s-2 border-emerald-500/40 space-y-2 pt-1">
-                          <span className="text-xs text-emerald-400/90 font-bold block">
-                            تفريعات سلة المشتريات:
-                          </span>
-                          <TreeNode
-                            id="delivery_zones"
-                            label={FEATURES_REGISTRY.delivery_zones.nameAr}
-                            price={FEATURES_REGISTRY.delivery_zones.basePriceUsd}
-                            requires={['cart_whatsapp']}
-                          />
-                          <TreeNode
-                            id="coupons"
-                            label={FEATURES_REGISTRY.coupons.nameAr}
-                            price={FEATURES_REGISTRY.coupons.basePriceUsd}
-                            requires={['cart_whatsapp']}
-                          />
-                          <TreeNode
-                            id="owner_notifications"
-                            label={FEATURES_REGISTRY.owner_notifications.nameAr}
-                            price={FEATURES_REGISTRY.owner_notifications.basePriceUsd}
-                            requires={['cart_whatsapp']}
-                          />
-                          <TreeNode
-                            id="payment_gateways"
-                            label={FEATURES_REGISTRY.payment_gateways.nameAr}
-                            price={FEATURES_REGISTRY.payment_gateways.basePriceUsd}
-                            requires={['cart_whatsapp']}
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Branch B: Catalog Intelligence & Customer Auth */}
-                    <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3">
-                      <span className="text-xs font-sans font-bold text-gold block border-b border-white/5 pb-1.5">
-                        فرع الذكاء، المخزون، وحسابات الزبائن (Intelligence & Accounts)
-                      </span>
-                      <div className="space-y-2">
-                        <TreeNode
-                          id="inventory_variants"
-                          label={FEATURES_REGISTRY.inventory_variants.nameAr}
-                          price={FEATURES_REGISTRY.inventory_variants.basePriceUsd}
-                          requires={['tier_3_catalog']}
-                        />
-                        <TreeNode
-                          id="smart_tags_ai"
-                          label={FEATURES_REGISTRY.smart_tags_ai.nameAr}
-                          price={FEATURES_REGISTRY.smart_tags_ai.basePriceUsd}
-                          requires={['tier_3_catalog']}
-                        />
-                        <TreeNode
-                          id="customer_accounts"
-                          label={FEATURES_REGISTRY.customer_accounts.nameAr}
-                          price={FEATURES_REGISTRY.customer_accounts.basePriceUsd}
-                          requires={['tier_3_catalog']}
-                        />
-                        {/* Sub-branch from Customer Accounts */}
-                        <div className="ps-3 border-s-2 border-gold/40 space-y-2 pt-1">
-                          <TreeNode
-                            id="reviews_ratings"
-                            label={FEATURES_REGISTRY.reviews_ratings.nameAr}
-                            price={FEATURES_REGISTRY.reviews_ratings.basePriceUsd}
-                            requires={['customer_accounts']}
-                          />
-                        </div>
-                        <TreeNode
-                          id="authenticity_guide"
-                          label={FEATURES_REGISTRY.authenticity_guide.nameAr}
-                          price={FEATURES_REGISTRY.authenticity_guide.basePriceUsd}
-                          requires={['tier_3_catalog']}
-                        />
-                        <TreeNode
-                          id="skin_routine_advisor"
-                          label={FEATURES_REGISTRY.skin_routine_advisor.nameAr}
-                          price={FEATURES_REGISTRY.skin_routine_advisor.basePriceUsd}
-                          requires={['tier_3_catalog']}
-                        />
-                        <TreeNode
-                          id="multi_branch"
-                          label={FEATURES_REGISTRY.multi_branch.nameAr}
-                          price={FEATURES_REGISTRY.multi_branch.basePriceUsd}
-                          requires={['tier_3_catalog']}
+                          id="reviews_ratings"
+                          label={FEATURES_REGISTRY.reviews_ratings.nameAr}
+                          price={FEATURES_REGISTRY.reviews_ratings.basePriceUsd}
+                          requires={['customer_accounts']}
                         />
                       </div>
+                      <TreeNode
+                        id="authenticity_guide"
+                        label={FEATURES_REGISTRY.authenticity_guide.nameAr}
+                        price={FEATURES_REGISTRY.authenticity_guide.basePriceUsd}
+                        requires={['tier_3_catalog']}
+                      />
+                      <TreeNode
+                        id="skin_routine_advisor"
+                        label={FEATURES_REGISTRY.skin_routine_advisor.nameAr}
+                        price={FEATURES_REGISTRY.skin_routine_advisor.basePriceUsd}
+                        requires={['tier_3_catalog']}
+                      />
+                      <TreeNode
+                        id="multi_branch"
+                        label={FEATURES_REGISTRY.multi_branch.nameAr}
+                        price={FEATURES_REGISTRY.multi_branch.basePriceUsd}
+                        requires={['tier_3_catalog']}
+                      />
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
-
-          {/* RIGHT: PRICING SUMMARY & LIVE METRICS (4 cols in sync mode) */}
-          <div
-            className={`${
-              viewMode === 'tree' ? 'lg:col-span-12' : viewMode === 'matrix' ? 'lg:col-span-4' : 'lg:col-span-4'
-            } p-6 sm:p-8 rounded-3xl bg-gradient-to-b from-elevated to-surface border border-gold/40 shadow-2xl space-y-6 sticky top-24`}
-          >
-            <div>
-              <span className="text-xs font-bold text-gold block">
-                ملخص التسعير والاستثمار — {effectiveProjectTitle}
-              </span>
-              <h3 className="text-base font-serif font-bold text-ivory mt-0.5">
-                حاسبة الباقة والتكاليف المتكررة
-              </h3>
-            </div>
-
-            <div className="space-y-2.5 text-xs font-sans">
-              <div className="flex items-baseline justify-between text-muted-lux">
-                <span>سعر الباقة الأساسية ({pricing.selectedTier}):</span>
-                <span className="text-base font-serif font-bold text-ivory">
-                  ${pricing.baseTierPriceUsd}
-                </span>
-              </div>
-              <div className="flex items-baseline justify-between text-muted-lux">
-                <span>مجموع الإضافات والقنوات:</span>
-                <span className="text-base font-serif font-bold text-gold">
-                  +${pricing.addonsPriceUsd}
-                </span>
-              </div>
-              <div className="flex items-baseline justify-between text-muted-lux">
-                <span>المجموع الإفرادي (Subtotal):</span>
-                <span className="font-mono text-sm font-semibold text-ivory">
-                  ${pricing.subtotalUsd}
-                </span>
-              </div>
-              {pricing.discountUsd > 0 && (
-                <div className="flex items-baseline justify-between text-emerald-400 font-semibold">
-                  <span>خصم خاص معتمد:</span>
-                  <span className="font-mono text-sm font-bold">
-                    -${pricing.discountUsd}
-                  </span>
-                </div>
-              )}
-              <div className="pt-3 border-t border-white/10 flex items-baseline justify-between">
-                <div>
-                  <span className="text-sm font-bold text-ivory block">عقد التأسيس الصافي:</span>
-                  <span className="text-xs text-muted-dim">يشمل استضافة السنة الأولى مجاناً ($0)</span>
-                </div>
-                <span className="text-3xl font-serif font-bold text-champagne drop-shadow-[0_2px_15px_rgba(201,168,76,0.3)]">
-                  ${pricing.totalUsd}
-                </span>
-              </div>
-            </div>
-
-            {/* Recurring Annual Renewal Summary */}
-            <div className="p-4 rounded-2xl bg-white/[0.03] border border-gold/20 space-y-2.5 text-xs font-sans">
-              <div className="flex items-center justify-between border-b border-white/5 pb-2">
-                <span className="font-bold text-champagne">التجديد السنوي (ابتداءً من السنة 2):</span>
-                <span className="font-mono text-base font-bold text-emerald-400">
-                  ${selectedProjectAnnualTotal} / سنوياً
-                </span>
-              </div>
-              <div className="space-y-1.5 text-muted-lux">
-                <div className="flex items-center justify-between">
-                  <span>- النطاق الرسمي ({projectDomainType}):</span>
-                  <span className="font-mono text-ivory">${projectAnnualDomainUsd} / سنوياً</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>- الاستضافة والصيانة السحابية:</span>
-                  <span className="font-mono text-ivory">${projectAnnualHostingUsd} / سنوياً</span>
-                </div>
-                {projectAiPlan === 'managed_annual' && (
-                  <div className="flex items-center justify-between">
-                    <span>- استهلاك ذكاء اصطناعي شامل:</span>
-                    <span className="font-mono text-gold">$90 / سنوياً</span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 space-y-2 text-xs font-sans">
-              <div className="flex items-center justify-between">
-                <span className="text-muted-lux">اسم المتجر / المشروع:</span>
-                <span className="text-gold font-bold">{effectiveProjectTitle}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-lux">عدد المزايا المفعلة:</span>
-                <span className="text-ivory font-bold">{selectedFeatures.length} ميزة</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-lux">صلاحية شروط الترابط (requires):</span>
-                <span
-                  className={
-                    validation.isValid ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'
-                  }
-                >
-                  {validation.isValid ? 'سليمة 100%' : 'توجد نواقص'}
-                </span>
-              </div>
-            </div>
-
-            {/* Prominent Action Buttons */}
-            <div className="space-y-2.5 pt-1">
-              <button
-                type="button"
-                onClick={() => setIsInvoiceModalOpen(true)}
-                className="w-full min-h-[46px] py-3 rounded-2xl bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-obsidian-dark font-sans font-bold text-xs hover:brightness-110 shadow-lg transition flex items-center justify-center gap-2"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="6 9 6 2 18 2 18 9" />
-                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
-                  <rect x="6" y="14" width="12" height="8" />
-                </svg>
-                <span>تصدير عرض السعر / الفاتورة كملف PDF</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleSavePlatformConfig}
-                disabled={isSaving}
-                className="w-full min-h-[44px] py-3 rounded-2xl bg-white/10 hover:bg-white/15 text-ivory border border-white/15 font-sans font-bold text-xs transition inline-flex items-center justify-center"
-              >
-                {isSaving
-                  ? 'جارٍ الحفظ...'
-                  : targetMode === 'custom_quote'
-                  ? `إنشاء وتدشين مشروع جديد بالأسطول بهذه الإعدادات`
-                  : `حفظ وتطبيق الإعدادات على مشروع «${effectiveProjectTitle}»`}
-              </button>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* MATRIX GRID (Rendered in 'sync' or 'matrix' modes) */}
+        {/* ==================================================================== */}
+        {/* MATRIX GRID (Rendered in sync or matrix mode)                       */}
+        {/* ==================================================================== */}
         {(viewMode === 'sync' || viewMode === 'matrix') && (
-          <div className="p-6 sm:p-8 rounded-3xl bg-surface border border-white/5 space-y-6">
-            <div>
-              <h3 className="text-base sm:text-lg font-serif font-bold text-ivory">
-                مصفوفة الميزات التفصيلية (Features Matrix Grid) — {effectiveProjectTitle}
-              </h3>
-              <p className="text-xs text-muted-lux">
-                قائمة كافة الإضافات الموديلية التابعة لمنصة سامق مع إمكانية التفعيل والتعطيل بنقرة واحدة
-              </p>
+          <div className="w-full p-6 sm:p-8 rounded-3xl bg-surface border border-white/5 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+              <div>
+                <h3 className="text-base sm:text-lg font-serif font-bold text-ivory">
+                  مصفوفة الميزات التفصيلية (Features Matrix Grid) — {effectiveProjectTitle}
+                </h3>
+                <p className="text-xs text-muted-lux">
+                  قائمة كافة الإضافات الموديلية التابعة لمنصة سامق مع إمكانية التفعيل والتعطيل وتعديل السعر بنقرة واحدة
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gold font-bold">
+                  {selectedFeatures.length} ميزة نشطة
+                </span>
+                <button
+                  type="button"
+                  onClick={handleResetAllPrices}
+                  className="text-xs text-muted-lux hover:text-ivory px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 transition"
+                  title="إعادة تعيين كافة الأسعار للافتراضي"
+                >
+                  إعادة ضبط الأسعار للافتراضي
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -1724,16 +1880,33 @@ export default function PlatformSuperAdminPage() {
                     </div>
 
                     <div className="flex flex-col items-end gap-2 shrink-0">
-                      <span
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSetPriceOverride(feat.id);
-                        }}
-                        title="تعديل السعر يدوياً"
-                        className="px-2 py-0.5 rounded text-xs font-sans font-bold bg-gold/15 text-gold border border-gold/30 hover:bg-gold/30 transition cursor-pointer"
-                      >
-                        {overridePrice !== undefined ? `$${displayPrice}*` : `+$${displayPrice}`}
-                      </span>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSetPriceOverride(feat.id);
+                          }}
+                          title="تعديل السعر يدوياً"
+                          className="px-2.5 py-1 rounded-lg text-xs font-sans font-bold bg-gold/15 text-gold border border-gold/30 hover:bg-gold/30 hover:border-gold transition cursor-pointer inline-flex items-center gap-1"
+                        >
+                          <span>{overridePrice !== undefined ? `$${displayPrice} (معدل)` : `+$${displayPrice}`}</span>
+                          <PencilIcon className="w-2.5 h-2.5" />
+                        </button>
+                        {overridePrice !== undefined && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleResetSinglePrice(feat.id);
+                            }}
+                            title="إعادة السعر للافتراضي"
+                            className="text-muted-dim hover:text-rose-400 p-1 rounded transition flex items-center justify-center"
+                          >
+                            <CloseIcon />
+                          </button>
+                        )}
+                      </div>
                       <span
                         className={`text-xs font-sans font-bold px-2 py-0.5 rounded ${
                           isSelected
@@ -1750,6 +1923,353 @@ export default function PlatformSuperAdminPage() {
             </div>
           </div>
         )}
+
+        {/* ==================================================================== */}
+        {/* PRICING & INVESTMENT SUMMARY CARD (Positioned at bottom in all modes) */}
+        {/* ==================================================================== */}
+        <div
+          id="pricing-summary-card"
+          className="w-full p-6 sm:p-8 rounded-3xl bg-gradient-to-b from-elevated via-surface to-elevated border border-gold/40 shadow-2xl space-y-6 scroll-mt-24"
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-gold" />
+                <h3 className="text-base sm:text-xl font-serif font-bold text-ivory">
+                  ملخص التسعير والاستثمار — {effectiveProjectTitle}
+                </h3>
+              </div>
+              <p className="text-xs text-muted-lux mt-1">
+                حاسبة الباقة والتكاليف المتكررة مع إمكانية تعديل كافة بنود التأسيس والرسوم السنوية مباشرة
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                type="button"
+                onClick={handleResetAllPrices}
+                className="min-h-[40px] px-3.5 rounded-xl bg-white/5 hover:bg-white/10 text-muted-lux hover:text-ivory border border-white/10 text-xs font-semibold transition"
+              >
+                إعادة ضبط الأسعار للافتراضي
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsInvoiceModalOpen(true)}
+                className="min-h-[40px] px-4 rounded-xl bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-obsidian-dark font-bold text-xs hover:brightness-110 shadow-md transition flex items-center gap-1.5"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="6 9 6 2 18 2 18 9" />
+                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                  <rect x="6" y="14" width="12" height="8" />
+                </svg>
+                <span>تصدير فاتورة PDF</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Column 1: One-Time Setup Costs */}
+            <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3.5">
+              <span className="text-xs font-bold text-champagne block border-b border-white/5 pb-2">
+                1. عقد التأسيس لمرة واحدة (Setup Investment):
+              </span>
+
+              <div className="space-y-2.5 text-xs font-sans">
+                {/* Base Tier with Edit Button */}
+                <div className="flex items-center justify-between text-muted-lux">
+                  <div className="flex items-center gap-1.5">
+                    <span>سعر الباقة الأساسية ({pricing.selectedTier}):</span>
+                    <button
+                      type="button"
+                      onClick={() => handleSetPriceOverride(pricing.selectedTier)}
+                      title="تعديل سعر الباقة الأساسية"
+                      className="text-gold/70 hover:text-gold p-0.5 transition cursor-pointer"
+                    >
+                      <PencilIcon className="w-2.5 h-2.5" />
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleSetPriceOverride(pricing.selectedTier)}
+                    className="text-base font-serif font-bold text-ivory hover:text-gold transition cursor-pointer"
+                  >
+                    ${pricing.baseTierPriceUsd}
+                  </button>
+                </div>
+
+                {/* Addons sum */}
+                <div className="flex items-center justify-between text-muted-lux">
+                  <span>مجموع الإضافات والقنوات:</span>
+                  <span className="text-base font-serif font-bold text-gold">
+                    +${pricing.addonsPriceUsd}
+                  </span>
+                </div>
+
+                {/* Subtotal */}
+                <div className="flex items-center justify-between text-muted-lux">
+                  <span>المجموع الإفرادي (Subtotal):</span>
+                  <span className="font-mono text-sm font-semibold text-ivory">
+                    ${pricing.subtotalUsd}
+                  </span>
+                </div>
+
+                {/* Special Discount with direct input */}
+                <div className="space-y-1 pt-1 border-t border-white/5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-muted-lux font-semibold">خصم خاص معتمد ($):</label>
+                    <span className="font-mono text-xs font-bold text-emerald-400">-${customDiscountUsd}</span>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min="0"
+                      value={customDiscountUsd}
+                      onChange={(e) => setCustomDiscountUsd(Math.max(0, Number(e.target.value) || 0))}
+                      placeholder="0"
+                      className="w-full min-h-[40px] px-3 rounded-xl bg-white/5 border border-white/10 text-emerald-400 font-mono font-bold focus:border-gold outline-hidden text-xs"
+                    />
+                    <span className="absolute end-3 top-2.5 text-muted-dim text-xs">$ خصم</span>
+                  </div>
+                </div>
+
+                {/* Net Setup Total with direct prompt/target edit */}
+                <div className="pt-3 border-t border-white/10 flex items-baseline justify-between">
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-sm font-bold text-ivory block">عقد التأسيس الصافي:</span>
+                      <button
+                        type="button"
+                        onClick={handleSetTargetNetTotal}
+                        title="تعديل السعر النهائي المقطوع"
+                        className="text-gold/70 hover:text-gold p-0.5 transition cursor-pointer"
+                      >
+                        <PencilIcon className="w-2.5 h-2.5" />
+                      </button>
+                    </div>
+                    <span className="text-xs text-muted-dim">
+                      {projectFirstYearHostingUsd > 0
+                        ? `استضافة السنة الأولى: $${projectFirstYearHostingUsd}`
+                        : 'شامل استضافة السنة الأولى مجاناً ($0)'}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleSetTargetNetTotal}
+                    title="انقر لتعديل الصافي مقطوعاً"
+                    className="text-3xl font-serif font-bold text-champagne hover:text-gold transition drop-shadow-[0_2px_15px_rgba(201,168,76,0.3)] cursor-pointer"
+                  >
+                    ${pricing.totalUsd}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Column 2: Transparent Recurring Annual Costs */}
+            <div className="p-5 rounded-2xl bg-white/[0.02] border border-gold/20 space-y-3.5">
+              <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                <span className="text-xs font-bold text-champagne">
+                  2. التجديد السنوي (ابتداءً من السنة 2):
+                </span>
+                <span className="font-mono text-base font-bold text-emerald-400">
+                  ${selectedProjectAnnualTotal} / سنوياً
+                </span>
+              </div>
+
+              <div className="space-y-3 text-xs font-sans">
+                {/* Domain Annual Fee */}
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-lux font-medium">النطاق الرسمي ({projectDomainType}):</span>
+                    <span className="font-mono text-gold font-bold">${projectAnnualDomainUsd} / سنوياً</span>
+                  </div>
+                  <input
+                    type="number"
+                    min="0"
+                    value={projectAnnualDomainUsd}
+                    onChange={(e) => setProjectAnnualDomainUsd(Math.max(0, Number(e.target.value) || 0))}
+                    className="w-full min-h-[38px] px-3 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-hidden text-xs font-mono font-bold"
+                  />
+                </div>
+
+                {/* Hosting & Maintenance Annual Fee */}
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-lux font-medium">الاستضافة والصيانة السحابية:</span>
+                    <span className="font-mono text-gold font-bold">${projectAnnualHostingUsd} / سنوياً</span>
+                  </div>
+                  <input
+                    type="number"
+                    min="0"
+                    value={projectAnnualHostingUsd}
+                    onChange={(e) => setProjectAnnualHostingUsd(Math.max(0, Number(e.target.value) || 0))}
+                    className="w-full min-h-[38px] px-3 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-hidden text-xs font-mono font-bold"
+                  />
+                </div>
+
+                {/* AI Operational Plan Annual Fee */}
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-lux font-medium">استهلاك الذكاء الاصطناعي ({projectAiPlan}):</span>
+                    <span className="font-mono text-gold font-bold">
+                      {projectAiPlan === 'managed_annual' ? `$${projectAnnualAiUsd} / سنوياً` : '$0'}
+                    </span>
+                  </div>
+                  <input
+                    type="number"
+                    min="0"
+                    value={projectAnnualAiUsd}
+                    onChange={(e) => setProjectAnnualAiUsd(Math.max(0, Number(e.target.value) || 0))}
+                    className="w-full min-h-[38px] px-3 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-hidden text-xs font-mono font-bold"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Column 3: Meta & Actions */}
+            <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-4 flex flex-col justify-between">
+              <div className="space-y-2.5 text-xs font-sans">
+                <span className="text-xs font-bold text-champagne block border-b border-white/5 pb-2">
+                  3. مواصفات العرض والترابط:
+                </span>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-lux">المشروع المستهدف:</span>
+                  <span className="text-gold font-bold">{effectiveProjectTitle}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-lux">عدد المزايا المفعلة:</span>
+                  <span className="text-ivory font-bold">{selectedFeatures.length} ميزة</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-lux">القالب المعماري:</span>
+                  <span className="text-champagne font-semibold">{SAMIQ_THEMES[activeTheme]?.nameAr}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-lux">صلاحية الترابط (requires):</span>
+                  <span
+                    className={
+                      validation.isValid ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'
+                    }
+                  >
+                    {validation.isValid ? 'سليمة 100%' : 'توجد نواقص'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-2 pt-2 border-t border-white/5">
+                <button
+                  type="button"
+                  onClick={() => setIsInvoiceModalOpen(true)}
+                  className="w-full min-h-[44px] py-2.5 rounded-xl bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-obsidian-dark font-sans font-bold text-xs hover:brightness-110 shadow-lg transition flex items-center justify-center gap-2"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="6 9 6 2 18 2 18 9" />
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                    <rect x="6" y="14" width="12" height="8" />
+                  </svg>
+                  <span>تصدير عرض السعر / الفاتورة كملف PDF</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleSavePlatformConfig}
+                  disabled={isSaving}
+                  className="w-full min-h-[44px] py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-ivory border border-white/15 font-sans font-bold text-xs transition inline-flex items-center justify-center"
+                >
+                  {isSaving
+                    ? 'جارٍ الحفظ...'
+                    : targetMode === 'custom_quote'
+                    ? `إنشاء وتدشين مشروع جديد بالأسطول بهذه الإعدادات`
+                    : `حفظ وتطبيق الإعدادات على مشروع «${effectiveProjectTitle}»`}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Floating Live Total Badge on Left */}
+        <aside
+          aria-label="الشارة الطافية الذكية للتسعير الحي"
+          className="fixed bottom-6 left-6 z-40 max-w-[340px] w-[calc(100vw-3rem)] sm:w-80 bg-[#0e0d13]/95 backdrop-blur-xl border border-gold/50 shadow-[0_10px_35px_rgba(0,0,0,0.7),0_0_20px_rgba(201,168,76,0.25)] rounded-3xl p-4 space-y-3 transition-all duration-300 animate-fadeIn"
+          dir="rtl"
+        >
+          {/* Badge Header */}
+          <div className="flex items-center justify-between border-b border-white/10 pb-2">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-gold animate-pulse" />
+              <span className="text-xs font-serif font-bold text-ivory">سَامِق · التسعير الحي</span>
+            </div>
+            <span className="text-[11px] font-sans font-bold px-2 py-0.5 rounded-full bg-emerald-950/70 border border-emerald-500/40 text-emerald-300">
+              {selectedFeatures.length} ميزة نشطة
+            </span>
+          </div>
+
+          {/* Live Figures */}
+          <div className="grid grid-cols-2 gap-2 text-xs font-sans">
+            {/* Setup Price */}
+            <div className="p-2.5 rounded-2xl bg-white/[0.03] border border-gold/20 flex flex-col justify-between">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] text-muted-lux font-medium">إجمالي التأسيس:</span>
+                <button
+                  type="button"
+                  onClick={handleSetTargetNetTotal}
+                  title="تعديل صافي التأسيس مباشرة"
+                  className="text-gold/70 hover:text-gold p-0.5 transition cursor-pointer"
+                >
+                  <PencilIcon className="w-2.5 h-2.5" />
+                </button>
+              </div>
+              <button
+                type="button"
+                onClick={handleSetTargetNetTotal}
+                title="انقر لتعديل الصافي مقطوعاً"
+                className="text-start mt-1 group cursor-pointer"
+              >
+                <span className="text-lg sm:text-xl font-serif font-bold text-champagne block group-hover:text-gold transition">
+                  ${pricing.totalUsd}
+                </span>
+                <span className="text-[10px] text-muted-dim block">انقر للتعديل المباشر</span>
+              </button>
+            </div>
+
+            {/* Annual Renewal */}
+            <div className="p-2.5 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col justify-between">
+              <span className="text-[11px] text-muted-lux font-medium">التجديد السنوي:</span>
+              <div className="mt-1">
+                <span className="text-base sm:text-lg font-mono font-bold text-emerald-400 block">
+                  ${selectedProjectAnnualTotal}
+                </span>
+                <span className="text-[10px] text-muted-dim block">ابتداءً من السنة 2</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="flex items-center gap-2 pt-1">
+            <button
+              type="button"
+              onClick={() => setIsInvoiceModalOpen(true)}
+              className="flex-1 min-h-[38px] px-3 rounded-xl bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-obsidian-dark font-sans font-bold text-xs hover:brightness-110 shadow-md transition flex items-center justify-center gap-1.5"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="6 9 6 2 18 2 18 9" />
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                <rect x="6" y="14" width="12" height="8" />
+              </svg>
+              <span>فاتورة PDF</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                document.getElementById('pricing-summary-card')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="flex-1 min-h-[38px] px-3 rounded-xl bg-white/10 hover:bg-white/20 text-ivory border border-white/15 font-sans font-bold text-xs transition flex items-center justify-center gap-1"
+            >
+              <span>الملخص</span>
+              <span className="text-gold font-bold">↓</span>
+            </button>
+          </div>
+        </aside>
 
         {/* Platform & Developer Identity Configuration Section */}
         <div className="p-6 rounded-3xl bg-surface border border-gold/30 shadow-xl space-y-5">
