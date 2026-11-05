@@ -129,6 +129,30 @@ export interface BranchRecord {
   isActive: boolean;
 }
 
+export interface SamiqProjectRecord {
+  id: string;
+  slug: string;
+  name: string;
+  legalName: string;
+  industryAr: string; // e.g. 'العناية بالبشرة والمكياج' | 'المطاعم والمقاهي المختصة' | 'العيادات والصيدليات التخصصية'
+  domain: string; // e.g. 'miftah-beauty.com'
+  domainType: 'subdomain_free' | 'custom_com' | 'custom_ye'; // subdomain ($0/yr), .com ($20/yr), .ye ($35/yr)
+  annualDomainUsd: number; // 0, 20, 35
+  annualHostingMaintenanceUsd: number; // e.g. 45 ($45/yr after free 1st year)
+  aiPlanType: 'none' | 'byok' | 'managed_annual'; // 0, 0, 90 ($90/yr)
+  themeId: 'luxury-noir' | 'ivory-journal' | 'clinic-lab';
+  whatsapp: string;
+  city: string;
+  adminPasscode: string;
+  status: 'active' | 'staging' | 'demo';
+  setupPriceUsd: number;
+  enabledFeatures: string[];
+  productsCount: number;
+  ordersCount: number;
+  previewUrl: string;
+  adminUrl: string;
+}
+
 export interface SamiqDatabaseSchema {
   tenant: TenantBrandInfo;
   features: typeof MOCK_STOREFRONT_DATA.features;
@@ -149,6 +173,7 @@ export interface SamiqDatabaseSchema {
   branches: BranchRecord[];
   conversations: OmnichannelConversation[];
   platformMeta?: PlatformMeta;
+  projects?: SamiqProjectRecord[];
 }
 
 export type ChannelType = 'web' | 'whatsapp' | 'telegram';
@@ -584,6 +609,101 @@ function createDefaultSeed(): SamiqDatabaseSchema {
         ],
       },
     ],
+    projects: [
+      {
+        id: 'proj-miftah',
+        slug: 'miftah',
+        name: 'مفتاح الجمال',
+        legalName: 'مفتاح الجمال — لكشف المقلد',
+        industryAr: 'العناية بالبشرة والمكياج',
+        domain: 'miftah-beauty.com',
+        domainType: 'custom_com',
+        annualDomainUsd: 20,
+        annualHostingMaintenanceUsd: 45,
+        aiPlanType: 'byok',
+        themeId: 'luxury-noir',
+        whatsapp: '967775234989',
+        city: 'صنعاء',
+        adminPasscode: 'miftah2026',
+        status: 'active',
+        setupPriceUsd: 550,
+        enabledFeatures: [
+          'tier_1_static',
+          'tier_2_editable',
+          'tier_3_catalog',
+          'cart_whatsapp',
+          'smart_tags_ai',
+          'authenticity_guide',
+          'skin_routine_advisor',
+          'customer_accounts',
+          'ai_chatbot',
+        ],
+        productsCount: 6,
+        ordersCount: 2,
+        previewUrl: '/?demo=1&theme=luxury-noir',
+        adminUrl: '/admin?tenant=miftah',
+      },
+      {
+        id: 'proj-restaurant',
+        slug: 'demo-restaurant',
+        name: 'دار القهوة المختصة والمخبز الحرفي',
+        legalName: 'دار القهوة المختصة — صنعاء',
+        industryAr: 'المطاعم والمقاهي المختصة',
+        domain: 'roastery.samiq.app',
+        domainType: 'subdomain_free',
+        annualDomainUsd: 0,
+        annualHostingMaintenanceUsd: 35,
+        aiPlanType: 'none',
+        themeId: 'ivory-journal',
+        whatsapp: '967770000111',
+        city: 'صنعاء',
+        adminPasscode: 'coffee2026',
+        status: 'demo',
+        setupPriceUsd: 400,
+        enabledFeatures: [
+          'tier_1_static',
+          'tier_2_editable',
+          'tier_3_catalog',
+          'cart_whatsapp',
+        ],
+        productsCount: 6,
+        ordersCount: 5,
+        previewUrl: '/?demo=1&tenant=demo-restaurant&theme=ivory-journal',
+        adminUrl: '/admin?tenant=demo-restaurant',
+      },
+      {
+        id: 'proj-clinic',
+        slug: 'derma-clinic',
+        name: 'مختبرات النخبة الجلدية',
+        legalName: 'مختبرات النخبة للعناية السريرية',
+        industryAr: 'العيادات والصيدليات التخصصية',
+        domain: 'elite-derma.com',
+        domainType: 'custom_com',
+        annualDomainUsd: 20,
+        annualHostingMaintenanceUsd: 50,
+        aiPlanType: 'managed_annual',
+        themeId: 'clinic-lab',
+        whatsapp: '967770000222',
+        city: 'عدن / صنعاء',
+        adminPasscode: 'clinic2026',
+        status: 'staging',
+        setupPriceUsd: 700,
+        enabledFeatures: [
+          'tier_1_static',
+          'tier_2_editable',
+          'tier_3_catalog',
+          'cart_whatsapp',
+          'smart_tags_ai',
+          'skin_routine_advisor',
+          'customer_accounts',
+          'ai_chatbot',
+        ],
+        productsCount: 6,
+        ordersCount: 3,
+        previewUrl: '/?demo=1&theme=clinic-lab',
+        adminUrl: '/admin?tenant=derma-clinic',
+      },
+    ],
   };
 }
 
@@ -617,6 +737,9 @@ export function getDb(): SamiqDatabaseSchema {
     }
     if (!parsed.platformMeta) {
       parsed.platformMeta = createDefaultSeed().platformMeta;
+    }
+    if (!parsed.projects || !Array.isArray(parsed.projects) || parsed.projects.length === 0) {
+      parsed.projects = createDefaultSeed().projects;
     }
     return parsed;
   } catch (err) {
@@ -1000,4 +1123,41 @@ export function savePlatformMeta(meta: Partial<PlatformMeta>): PlatformMeta {
   saveDb(db);
   return db.platformMeta;
 }
+
+// 13. Multi-Project Fleet Management
+export function getAllProjects(): SamiqProjectRecord[] {
+  const db = getDb();
+  return db.projects || [];
+}
+
+export function getProjectById(id: string): SamiqProjectRecord | undefined {
+  const db = getDb();
+  return (db.projects || []).find((p) => p.id === id || p.slug === id);
+}
+
+export function saveProject(project: SamiqProjectRecord): SamiqProjectRecord {
+  const db = getDb();
+  if (!db.projects) db.projects = [];
+  const existingIdx = db.projects.findIndex((p) => p.id === project.id);
+  if (existingIdx >= 0) {
+    db.projects[existingIdx] = project;
+  } else {
+    db.projects.push(project);
+  }
+  saveDb(db);
+  return project;
+}
+
+export function deleteProject(id: string): boolean {
+  const db = getDb();
+  if (!db.projects) return false;
+  const initialLen = db.projects.length;
+  db.projects = db.projects.filter((p) => p.id !== id);
+  if (db.projects.length !== initialLen) {
+    saveDb(db);
+    return true;
+  }
+  return false;
+}
+
 

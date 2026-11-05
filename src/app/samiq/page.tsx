@@ -149,6 +149,7 @@ const TEMPLATE_PREVIEWS = [
 export default function SamiqShowcasePage() {
   const [selectedTemplate, setSelectedTemplate] = useState<string>('luxury-noir');
   const [selectedPackageId, setSelectedPackageId] = useState<string>('intelligence');
+  const [selectedDomainOption, setSelectedDomainOption] = useState<'free' | 'com' | 'ye'>('com');
   const [customFeatures, setCustomFeatures] = useState<string[]>([
     'tier_1_static',
     'tier_2_editable',
@@ -205,6 +206,9 @@ export default function SamiqShowcasePage() {
   const effectivePrice = activeTab === 'packages' && currentPackageObj ? currentPackageObj.priceUsd : customPricing.totalUsd;
   const currentTemplateObj = TEMPLATE_PREVIEWS.find((t) => t.id === selectedTemplate) || TEMPLATE_PREVIEWS[0];
 
+  const domainCostUsd = selectedDomainOption === 'com' ? 20 : selectedDomainOption === 'ye' ? 35 : 0;
+  const annualRenewalUsd = domainCostUsd + 45;
+
   // Pre-filled Telegram order URL
   const telegramOrderUrl = useMemo(() => {
     const packageName =
@@ -214,12 +218,21 @@ export default function SamiqShowcasePage() {
       .slice(0, 6)
       .join('، ');
 
+    const domainLabel =
+      selectedDomainOption === 'com'
+        ? 'دومين رسمي خاص (.com) — $20 سنوياً'
+        : selectedDomainOption === 'ye'
+        ? 'دومين محلي رسمي (.ye) — $35 سنوياً'
+        : 'نطاق فرعي مجاني (*.samiq.app) — $0 سنوياً';
+
     const text =
       `السلام عليكم أخي المطور (@${developerTelegramHandle})،\n` +
       `أرغب بطلب متجر رقمي فاخر عبر محرك منصة سَامِق (SAMIQ).\n\n` +
       `القالب المفضل: ${currentTemplateObj.nameAr}\n` +
       `الباقة المختارة: ${packageName}\n` +
-      `التكلفة التقديرية: $${effectivePrice}\n` +
+      `عقد التأسيس (مرة واحدة): $${effectivePrice} (يشمل استضافة السنة الأولى مجاناً)\n` +
+      `خيار النطاق: ${domainLabel}\n` +
+      `تجديد الاستضافة السنوية (من السنة 2): $45 / سنوياً (السنة الأولى مجانية $0)\n` +
       `المزايا المحددة: ${featureNames}...\n\n` +
       `أرجو تزويدي بتفاصيل التجهيز، وقت التسليم، وآلية الربط. شكراً لك!`;
 
@@ -231,6 +244,7 @@ export default function SamiqShowcasePage() {
     customFeatures,
     currentTemplateObj.nameAr,
     effectivePrice,
+    selectedDomainOption,
   ]);
 
   return (
@@ -695,6 +709,61 @@ export default function SamiqShowcasePage() {
                     </select>
                   </div>
 
+                  {/* Domain Option Toggle for Proposal */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-[#FAF7F2] block">
+                      خيار النطاق الرسمي (Domain Name):
+                    </label>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedDomainOption('free')}
+                        className={`min-h-[44px] p-2 rounded-xl border text-center transition flex flex-col justify-center items-center ${
+                          selectedDomainOption === 'free'
+                            ? 'bg-[#C9A84C]/20 border-[#C9A84C] text-[#FAF7F2] font-bold'
+                            : 'bg-white/5 border-white/10 text-[#8E8B85] hover:border-white/20'
+                        }`}
+                      >
+                        <span>نطاق مجاني</span>
+                        <span className="font-mono text-emerald-400 text-xs">$0 / سنوياً</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedDomainOption('com')}
+                        className={`min-h-[44px] p-2 rounded-xl border text-center transition flex flex-col justify-center items-center ${
+                          selectedDomainOption === 'com'
+                            ? 'bg-[#C9A84C]/20 border-[#C9A84C] text-[#FAF7F2] font-bold'
+                            : 'bg-white/5 border-white/10 text-[#8E8B85] hover:border-white/20'
+                        }`}
+                      >
+                        <span>دومين رسمي .com</span>
+                        <span className="font-mono text-[#E8D390] text-xs">+$20 / سنوياً</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Recurring Renewal Details Card */}
+                  <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1.5 text-xs">
+                    <div className="flex items-center justify-between text-[#8E8B85]">
+                      <span>عقد التأسيس (مرة واحدة):</span>
+                      <span className="font-bold text-[#FAF7F2]">${customPricing.totalUsd}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-[#8E8B85]">
+                      <span>النطاق السنوي:</span>
+                      <span className="font-bold text-[#E8D390]">
+                        {selectedDomainOption === 'com' ? '$20 / سنوياً' : '$0 / سنوياً'}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-[#8E8B85]">
+                      <span>استضافة السنة الأولى:</span>
+                      <span className="font-bold text-emerald-400">مجاناً ($0)</span>
+                    </div>
+                    <div className="flex items-center justify-between text-[#8E8B85] pt-1 border-t border-white/5">
+                      <span>تجديد الاستضافة من السنة 2:</span>
+                      <span className="font-mono text-[#FAF7F2]">$45 / سنوياً</span>
+                    </div>
+                  </div>
+
                   <div className="space-y-2">
                     <span className="text-xs font-bold text-[#8E8B85] block">المزايا المضمنة ({customFeatures.length}):</span>
                     <div className="max-h-48 overflow-y-auto space-y-1 pr-1 text-xs text-[#A09D94]">
@@ -802,6 +871,217 @@ export default function SamiqShowcasePage() {
             </div>
           </div>
         )}
+
+        {/* ==================================================================== */}
+        {/* DEDICATED SECTION: TRANSPARENT ANNUAL & OPERATIONAL ECONOMICS        */}
+        {/* ==================================================================== */}
+        <section className="p-8 sm:p-12 rounded-[2.5rem] bg-white/[0.02] border border-white/10 shadow-2xl space-y-10">
+          <div className="text-center max-w-3xl mx-auto space-y-3">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#C9A84C]/10 border border-[#C9A84C]/30 text-[#E8D390] text-xs font-semibold">
+              <span className="w-2 h-2 rounded-full bg-[#C9A84C]" />
+              <span>شفافية مالية مطلقة 100% بدون أي اشتراكات مفاجئة</span>
+            </div>
+
+            <h2 className="text-2xl sm:text-4xl font-serif font-bold text-[#FAF7F2]">
+              التكاليف السنوية والتشغيلية الشفافة (الدومين، الاستضافة، والتجديد)
+            </h2>
+
+            <p className="text-xs sm:text-sm text-[#A09D94] leading-relaxed">
+              نؤمن في سَامِق بالوضوح المالي التام مع عملائنا منذ اليوم الأول. إليك التفصيل الدقيق لرسوم البناء لمرة واحدة ورسوم التشغيل والتجديد السنوية الحقيقية دون أي تكاليف مستترة:
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Pillar 1: Setup Fee */}
+            <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/10 flex flex-col justify-between space-y-5">
+              <div className="space-y-3">
+                <div className="w-10 h-10 rounded-xl bg-gold/15 border border-gold/30 flex items-center justify-center text-gold font-bold">
+                  1
+                </div>
+                <div>
+                  <span className="text-xs font-semibold text-gold block">تُدفع لمرة واحدة فقط عند الاستلام</span>
+                  <h3 className="text-base sm:text-lg font-serif font-bold text-ivory mt-0.5">
+                    أولاً: رسوم تأسيس وبناء المتجر
+                  </h3>
+                </div>
+                <div className="pt-2">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-serif font-bold text-[#E8D390]">$100 - $700+</span>
+                    <span className="text-xs text-muted-lux">حسب الباقة</span>
+                  </div>
+                </div>
+                <ul className="space-y-2 pt-2 border-t border-white/5 text-xs text-[#A09D94]">
+                  <li className="flex items-start gap-2">
+                    <svg className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    <span>برمجة معمارية فاخرة وخاصة بعلامتك (Cold Load أقل من 150kB).</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <svg className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    <span>تهيئة الكتالوج، وسوم الذكاء الاصطناعي، وسلة واتساب الذكية.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <svg className="w-4 h-4 text-gold shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    <span className="text-champagne font-semibold">استضافة سحابية عالمية مجانية للعام الأول بالكامل ($0).</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <svg className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    <span>صفر عمولة (0%) على كافة مبيعاتك وأرباحك مدى الحياة.</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Pillar 2: Domain Name */}
+            <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/10 flex flex-col justify-between space-y-5">
+              <div className="space-y-3">
+                <div className="w-10 h-10 rounded-xl bg-gold/15 border border-gold/30 flex items-center justify-center text-gold font-bold">
+                  2
+                </div>
+                <div>
+                  <span className="text-xs font-semibold text-champagne block">حجز وتجديد النطاق سنوياً</span>
+                  <h3 className="text-base sm:text-lg font-serif font-bold text-ivory mt-0.5">
+                    ثانياً: رسوم النطاق الرسمي (Domain)
+                  </h3>
+                </div>
+                <div className="pt-2">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-serif font-bold text-[#E8D390]">
+                      {selectedDomainOption === 'free' ? '$0' : selectedDomainOption === 'com' ? '$20' : '$35'}
+                    </span>
+                    <span className="text-xs text-muted-lux">/ سنوياً</span>
+                  </div>
+                </div>
+                <div className="space-y-2 pt-2 border-t border-white/5 text-xs">
+                  <div
+                    onClick={() => setSelectedDomainOption('free')}
+                    className={`cursor-pointer p-3 rounded-xl border transition flex items-center justify-between min-h-[44px] ${
+                      selectedDomainOption === 'free'
+                        ? 'bg-gold/15 border-gold text-ivory'
+                        : 'bg-white/5 border-white/5 text-muted-lux hover:border-white/20'
+                    }`}
+                  >
+                    <div>
+                      <span className="font-bold block">نطاق فرعي مجاني (*.samiq.app)</span>
+                      <span className="text-muted-dim text-xs">مدى الحياة بدون أي تجديد</span>
+                    </div>
+                    <span className="font-mono text-emerald-400 font-bold">$0</span>
+                  </div>
+
+                  <div
+                    onClick={() => setSelectedDomainOption('com')}
+                    className={`cursor-pointer p-3 rounded-xl border transition flex items-center justify-between min-h-[44px] ${
+                      selectedDomainOption === 'com'
+                        ? 'bg-gold/15 border-gold text-ivory'
+                        : 'bg-white/5 border-white/5 text-muted-lux hover:border-white/20'
+                    }`}
+                  >
+                    <div>
+                      <span className="font-bold block">دومين عالمي خاص (.com / .net)</span>
+                      <span className="text-muted-dim text-xs">شامل حماية SSL وCloudflare</span>
+                    </div>
+                    <span className="font-mono text-gold font-bold">$20/سنة</span>
+                  </div>
+
+                  <div
+                    onClick={() => setSelectedDomainOption('ye')}
+                    className={`cursor-pointer p-3 rounded-xl border transition flex items-center justify-between min-h-[44px] ${
+                      selectedDomainOption === 'ye'
+                        ? 'bg-gold/15 border-gold text-ivory'
+                        : 'bg-white/5 border-white/5 text-muted-lux hover:border-white/20'
+                    }`}
+                  >
+                    <div>
+                      <span className="font-bold block">دومين يمني رسمي (.ye / .com.ye)</span>
+                      <span className="text-muted-dim text-xs">وفق رسوم الهيئة العامة للاتصالات</span>
+                    </div>
+                    <span className="font-mono text-gold font-bold">$35/سنة</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Pillar 3: Hosting & Maintenance (Year 2+) */}
+            <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/10 flex flex-col justify-between space-y-5">
+              <div className="space-y-3">
+                <div className="w-10 h-10 rounded-xl bg-gold/15 border border-gold/30 flex items-center justify-center text-gold font-bold">
+                  3
+                </div>
+                <div>
+                  <span className="text-xs font-semibold text-emerald-400 block">ابتداءً من السنة الثانية فقط</span>
+                  <h3 className="text-base sm:text-lg font-serif font-bold text-ivory mt-0.5">
+                    ثالثاً: الاستضافة السحابية والصيانة
+                  </h3>
+                </div>
+                <div className="pt-2">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-serif font-bold text-emerald-400">$35 - $50</span>
+                    <span className="text-xs text-muted-lux">/ سنوياً (أقل من $4/شهرياً)</span>
+                  </div>
+                </div>
+                <ul className="space-y-2 pt-2 border-t border-white/5 text-xs text-[#A09D94]">
+                  <li className="flex items-start gap-2">
+                    <svg className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    <span><strong className="text-champagne">السنة الأولى: مجاناً ($0)</strong> مشمولة بالكامل مع التأسيس.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <svg className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    <span>بنية سحابية عالمية فائقة السرعة للمستخدمين داخل اليمن والخليج.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <svg className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    <span>نسخ احتياطي يومي متواصل وتحديثات برمجية أمنية فورية.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <svg className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    <span>دعم فني واستجابة هندسية مباشرة ومستمرة.</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* Interactive Calculator Summary Banner */}
+          <div className="p-6 rounded-2xl bg-gradient-to-r from-gold/15 to-gold/5 border border-gold/30 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="space-y-1 text-center md:text-start">
+              <span className="text-xs font-bold text-champagne block">
+                ملخص التكلفة لاختيارك الحالي ({selectedDomainOption === 'free' ? 'نطاق مجاني' : selectedDomainOption === 'com' ? 'دومين رسمي .com' : 'دومين يمني .ye'}):
+              </span>
+              <p className="text-xs text-muted-lux">
+                السنة الأولى: <strong className="text-ivory">${effectivePrice}</strong> عقد تأسيس
+                {selectedDomainOption !== 'free' && ` + $${domainCostUsd} حجز النطاق`} (الاستضافة مجاناً $0) ·
+                التجديد من السنة الثانية: <strong className="text-emerald-400">${annualRenewalUsd} / سنوياً فقط</strong> (شامل النطاق والسيرفر).
+              </p>
+            </div>
+
+            <a
+              href={telegramOrderUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="min-h-[44px] px-6 rounded-xl bg-gradient-to-r from-[#BF953F] to-[#AA771C] hover:from-[#C9A84C] hover:to-[#B38728] text-obsidian-dark text-xs font-bold transition shadow-lg inline-flex items-center gap-2 shrink-0"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21.198 2.433a2.242 2.242 0 0 0-1.022.215l-16.7 6.4a2.25 2.25 0 0 0 .126 4.195l4.312 1.348 1.624 5.228a1.5 1.5 0 0 0 2.45.64l2.58-2.203 4.802 3.535a2.25 2.25 0 0 0 3.524-1.39l3.3-15.5a2.242 2.242 0 0 0-1.996-2.468z" />
+              </svg>
+              <span>طلب المتجر بهذا الخيار عبر تيليجرام</span>
+            </a>
+          </div>
+        </section>
 
         {/* Global Bottom Order Call to Action Banner */}
         <div className="p-8 sm:p-12 rounded-[2.5rem] bg-gradient-to-r from-[#BF953F]/20 via-[#C9A84C]/10 to-[#AA771C]/20 border border-[#C9A84C]/40 text-center space-y-6 shadow-2xl relative overflow-hidden">

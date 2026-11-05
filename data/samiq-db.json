@@ -119,8 +119,18 @@
           "inStock": true
         }
       ],
-      "tags": ["تفتيح التصبغات", "مضاد أكسدة", "نضارة فورية", "بشرة باهتة", "استخدام صباحي"],
-      "skinTypes": ["dry", "combination", "all"],
+      "tags": [
+        "تفتيح التصبغات",
+        "مضاد أكسدة",
+        "نضارة فورية",
+        "بشرة باهتة",
+        "استخدام صباحي"
+      ],
+      "skinTypes": [
+        "dry",
+        "combination",
+        "all"
+      ],
       "aiCategoryConfidence": 99
     },
     {
@@ -150,8 +160,18 @@
           "inStock": true
         }
       ],
-      "tags": ["ترطيب عميق", "سيراميد طبيعي", "خالي من العطور", "بشرة جافة وحساسة", "تنظيف لطيف"],
-      "skinTypes": ["dry", "sensitive", "all"],
+      "tags": [
+        "ترطيب عميق",
+        "سيراميد طبيعي",
+        "خالي من العطور",
+        "بشرة جافة وحساسة",
+        "تنظيف لطيف"
+      ],
+      "skinTypes": [
+        "dry",
+        "sensitive",
+        "all"
+      ],
       "aiCategoryConfidence": 98
     },
     {
@@ -176,8 +196,17 @@
           "inStock": true
         }
       ],
-      "tags": ["مسامات واسعة", "تنظيم الدهون", "بشرة دهنية", "مقاومة الشوائب", "خالي من الزيوت"],
-      "skinTypes": ["oily", "combination"],
+      "tags": [
+        "مسامات واسعة",
+        "تنظيم الدهون",
+        "بشرة دهنية",
+        "مقاومة الشوائب",
+        "خالي من الزيوت"
+      ],
+      "skinTypes": [
+        "oily",
+        "combination"
+      ],
       "aiCategoryConfidence": 99
     },
     {
@@ -207,8 +236,16 @@
           "inStock": true
         }
       ],
-      "tags": ["ثبات مخملي", "ترطيب الشفاه", "مكياج فاخر", "درجة روز كوتور", "مقاوم للتكتل"],
-      "skinTypes": ["all"],
+      "tags": [
+        "ثبات مخملي",
+        "ترطيب الشفاه",
+        "مكياج فاخر",
+        "درجة روز كوتور",
+        "مقاوم للتكتل"
+      ],
+      "skinTypes": [
+        "all"
+      ],
       "aiCategoryConfidence": 97
     },
     {
@@ -233,8 +270,16 @@
           "inStock": true
         }
       ],
-      "tags": ["ألوان دافئة", "دمج حريري", "مكياج سهرات", "ثبات 12 ساعة", "شيمر ومطفي"],
-      "skinTypes": ["all"],
+      "tags": [
+        "ألوان دافئة",
+        "دمج حريري",
+        "مكياج سهرات",
+        "ثبات 12 ساعة",
+        "شيمر ومطفي"
+      ],
+      "skinTypes": [
+        "all"
+      ],
       "aiCategoryConfidence": 98
     },
     {
@@ -259,8 +304,17 @@
           "inStock": true
         }
       ],
-      "tags": ["ترميم الحاجز", "ترطيب 24 ساعة", "بشرة جافة وحساسة", "حمض الهيالورونيك", "ليلي ونهاري"],
-      "skinTypes": ["dry", "sensitive"],
+      "tags": [
+        "ترميم الحاجز",
+        "ترطيب 24 ساعة",
+        "بشرة جافة وحساسة",
+        "حمض الهيالورونيك",
+        "ليلي ونهاري"
+      ],
+      "skinTypes": [
+        "dry",
+        "sensitive"
+      ],
       "aiCategoryConfidence": 99
     }
   ],
@@ -696,5 +750,327 @@
     "developerTelegramHandle": "KorosSenpai",
     "developerTelegramUrl": "https://t.me/KorosSenpai",
     "showcasePath": "/samiq"
-  }
+  },
+  "conversations": [
+    {
+      "id": "conv-wa-1",
+      "channel": "whatsapp",
+      "customerName": "أم ريان — صنعاء",
+      "customerIdentifier": "+967 771 234 567",
+      "lastMessage": "كيف أتحقق من مطابقة غسول السيراميد لمعايير الجودة قبل فتح العبوة؟",
+      "lastMessageTime": "منذ 10 دقائق",
+      "unreadCount": 1,
+      "isBotActive": true,
+      "status": "active",
+      "messages": [
+        {
+          "id": "m1",
+          "sender": "customer",
+          "senderName": "أم ريان",
+          "text": "السلام عليكم، هل غسول السيراميد للبشرة الدهنية متوفر بحجم 473 مل؟",
+          "timestamp": "14:20"
+        },
+        {
+          "id": "m2",
+          "sender": "bot",
+          "senderName": "المستشارة الذكية (مفتاح الجمال)",
+          "text": "وعليكم السلام ورحمة الله. نعم متوفر في فرع حدة والكتالوج الإلكتروني، المنتج أصلي 100% مستورد من فرنسا مع باركود فحص فوري.",
+          "timestamp": "14:21"
+        },
+        {
+          "id": "m3",
+          "sender": "customer",
+          "senderName": "أم ريان",
+          "text": "كيف أتحقق من مطابقة غسول السيراميد لمعايير الجودة قبل فتح العبوة؟",
+          "timestamp": "14:23"
+        }
+      ]
+    },
+    {
+      "id": "conv-web-2",
+      "channel": "web",
+      "customerName": "سارة المهدي",
+      "customerIdentifier": "sarah.m@gmail.com",
+      "lastMessage": "طلبت سيروم فيتامين سي من الموقع، هل التوصيل إلى حدة بنفس اليوم؟",
+      "lastMessageTime": "منذ 25 دقيقة",
+      "unreadCount": 0,
+      "isBotActive": true,
+      "status": "active",
+      "messages": [
+        {
+          "id": "m4",
+          "sender": "customer",
+          "senderName": "سارة المهدي",
+          "text": "طلبت سيروم فيتامين سي من الموقع، هل التوصيل إلى حدة بنفس اليوم؟",
+          "timestamp": "13:50"
+        },
+        {
+          "id": "m5",
+          "sender": "bot",
+          "senderName": "مستشارة سَامِق الذكية",
+          "text": "أهلاً بكِ أستاذة سارة. طلبات أمانة العاصمة صنعاء تسلّم في نفس اليوم خلال 3 إلى 5 ساعات عبر مندوبنا مع إمكانية الفحص قبل السداد.",
+          "timestamp": "13:51"
+        }
+      ]
+    },
+    {
+      "id": "conv-tg-3",
+      "channel": "telegram",
+      "customerName": "م. عبد الرحمن الحكيمي",
+      "customerIdentifier": "@Ar_Hakeemi",
+      "lastMessage": "أريد حجز استشارة جلدية لزوجتي يوم الخميس القادم في فرع حدة.",
+      "lastMessageTime": "منذ 45 دقيقة",
+      "unreadCount": 2,
+      "isBotActive": false,
+      "status": "pending",
+      "messages": [
+        {
+          "id": "m6",
+          "sender": "customer",
+          "senderName": "م. عبد الرحمن الحكيمي",
+          "text": "أريد حجز استشارة جلدية لزوجتي يوم الخميس القادم في فرع حدة.",
+          "timestamp": "13:10"
+        }
+      ]
+    }
+  ],
+  "content": {
+    "blocks": {
+      "skin-routine": {
+        "title": "روتين العناية ببشرتك لإشراقة تدوم",
+        "subtitle": "اختاري نوع بشرتك لتكتشفي الروتين المثالي والمكونات الفعالة",
+        "skinTypes": [
+          {
+            "id": "oily",
+            "label": "بشرة دهنية",
+            "icon": "drop",
+            "tagline": "تنقية المسامات والتحكم باللمعان دون جفاف",
+            "routineDescription": "روتين متوازن يركز على تنظيم الإفرازات الزهمية وتضييق المسام الواسعة مع ترطيب مائي خفيف.",
+            "steps": [
+              "تنظيف عميق صباحاً ومساءً بغسول رغوي يحتوي على النياسيناميد وحمض الهيالورونيك.",
+              "تطبيق قطرات من سيروم النياسيناميد 10% والزنك لتنظيم دهون البشرة ومكافحة البثور.",
+              "ترطيب خفيف بجل مائي غير زيتي وواقي شمس سائل بدون لمعة دهنية."
+            ],
+            "recommendedProductIds": [
+              "prod-2",
+              "prod-3"
+            ],
+            "activeIngredientIds": [
+              "niacinamide",
+              "hyaluronic",
+              "vitaminc"
+            ]
+          },
+          {
+            "id": "dry",
+            "label": "بشرة جافة",
+            "icon": "wave",
+            "tagline": "ترطيب عميق وحماية حاجز البشرة الحساس",
+            "routineDescription": "روتين مغذٍ يدعم حاجز الدهون الواقي ويمنح ترطيباً مضاعفاً يمنع التقشر والشد.",
+            "steps": [
+              "غسول كريمي لطيف جداً بالسيراميد خالي من الصابون والعطور يحافظ على رطوبة الجلد.",
+              "سيروم فيتامين سي أو حمض الهيالورونيك لضخ الرطوبة في خلايا البشرة واستعادة المرونة.",
+              "كريم ترطيب غني بالسيراميد صباحاً ومساءً لقفل الرطوبة داخل البشرة طوال 24 ساعة."
+            ],
+            "recommendedProductIds": [
+              "prod-1",
+              "prod-2",
+              "prod-6"
+            ],
+            "activeIngredientIds": [
+              "hyaluronic",
+              "vitaminc",
+              "niacinamide"
+            ]
+          },
+          {
+            "id": "sensitive",
+            "label": "بشرة حساسة",
+            "icon": "feather",
+            "tagline": "تهدئة الاحمرار ودعم المقاومة الطبيعية",
+            "routineDescription": "روتين هادئ جداً بمكونات نقية مختبرة جلدياً خالية من المواد المهيجة والعطور الصناعية.",
+            "steps": [
+              "تنظيف فائق اللطف بغسول مهدئ لا يسبب أي وخز أو احمرار.",
+              "سيروم مرطب خفيف مدعم بالنياسيناميد بتركيز معتدل لتهدئة التحسس وتقوية الجدار الواقي.",
+              "مرطب مهدئ خالٍ من العطور وواقي شمس فيزيائي بنسبة 100%."
+            ],
+            "recommendedProductIds": [
+              "prod-2",
+              "prod-6"
+            ],
+            "activeIngredientIds": [
+              "hyaluronic",
+              "niacinamide",
+              "vitaminc"
+            ]
+          }
+        ],
+        "ingredients": [
+          {
+            "id": "vitaminc",
+            "nameEn": "Vitamin C",
+            "nameAr": "فيتامين سي النقي",
+            "iconType": "citrus",
+            "benefitsAr": "مضاد أكسدة فائق، يفتح التصبغات، ويوحد لون البشرة ويحفز إنتاج الكولاجين الطبيعي.",
+            "concentration": "10% Pure"
+          },
+          {
+            "id": "hyaluronic",
+            "nameEn": "Hyaluronic Acid",
+            "nameAr": "حمض الهيالورونيك",
+            "iconType": "drop",
+            "benefitsAr": "يحبس الرطوبة حتى 1000 ضعف وزنه بالماء، ليمنح البشرة امتلاءً ونعومة مخملية فورية.",
+            "concentration": "2% Multi-Weight"
+          },
+          {
+            "id": "niacinamide",
+            "nameEn": "Niacinamide",
+            "nameAr": "نياسيناميد (فيتامين B3)",
+            "iconType": "molecule",
+            "benefitsAr": "يقلل المسامات الواسعة، ينظم إفراز الدهون، ويهدئ الاحمرار ويعالج آثار الحبوب.",
+            "concentration": "10% + Zinc 1%"
+          }
+        ]
+      },
+      "authenticity-compare": {
+        "prod-1": {
+          "productId": "prod-1",
+          "productTitle": "سيروم فيتامين سي النقي 10% (Pure Vitamin C10)",
+          "brand": "سيرومات نقية",
+          "original": {
+            "title": "الأصلي المعتمد",
+            "image": "/media/products/serum-vitamin-c.jpg",
+            "batchCode": "54U700",
+            "formulaNotes": "سائل نقي ذهبي فاتح، رائحة حمضية منعشة وخفيفة، خالٍ تماماً من الرغوة أو الشوائب",
+            "packagingNotes": "زجاج داكن ثقيل عازل للضوء، رقم الباتش محفور بالليزر أسفل الزجاج، قطارة محكمة بسدادة مطاطية أصلية"
+          },
+          "counterfeit": {
+            "title": "التقليد المغشوش المنتشر",
+            "image": "/media/products/serum-vitamin-c.jpg",
+            "batchCode": "بدون كود أو مطبوع بحبر باهت",
+            "formulaNotes": "سائل معكر مائل للبياض، رغوة كثيفة تطفو عند الرج، رائحة كيميائية نفاذة تسبب تهيج البشرة",
+            "packagingNotes": "زجاج خفيف رديء، غطاء قطارة بلاستيكي يسرب الهواء مما يسبب أكسدة وتلف التركيبة فوراً"
+          },
+          "checklist": [
+            {
+              "title": "رقم التشغيلة والباتش كود (Batch Code)",
+              "originalFeature": "محفور بالليزر في قاع الزجاج متطابق تماماً مع الكود المطبوع على الكرتون الخارجي (مثال: 54U700).",
+              "fakeRisk": "مفقود نهائياً أو مطبوع بحبر باهت يمكن مسحه بسهولة بالإصبع."
+            },
+            {
+              "title": "نقاء القوام وتجانس السيروم",
+              "originalFeature": "قوام انسيابي نقي شفاف بلون كهرماني ذهبي يتغلغل في البشرة دون بقايا دهنية.",
+              "fakeRisk": "سائل معكر تظهر به فقاعات ورغوة بيضاء لزجة لا تختفي بعد دقيقة."
+            },
+            {
+              "title": "الباركود ومطابقة الوكالة الرسمية",
+              "originalFeature": "يقرأ الباركود مباشرة في تطبيق الفحص المعتمد ويظهر بيانات التشغيلة وتاريخ الإنتاج الموثق.",
+              "fakeRisk": "باركود عشوائي لا يؤدي لأي صفحة أو يعطي منتجاً مختلفاً."
+            },
+            {
+              "title": "جودة الزجاج ومطاط القطارة",
+              "originalFeature": "زجاج طبي معتم عازل للضوء لحماية فيتامين C من الأكسدة مع قطارة دقيقة.",
+              "fakeRisk": "زجاج شفاف رخيص ومطاط رديء يتفتت بعد أسبوع من الاستخدام."
+            }
+          ],
+          "videoUrl": "https://youtube.com/shorts/sample-miftah-auth"
+        }
+      }
+    }
+  },
+  "projects": [
+    {
+      "id": "proj-miftah",
+      "slug": "miftah",
+      "name": "مفتاح الجمال",
+      "legalName": "مفتاح الجمال — لكشف المقلد",
+      "industryAr": "العناية بالبشرة والمكياج",
+      "domain": "miftah-beauty.com",
+      "domainType": "custom_com",
+      "annualDomainUsd": 20,
+      "annualHostingMaintenanceUsd": 45,
+      "aiPlanType": "byok",
+      "themeId": "luxury-noir",
+      "whatsapp": "967775234989",
+      "city": "صنعاء",
+      "adminPasscode": "miftah2026",
+      "status": "active",
+      "setupPriceUsd": 550,
+      "enabledFeatures": [
+        "tier_1_static",
+        "tier_2_editable",
+        "tier_3_catalog",
+        "cart_whatsapp",
+        "smart_tags_ai",
+        "authenticity_guide",
+        "skin_routine_advisor",
+        "customer_accounts",
+        "ai_chatbot"
+      ],
+      "productsCount": 6,
+      "ordersCount": 2,
+      "previewUrl": "/?demo=1&theme=luxury-noir",
+      "adminUrl": "/admin?tenant=miftah"
+    },
+    {
+      "id": "proj-restaurant",
+      "slug": "demo-restaurant",
+      "name": "دار القهوة المختصة والمخبز الحرفي",
+      "legalName": "دار القهوة المختصة — صنعاء",
+      "industryAr": "المطاعم والمقاهي المختصة",
+      "domain": "roastery.samiq.app",
+      "domainType": "subdomain_free",
+      "annualDomainUsd": 0,
+      "annualHostingMaintenanceUsd": 35,
+      "aiPlanType": "none",
+      "themeId": "ivory-journal",
+      "whatsapp": "967770000111",
+      "city": "صنعاء",
+      "adminPasscode": "coffee2026",
+      "status": "demo",
+      "setupPriceUsd": 400,
+      "enabledFeatures": [
+        "tier_1_static",
+        "tier_2_editable",
+        "tier_3_catalog",
+        "cart_whatsapp"
+      ],
+      "productsCount": 6,
+      "ordersCount": 5,
+      "previewUrl": "/?demo=1&tenant=demo-restaurant&theme=ivory-journal",
+      "adminUrl": "/admin?tenant=demo-restaurant"
+    },
+    {
+      "id": "proj-clinic",
+      "slug": "derma-clinic",
+      "name": "مختبرات النخبة الجلدية",
+      "legalName": "مختبرات النخبة للعناية السريرية",
+      "industryAr": "العيادات والصيدليات التخصصية",
+      "domain": "elite-derma.com",
+      "domainType": "custom_com",
+      "annualDomainUsd": 20,
+      "annualHostingMaintenanceUsd": 50,
+      "aiPlanType": "managed_annual",
+      "themeId": "clinic-lab",
+      "whatsapp": "967770000222",
+      "city": "عدن / صنعاء",
+      "adminPasscode": "clinic2026",
+      "status": "staging",
+      "setupPriceUsd": 700,
+      "enabledFeatures": [
+        "tier_1_static",
+        "tier_2_editable",
+        "tier_3_catalog",
+        "cart_whatsapp",
+        "smart_tags_ai",
+        "skin_routine_advisor",
+        "customer_accounts",
+        "ai_chatbot"
+      ],
+      "productsCount": 6,
+      "ordersCount": 3,
+      "previewUrl": "/?demo=1&theme=clinic-lab",
+      "adminUrl": "/admin?tenant=derma-clinic"
+    }
+  ]
 }
