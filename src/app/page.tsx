@@ -4,7 +4,6 @@ import { getDb } from '@/core/db/store';
 import { StorefrontProvider } from '@/core/storefront/StorefrontProvider';
 import { ThemeHost } from '@/themes/ThemeHost';
 import { loadAllBlocksData } from '@/modules/blocks/registry';
-import { DEMO_RESTAURANT_PRODUCTS, DEMO_RESTAURANT_CATEGORIES } from '@/core/store/mockData';
 import { TenantBrandInfo, ThemeId, resolveThemeId } from '@/themes/contract';
 import { FeatureTierSimulator } from '@/themes/base/luxury-noir/components/FeatureTierSimulator';
 
@@ -25,9 +24,8 @@ export default async function StorefrontHomePage(props: PageProps) {
     searchParams.demo === '1' ||
     searchParams.demo === 'panel';
 
-  // 1. Resolve tenant context (supports dev acceptance testing for demo-restaurant)
+  // 1. Resolve tenant context (defaults to Miftah Al-Jamal)
   const tenantSlug = isDevOrDemo && searchParams.tenant ? searchParams.tenant : undefined;
-  const isDemoRestaurant = tenantSlug === 'demo-restaurant';
   const tenantContext = resolveTenant(tenantSlug);
   const db = getDb();
 
@@ -40,23 +38,23 @@ export default async function StorefrontHomePage(props: PageProps) {
   // 3. Load modular blocks data from registry
   const blocksData = loadAllBlocksData(db);
 
-  // 4. Build tenant storefront data
+  // 4. Build tenant storefront data (tailored for Miftah Al-Jamal)
   const tenantData: TenantBrandInfo = {
     ...tenantContext.tenant,
-    ...(!isDemoRestaurant ? db.tenant : {}),
+    ...(db.tenant || {}),
     themeId,
-    contact: isDemoRestaurant ? tenantContext.tenant.contact : (db.tenant?.contact || tenantContext.tenant.contact),
-    homeSections: isDemoRestaurant ? tenantContext.tenant.homeSections : (db.tenant?.homeSections || tenantContext.tenant.homeSections),
+    contact: db.tenant?.contact || tenantContext.tenant.contact,
+    homeSections: db.tenant?.homeSections || tenantContext.tenant.homeSections,
   };
 
-  const rawProducts = isDemoRestaurant ? DEMO_RESTAURANT_PRODUCTS : db.products;
+  const rawProducts = db.products;
   const products = rawProducts.filter(
     (p) =>
       p.visibilityStatus !== 'warehouse_only' &&
       p.visibilityStatus !== 'archived' &&
       p.isPublished !== false
   );
-  const categories = isDemoRestaurant ? DEMO_RESTAURANT_CATEGORIES : db.categories;
+  const categories = db.categories;
 
   const showDemoPanel = searchParams.demo === 'panel';
 

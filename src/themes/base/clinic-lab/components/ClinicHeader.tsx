@@ -41,7 +41,7 @@ export function ClinicHeader({ onOpenAdvisor, onOpenCart }: ClinicHeaderProps) {
               {tenant.name || 'مفتاح الجمال'}
             </span>
             <span className="text-xs text-[#0F4C4A]/70 font-medium">
-              معمل سريري معتمد
+              لكشف المقلد والعناية السريرية
             </span>
           </div>
         </a>

@@ -161,20 +161,43 @@ export const DEFAULT_PILOT_FEATURES = [
 export function resolveTenant(slugOrDomain?: string): ResolvedTenantContext {
   const mode = (process.env.TENANT_MODE as 'shared' | 'single') || 'shared';
 
-  // Dev demo restaurant check
-  if (slugOrDomain === 'demo-restaurant') {
-    const rawFeatures = ['tier_1_static', 'tier_2_editable', 'tier_3_catalog', 'cart_whatsapp'];
+  // Template variation for Miftah Ivory Journal
+  if (slugOrDomain === 'miftah-ivory') {
+    const tenant: TenantProfile = {
+      ...DEFAULT_PILOT_TENANT,
+      tagline: 'المجلة التحريرية ودليل العناية الفاخرة لكشف المقلد',
+      themeId: 'ivory-journal',
+    };
+    const rawFeatures = DEFAULT_PILOT_FEATURES;
     const effectiveFeatureIds = resolveEffectiveFeatures(rawFeatures);
     const featureSet = new Set(effectiveFeatureIds);
     return {
-      tenant: DEMO_RESTAURANT_TENANT,
+      tenant,
       activeFeatureIds: effectiveFeatureIds,
       isFeatureEnabled: (id: string) => featureSet.has(id),
       mode,
     };
   }
 
-  // Default to Miftah pilot tenant
+  // Template variation for Miftah Clinic Lab
+  if (slugOrDomain === 'miftah-clinic') {
+    const tenant: TenantProfile = {
+      ...DEFAULT_PILOT_TENANT,
+      tagline: 'المختبر السريري التخصصي لفحص الأصالة وكشف المقلد',
+      themeId: 'clinic-lab',
+    };
+    const rawFeatures = DEFAULT_PILOT_FEATURES;
+    const effectiveFeatureIds = resolveEffectiveFeatures(rawFeatures);
+    const featureSet = new Set(effectiveFeatureIds);
+    return {
+      tenant,
+      activeFeatureIds: effectiveFeatureIds,
+      isFeatureEnabled: (id: string) => featureSet.has(id),
+      mode,
+    };
+  }
+
+  // Default to Miftah pilot tenant (Luxury Noir)
   const tenant = DEFAULT_PILOT_TENANT;
   const rawFeatures = DEFAULT_PILOT_FEATURES;
   const effectiveFeatureIds = resolveEffectiveFeatures(rawFeatures);

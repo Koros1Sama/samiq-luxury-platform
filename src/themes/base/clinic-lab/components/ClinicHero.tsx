@@ -18,22 +18,22 @@ export function ClinicHero({ onExploreClick }: ClinicHeroProps) {
             {/* Trust Pill */}
             <div className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full bg-[#CFE8E1] border border-[#0F4C4A]/20 text-[#0F4C4A] text-xs font-bold">
               <ShieldCheckIcon size={14} />
-              <span>فحص مخبري معتمد · أصلي 100%</span>
+              <span>فحص مخبري معتمد · لكشف المقلد</span>
             </div>
 
             {/* Headline */}
             <h1 className="text-sm sm:text-2xl lg:text-3xl font-bold text-[#0F4C4A] leading-tight truncate sm:whitespace-normal">
-              العناية السريرية المتقدمة للبشرة في اليمن
+              مفتاح الجمال — فحص الأصالة والعناية السريرية
             </h1>
 
             {/* Subtitle - Hidden on mobile (< sm) to preserve fold height for >= 3 product rows */}
             <p className="hidden sm:block text-sm sm:text-base text-[#4A5568] leading-[1.75] max-w-xl">
-              تركيبات علاجية نقية بتركيزات مدروسة وموثقة برقم التشغيلة الرسمي. نوفر روتيناً سريرياً مخصصاً لبشرتك مع فحص الأصالة المباشر.
+              تركيبات علاجية نقية بتركيزات مدروسة وموثقة برقم التشغيلة الرسمي في اليمن. نوفر روتيناً سريرياً مخصصاً لبشرتك مع فحص الأصالة وكشف المقلد.
             </p>
 
             {/* Micro subtitle on mobile */}
             <span className="sm:hidden text-xs text-[#4A5568] leading-tight truncate">
-              تركيبات علاجية نقية موثقة برقم التشغيلة
+              مفتاح الجمال · تركيبات علاجية نقية لكشف المقلد
             </span>
 
             {/* Quick Metrics (Desktop / Tablet) */}

@@ -98,7 +98,7 @@ export function IvoryHeader({ onOpenSearch, onOpenAdvisor }: IvoryHeaderProps) {
           >
             <span>{tenant.name}</span>
             <span className="hidden sm:block text-xs font-sans text-[#5E6B5A] mt-0.5 leading-none">
-              مجلة الجمال الأصلي
+              لكشف المقلد ومجلة العناية الفاخرة
             </span>
           </a>
         </div>

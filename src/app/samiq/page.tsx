@@ -129,39 +129,30 @@ const READY_PACKAGES = [
 const TEMPLATE_PREVIEWS = [
   {
     id: 'luxury-noir',
-    nameAr: 'أسود رخامي فاخر (Luxury Noir)',
-    tagline: 'الأسود الساحر مع الذهب الملكي وإضاءات الهالو السينمائية',
-    bestFor: 'العلامات التجميلية الفاخرة، العطور الحصرية، والمجوهرات',
+    nameAr: 'مفتاح الجمال — أسود رخامي فاخر (Luxury Noir)',
+    tagline: 'الأسود الساحر مع الذهب الملكي وإضاءات الهالو السينمائية لمفتاح الجمال',
+    bestFor: 'مستحضرات العناية الفاخرة، السيرومات النقية، والمكياج الملكي',
     previewUrl: '/?demo=1&theme=luxury-noir',
     bgColor: '#070709',
     accentColor: '#C9A84C',
   },
   {
     id: 'ivory-journal',
-    nameAr: 'حرير عاجي تحريري (Ivory Journal)',
-    tagline: 'حرير عاجي دافئ، نصوص إسبريسو، وطابع المجلات التحريرية العالمية',
-    bestFor: 'صالونات التجميل، العلامات التحريرية، والمنتجات الطبيعية',
+    nameAr: 'مفتاح الجمال — حرير عاجي تحريري (Ivory Journal)',
+    tagline: 'حرير عاجي دافئ، نصوص إسبريسو، وطابع المجلات التحريرية لمفتاح الجمال',
+    bestFor: 'أدلة روتين العناية، مختارات العدد التحريري، ومستحضرات الترطيب',
     previewUrl: '/?demo=1&theme=ivory-journal',
     bgColor: '#FAF7F2',
     accentColor: '#B8860B',
   },
   {
     id: 'clinic-lab',
-    nameAr: 'مختبر سريري نقي (Clinic Lab)',
-    tagline: 'الأبيض الطبي مع تركواز كلينيكال عميق وأخضر نعناعي مخبري',
-    bestFor: 'العيادات الجلدية، الصيدليات المتخصصة، ومراكز الفحص',
+    nameAr: 'مفتاح الجمال — مختبر سريري نقي (Clinic Lab)',
+    tagline: 'الأبيض الطبي مع تركواز كلينيكال عميق لفحص التشغيلات والتركيزات لمفتاح الجمال',
+    bestFor: 'فحص الأصالة المخبري، تحليل المكونات والتركيزات الدقيقة، وكشف المقلد',
     previewUrl: '/?demo=1&theme=clinic-lab',
     bgColor: '#FFFFFF',
     accentColor: '#0F4C4A',
-  },
-  {
-    id: 'demo-restaurant',
-    nameAr: 'مطعم ومقهى فاخر (Demo Restaurant)',
-    tagline: 'قالب تفاعلي لقوائم الطعام والمشروبات وحجوزات الطاولات',
-    bestFor: 'المطاعم الراقية، المقاهي التخصصية، ولاونجات الضيافة',
-    previewUrl: '/?demo=1&tenant=demo-restaurant',
-    bgColor: '#120F0D',
-    accentColor: '#E67E22',
   },
 ];
 
@@ -169,7 +160,7 @@ export default function SamiqShowcasePage() {
   const [selectedTemplate, setSelectedTemplate] = useState<string>('luxury-noir');
   const [selectedPackageId, setSelectedPackageId] = useState<string>('intelligence');
   const [selectedDomainOption, setSelectedDomainOption] = useState<'free' | 'com' | 'ye'>('com');
-  const [clientStoreTitle, setClientStoreTitle] = useState<string>('');
+  const [clientStoreTitle, setClientStoreTitle] = useState<string>('مفتاح الجمال');
   const [clientContactName, setClientContactName] = useState<string>('');
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
 
@@ -421,7 +412,7 @@ export default function SamiqShowcasePage() {
                   : 'text-[#A09D94] hover:text-[#FAF7F2]'
               }`}
             >
-              معرض القوالب المعمارية (4 قوالب)
+              معرض قوالب مفتاح الجمال (3 قوالب فاخرة)
             </button>
           </div>
         </div>
@@ -924,15 +915,18 @@ export default function SamiqShowcasePage() {
         {activeTab === 'templates' && (
           <div className="space-y-8 animate-fadeIn">
             <div className="text-center max-w-2xl mx-auto space-y-2">
+              <span className="text-xs font-mono font-semibold tracking-wider text-[#C9A84C] uppercase">
+                MIFTAH AL-JAMAL ARCHITECTURAL TEMPLATES
+              </span>
               <h2 className="text-2xl sm:text-3xl font-serif font-bold text-[#FAF7F2]">
-                4 قوالب معمارية فاخرة بهويات مستقلة تماماً
+                3 قوالب معمارية فاخرة لمفتاح الجمال بهندسات بصرية مستقلة
               </h2>
               <p className="text-xs sm:text-sm text-[#8E8B85]">
-                كل قالب تم بناؤه من الصفر بـ DNA بصري مستقل، ويمكن تبديل القالب بنقرة واحدة من لوحة التحكم دون فقدان أي بيانات.
+                كل قالب تم تخصيصه وتوجيهه بالكامل لمفتاح الجمال (لكشف المقلد)، ويمكنك معاينة المتجر الحي بكل قالب واختيار النمط الأنسب لعلامتك.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {TEMPLATE_PREVIEWS.map((tpl) => {
                 const isSelected = selectedTemplate === tpl.id;
                 return (

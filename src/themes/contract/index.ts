@@ -26,30 +26,30 @@ export interface ThemeMeta {
 export const SAMIQ_THEMES: Record<ThemeId, ThemeMeta> = {
   'luxury-noir': {
     id: 'luxury-noir',
-    nameAr: 'أسود رخامي فاخر (Luxury Noir)',
+    nameAr: 'مفتاح الجمال — أسود رخامي فاخر (Luxury Noir)',
     nameEn: 'Luxury Noir',
-    paletteDescription: 'الأسود الساحر مع الذهب الملكي وإضاءات الهالو السينمائية',
+    paletteDescription: 'الأسود الساحر مع الذهب الملكي وإضاءات الهالو السينمائية لمفتاح الجمال',
     primaryColor: '#070709',
     accentColor: '#C9A84C',
     badge: 'الأكثر فخامة',
   },
   'ivory-journal': {
     id: 'ivory-journal',
-    nameAr: 'حرير عاجي تحريري (Ivory Journal)',
+    nameAr: 'مفتاح الجمال — حرير عاجي تحريري (Ivory Journal)',
     nameEn: 'Ivory Journal',
-    paletteDescription: 'حرير عاجي دافئ، نصوص إسبريسو، ولمسات شامبانيا عيادات التجميل السويسرية',
+    paletteDescription: 'حرير عاجي دافئ، نصوص إسبريسو، ولمسات شامبانيا المجلات التحريرية لمفتاح الجمال',
     primaryColor: '#FAF7F2',
     accentColor: '#B8860B',
     badge: 'طابع المجلات العالمية',
   },
   'clinic-lab': {
     id: 'clinic-lab',
-    nameAr: 'مختبر سريري نقي (Clinic Lab)',
+    nameAr: 'مفتاح الجمال — مختبر سريري نقي (Clinic Lab)',
     nameEn: 'Clinic Lab',
-    paletteDescription: 'الأبيض والضباب الهادئ مع تركواز كلينيكال عميق وأخضر نعناعي طبي',
+    paletteDescription: 'الأبيض والضباب الهادئ مع تركواز كلينيكال عميق لفحص الأصالة والتشغيلات لمفتاح الجمال',
     primaryColor: '#FFFFFF',
     accentColor: '#0F4C4A',
-    badge: 'طبي معتمد',
+    badge: 'مخبري معتمد',
   },
 };
 

@@ -13,7 +13,9 @@ interface IvoryHeroProps extends Partial<SectionComponentProps> {
 export function IvoryHero({ section }: IvoryHeroProps) {
   const { tenant } = useStorefront();
 
-  const title = (section?.props?.title as string) || tenant.name;
+  const title =
+    (section?.props?.title as string) ||
+    (tenant.name ? `${tenant.name} — لكشف المقلد` : 'مفتاح الجمال — لكشف المقلد');
   const subtitle =
     (section?.props?.subtitle as string) ||
     tenant.tagline ||

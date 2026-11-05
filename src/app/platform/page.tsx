@@ -19,8 +19,8 @@ export default function PlatformSuperAdminPage() {
 
   // Mode: 'custom_quote' (general quote for any project) | 'fleet_project' (linked to a registered project in fleet)
   const [targetMode, setTargetMode] = useState<'custom_quote' | 'fleet_project'>('custom_quote');
-  const [quoteProjectTitle, setQuoteProjectTitle] = useState<string>('متجر النخبة الفاخر');
-  const [quoteClientName, setQuoteClientName] = useState<string>('');
+  const [quoteProjectTitle, setQuoteProjectTitle] = useState<string>('مفتاح الجمال — لكشف المقلد');
+  const [quoteClientName, setQuoteClientName] = useState<string>('إدارة مفتاح الجمال');
   const [customDiscountUsd, setCustomDiscountUsd] = useState<number>(0);
   const [priceOverrides, setPriceOverrides] = useState<Record<string, number>>({});
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
