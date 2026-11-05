@@ -29,7 +29,9 @@ export default function ProductDetailPage() {
   const [activeImage, setActiveImage] = useState<string>('');
   const [reviews, setReviews] = useState<any[]>([]);
   const [authenticityGuide, setAuthenticityGuide] = useState<any>(null);
-  const [currentCurrency, setCurrentCurrency] = useState<ThemeCurrencyCode>('YER');
+  const subpageTheme = useSubpageTheme();
+  const currentCurrency = subpageTheme.currency || 'YER';
+  const setCurrentCurrency = subpageTheme.setCurrency;
   const [selectedVariantId, setSelectedVariantId] = useState<string>('');
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -162,33 +164,8 @@ export default function ProductDetailPage() {
   };
 
   return (
-    <SubpageThemeWrapper activeNav="product" showNavHeader={false}>
-      <div className="min-h-screen bg-obsidian text-ivory font-sans">
-      {/* Top Navigation */}
-      <header data-testid="header" className="sticky top-0 z-30 w-full bg-obsidian/90 backdrop-blur-md border-b border-white/[0.08]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <Link href="/" className="flex items-center">
-            <MiftahLogoSvg size={46} />
-          </Link>
-          <div className="flex items-center gap-4">
-            <CurrencySwitcher currentCurrency={currentCurrency} onCurrencyChange={setCurrentCurrency} />
-            <button
-              type="button"
-              data-testid="cart-button"
-              onClick={() => setIsCartOpen(true)}
-              className="relative min-w-[44px] min-h-[44px] p-2.5 rounded-full bg-white/5 border border-white/10 hover:border-gold/40 text-champagne flex items-center justify-center"
-            >
-              <BagCartIcon size={18} color="#E6CFA0" />
-              {cartItems.length > 0 && (
-                <span className="absolute -top-1 -end-1 w-4 h-4 rounded-full bg-gold text-obsidian-dark text-xs font-bold flex items-center justify-center">
-                  {cartItems.reduce((acc, i) => acc + i.quantity, 0)}
-                </span>
-              )}
-            </button>
-          </div>
-        </div>
-      </header>
-
+    <SubpageThemeWrapper activeNav="product" showNavHeader={true} showFooter={true} showSimulator={true}>
+      <div className="min-h-screen text-ivory font-sans">
       {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 text-xs text-muted-lux font-sans flex items-center gap-2">
         <Link href="/" className="min-h-[44px] inline-flex items-center hover:text-champagne transition">الرئيسية</Link>

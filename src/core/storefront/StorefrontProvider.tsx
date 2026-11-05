@@ -30,6 +30,57 @@ const DEFAULT_PLATFORM_META: PlatformMeta = {
   showcasePath: '/samiq',
 };
 
+export const DEFAULT_STOREFRONT_TENANT: TenantBrandInfo = {
+  id: '11111111-1111-1111-1111-111111111111',
+  name: 'مفتاح الجمال',
+  tagline: 'لكشف المقلد ومجلة العناية الفاخرة',
+  legalName: 'مفتاح الجمال للتجارة والعناية',
+  city: 'صنعاء',
+  deliveryCoverage: 'كافة محافظات الجمهورية اليمنية',
+  themeId: 'luxury-noir',
+  activeTheme: 'luxury-noir',
+  whatsapp: '775234989',
+  phone: '775234989',
+  googleMaps: 'https://maps.app.goo.gl/DxsZTHrv2r386bXa9',
+  announcementText: 'مستحضرات مصرحة ومطابقة لمعايير الهيئة العليا للأدوية والمستلزمات الطبية',
+  homeSections: [],
+  contact: {
+    whatsapp: '775234989',
+    phone: '775234989',
+    social: {
+      tiktok: 'tamifttah',
+      instagram: 'tamifttah',
+      facebook: 'tamifttah',
+    },
+    map: {
+      url: 'https://maps.app.goo.gl/DxsZTHrv2r386bXa9',
+      label: 'فرع صنعاء الرئيسي (حدة)',
+      city: 'صنعاء',
+    },
+  },
+};
+
+export const DEFAULT_STOREFRONT_FEATURES: FeatureFlags = {
+  tier_1_static: true,
+  tier_2_editable: true,
+  tier_3_catalog: true,
+  cart_whatsapp: true,
+  customer_accounts: true,
+  payment_gateways: true,
+  ai_chatbot: true,
+  whatsapp_channel: true,
+  telegram_channel: true,
+  authenticity_guide: true,
+  blog: true,
+  bookings: true,
+  coupons: true,
+  delivery_zones: true,
+  second_language: true,
+  pwa_app: true,
+  multi_branch: true,
+  reviews_ratings: true,
+};
+
 const StorefrontContext = createContext<StorefrontContextValue | null>(null);
 
 const STORAGE_KEYS = {
@@ -39,10 +90,10 @@ const STORAGE_KEYS = {
 };
 
 interface StorefrontProviderProps {
-  tenant: TenantBrandInfo;
-  features: FeatureFlags;
-  products: ProductCardData[];
-  categories: CategoryItem[];
+  tenant?: TenantBrandInfo;
+  features?: FeatureFlags;
+  products?: ProductCardData[];
+  categories?: CategoryItem[];
   blocksData?: Record<string, unknown>;
   initialCurrency?: ThemeCurrencyCode;
   platformMeta?: PlatformMeta;
@@ -52,10 +103,10 @@ interface StorefrontProviderProps {
 }
 
 export function StorefrontProvider({
-  tenant,
-  features,
-  products,
-  categories,
+  tenant = DEFAULT_STOREFRONT_TENANT,
+  features = DEFAULT_STOREFRONT_FEATURES,
+  products = [],
+  categories = [],
   blocksData = {},
   initialCurrency = 'YER',
   platformMeta,
@@ -483,4 +534,8 @@ export function useStorefront(): StorefrontContextValue {
     throw new Error('useStorefront must be used within a StorefrontProvider');
   }
   return context;
+}
+
+export function useOptionalStorefront(): StorefrontContextValue | null {
+  return useContext(StorefrontContext);
 }

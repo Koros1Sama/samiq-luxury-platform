@@ -1,6 +1,13 @@
 import { NextResponse } from 'next/server';
 import { getDb, saveDb } from '@/core/db/store';
 import { ProductCardData } from '@/themes/contract';
+import {
+  verifyAdminAuth,
+  checkRateLimit,
+  getClientIp,
+  sanitizeText,
+  sanitizeObjectDeep,
+} from '@/core/security/guard';
 
 interface ClassificationResult {
   suggestedCategory: 'serums' | 'cleansers-moisturizers' | 'makeup' | 'skincare';
@@ -121,10 +128,24 @@ function classifyProductLocally(title: string, rawBrand?: string, rawNotes?: str
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    const ip = getClientIp(req);
+    if (!checkRateLimit(`product_assistant:${ip}`, 30, 60_000)) {
+      return NextResponse.json({ success: false, message: 'تجاوزت الحد المسموح من الطلبات' }, { status: 429 });
+    }
 
-    // 1. Batch reclassify action
+    const raw = await req.json();
+    const body = sanitizeObjectDeep(raw);
+
+    // 1. Batch reclassify action requires admin
     if (body.action === 'batch_reclassify') {
+      const auth = verifyAdminAuth(req);
+      if (!auth.authorized) {
+        return NextResponse.json(
+          { success: false, message: 'غير مصرح لك بإعادة فهرسة المنتجات' },
+          { status: 401 }
+        );
+      }
+
       const db = getDb();
       let updatedCount = 0;
 
@@ -153,8 +174,11 @@ export async function POST(req: Request) {
     }
 
     // 2. Single product assistant
-    const { title, brand, rawNotes } = body;
-    if (!title || typeof title !== 'string') {
+    const title = sanitizeText(body.title, 150);
+    const brand = sanitizeText(body.brand, 100);
+    const rawNotes = sanitizeText(body.rawNotes, 500);
+
+    if (!title) {
       return NextResponse.json({ success: false, message: 'اسم المنتج مطلوب' }, { status: 400 });
     }
 

@@ -7,6 +7,13 @@ import {
   deleteAuthenticityGuide,
 } from '@/core/db/store';
 import { AuthenticityComparisonData } from '@/modules/blocks/types';
+import {
+  verifyAdminAuth,
+  checkRateLimit,
+  getClientIp,
+  sanitizeText,
+  sanitizeObjectDeep,
+} from '@/core/security/guard';
 
 export async function GET() {
   const guides = getAllAuthenticityGuides();
@@ -15,11 +22,20 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    const raw = await req.json();
+    const body = sanitizeObjectDeep(raw);
 
-    // Check if adding/updating an authenticity guide
+    // 1. Admin add/update an authenticity guide
     if (body.action === 'add_batch' || body.action === 'create_guide') {
-      const productCode = (body.batchCode || body.productId || body.productTitle || '').trim();
+      const auth = verifyAdminAuth(req);
+      if (!auth.authorized) {
+        return NextResponse.json(
+          { success: false, message: 'غير مصرح لك بإضافة أدلة الفحص' },
+          { status: 401 }
+        );
+      }
+
+      const productCode = sanitizeText(body.batchCode || body.productId || body.productTitle || '', 100);
       if (!productCode) {
         return NextResponse.json(
           { success: false, message: 'اسم أو معرف المستحضر مطلوب' },
@@ -28,19 +44,19 @@ export async function POST(req: Request) {
       }
 
       const guide: AuthenticityComparisonData = {
-        productId: body.productId || `prod-auth-${productCode.toLowerCase().replace(/\s+/g, '-')}`,
-        productTitle: body.productTitle || `مستحضر ${productCode}`,
-        brand: body.brand || 'سيرومات نقية',
+        productId: sanitizeText(body.productId, 100) || `prod-auth-${productCode.toLowerCase().replace(/\s+/g, '-')}`,
+        productTitle: sanitizeText(body.productTitle, 150) || `مستحضر ${productCode}`,
+        brand: sanitizeText(body.brand, 100) || 'سيرومات نقية',
         original: {
-          title: body.originalTitle || 'الأصلي المعتمد',
-          image: body.image || '/media/products/serum-vitamin-c.jpg',
+          title: sanitizeText(body.originalTitle, 100) || 'الأصلي المعتمد',
+          image: sanitizeText(body.image, 300) || '/media/products/serum-vitamin-c.jpg',
           batchCode: 'مصرح ومطابق لمعايير الهيئة',
-          formulaNotes: body.formulaNotes || 'قوام نقي متجانس مطابق لمواصفات المختبر الأصلي ومعايير الهيئة العليا للأدوية',
-          packagingNotes: body.packagingNotes || 'زجاج معتم عازل للضوء مع ختم الأصالة والباركود المعتمد',
+          formulaNotes: sanitizeText(body.formulaNotes, 500) || 'قوام نقي متجانس مطابق لمواصفات المختبر الأصلي ومعايير الهيئة العليا للأدوية',
+          packagingNotes: sanitizeText(body.packagingNotes, 500) || 'زجاج معتم عازل للضوء مع ختم الأصالة والباركود المعتمد',
         },
         counterfeit: {
           title: 'التقليد المغشوش',
-          image: body.image || '/media/products/serum-vitamin-c.jpg',
+          image: sanitizeText(body.image, 300) || '/media/products/serum-vitamin-c.jpg',
           batchCode: 'بدون ختم اعتماد أو مطبوع بحبر باهت',
           formulaNotes: 'سائل معكر سريع التأكسد يسبب تهيج الجلد',
           packagingNotes: 'عبوة رديئة ومطاط يسرب الهواء',
@@ -50,7 +66,7 @@ export async function POST(req: Request) {
           : [
               {
                 title: 'ختم وتصريح الهيئة العليا للأدوية والمستلزمات الطبية',
-                originalFeature: `مصرح ومطابق للمواصفات الرسمية مع ختم الأصالة والباركود المعتمد.`,
+                originalFeature: 'مصرح ومطابق للمواصفات الرسمية مع ختم الأصالة والباركود المعتمد.',
                 fakeRisk: 'مفقود نهائياً أو ملصق تجاري باهت يمكن تقشيره.',
               },
               {
@@ -65,7 +81,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true, guide });
     }
 
-    const query = (body.query || body.productName || body.batchCode || body.productId || '').trim();
+    // 2. Public verification query
+    const ip = getClientIp(req);
+    if (!checkRateLimit(`auth_verify:${ip}`, 40, 60_000)) {
+      return NextResponse.json(
+        { success: false, message: 'تجاوزت عدد طلبات التحقق المسموح بها في الدقيقة' },
+        { status: 429 }
+      );
+    }
+
+    const query = sanitizeText(body.query || body.productName || body.batchCode || body.productId || '', 150);
 
     if (query) {
       const verification = verifyBatchCode(query);
@@ -73,7 +98,8 @@ export async function POST(req: Request) {
     }
 
     if (body.productId) {
-      const guide = getAuthenticityGuide(body.productId);
+      const pId = sanitizeText(body.productId, 100);
+      const guide = getAuthenticityGuide(pId);
       return NextResponse.json({ success: true, guide });
     }
 
@@ -91,8 +117,20 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
+    const auth = verifyAdminAuth(req);
+    if (!auth.authorized) {
+      return NextResponse.json(
+        { success: false, message: 'غير مصرح لك بحذف أدلة الفحص' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(req.url);
-    const key = searchParams.get('key') || searchParams.get('productId') || searchParams.get('batchCode') || '';
+    const key = sanitizeText(
+      searchParams.get('key') || searchParams.get('productId') || searchParams.get('batchCode') || '',
+      100
+    );
+
     if (!key) {
       return NextResponse.json(
         { success: false, message: 'معرف المستحضر مطلوب' },

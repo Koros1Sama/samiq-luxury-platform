@@ -449,6 +449,20 @@ export default function SamiqShowcasePage() {
               <span>تحميل عرض السعر (PDF)</span>
             </button>
             <Link
+              href="/platform"
+              className="min-h-[44px] px-3.5 py-2 rounded-xl bg-gold/15 hover:bg-gold/25 text-champagne border border-gold/30 text-xs font-bold transition inline-flex items-center gap-1.5"
+            >
+              <span>استوديو المنصة</span>
+              <span>↗</span>
+            </Link>
+            <Link
+              href="/admin"
+              className="min-h-[44px] px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-[#FAF7F2] border border-white/10 text-xs font-semibold transition inline-flex items-center gap-1.5"
+            >
+              <span>لوحة التاجر ERP</span>
+              <span>↗</span>
+            </Link>
+            <Link
               href="/"
               className="min-h-[44px] px-4 rounded-xl bg-white/5 hover:bg-white/10 text-[#FAF7F2] border border-white/10 text-xs font-semibold transition inline-flex items-center gap-1.5"
             >

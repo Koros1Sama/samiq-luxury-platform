@@ -75,9 +75,10 @@ export function LuxuryHeader(props: LuxuryHeaderProps) {
   const navLinks = [
     { labelAr: 'الرئيسية', labelEn: 'Home', href: '/', show: true },
     { labelAr: 'المنتجات', labelEn: 'Products', href: '/#products-catalog', show: !!features.tier_3_catalog },
-    { labelAr: 'مختبر كشف المقلد', labelEn: 'Authenticity Lab', href: '/#authenticity-lab', show: !!features.tier_3_catalog && !!features.authenticity_guide },
+    { labelAr: 'فحص الأصالة', labelEn: 'Authenticity Lab', href: '/authenticity-hub', show: !!features.tier_3_catalog && !!features.authenticity_guide },
     { labelAr: 'المجلة', labelEn: 'Journal', href: '/blog', show: !!features.blog },
     { labelAr: 'حجز استشارة', labelEn: 'Bookings', href: '/bookings', show: !!features.bookings },
+    { labelAr: 'حسابي والولاء', labelEn: 'My Account', href: '/account', show: !!features.customer_accounts },
   ].filter((link) => link.show);
 
   return (

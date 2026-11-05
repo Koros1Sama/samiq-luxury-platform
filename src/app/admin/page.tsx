@@ -228,6 +228,16 @@ export default function MerchantAdminPage() {
     if (authSaved === 'true') {
       setIsAuthenticated(true);
     }
+    // Verify session with backend HttpOnly cookie/header
+    fetch('/api/admin/auth')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.authenticated) {
+          setIsAuthenticated(true);
+          localStorage.setItem('samiq_admin_auth', 'true');
+        }
+      })
+      .catch(() => {});
     fetchAllData();
   }, []);
 
@@ -505,30 +515,63 @@ export default function MerchantAdminPage() {
     handleSaveBranches(updated);
   };
 
-  const handleLogin = (e?: React.FormEvent) => {
+  const handleLogin = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (
-      passcode.trim() === 'miftah2026' ||
-      passcode.trim() === 'admin2026' ||
-      passcode.trim() === 'samiq2026' ||
-      passcode.trim() === '1234'
-    ) {
-      setIsAuthenticated(true);
-      localStorage.setItem('samiq_admin_auth', 'true');
-      setAuthError('');
-    } else {
-      setAuthError('رمز الدخول غير صحيح. يمكنك استخدام زر الدخول السريع أدناه للتجربة.');
+    const cleanPass = passcode.trim();
+    try {
+      const res = await fetch('/api/admin/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passcode: cleanPass }),
+      });
+      const data = await res.json();
+      if (data.success && data.authenticated) {
+        setIsAuthenticated(true);
+        localStorage.setItem('samiq_admin_auth', 'true');
+        setAuthError('');
+        fetchAllData();
+      } else {
+        setAuthError(data.message || 'رمز الدخول غير صحيح. يمكنك استخدام زر الدخول السريع أدناه للتجربة.');
+      }
+    } catch {
+      if (
+        cleanPass === 'miftah2026' ||
+        cleanPass === 'admin2026' ||
+        cleanPass === 'samiq2026' ||
+        cleanPass === '1234'
+      ) {
+        setIsAuthenticated(true);
+        localStorage.setItem('samiq_admin_auth', 'true');
+        setAuthError('');
+      } else {
+        setAuthError('رمز الدخول غير صحيح.');
+      }
     }
   };
 
-  const handleQuickDemoLogin = () => {
+  const handleQuickDemoLogin = async () => {
     setPasscode('miftah2026');
+    try {
+      await fetch('/api/admin/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passcode: 'miftah2026' }),
+      });
+    } catch {}
     setIsAuthenticated(true);
     localStorage.setItem('samiq_admin_auth', 'true');
     setAuthError('');
+    fetchAllData();
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/admin/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'logout' }),
+      });
+    } catch {}
     setIsAuthenticated(false);
     localStorage.removeItem('samiq_admin_auth');
   };
@@ -1456,7 +1499,22 @@ export default function MerchantAdminPage() {
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Link
+              href="/platform"
+              className="min-h-[44px] px-3 py-2 rounded-xl bg-gold/15 hover:bg-gold/25 text-xs font-bold text-champagne border border-gold/30 transition inline-flex items-center gap-1"
+            >
+              <span>استوديو المنصة والأسطول</span>
+              <span>↗</span>
+            </Link>
+            <Link
+              href="/samiq"
+              target="_blank"
+              className="min-h-[44px] px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold text-ivory border border-white/10 transition inline-flex items-center gap-1"
+            >
+              <span>معرض سَامِق العام</span>
+              <span>↗</span>
+            </Link>
             <Link
               href="/"
               target="_blank"
@@ -1598,6 +1656,26 @@ export default function MerchantAdminPage() {
           >
             إعدادات المتجر
           </button>
+        </div>
+
+        {/* Quick Links to Live Storefront Subpages */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 border-t border-white/[0.04] flex items-center gap-2 overflow-x-auto text-[11px] text-muted-lux scrollbar-none">
+          <span className="font-semibold text-gold/80 whitespace-nowrap">معاينة صفحات المتجر الحية:</span>
+          <Link href="/authenticity-hub" target="_blank" className="hover:text-champagne transition whitespace-nowrap px-2 py-0.5 rounded-md bg-white/5 border border-white/5">
+            مركز فحص الأصالة ↗
+          </Link>
+          <Link href="/bookings" target="_blank" className="hover:text-champagne transition whitespace-nowrap px-2 py-0.5 rounded-md bg-white/5 border border-white/5">
+            حجز استشارة ↗
+          </Link>
+          <Link href="/blog" target="_blank" className="hover:text-champagne transition whitespace-nowrap px-2 py-0.5 rounded-md bg-white/5 border border-white/5">
+            المدونة الطبية ↗
+          </Link>
+          <Link href="/account" target="_blank" className="hover:text-champagne transition whitespace-nowrap px-2 py-0.5 rounded-md bg-white/5 border border-white/5">
+            بوابة العميل ↗
+          </Link>
+          <Link href="/" target="_blank" className="hover:text-champagne transition whitespace-nowrap px-2 py-0.5 rounded-md bg-white/5 border border-white/5">
+            الواجهة الرئيسية ↗
+          </Link>
         </div>
       </header>
 
@@ -2498,9 +2576,11 @@ export default function MerchantAdminPage() {
                 />
                 <input
                   type="number"
+                  min="0"
+                  max="100"
                   placeholder="نسبة الخصم %"
                   value={newCouponDiscount}
-                  onChange={(e) => setNewCouponDiscount(Number(e.target.value))}
+                  onChange={(e) => setNewCouponDiscount(Math.min(100, Math.max(0, parseInt(e.target.value) || 0)))}
                   className="w-28 min-h-[44px] px-3 rounded-xl bg-white/5 border border-white/10 text-ivory text-xs outline-none"
                 />
                 <button
@@ -3281,8 +3361,9 @@ export default function MerchantAdminPage() {
                 />
                 <input
                   type="number"
+                  min="0"
                   value={newZoneFeeYer}
-                  onChange={(e) => setNewZoneFeeYer(Number(e.target.value))}
+                  onChange={(e) => setNewZoneFeeYer(Math.max(0, parseInt(e.target.value) || 0))}
                   placeholder="الرسوم (ريال يمني)"
                   className="min-h-[40px] px-3 rounded-xl bg-white/5 border border-white/10 text-xs text-ivory font-mono outline-none focus:border-gold"
                 />
@@ -3685,8 +3766,9 @@ export default function MerchantAdminPage() {
                     <label className="text-xs text-muted-lux block">الكمية بالمخزن:</label>
                     <input
                       type="number"
+                      min="0"
                       value={formStockQuantity}
-                      onChange={(e) => setFormStockQuantity(Number(e.target.value))}
+                      onChange={(e) => setFormStockQuantity(Math.max(0, parseInt(e.target.value) || 0))}
                       className="w-full min-h-[44px] px-3 rounded-xl bg-white/5 border border-white/10 text-ivory text-xs outline-none focus:border-gold"
                     />
                   </div>
@@ -3694,8 +3776,9 @@ export default function MerchantAdminPage() {
                     <label className="text-xs text-muted-lux block">حد التنبيه بالنفاد:</label>
                     <input
                       type="number"
+                      min="0"
                       value={formLowStockThreshold}
-                      onChange={(e) => setFormLowStockThreshold(Number(e.target.value))}
+                      onChange={(e) => setFormLowStockThreshold(Math.max(0, parseInt(e.target.value) || 0))}
                       className="w-full min-h-[44px] px-3 rounded-xl bg-white/5 border border-white/10 text-ivory text-xs outline-none focus:border-gold"
                     />
                   </div>
@@ -3729,8 +3812,9 @@ export default function MerchantAdminPage() {
                     <label className="text-xs text-champagne block font-bold">سعر البيع (YER):</label>
                     <input
                       type="number"
+                      min="0"
                       value={formPriceYer}
-                      onChange={(e) => setFormPriceYer(Number(e.target.value))}
+                      onChange={(e) => setFormPriceYer(Math.max(0, parseInt(e.target.value) || 0))}
                       className="w-full min-h-[44px] px-3 rounded-xl bg-white/5 border border-gold/40 text-champagne font-bold text-xs outline-none"
                     />
                   </div>
@@ -3738,8 +3822,9 @@ export default function MerchantAdminPage() {
                     <label className="text-xs text-muted-lux block">السعر قبل الخصم (YER):</label>
                     <input
                       type="number"
+                      min="0"
                       value={formComparePriceYer}
-                      onChange={(e) => setFormComparePriceYer(Number(e.target.value))}
+                      onChange={(e) => setFormComparePriceYer(Math.max(0, parseInt(e.target.value) || 0))}
                       className="w-full min-h-[44px] px-3 rounded-xl bg-white/5 border border-white/10 text-ivory text-xs outline-none"
                     />
                   </div>
@@ -3747,8 +3832,9 @@ export default function MerchantAdminPage() {
                     <label className="text-xs text-muted-lux block">سعر التكلفة (YER):</label>
                     <input
                       type="number"
+                      min="0"
                       value={formCostPriceYer}
-                      onChange={(e) => setFormCostPriceYer(Number(e.target.value))}
+                      onChange={(e) => setFormCostPriceYer(Math.max(0, parseInt(e.target.value) || 0))}
                       className="w-full min-h-[44px] px-3 rounded-xl bg-white/5 border border-white/10 text-ivory text-xs outline-none"
                     />
                   </div>
@@ -3756,8 +3842,9 @@ export default function MerchantAdminPage() {
                     <label className="text-xs text-muted-lux block">السعر بالسعودي (SAR):</label>
                     <input
                       type="number"
+                      min="0"
                       value={formPriceSar}
-                      onChange={(e) => setFormPriceSar(Number(e.target.value))}
+                      onChange={(e) => setFormPriceSar(Math.max(0, parseInt(e.target.value) || 0))}
                       className="w-full min-h-[44px] px-3 rounded-xl bg-white/5 border border-white/10 text-ivory text-xs outline-none"
                     />
                   </div>
@@ -3765,8 +3852,9 @@ export default function MerchantAdminPage() {
                     <label className="text-xs text-muted-lux block">السعر بالدولار (USD):</label>
                     <input
                       type="number"
+                      min="0"
                       value={formPriceUsd}
-                      onChange={(e) => setFormPriceUsd(Number(e.target.value))}
+                      onChange={(e) => setFormPriceUsd(Math.max(0, parseInt(e.target.value) || 0))}
                       className="w-full min-h-[44px] px-3 rounded-xl bg-white/5 border border-white/10 text-ivory text-xs outline-none"
                     />
                   </div>
@@ -3905,7 +3993,7 @@ export default function MerchantAdminPage() {
                     type="number"
                     min="1"
                     value={posQuantity}
-                    onChange={(e) => setPosQuantity(Number(e.target.value))}
+                    onChange={(e) => setPosQuantity(Math.max(1, parseInt(e.target.value) || 1))}
                     className="w-full min-h-[44px] px-3 rounded-xl bg-white/5 border border-white/10 text-ivory text-xs outline-none"
                   />
                 </div>
@@ -4122,8 +4210,9 @@ export default function MerchantAdminPage() {
                   <label className="text-xs text-gold font-bold block">وقت القراءة (دقائق):</label>
                   <input
                     type="number"
+                    min="1"
                     value={blogReadTime}
-                    onChange={(e) => setBlogReadTime(Number(e.target.value))}
+                    onChange={(e) => setBlogReadTime(Math.max(1, parseInt(e.target.value) || 1))}
                     className="w-full min-h-[44px] px-3 rounded-xl bg-white/5 border border-white/10 text-ivory text-xs outline-none"
                   />
                 </div>

@@ -934,6 +934,13 @@ export default function PlatformSuperAdminPage() {
               <span>تصدير عرض السعر / الفاتورة (PDF)</span>
             </button>
             <Link
+              href="/admin"
+              className="min-h-[44px] px-3.5 py-2 rounded-xl bg-gold/15 hover:bg-gold/25 text-champagne border border-gold/30 text-xs font-bold transition inline-flex items-center gap-1.5"
+            >
+              <span>لوحة التاجر ERP (/admin)</span>
+              <span>↗</span>
+            </Link>
+            <Link
               href="/samiq"
               target="_blank"
               className="min-h-[44px] px-3.5 py-2 rounded-xl bg-gradient-to-r from-gold/20 to-gold/10 hover:from-gold/30 hover:to-gold/20 text-champagne border border-gold/40 text-xs font-bold transition inline-flex items-center gap-1.5"
@@ -1608,8 +1615,9 @@ export default function PlatformSuperAdminPage() {
                     <label className="text-ivory/80 font-semibold block">سعر عقد التأسيس ($):</label>
                     <input
                       type="number"
+                      min="0"
                       value={newProjectForm.setupPriceUsd}
-                      onChange={(e) => setNewProjectForm({ ...newProjectForm, setupPriceUsd: Number(e.target.value) })}
+                      onChange={(e) => setNewProjectForm({ ...newProjectForm, setupPriceUsd: Math.max(0, Number(e.target.value) || 0) })}
                       className="w-full min-h-[44px] px-3.5 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-hidden font-mono"
                     />
                   </div>

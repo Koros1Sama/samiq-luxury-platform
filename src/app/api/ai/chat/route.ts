@@ -1,15 +1,39 @@
 import { NextResponse } from 'next/server';
 import { getAllProducts, getDb } from '@/core/db/store';
 import { ProductCardData } from '@/themes/contract';
+import {
+  checkRateLimit,
+  getClientIp,
+  sanitizeText,
+  sanitizeObjectDeep,
+} from '@/core/security/guard';
 
 export async function POST(req: Request) {
   try {
-    const { message, conversationHistory } = await req.json();
-    const query = (message || '').trim();
+    const ip = getClientIp(req);
+
+    // Rate limiting: max 15 AI requests per minute per IP
+    if (!checkRateLimit(`ai_chat:${ip}`, 15, 60_000)) {
+      return NextResponse.json(
+        {
+          success: false,
+          text: 'تم تجاوز الحد الأقصى للمحادثات الفورية بالدقيقة. يرجى الانتظار بضع ثوانٍ أو التواصل مباشرة عبر واتساب المتجر.',
+          recommendedProducts: [],
+          quickPills: ['طلب مباشر عبر واتساب', 'تصفح كافة المنتجات'],
+          escalateToHuman: true,
+        },
+        { status: 429 }
+      );
+    }
+
+    const raw = await req.json();
+    const body = sanitizeObjectDeep(raw);
+    const query = sanitizeText(body.message || '', 400);
     const queryLower = query.toLowerCase();
+
     const db = getDb();
     const products = getAllProducts();
-    const storeName = db.tenant?.name || 'مفتاح الجمال';
+    const storeName = sanitizeText(db.tenant?.name || 'مفتاح الجمال', 100);
 
     const apiKey = db.tenant?.notificationConfig?.geminiApiKey || process.env.GEMINI_API_KEY;
 
@@ -58,18 +82,19 @@ export async function POST(req: Request) {
 
           if (candidateText && candidateText.trim()) {
             const cleanText = candidateText.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
+            const sanitizedClean = sanitizeText(cleanText, 1000);
             const recommended = products.filter((p) =>
               queryLower.includes(p.categorySlug) ||
-              cleanText.includes(p.title) ||
+              sanitizedClean.includes(p.title) ||
               (p.tags && p.tags.some((t) => queryLower.includes(t.toLowerCase())))
             ).slice(0, 3);
 
             return NextResponse.json({
               success: true,
-              text: cleanText.trim(),
+              text: sanitizedClean,
               recommendedProducts: recommended.length > 0 ? recommended : products.slice(0, 2),
               quickPills: ['طلب مباشر عبر واتساب', 'تصفح كافة المنتجات', 'موقع الفرع'],
-              escalateToHuman: cleanText.includes('واتساب') || cleanText.includes('موظف'),
+              escalateToHuman: sanitizedClean.includes('واتساب') || sanitizedClean.includes('موظف'),
             });
           }
         }

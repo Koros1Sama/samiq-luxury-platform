@@ -2,16 +2,27 @@ import { NextResponse } from 'next/server';
 import { getDb, saveDb, SamiqProjectRecord, DEFAULT_PRICING_CONFIG } from '@/core/db/store';
 import { ThemeId, isValidThemeId, FeatureFlags, PlatformMeta } from '@/themes/contract';
 import { MOCK_PLATFORM_META } from '@/core/store/mockData';
-import { FEATURES_REGISTRY } from '@/core/features/registry';
+import {
+  verifyAdminAuth,
+  maskSensitiveTenantSecrets,
+  maskSensitiveProjectSecrets,
+  checkRateLimit,
+  getClientIp,
+  sanitizeText,
+  sanitizeNumber,
+  sanitizeObjectDeep,
+} from '@/core/security/guard';
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const auth = verifyAdminAuth(req);
     const db = getDb();
+
     return NextResponse.json({
       success: true,
-      tenant: db.tenant,
+      tenant: maskSensitiveTenantSecrets(db.tenant, auth.authorized),
       features: db.features,
-      projects: db.projects || [],
+      projects: maskSensitiveProjectSecrets(db.projects || [], auth.authorized),
       platformMeta: db.platformMeta || MOCK_PLATFORM_META,
       pricingConfig: db.pricingConfig || DEFAULT_PRICING_CONFIG,
       themeId: db.tenant.themeId || 'luxury-noir',
@@ -19,6 +30,7 @@ export async function GET() {
       ordersCount: db.orders ? db.orders.length : 0,
       bookingsCount: db.bookings ? db.bookings.length : 0,
       customersCount: db.customers ? db.customers.length : 0,
+      isAdmin: auth.authorized,
     });
   } catch (error) {
     return NextResponse.json({ success: false, message: 'فشل استرجاع تكوين المنصة' }, { status: 500 });
@@ -27,17 +39,34 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    const ip = getClientIp(req);
+    if (!checkRateLimit(`platform_config:${ip}`, 45, 60_000)) {
+      return NextResponse.json(
+        { success: false, message: 'تجاوزت الحد المسموح من الطلبات، يرجى الانتظار' },
+        { status: 429 }
+      );
+    }
+
+    const auth = verifyAdminAuth(req);
+    if (!auth.authorized) {
+      return NextResponse.json(
+        { success: false, message: 'غير مصرح لك بتعديل تكوين المنصة أو أسطول المشاريع' },
+        { status: 401 }
+      );
+    }
+
+    const raw = await req.json();
+    const body = sanitizeObjectDeep(raw);
     const db = getDb();
 
     // 0. Handle Create Project Action
     if (body.action === 'create_project') {
-      const slug = (body.slug || `store-${Date.now()}`).trim().toLowerCase().replace(/\s+/g, '-');
+      const slug = sanitizeText(body.slug || `store-${Date.now()}`, 50).toLowerCase().replace(/\s+/g, '-');
       const themeId = (isValidThemeId(body.themeId) ? body.themeId : 'luxury-noir') as ThemeId;
       const domainType = body.domainType || 'subdomain_free';
       const annualDomainUsd =
         typeof body.annualDomainUsd === 'number'
-          ? body.annualDomainUsd
+          ? sanitizeNumber(body.annualDomainUsd, 0, 0, 10_000)
           : domainType === 'custom_com'
           ? 20
           : domainType === 'custom_ye'
@@ -45,27 +74,27 @@ export async function POST(req: Request) {
           : 0;
 
       const newProject: SamiqProjectRecord = {
-        id: body.id || `proj-${Date.now()}`,
+        id: sanitizeText(body.id, 50) || `proj-${Date.now()}`,
         slug,
-        name: body.name || 'متجر جديد',
-        legalName: body.legalName || body.name || 'متجر تجاري جديد',
-        industryAr: body.industryAr || 'العناية بالبشرة والمكياج',
-        domain: body.domain || `${slug}.samiq.app`,
+        name: sanitizeText(body.name || 'متجر جديد', 100),
+        legalName: sanitizeText(body.legalName || body.name || 'متجر تجاري جديد', 150),
+        industryAr: sanitizeText(body.industryAr || 'العناية بالبشرة والمكياج', 100),
+        domain: sanitizeText(body.domain || `${slug}.samiq.app`, 100),
         domainType,
         annualDomainUsd,
-        annualHostingMaintenanceUsd: typeof body.annualHostingMaintenanceUsd === 'number' ? body.annualHostingMaintenanceUsd : 45,
+        annualHostingMaintenanceUsd: sanitizeNumber(body.annualHostingMaintenanceUsd, 45, 0, 10_000),
         aiPlanType: body.aiPlanType || 'none',
         themeId: themeId as 'luxury-noir' | 'ivory-journal' | 'clinic-lab',
-        whatsapp: body.whatsapp || '967770000000',
-        city: body.city || 'صنعاء',
-        adminPasscode: body.adminPasscode || 'samiq2026',
+        whatsapp: sanitizeText(body.whatsapp || '967770000000', 30),
+        city: sanitizeText(body.city || 'صنعاء', 50),
+        adminPasscode: sanitizeText(body.adminPasscode || 'samiq2026', 50),
         status: body.status || 'staging',
-        setupPriceUsd: typeof body.setupPriceUsd === 'number' ? body.setupPriceUsd : 450,
+        setupPriceUsd: sanitizeNumber(body.setupPriceUsd, 450, 0, 100_000),
         enabledFeatures: Array.isArray(body.enabledFeatures) && body.enabledFeatures.length > 0
           ? body.enabledFeatures
           : ['tier_1_static', 'tier_2_editable', 'tier_3_catalog', 'cart_whatsapp'],
-        productsCount: typeof body.productsCount === 'number' ? body.productsCount : 6,
-        ordersCount: typeof body.ordersCount === 'number' ? body.ordersCount : 0,
+        productsCount: sanitizeNumber(body.productsCount, 6, 0, 100_000),
+        ordersCount: sanitizeNumber(body.ordersCount, 0, 0, 100_000),
         previewUrl: `/?demo=1&tenant=${slug}&theme=${themeId}`,
         adminUrl: `/admin?tenant=${slug}`,
       };
@@ -77,20 +106,21 @@ export async function POST(req: Request) {
       return NextResponse.json({
         success: true,
         message: 'تم تدشين المشروع الجديد بنجاح في أسطول مشاريع سَامِق',
-        projects: db.projects,
+        projects: maskSensitiveProjectSecrets(db.projects, true),
         project: newProject,
       });
     }
 
     // 0.1 Handle Delete Project Action
     if (body.action === 'delete_project') {
-      if (body.projectId && body.projectId !== 'proj-miftah') {
-        db.projects = (db.projects || []).filter((p) => p.id !== body.projectId);
+      const projId = sanitizeText(body.projectId, 50);
+      if (projId && projId !== 'proj-miftah') {
+        db.projects = (db.projects || []).filter((p) => p.id !== projId);
         saveDb(db);
         return NextResponse.json({
           success: true,
           message: 'تم حذف المشروع من الأسطول بنجاح',
-          projects: db.projects,
+          projects: maskSensitiveProjectSecrets(db.projects, true),
         });
       } else {
         return NextResponse.json(
@@ -102,11 +132,12 @@ export async function POST(req: Request) {
 
     // 1. Update Project in Fleet if projectId is provided
     if (body.projectId && db.projects) {
-      const projIdx = db.projects.findIndex((p) => p.id === body.projectId);
+      const projId = sanitizeText(body.projectId, 50);
+      const projIdx = db.projects.findIndex((p) => p.id === projId);
       if (projIdx >= 0) {
         const curProj = db.projects[projIdx];
         const nextTheme = (body.themeId && isValidThemeId(body.themeId) ? body.themeId : curProj.themeId) as 'luxury-noir' | 'ivory-journal' | 'clinic-lab';
-        
+
         let nextFeatures = curProj.enabledFeatures;
         if (body.features && Array.isArray(body.features)) {
           nextFeatures = body.features;
@@ -114,25 +145,24 @@ export async function POST(req: Request) {
 
         db.projects[projIdx] = {
           ...curProj,
-          name: body.name ?? curProj.name,
-          legalName: body.legalName ?? curProj.legalName,
-          industryAr: body.industryAr ?? curProj.industryAr,
-          domain: body.domain ?? curProj.domain,
+          name: body.name ? sanitizeText(body.name, 100) : curProj.name,
+          legalName: body.legalName ? sanitizeText(body.legalName, 150) : curProj.legalName,
+          industryAr: body.industryAr ? sanitizeText(body.industryAr, 100) : curProj.industryAr,
+          domain: body.domain ? sanitizeText(body.domain, 100) : curProj.domain,
           domainType: body.domainType ?? curProj.domainType,
-          annualDomainUsd: typeof body.annualDomainUsd === 'number' ? body.annualDomainUsd : curProj.annualDomainUsd,
-          annualHostingMaintenanceUsd: typeof body.annualHostingMaintenanceUsd === 'number' ? body.annualHostingMaintenanceUsd : curProj.annualHostingMaintenanceUsd,
+          annualDomainUsd: typeof body.annualDomainUsd === 'number' ? sanitizeNumber(body.annualDomainUsd, 20, 0, 10_000) : curProj.annualDomainUsd,
+          annualHostingMaintenanceUsd: typeof body.annualHostingMaintenanceUsd === 'number' ? sanitizeNumber(body.annualHostingMaintenanceUsd, 45, 0, 10_000) : curProj.annualHostingMaintenanceUsd,
           aiPlanType: body.aiPlanType ?? curProj.aiPlanType,
           status: body.status ?? curProj.status,
           themeId: nextTheme,
           enabledFeatures: nextFeatures,
-          setupPriceUsd: typeof body.setupPriceUsd === 'number' ? body.setupPriceUsd : curProj.setupPriceUsd,
-          whatsapp: body.whatsapp ?? curProj.whatsapp,
-          city: body.city ?? curProj.city,
+          setupPriceUsd: typeof body.setupPriceUsd === 'number' ? sanitizeNumber(body.setupPriceUsd, curProj.setupPriceUsd, 0, 100_000) : curProj.setupPriceUsd,
+          whatsapp: body.whatsapp ? sanitizeText(body.whatsapp, 30) : curProj.whatsapp,
+          city: body.city ? sanitizeText(body.city, 50) : curProj.city,
           previewUrl: curProj.slug === 'miftah' ? `/?demo=1&theme=${nextTheme}` : `/?demo=1&tenant=${curProj.slug}&theme=${nextTheme}`,
         };
 
-        // If this is proj-miftah, also sync live tenant theme and features
-        if (body.projectId === 'proj-miftah') {
+        if (projId === 'proj-miftah') {
           db.tenant.themeId = nextTheme;
           const activeSet = new Set<string>(nextFeatures);
           db.features = {
@@ -156,7 +186,6 @@ export async function POST(req: Request) {
     // 2. Update active theme directly if provided
     if (body.themeId && typeof body.themeId === 'string' && isValidThemeId(body.themeId)) {
       db.tenant.themeId = body.themeId as ThemeId;
-      // Also sync to proj-miftah in fleet
       if (db.projects) {
         const miftah = db.projects.find((p) => p.id === 'proj-miftah');
         if (miftah) {
@@ -169,7 +198,6 @@ export async function POST(req: Request) {
     // 3. Update feature flags directly if provided
     if (body.features) {
       if (Array.isArray(body.features)) {
-        // If an array of active feature IDs is passed
         const activeSet = new Set<string>(body.features);
         const nextFeatures: FeatureFlags = {
           tier_1_static: activeSet.has('tier_1_static'),
@@ -196,17 +224,20 @@ export async function POST(req: Request) {
 
     // 4. Update tenant metadata
     if (body.tenant && typeof body.tenant === 'object') {
+      delete body.tenant.passcode;
+      delete body.tenant.adminPasscode;
       db.tenant = {
         ...db.tenant,
         ...body.tenant,
       };
-      if (body.tenant.name) db.tenant.name = body.tenant.name;
-      if (body.tenant.tagline) db.tenant.tagline = body.tenant.tagline;
+      if (body.tenant.name) db.tenant.name = sanitizeText(body.tenant.name, 100);
+      if (body.tenant.tagline) db.tenant.tagline = sanitizeText(body.tenant.tagline, 200);
       if (body.tenant.whatsapp) {
-        db.tenant.whatsapp = body.tenant.whatsapp;
-        if (db.tenant.contact) db.tenant.contact.whatsapp = body.tenant.whatsapp;
+        const safeWa = sanitizeText(body.tenant.whatsapp, 30);
+        db.tenant.whatsapp = safeWa;
+        if (db.tenant.contact) db.tenant.contact.whatsapp = safeWa;
       }
-      if (body.tenant.city) db.tenant.city = body.tenant.city;
+      if (body.tenant.city) db.tenant.city = sanitizeText(body.tenant.city, 50);
       if (typeof body.tenant.noindex === 'boolean') db.tenant.noindex = body.tenant.noindex;
     }
 
@@ -227,15 +258,14 @@ export async function POST(req: Request) {
       };
     }
 
-    // Save directly to samiq-db.json
     saveDb(db);
 
     return NextResponse.json({
       success: true,
       message: 'تم حفظ تكوين المنصة والقالب وقاعدة البيانات بنجاح',
-      tenant: db.tenant,
+      tenant: maskSensitiveTenantSecrets(db.tenant, true),
       features: db.features,
-      projects: db.projects || [],
+      projects: maskSensitiveProjectSecrets(db.projects || [], true),
       themeId: db.tenant.themeId,
       platformMeta: db.platformMeta || MOCK_PLATFORM_META,
       pricingConfig: db.pricingConfig || DEFAULT_PRICING_CONFIG,
@@ -244,4 +274,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: false, message: 'حدث خطأ أثناء حفظ تكوين المنصة' }, { status: 500 });
   }
 }
-

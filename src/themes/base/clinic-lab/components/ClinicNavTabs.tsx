@@ -1,18 +1,22 @@
 'use client';
 
 import React from 'react';
+import { useStorefront } from '@/core/storefront/StorefrontProvider';
 
 const TABS = [
-  { id: 'tab-store', label: 'المتجر', href: '#products' },
-  { id: 'tab-routine', label: 'روتيني', href: '#routine' },
-  { id: 'tab-auth', label: 'فحص المنتج وكشف المقلد', href: '#authenticity' },
-  { id: 'tab-account', label: 'الملف الطبي وحسابي', href: '/account' },
-  { id: 'tab-bookings', label: 'حجز استشارة', href: '/bookings' },
-  { id: 'tab-blog', label: 'المجلة السريرية', href: '/blog' },
-  { id: 'tab-contact', label: 'تواصل', href: '#contact' },
+  { id: 'tab-store', labelAr: 'المتجر', labelEn: 'Store', href: '#products' },
+  { id: 'tab-routine', labelAr: 'روتيني', labelEn: 'Routine', href: '#routine' },
+  { id: 'tab-auth', labelAr: 'فحص الأصالة', labelEn: 'Authenticity Hub', href: '/authenticity-hub' },
+  { id: 'tab-account', labelAr: 'الملف الطبي وحسابي', labelEn: 'Medical Profile', href: '/account' },
+  { id: 'tab-bookings', labelAr: 'حجز استشارة', labelEn: 'Bookings', href: '/bookings' },
+  { id: 'tab-blog', labelAr: 'المجلة السريرية', labelEn: 'Clinical Journal', href: '/blog' },
+  { id: 'tab-contact', labelAr: 'تواصل', labelEn: 'Contact', href: '#contact' },
 ];
 
 export function ClinicNavTabs() {
+  const { locale } = useStorefront();
+  const isEn = locale === 'en';
+
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     if (href.startsWith('#')) {
       e.preventDefault();
@@ -36,7 +40,7 @@ export function ClinicNavTabs() {
             onClick={(e) => handleClick(e, tab.href)}
             className="min-h-[40px] px-3.5 rounded-lg inline-flex items-center justify-center text-xs sm:text-sm font-semibold text-[#0F4C4A] hover:bg-[#CFE8E1]/60 focus:outline-hidden focus:ring-2 focus:ring-[#0F4C4A] transition-colors whitespace-nowrap"
           >
-            {tab.label}
+            {isEn ? tab.labelEn : tab.labelAr}
           </a>
         ))}
       </div>

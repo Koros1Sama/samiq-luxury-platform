@@ -8,6 +8,13 @@ import {
   saveDb,
 } from '@/core/db/store';
 import { CategoryItem } from '@/themes/contract';
+import {
+  verifyAdminAuth,
+  checkRateLimit,
+  getClientIp,
+  sanitizeText,
+  sanitizeObjectDeep,
+} from '@/core/security/guard';
 
 export async function GET() {
   const categories = getAllCategories();
@@ -21,7 +28,16 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    const auth = verifyAdminAuth(req);
+    if (!auth.authorized) {
+      return NextResponse.json(
+        { success: false, message: 'غير مصرح لك بإضافة أو تعديل الأقسام' },
+        { status: 401 }
+      );
+    }
+
+    const raw = await req.json();
+    const body = sanitizeObjectDeep(raw);
 
     // Check if updating homepage sections
     if (body.action === 'update_sections' && Array.isArray(body.homeSections)) {
@@ -29,23 +45,24 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true, homeSections: body.homeSections });
     }
 
-    if (!body.title) {
+    const title = sanitizeText(body.title, 100);
+    if (!title) {
       return NextResponse.json(
         { success: false, message: 'عنوان القسم مطلوب' },
         { status: 400 }
       );
     }
 
-    const categoryId = body.id || `cat-${Date.now()}`;
+    const categoryId = sanitizeText(body.id, 50) || `cat-${Date.now()}`;
     const category: CategoryItem = {
       id: categoryId,
-      title: body.title,
-      subtitle: body.subtitle || '',
-      brand: body.brand || body.title,
-      image: body.image || '/media/products/serum-vitamin-c.jpg',
-      ctaText: body.ctaText || body.title,
-      href: body.href || `#${categoryId}`,
-      badge: body.badge || '',
+      title,
+      subtitle: sanitizeText(body.subtitle, 200),
+      brand: sanitizeText(body.brand || body.title, 100),
+      image: sanitizeText(body.image || '/media/products/serum-vitamin-c.jpg', 300),
+      ctaText: sanitizeText(body.ctaText || body.title, 50),
+      href: sanitizeText(body.href || `#${categoryId}`, 100),
+      badge: sanitizeText(body.badge, 50),
     };
 
     const saved = saveCategory(category);
@@ -60,14 +77,24 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
   try {
-    const body = await req.json();
+    const auth = verifyAdminAuth(req);
+    if (!auth.authorized) {
+      return NextResponse.json(
+        { success: false, message: 'غير مصرح لك بتعديل الأقسام' },
+        { status: 401 }
+      );
+    }
+
+    const raw = await req.json();
+    const body = sanitizeObjectDeep(raw);
 
     if (body.action === 'update_sections' && Array.isArray(body.homeSections)) {
       updateHomeSections(body.homeSections);
       return NextResponse.json({ success: true, homeSections: body.homeSections });
     }
 
-    if (!body.id) {
+    const id = sanitizeText(body.id, 50);
+    if (!id) {
       return NextResponse.json(
         { success: false, message: 'معرف القسم مطلوب' },
         { status: 400 }
@@ -75,7 +102,7 @@ export async function PUT(req: Request) {
     }
 
     const db = getDb();
-    const idx = db.categories.findIndex((c) => c.id === body.id);
+    const idx = db.categories.findIndex((c) => c.id === id);
     if (idx === -1) {
       return NextResponse.json(
         { success: false, message: 'القسم غير موجود' },
@@ -88,6 +115,7 @@ export async function PUT(req: Request) {
       ...existing,
       ...body,
       id: existing.id,
+      title: body.title ? sanitizeText(body.title, 100) : existing.title,
     };
 
     db.categories[idx] = updated;
@@ -104,8 +132,16 @@ export async function PUT(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
+    const auth = verifyAdminAuth(req);
+    if (!auth.authorized) {
+      return NextResponse.json(
+        { success: false, message: 'غير مصرح لك بحذف الأقسام' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(req.url);
-    const id = searchParams.get('id');
+    const id = sanitizeText(searchParams.get('id') || '', 50);
     if (!id) {
       return NextResponse.json(
         { success: false, message: 'معرف القسم مطلوب' },

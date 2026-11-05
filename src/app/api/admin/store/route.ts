@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import {
   getDb,
-  saveDb,
   updateTenant,
   updateShippingZones,
   updateBranches,
@@ -10,43 +9,79 @@ import {
   getAllBranches,
   ShippingZoneRecord,
   BranchRecord,
-  TenantConfig,
 } from '@/core/db/store';
-
 import { CLIENT_INDUSTRY_PRESETS } from '@/core/tenant/presets';
+import {
+  verifyAdminAuth,
+  maskSensitiveTenantSecrets,
+  checkRateLimit,
+  getClientIp,
+  sanitizeObjectDeep,
+  sanitizeText,
+} from '@/core/security/guard';
 
-export async function GET() {
+export async function GET(req: Request) {
+  const auth = verifyAdminAuth(req);
   const db = getDb();
+
   return NextResponse.json({
     success: true,
-    tenant: db.tenant,
+    tenant: maskSensitiveTenantSecrets(db.tenant, auth.authorized),
     shippingZones: db.shippingZones || [],
     branches: getAllBranches(),
     reviews: getAllReviews(),
     presets: Object.keys(CLIENT_INDUSTRY_PRESETS),
+    isAdmin: auth.authorized,
   });
 }
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    const ip = getClientIp(req);
+    if (!checkRateLimit(`admin_store:${ip}`, 60, 60_000)) {
+      return NextResponse.json(
+        { success: false, message: 'تجاوزت الحد المسموح من الطلبات، يرجى الانتظار قليلاً' },
+        { status: 429 }
+      );
+    }
+
+    const auth = verifyAdminAuth(req);
+    if (!auth.authorized) {
+      return NextResponse.json(
+        { success: false, message: 'غير مصرح لك بتنفيذ هذه العملية الإدارية' },
+        { status: 401 }
+      );
+    }
+
+    const rawBody = await req.json();
+    const body = sanitizeObjectDeep(rawBody);
     const action = body.action;
 
     if (action === 'update_tenant') {
       const tenantData = body.tenant || {};
+      // Never allow overriding system passcode via update_tenant
+      delete tenantData.passcode;
+      delete tenantData.adminPasscode;
       const updated = updateTenant(tenantData);
-      return NextResponse.json({ success: true, tenant: updated });
+      return NextResponse.json({
+        success: true,
+        tenant: maskSensitiveTenantSecrets(updated, true),
+      });
     }
 
     if (action === 'apply_client_preset') {
-      const presetKey = body.presetKey as string;
+      const presetKey = sanitizeText(body.presetKey || '', 100);
       const presetData = CLIENT_INDUSTRY_PRESETS[presetKey];
       if (!presetData) {
         return NextResponse.json({ success: false, message: 'النمط المختار غير معروف' }, { status: 400 });
       }
 
       const updated = updateTenant(presetData);
-      return NextResponse.json({ success: true, tenant: updated, preset: presetKey });
+      return NextResponse.json({
+        success: true,
+        tenant: maskSensitiveTenantSecrets(updated, true),
+        preset: presetKey,
+      });
     }
 
     if (action === 'save_shipping_zones') {
@@ -68,11 +103,12 @@ export async function POST(req: Request) {
     }
 
     if (action === 'moderate_review') {
-      const { reviewId, operation } = body;
+      const reviewId = sanitizeText(body.reviewId || '', 100);
+      const operation = body.operation;
       if (!reviewId || !['delete', 'toggle_approve'].includes(operation)) {
         return NextResponse.json({ success: false, message: 'معاملات المراجعة غير مكتملة' }, { status: 400 });
       }
-      const success = moderateReview(reviewId, operation);
+      const success = moderateReview(reviewId, operation as 'delete' | 'toggle_approve');
       const reviews = getAllReviews();
       return NextResponse.json({ success, reviews });
     }

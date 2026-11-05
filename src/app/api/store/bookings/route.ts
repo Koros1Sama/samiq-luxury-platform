@@ -7,6 +7,13 @@ import {
   getAllBranches,
   BookingRecord,
 } from '@/core/db/store';
+import {
+  verifyAdminAuth,
+  checkRateLimit,
+  getClientIp,
+  sanitizeText,
+  sanitizeObjectDeep,
+} from '@/core/security/guard';
 
 export async function GET() {
   const bookings = getAllBookings();
@@ -16,8 +23,26 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    if (!body.customerName || !body.customerPhone || !body.bookingDate || !body.serviceType) {
+    const ip = getClientIp(req);
+    if (!checkRateLimit(`bookings_post:${ip}`, 15, 300_000)) {
+      return NextResponse.json(
+        { success: false, message: 'تجاوزت الحد المسموح من طلبات الحجز، يرجى الانتظار' },
+        { status: 429 }
+      );
+    }
+
+    const raw = await req.json();
+    const body = sanitizeObjectDeep(raw);
+
+    const customerName = sanitizeText(body.customerName, 100);
+    const customerPhone = sanitizeText(body.customerPhone, 30);
+    const serviceType = sanitizeText(body.serviceType, 50) as BookingRecord['serviceType'];
+    const branchId = sanitizeText(body.branchId || 'branch-sanaa', 50);
+    const bookingDate = sanitizeText(body.bookingDate, 30);
+    const bookingTime = sanitizeText(body.bookingTime || '04:00 PM', 30);
+    const notes = sanitizeText(body.notes, 500);
+
+    if (!customerName || !customerPhone || !bookingDate || !serviceType) {
       return NextResponse.json(
         { success: false, message: 'يرجى استكمال بيانات الحجز كاملة' },
         { status: 400 }
@@ -26,13 +51,13 @@ export async function POST(req: Request) {
 
     const booking = createBooking({
       tenantId: '11111111-1111-1111-1111-111111111111',
-      customerName: body.customerName,
-      customerPhone: body.customerPhone,
-      serviceType: body.serviceType,
-      branchId: body.branchId || 'branch-sanaa',
-      bookingDate: body.bookingDate,
-      bookingTime: body.bookingTime || '04:00 PM',
-      notes: body.notes,
+      customerName,
+      customerPhone,
+      serviceType,
+      branchId,
+      bookingDate,
+      bookingTime,
+      notes: notes || undefined,
     });
 
     return NextResponse.json({ success: true, booking });
@@ -43,8 +68,17 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
   try {
-    const body = await req.json();
-    const id = body.id || body.bookingId;
+    const auth = verifyAdminAuth(req);
+    if (!auth.authorized) {
+      return NextResponse.json(
+        { success: false, message: 'غير مصرح لك بتعديل الحجز' },
+        { status: 401 }
+      );
+    }
+
+    const raw = await req.json();
+    const body = sanitizeObjectDeep(raw);
+    const id = sanitizeText(body.id || body.bookingId || '', 100);
     const status = body.status as BookingRecord['status'];
 
     if (!id || !status) {
@@ -73,8 +107,16 @@ export async function PUT(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
+    const auth = verifyAdminAuth(req);
+    if (!auth.authorized) {
+      return NextResponse.json(
+        { success: false, message: 'غير مصرح لك بحذف الحجز' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(req.url);
-    const id = searchParams.get('id');
+    const id = sanitizeText(searchParams.get('id') || '', 100);
     if (!id) {
       return NextResponse.json(
         { success: false, message: 'معرف الحجز مطلوب' },

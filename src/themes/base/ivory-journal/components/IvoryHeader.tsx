@@ -60,7 +60,7 @@ export function IvoryHeader({ onOpenSearch, onOpenAdvisor }: IvoryHeaderProps) {
           </button>
 
           {/* Desktop Left Nav Links */}
-          <nav className="hidden lg:flex items-center gap-6 text-sm font-sans font-medium text-[#554D46]">
+          <nav className="hidden lg:flex items-center gap-5 text-xs xl:text-sm font-sans font-medium text-[#554D46]">
             {features.tier_3_catalog && (
               <>
                 <button
@@ -80,13 +80,28 @@ export function IvoryHeader({ onOpenSearch, onOpenAdvisor }: IvoryHeaderProps) {
               </>
             )}
             {features.tier_3_catalog && features.authenticity_guide && (
-              <button
-                type="button"
-                onClick={() => scrollTo('#authenticity')}
+              <a
+                href="/authenticity-hub"
                 className="hover:text-[#1B1612] transition-colors min-h-[44px] px-2 flex items-center"
               >
-                {isEn ? 'Authenticity Lab' : 'فحص الأصالة'}
-              </button>
+                {isEn ? 'Authenticity Hub' : 'فحص الأصالة'}
+              </a>
+            )}
+            {features.blog !== false && (
+              <a
+                href="/blog"
+                className="hover:text-[#1B1612] transition-colors min-h-[44px] px-2 flex items-center"
+              >
+                {isEn ? 'Journal' : 'المجلة'}
+              </a>
+            )}
+            {features.bookings !== false && (
+              <a
+                href="/bookings"
+                className="hover:text-[#1B1612] transition-colors min-h-[44px] px-2 flex items-center"
+              >
+                {isEn ? 'Bookings' : 'حجز استشارة'}
+              </a>
             )}
           </nav>
         </div>

@@ -1,42 +1,114 @@
 import { NextResponse } from 'next/server';
-import { getAllOrders, createOrder, updateOrderStatus, deleteOrder, OrderRecord, getDb } from '@/core/db/store';
+import {
+  getAllOrders,
+  createOrder,
+  updateOrderStatus,
+  deleteOrder,
+  OrderRecord,
+  getDb,
+} from '@/core/db/store';
+import {
+  verifyAdminAuth,
+  checkRateLimit,
+  getClientIp,
+  sanitizeText,
+  sanitizeNumber,
+  sanitizeObjectDeep,
+} from '@/core/security/guard';
 
-export async function GET() {
-  const orders = getAllOrders();
-  return NextResponse.json({ success: true, count: orders.length, orders });
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const phone = sanitizeText(searchParams.get('phone') || '', 50);
+  const allOrders = getAllOrders();
+
+  // If a specific customer is checking their order history
+  if (phone) {
+    const customerOrders = allOrders.filter(
+      (o) => o.customerPhone === phone || o.customerPhone.includes(phone)
+    );
+    return NextResponse.json({ success: true, count: customerOrders.length, orders: customerOrders });
+  }
+
+  // Admin access or full list
+  const auth = verifyAdminAuth(req);
+  return NextResponse.json({
+    success: true,
+    count: allOrders.length,
+    orders: allOrders,
+    isAdmin: auth.authorized,
+  });
 }
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    const ip = getClientIp(req);
 
-    if (!body.customerName || !body.customerPhone || !body.items || body.items.length === 0) {
+    // Rate limiting: max 20 order creations per 5 minutes per IP
+    if (!checkRateLimit(`orders_post:${ip}`, 20, 300_000)) {
+      return NextResponse.json(
+        { success: false, message: 'تم تجاوز الحد المسموح من الطلبات، يرجى الانتظار قليلاً' },
+        { status: 429 }
+      );
+    }
+
+    const raw = await req.json();
+    const body = sanitizeObjectDeep(raw);
+
+    const customerName = sanitizeText(body.customerName, 100);
+    const customerPhone = sanitizeText(body.customerPhone, 30);
+    const customerEmail = sanitizeText(body.customerEmail, 100);
+    const city = sanitizeText(body.city || 'صنعاء', 50);
+    const address = sanitizeText(body.address || 'صنعاء', 250);
+    const notes = sanitizeText(body.notes, 500);
+    const appliedCoupon = sanitizeText(body.appliedCoupon, 30).toUpperCase();
+    const paymentMethod = sanitizeText(body.paymentMethod || 'whatsapp', 50) as OrderRecord['paymentMethod'];
+    const paymentReference = sanitizeText(body.paymentReference, 100);
+
+    if (!customerName || !customerPhone || !Array.isArray(body.items) || body.items.length === 0) {
       return NextResponse.json(
         { success: false, message: 'بيانات الطلب غير مكتملة' },
         { status: 400 }
       );
     }
 
-    const initialStatus = body.status || 'pending';
+    // Sanitize and validate items list
+    const validatedItems = body.items.map((item: any) => ({
+      productId: sanitizeText(item.productId, 100),
+      title: sanitizeText(item.title, 150),
+      variantTitle: sanitizeText(item.variantTitle, 100),
+      quantity: sanitizeNumber(item.quantity, 1, 1, 1000),
+      unitPrice: {
+        YER: sanitizeNumber(item.unitPrice?.YER, 0, 0, 100_000_000),
+        SAR: sanitizeNumber(item.unitPrice?.SAR, 0, 0, 1_000_000),
+        USD: sanitizeNumber(item.unitPrice?.USD, 0, 0, 500_000),
+      },
+    }));
+
+    const subtotalYer = sanitizeNumber(body.subtotalYer, 0, 0, 500_000_000);
+    const shippingFeeYer = sanitizeNumber(body.shippingFeeYer, 0, 0, 100_000_000);
+    const discountYer = sanitizeNumber(body.discountYer, 0, 0, subtotalYer);
+    const totalYer = sanitizeNumber(body.totalYer, Math.max(0, subtotalYer + shippingFeeYer - discountYer), 0, 600_000_000);
+
+    const initialStatus = (body.status === 'confirmed' ? 'confirmed' : 'pending') as OrderRecord['status'];
 
     const newOrder = createOrder({
       tenantId: '11111111-1111-1111-1111-111111111111',
-      customerName: body.customerName,
-      customerPhone: body.customerPhone,
-      customerEmail: body.customerEmail,
-      city: body.city || 'صنعاء',
-      address: body.address || 'صنعاء',
-      items: body.items,
-      subtotalYer: Number(body.subtotalYer) || 0,
-      shippingFeeYer: Number(body.shippingFeeYer) || 0,
-      discountYer: Number(body.discountYer) || 0,
-      totalYer: Number(body.totalYer) || 0,
-      currency: body.currency || 'YER',
-      appliedCoupon: body.appliedCoupon,
-      paymentMethod: body.paymentMethod || 'whatsapp',
-      paymentReference: body.paymentReference,
+      customerName,
+      customerPhone,
+      customerEmail: customerEmail || undefined,
+      city,
+      address,
+      items: validatedItems,
+      subtotalYer,
+      shippingFeeYer,
+      discountYer,
+      totalYer,
+      currency: 'YER',
+      appliedCoupon: appliedCoupon || undefined,
+      paymentMethod,
+      paymentReference: paymentReference || undefined,
       status: initialStatus,
-      notes: body.notes,
+      notes: notes || undefined,
     });
 
     // Optional Telegram notification if bot token configured
@@ -70,8 +142,17 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
   try {
-    const body = await req.json();
-    const orderId = body.id || body.orderId;
+    const auth = verifyAdminAuth(req);
+    if (!auth.authorized) {
+      return NextResponse.json(
+        { success: false, message: 'غير مصرح لك بتحديث حالة الطلب' },
+        { status: 401 }
+      );
+    }
+
+    const raw = await req.json();
+    const body = sanitizeObjectDeep(raw);
+    const orderId = sanitizeText(body.id || body.orderId || '', 100);
     const status = body.status as OrderRecord['status'];
 
     if (!orderId || !status) {
@@ -100,8 +181,16 @@ export async function PUT(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
+    const auth = verifyAdminAuth(req);
+    if (!auth.authorized) {
+      return NextResponse.json(
+        { success: false, message: 'غير مصرح لك بحذف الطلب' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(req.url);
-    const id = searchParams.get('id');
+    const id = sanitizeText(searchParams.get('id') || '', 100);
     if (!id) {
       return NextResponse.json(
         { success: false, message: 'معرف الطلب مطلوب' },

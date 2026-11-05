@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
-import { ThemeId, isValidThemeId } from '@/themes/contract';
+import { ThemeId, isValidThemeId, TenantBrandInfo, FeatureFlags, ThemeCurrencyCode } from '@/themes/contract';
 import {
   BrandPalette,
   ResolvedThemePalette,
@@ -11,14 +11,24 @@ import {
   getClientCustomPalette,
 } from './themePalette';
 import { MiftahLogoSvg } from '@/themes/base/luxury-noir/components/MiftahLogoSvg';
+import {
+  StorefrontProvider,
+  useStorefront,
+  useOptionalStorefront,
+  DEFAULT_STOREFRONT_TENANT,
+  DEFAULT_STOREFRONT_FEATURES,
+} from './StorefrontProvider';
+import { FeatureTierSimulator } from '@/themes/base/luxury-noir/components/FeatureTierSimulator';
 
-interface SubpageThemeContextValue {
+export interface SubpageThemeContextValue {
   activeTheme: ThemeId;
   setActiveTheme: (theme: ThemeId) => void;
   palette: ResolvedThemePalette;
   isLight: boolean;
   locale: 'ar' | 'en';
   setLocale: (locale: 'ar' | 'en') => void;
+  currency: ThemeCurrencyCode;
+  setCurrency: (c: ThemeCurrencyCode) => void;
 }
 
 const SubpageThemeContext = createContext<SubpageThemeContextValue | null>(null);
@@ -26,7 +36,6 @@ const SubpageThemeContext = createContext<SubpageThemeContextValue | null>(null)
 export function useSubpageTheme(): SubpageThemeContextValue {
   const ctx = useContext(SubpageThemeContext);
   if (!ctx) {
-    // Fallback safe defaults if used outside provider
     const pal = resolveThemePalette('luxury-noir');
     return {
       activeTheme: 'luxury-noir',
@@ -35,107 +44,112 @@ export function useSubpageTheme(): SubpageThemeContextValue {
       isLight: false,
       locale: 'ar',
       setLocale: () => {},
+      currency: 'YER',
+      setCurrency: () => {},
     };
   }
   return ctx;
 }
 
-interface SubpageThemeWrapperProps {
+export interface SubpageThemeWrapperProps {
   children: React.ReactNode;
   activeNav?: 'home' | 'product' | 'blog' | 'bookings' | 'account' | 'authenticity-hub';
   showNavHeader?: boolean;
+  showFooter?: boolean;
+  showSimulator?: boolean;
   titleAr?: string;
   titleEn?: string;
+  tenant?: TenantBrandInfo;
+  features?: FeatureFlags;
 }
 
-export function SubpageThemeWrapper({
+function SubpageThemeInner({
   children,
   activeNav,
   showNavHeader = true,
-  titleAr,
-  titleEn,
+  showFooter = true,
+  showSimulator = true,
 }: SubpageThemeWrapperProps) {
-  const [activeTheme, setActiveThemeState] = useState<ThemeId>('luxury-noir');
-  const [customPalette, setCustomPaletteState] = useState<BrandPalette | null>(null);
-  const [locale, setLocaleState] = useState<'ar' | 'en'>('ar');
-  const [mounted, setMounted] = useState(false);
+  const sf = useStorefront();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-    const clientTheme = getClientActiveTheme('luxury-noir');
-    setActiveThemeState(clientTheme);
+  const activeTheme = sf.activeTheme || 'luxury-noir';
+  const palette = sf.palette || resolveThemePalette(activeTheme, sf.customPalette);
+  const isLight = palette.isLight;
+  const locale = sf.locale || 'ar';
+  const isEn = locale === 'en';
+  const features = sf.features || DEFAULT_STOREFRONT_FEATURES;
+  const tenant = sf.tenant || DEFAULT_STOREFRONT_TENANT;
 
-    const clientPalette = getClientCustomPalette();
-    if (clientPalette) {
-      setCustomPaletteState(clientPalette);
-    }
-
-    const savedLocale = localStorage.getItem('samiq_locale') as 'ar' | 'en';
-    if (savedLocale === 'ar' || savedLocale === 'en') {
-      setLocaleState(savedLocale);
-    }
-
-    const handleThemeChange = (e: any) => {
-      if (e.detail && isValidThemeId(e.detail)) {
-        setActiveThemeState(e.detail);
-      }
-    };
-    const handlePaletteChange = (e: any) => {
-      setCustomPaletteState(e.detail || null);
-    };
-    const handleLocaleChange = (e: any) => {
-      if (e.detail === 'ar' || e.detail === 'en') {
-        setLocaleState(e.detail);
-      }
-    };
-
-    window.addEventListener('samiq_theme_changed', handleThemeChange);
-    window.addEventListener('samiq_custom_palette_changed', handlePaletteChange);
-    window.addEventListener('samiq_locale_changed', handleLocaleChange);
-
-    return () => {
-      window.removeEventListener('samiq_theme_changed', handleThemeChange);
-      window.removeEventListener('samiq_custom_palette_changed', handlePaletteChange);
-      window.removeEventListener('samiq_locale_changed', handleLocaleChange);
-    };
-  }, []);
-
-  const setLocale = useCallback((newLocale: 'ar' | 'en') => {
-    setLocaleState(newLocale);
-    try {
-      localStorage.setItem('samiq_locale', newLocale);
-      document.documentElement.dir = newLocale === 'en' ? 'ltr' : 'rtl';
-      document.documentElement.lang = newLocale;
-      window.dispatchEvent(new CustomEvent('samiq_locale_changed', { detail: newLocale }));
-    } catch {
-      // fallback
-    }
-  }, []);
-
-  const setActiveTheme = useCallback((themeId: ThemeId) => {
-    setActiveThemeState(themeId);
-    try {
-      localStorage.setItem('samiq_demo_theme', themeId);
-      window.dispatchEvent(new CustomEvent('samiq_theme_changed', { detail: themeId }));
-    } catch {
-      // fallback
-    }
-  }, []);
-
-  const palette = useMemo(
-    () => resolveThemePalette(activeTheme, customPalette),
-    [activeTheme, customPalette]
+  const setActiveTheme = useCallback(
+    (themeId: ThemeId) => {
+      sf.setActiveTheme?.(themeId);
+    },
+    [sf]
   );
 
-  const isLight = palette.isLight;
+  const setLocale = useCallback(
+    (newLocale: 'ar' | 'en') => {
+      sf.setLocale?.(newLocale);
+    },
+    [sf]
+  );
 
-  const navLinks = [
-    { id: 'home', labelAr: 'المتجر الرئيسي', labelEn: 'Storefront', href: '/' },
-    { id: 'account', labelAr: 'حسابي والولاء', labelEn: 'My Account', href: '/account' },
-    { id: 'authenticity-hub', labelAr: 'الموسوعة', labelEn: 'Authenticity Lab', href: '/authenticity-hub' },
-    { id: 'bookings', labelAr: 'حجز موعد', labelEn: 'Bookings', href: '/bookings' },
-    { id: 'blog', labelAr: 'المجلة', labelEn: 'Journal', href: '/blog' },
+  const setCurrency = useCallback(
+    (newCurrency: ThemeCurrencyCode) => {
+      sf.setCurrency?.(newCurrency);
+    },
+    [sf]
+  );
+
+  const currency = sf.currency || 'YER';
+
+  const navLinks = useMemo(
+    () => [
+      { id: 'home', labelAr: 'المتجر الرئيسي', labelEn: 'Storefront', href: '/', show: true },
+      {
+        id: 'authenticity-hub',
+        labelAr: 'فحص الأصالة',
+        labelEn: 'Authenticity Lab',
+        href: '/authenticity-hub',
+        show: features?.authenticity_guide !== false,
+      },
+      {
+        id: 'bookings',
+        labelAr: 'حجز استشارة',
+        labelEn: 'Book Consultation',
+        href: '/bookings',
+        show: features?.bookings !== false,
+      },
+      {
+        id: 'blog',
+        labelAr: 'المجلة العلمية',
+        labelEn: 'Scientific Journal',
+        href: '/blog',
+        show: features?.blog !== false,
+      },
+      {
+        id: 'account',
+        labelAr: 'حسابي والولاء',
+        labelEn: 'My Account & Club',
+        href: '/account',
+        show: features?.customer_accounts !== false,
+      },
+    ].filter((link) => link.show),
+    [features]
+  );
+
+  const currencies: { code: ThemeCurrencyCode; label: string }[] = [
+    { code: 'YER', label: 'ر.ي' },
+    { code: 'SAR', label: 'ر.س' },
+    { code: 'USD', label: '$' },
   ];
+
+  const announcement =
+    tenant.announcementText ||
+    (isEn
+      ? 'Certified products compliant with Supreme Board of Drugs & Medical Appliances (SBDMA) standards'
+      : 'مستحضرات مصرحة ومطابقة لمعايير الهيئة العليا للأدوية والمستلزمات الطبية');
 
   return (
     <SubpageThemeContext.Provider
@@ -146,6 +160,8 @@ export function SubpageThemeWrapper({
         isLight,
         locale,
         setLocale,
+        currency,
+        setCurrency,
       }}
     >
       <div
@@ -225,75 +241,538 @@ export function SubpageThemeWrapper({
           `}</style>
         )}
 
-        {/* Dynamic Chameleon Subpage Header */}
+        {/* 1. Top Regulatory & Announcement Bar */}
+        <div
+          className="w-full py-1.5 px-4 text-xs font-sans text-center transition-colors border-b flex items-center justify-center gap-2"
+          style={{
+            backgroundColor: isLight ? '#00000005' : '#FFFFFF08',
+            borderColor: palette.border,
+            color: palette.muted,
+          }}
+        >
+          <span
+            className="inline-block w-2 h-2 rounded-full shrink-0"
+            style={{ backgroundColor: palette.accent }}
+          />
+          <span className="truncate max-w-4xl">{announcement}</span>
+        </div>
+
+        {/* 2. Unified Chameleon Subpage Header */}
         {showNavHeader && (
           <header
-            className="sticky top-0 z-30 w-full backdrop-blur-md transition-colors duration-300"
+            data-testid="header"
+            className="sticky top-0 z-40 w-full backdrop-blur-md transition-colors duration-300 shadow-sm"
             style={{
-              backgroundColor: isLight
-                ? `${palette.background}F2`
-                : `${palette.background}E6`,
+              backgroundColor: isLight ? `${palette.background}F0` : `${palette.background}E6`,
               borderBottom: `1px solid ${palette.border}`,
             }}
           >
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-4">
-              <Link href="/" className="flex items-center gap-2">
-                <MiftahLogoSvg size={42} showText={true} />
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-3">
+              {/* Brand Emblem & Name */}
+              <Link href="/" className="flex items-center gap-2 group min-w-0 shrink-0">
+                {activeTheme === 'clinic-lab' ? (
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-base"
+                      style={{
+                        backgroundColor: `${palette.accent}20`,
+                        color: palette.accent,
+                        border: `1px solid ${palette.accent}40`,
+                      }}
+                    >
+                      M
+                    </div>
+                    <div className="flex flex-col text-start">
+                      <span className="font-bold text-sm sm:text-base leading-tight" style={{ color: palette.text }}>
+                        {tenant.name}
+                      </span>
+                      <span className="text-[10px] leading-tight" style={{ color: palette.muted }}>
+                        {isEn ? 'Clinical Care & Authenticity Lab' : 'لكشف المقلد والعناية السريرية'}
+                      </span>
+                    </div>
+                  </div>
+                ) : activeTheme === 'ivory-journal' ? (
+                  <div className="flex flex-col text-start">
+                    <span className="font-serif font-bold text-lg sm:text-xl leading-none" style={{ color: palette.text }}>
+                      {tenant.name}
+                    </span>
+                    <span className="text-[10px] font-sans mt-0.5" style={{ color: palette.muted }}>
+                      {isEn ? 'Luxury Care & Authenticity Journal' : 'لكشف المقلد ومجلة العناية الفاخرة'}
+                    </span>
+                  </div>
+                ) : (
+                  <MiftahLogoSvg size={40} showText={true} />
+                )}
               </Link>
 
-              <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                {/* Navigation Links */}
+              {/* Desktop Navigation Links */}
+              <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
                 {navLinks.map((link) => {
                   const isActive = activeNav === link.id;
                   return (
                     <Link
                       key={link.id}
                       href={link.href}
-                      className={`min-h-[40px] px-3 rounded-lg text-xs font-sans transition inline-flex items-center ${
-                        isActive
-                          ? 'font-bold'
-                          : 'opacity-85 hover:opacity-100'
+                      className={`relative min-h-[42px] px-3.5 py-2 rounded-xl text-xs xl:text-sm font-sans font-medium transition-all inline-flex items-center gap-1.5 ${
+                        isActive ? 'font-bold' : 'opacity-80 hover:opacity-100'
                       }`}
                       style={{
-                        backgroundColor: isActive
-                          ? `${palette.accent}20`
-                          : isLight
-                          ? '#00000008'
-                          : '#FFFFFF0D',
                         color: isActive ? palette.accent : palette.text,
-                        border: `1px solid ${
-                          isActive ? palette.accent : palette.border
-                        }`,
+                        backgroundColor: isActive
+                          ? `${palette.accent}15`
+                          : 'transparent',
                       }}
                     >
-                      {locale === 'en' ? link.labelEn : link.labelAr}
+                      <span>{isEn ? link.labelEn : link.labelAr}</span>
+                      {isActive && (
+                        <span
+                          className="absolute bottom-1 inset-x-3 h-[2px] rounded-full"
+                          style={{
+                            backgroundColor: palette.accent,
+                            boxShadow: `0 0 6px ${palette.accent}`,
+                          }}
+                        />
+                      )}
                     </Link>
                   );
                 })}
+              </nav>
 
-                {/* Bilingual AR | EN Toggle */}
-                <button
-                  type="button"
-                  onClick={() => setLocale(locale === 'ar' ? 'en' : 'ar')}
-                  className="min-h-[40px] px-2.5 rounded-lg border text-xs font-mono font-bold transition inline-flex items-center gap-1"
+              {/* Action Controls: Template Switcher + Currency + Language + Cart */}
+              <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                {/* Interactive Template Switcher Pill */}
+                <div
+                  className="hidden sm:inline-flex items-center p-0.5 rounded-full border text-[11px] font-medium"
                   style={{
                     borderColor: palette.border,
-                    backgroundColor: isLight ? '#00000008' : '#FFFFFF0D',
+                    backgroundColor: isLight ? '#00000008' : '#FFFFFF0A',
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setActiveTheme('luxury-noir')}
+                    className={`min-h-[32px] px-2.5 rounded-full transition-all ${
+                      activeTheme === 'luxury-noir' ? 'font-bold shadow-xs' : 'opacity-60 hover:opacity-100'
+                    }`}
+                    style={{
+                      backgroundColor: activeTheme === 'luxury-noir' ? palette.accent : 'transparent',
+                      color: activeTheme === 'luxury-noir' ? '#0B0B0C' : palette.text,
+                    }}
+                    title="قالب الفخامة الداكنة"
+                  >
+                    Noir
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTheme('ivory-journal')}
+                    className={`min-h-[32px] px-2.5 rounded-full transition-all ${
+                      activeTheme === 'ivory-journal' ? 'font-bold shadow-xs' : 'opacity-60 hover:opacity-100'
+                    }`}
+                    style={{
+                      backgroundColor: activeTheme === 'ivory-journal' ? palette.accent : 'transparent',
+                      color: activeTheme === 'ivory-journal' ? '#FFFFFF' : palette.text,
+                    }}
+                    title="قالب المجلة العاجية"
+                  >
+                    Ivory
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTheme('clinic-lab')}
+                    className={`min-h-[32px] px-2.5 rounded-full transition-all ${
+                      activeTheme === 'clinic-lab' ? 'font-bold shadow-xs' : 'opacity-60 hover:opacity-100'
+                    }`}
+                    style={{
+                      backgroundColor: activeTheme === 'clinic-lab' ? palette.accent : 'transparent',
+                      color: activeTheme === 'clinic-lab' ? '#FFFFFF' : palette.text,
+                    }}
+                    title="قالب المختبر السريري"
+                  >
+                    Clinic
+                  </button>
+                </div>
+
+                {/* Currency Switcher */}
+                <div
+                  className="inline-flex items-center border rounded-lg text-xs font-bold overflow-hidden"
+                  style={{
+                    borderColor: palette.border,
+                    backgroundColor: isLight ? '#00000008' : '#FFFFFF0A',
+                  }}
+                >
+                  {currencies.map((c) => (
+                    <button
+                      key={c.code}
+                      type="button"
+                      onClick={() => setCurrency(c.code)}
+                      className={`min-h-[36px] px-2 transition-all ${
+                        currency === c.code ? 'font-bold' : 'opacity-50 hover:opacity-100'
+                      }`}
+                      style={{
+                        backgroundColor: currency === c.code ? `${palette.accent}25` : 'transparent',
+                        color: currency === c.code ? palette.accent : palette.text,
+                      }}
+                    >
+                      {c.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Bilingual AR | EN Toggle */}
+                {features?.second_language !== false && (
+                  <button
+                    type="button"
+                    onClick={() => setLocale(isEn ? 'ar' : 'en')}
+                    className="min-h-[36px] px-2.5 rounded-lg border text-xs font-mono font-bold transition inline-flex items-center gap-1"
+                    style={{
+                      borderColor: palette.border,
+                      backgroundColor: isLight ? '#00000008' : '#FFFFFF0A',
+                      color: palette.text,
+                    }}
+                    title={isEn ? 'التبديل إلى العربية' : 'Switch to English'}
+                    aria-label="تبديل اللغة"
+                  >
+                    <span className={!isEn ? 'font-bold' : 'opacity-40'}>AR</span>
+                    <span className="opacity-30">|</span>
+                    <span className={isEn ? 'font-bold' : 'opacity-40'}>EN</span>
+                  </button>
+                )}
+
+                {/* Cart Button */}
+                <button
+                  type="button"
+                  onClick={() => sf.cart?.open?.()}
+                  className="relative min-w-[42px] min-h-[42px] rounded-lg border flex items-center justify-center transition-all"
+                  style={{
+                    borderColor: palette.border,
+                    backgroundColor: `${palette.accent}15`,
+                    color: palette.accent,
+                  }}
+                  title={isEn ? 'Shopping Cart' : 'سلة المشتريات'}
+                  aria-label="سلة المشتريات"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.75}
+                      d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                    />
+                  </svg>
+                  {sf.cart?.count > 0 && (
+                    <span
+                      className="absolute -top-1.5 -end-1.5 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center leading-none text-white shadow-xs"
+                      style={{ backgroundColor: '#D9534F' }}
+                    >
+                      {sf.cart.count}
+                    </span>
+                  )}
+                </button>
+
+                {/* Mobile Menu Toggle Button */}
+                <button
+                  type="button"
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  className="lg:hidden min-w-[42px] min-h-[42px] rounded-lg border flex items-center justify-center transition"
+                  style={{
+                    borderColor: palette.border,
+                    backgroundColor: isLight ? '#00000008' : '#FFFFFF0A',
                     color: palette.text,
                   }}
-                  title={locale === 'ar' ? 'Switch to English' : 'التحويل للعربية'}
+                  aria-label="القائمة"
                 >
-                  <span className={locale === 'ar' ? 'font-bold' : 'opacity-50'}>AR</span>
-                  <span className="opacity-30">|</span>
-                  <span className={locale === 'en' ? 'font-bold' : 'opacity-50'}>EN</span>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    {mobileMenuOpen ? (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    ) : (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    )}
+                  </svg>
                 </button>
               </div>
             </div>
+
+            {/* Mobile Expanded Menu Drawer */}
+            {mobileMenuOpen && (
+              <div
+                className="lg:hidden border-t px-4 py-4 space-y-3"
+                style={{
+                  backgroundColor: palette.surface,
+                  borderColor: palette.border,
+                }}
+              >
+                <div className="flex flex-col space-y-1">
+                  {navLinks.map((link) => {
+                    const isActive = activeNav === link.id;
+                    return (
+                      <Link
+                        key={link.id}
+                        href={link.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={`min-h-[44px] px-4 rounded-xl flex items-center justify-between text-sm font-sans font-medium transition ${
+                          isActive ? 'font-bold' : 'opacity-80'
+                        }`}
+                        style={{
+                          backgroundColor: isActive ? `${palette.accent}20` : 'transparent',
+                          color: isActive ? palette.accent : palette.text,
+                        }}
+                      >
+                        <span>{isEn ? link.labelEn : link.labelAr}</span>
+                        {isActive && <span style={{ color: palette.accent }}>●</span>}
+                      </Link>
+                    );
+                  })}
+                </div>
+
+                {/* Mobile Template Selector */}
+                <div className="pt-2 border-t flex items-center justify-between gap-2" style={{ borderColor: palette.border }}>
+                  <span className="text-xs" style={{ color: palette.muted }}>
+                    {isEn ? 'Theme Template:' : 'قالب المتجر:'}
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveTheme('luxury-noir');
+                        setMobileMenuOpen(false);
+                      }}
+                      className="px-2.5 py-1 rounded text-xs"
+                      style={{
+                        backgroundColor: activeTheme === 'luxury-noir' ? palette.accent : 'transparent',
+                        color: activeTheme === 'luxury-noir' ? '#0B0B0C' : palette.text,
+                      }}
+                    >
+                      Noir
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveTheme('ivory-journal');
+                        setMobileMenuOpen(false);
+                      }}
+                      className="px-2.5 py-1 rounded text-xs"
+                      style={{
+                        backgroundColor: activeTheme === 'ivory-journal' ? palette.accent : 'transparent',
+                        color: activeTheme === 'ivory-journal' ? '#FFFFFF' : palette.text,
+                      }}
+                    >
+                      Ivory
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveTheme('clinic-lab');
+                        setMobileMenuOpen(false);
+                      }}
+                      className="px-2.5 py-1 rounded text-xs"
+                      style={{
+                        backgroundColor: activeTheme === 'clinic-lab' ? palette.accent : 'transparent',
+                        color: activeTheme === 'clinic-lab' ? '#FFFFFF' : palette.text,
+                      }}
+                    >
+                      Clinic
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </header>
         )}
 
+        {/* Page Children Content */}
         {children}
+
+        {/* 3. Unified Chameleon Storefront Subpage Footer */}
+        {showFooter && (
+          <footer
+            className="w-full border-t transition-colors mt-20 pt-16 pb-28 sm:pb-24"
+            style={{
+              backgroundColor: isLight ? `${palette.surface}F8` : `${palette.surface}E6`,
+              borderColor: palette.border,
+            }}
+          >
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                {/* Col 1: Brand Info */}
+                <div className="space-y-4">
+                  <Link href="/" className="inline-block">
+                    <span className="font-serif font-bold text-xl" style={{ color: palette.text }}>
+                      {tenant.name}
+                    </span>
+                  </Link>
+                  <p className="text-xs sm:text-sm font-sans leading-relaxed" style={{ color: palette.muted }}>
+                    {isEn
+                      ? 'The premier destination for certified authentic luxury cosmetics and dermatology-grade skincare in Yemen.'
+                      : 'الوجهة المعتمدة الأولى في اليمن لمستحضرات العناية بالبشرة والتجميل الأصلية الموثقة والمصرحة رسمياً.'}
+                  </p>
+                  <div
+                    className="p-3 rounded-xl border text-xs font-sans leading-relaxed"
+                    style={{
+                      borderColor: palette.border,
+                      backgroundColor: isLight ? '#00000005' : '#FFFFFF05',
+                      color: palette.muted,
+                    }}
+                  >
+                    {isEn
+                      ? 'Compliant with SBDMA regulations. Certified authenticity guarantee on all catalog curations.'
+                      : 'مطابقة لمعايير الهيئة العليا للأدوية والمستلزمات الطبية. كفالة أصالة معتمدة 100% لكافة المستحضرات.'}
+                  </div>
+                </div>
+
+                {/* Col 2: Navigation Links */}
+                <div className="space-y-3">
+                  <h4 className="text-xs font-bold uppercase tracking-wider" style={{ color: palette.accent }}>
+                    {isEn ? 'Directory' : 'فهرس المتجر والمجلة'}
+                  </h4>
+                  <ul className="space-y-2 text-xs font-sans">
+                    {navLinks.map((l) => (
+                      <li key={l.id}>
+                        <Link
+                          href={l.href}
+                          className="hover:underline transition-all"
+                          style={{ color: palette.text }}
+                        >
+                          {isEn ? l.labelEn : l.labelAr}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Col 3: Contact & Main Branch */}
+                <div className="space-y-3">
+                  <h4 className="text-xs font-bold uppercase tracking-wider" style={{ color: palette.accent }}>
+                    {isEn ? 'Main Branch' : 'الفرع الرئيسي والتواصل'}
+                  </h4>
+                  <div className="space-y-2 text-xs font-sans" style={{ color: palette.muted }}>
+                    <p className="font-medium" style={{ color: palette.text }}>
+                      {isEn ? 'Sanaa Main Flagship' : 'صنعاء — فرع حدة الرئيسي'}
+                    </p>
+                    <p>{isEn ? 'Hadda St, near diplomatic quarter' : 'شارع حدة، بجوار الحي الدبلوماسي'}</p>
+                    <p>
+                      {isEn ? 'Direct Line / WhatsApp: ' : 'هاتف وواتساب: '}
+                      <span className="font-mono font-bold" style={{ color: palette.accent }}>
+                        775234989
+                      </span>
+                    </p>
+                    <a
+                      href={tenant.googleMaps || 'https://maps.app.goo.gl/DxsZTHrv2r386bXa9'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 underline pt-1 font-semibold"
+                      style={{ color: palette.accent }}
+                    >
+                      <span>{isEn ? 'View on Google Maps' : 'موقع الفرع على خرائط جوجل'}</span>
+                      <span>↗</span>
+                    </a>
+                  </div>
+                </div>
+
+                {/* Col 4: Official Social Channels */}
+                <div className="space-y-3">
+                  <h4 className="text-xs font-bold uppercase tracking-wider" style={{ color: palette.accent }}>
+                    {isEn ? 'Social Channels' : 'القنوات المعتمدة'}
+                  </h4>
+                  <div className="space-y-2 text-xs font-sans">
+                    <a
+                      href="https://wa.me/967775234989"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-between p-2 rounded-lg border transition hover:opacity-100"
+                      style={{
+                        borderColor: palette.border,
+                        color: palette.text,
+                        backgroundColor: isLight ? '#00000005' : '#FFFFFF05',
+                      }}
+                    >
+                      <span>WhatsApp Direct</span>
+                      <span className="font-mono text-xs" style={{ color: palette.accent }}>
+                        +967 775 234 989
+                      </span>
+                    </a>
+                    <a
+                      href="https://instagram.com/tamifttah"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-between p-2 rounded-lg border transition hover:opacity-100"
+                      style={{
+                        borderColor: palette.border,
+                        color: palette.text,
+                        backgroundColor: isLight ? '#00000005' : '#FFFFFF05',
+                      }}
+                    >
+                      <span>Instagram</span>
+                      <span className="font-mono text-xs" style={{ color: palette.accent }}>
+                        @tamifttah
+                      </span>
+                    </a>
+                    <a
+                      href="https://tiktok.com/@tamiffttah"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-between p-2 rounded-lg border transition hover:opacity-100"
+                      style={{
+                        borderColor: palette.border,
+                        color: palette.text,
+                        backgroundColor: isLight ? '#00000005' : '#FFFFFF05',
+                      }}
+                    >
+                      <span>TikTok</span>
+                      <span className="font-mono text-xs" style={{ color: palette.accent }}>
+                        @tamiffttah
+                      </span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Copyright & SAMIQ Attribution */}
+              <div
+                className="pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-sans"
+                style={{ borderColor: palette.border, color: palette.muted }}
+              >
+                <span>
+                  © {new Date().getFullYear()} {tenant.name}. {isEn ? 'All rights reserved.' : 'كافة الحقوق محفوظة.'}
+                </span>
+                <span className="inline-flex items-center gap-1.5 font-medium">
+                  <span>{isEn ? 'Powered by' : 'مشغل بواسطة'}</span>
+                  <a
+                    href="https://samiq.shop"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-bold underline"
+                    style={{ color: palette.accent }}
+                  >
+                    {isEn ? 'SAMIQ Luxury Commerce Engine' : 'منصة سَامِق للعلامات الفاخرة'}
+                  </a>
+                </span>
+              </div>
+            </div>
+          </footer>
+        )}
+
+        {/* 4. Feature Tier Simulator Bar (Bottom Live Bar) */}
+        {showSimulator && <FeatureTierSimulator />}
       </div>
     </SubpageThemeContext.Provider>
+  );
+}
+
+export function SubpageThemeWrapper(props: SubpageThemeWrapperProps) {
+  const existingSf = useOptionalStorefront();
+
+  // If already wrapped by StorefrontProvider, render directly
+  if (existingSf) {
+    return <SubpageThemeInner {...props} />;
+  }
+
+  // Otherwise, wrap in StorefrontProvider with sensible defaults so simulator & cart work
+  return (
+    <StorefrontProvider
+      tenant={props.tenant || DEFAULT_STOREFRONT_TENANT}
+      features={props.features || DEFAULT_STOREFRONT_FEATURES}
+    >
+      <SubpageThemeInner {...props} />
+    </StorefrontProvider>
   );
 }
