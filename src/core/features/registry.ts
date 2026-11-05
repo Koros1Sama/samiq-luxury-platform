@@ -291,6 +291,40 @@ export const FEATURES_REGISTRY: Record<string, FeatureDefinition> = {
   },
 };
 
+export interface PlatformPricingConfig {
+  priceMultiplier: number;
+  isDiscountEnabled: boolean;
+  discountPercent: number;
+  customDiscountUsd: number;
+  matchOriginalPrice: boolean;
+  priceOverrides: Record<string, number>;
+  domainTierPrices: {
+    subdomain_free: number;
+    custom_com: number;
+    custom_ye: number;
+  };
+  firstYearHostingUsd: number;
+  annualHostingUsd: number;
+  annualAiUsd: number;
+}
+
+export const DEFAULT_PRICING_CONFIG: PlatformPricingConfig = {
+  priceMultiplier: 1.5,
+  isDiscountEnabled: true,
+  discountPercent: 25,
+  customDiscountUsd: 0,
+  matchOriginalPrice: false,
+  priceOverrides: {},
+  domainTierPrices: {
+    subdomain_free: 0,
+    custom_com: 20,
+    custom_ye: 35,
+  },
+  firstYearHostingUsd: 0,
+  annualHostingUsd: 45,
+  annualAiUsd: 90,
+};
+
 export interface PricingOptions {
   priceMultiplier?: number;
   isDiscountEnabled?: boolean;

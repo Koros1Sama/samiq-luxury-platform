@@ -1190,5 +1190,21 @@
       "previewUrl": "/?demo=1&theme=clinic-lab",
       "adminUrl": "/admin?tenant=miftah-clinic"
     }
-  ]
+  ],
+  "pricingConfig": {
+    "priceMultiplier": 1.5,
+    "isDiscountEnabled": true,
+    "discountPercent": 25,
+    "customDiscountUsd": 0,
+    "matchOriginalPrice": false,
+    "priceOverrides": {},
+    "domainTierPrices": {
+      "subdomain_free": 0,
+      "custom_com": 20,
+      "custom_ye": 35
+    },
+    "firstYearHostingUsd": 0,
+    "annualHostingUsd": 45,
+    "annualAiUsd": 90
+  }
 }

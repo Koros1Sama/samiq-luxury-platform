@@ -7,9 +7,11 @@ import {
   calculateTierPrice,
   validateFeatureDependencies,
   resolveEffectiveFeatures,
+  PlatformPricingConfig,
+  DEFAULT_PRICING_CONFIG,
 } from '@/core/features/registry';
 import { ThemeId, SAMIQ_THEMES, isValidThemeId } from '@/themes/contract';
-import { SamiqProjectRecord } from '@/core/db/store';
+import type { SamiqProjectRecord } from '@/core/db/store';
 import { PdfInvoiceModal } from '@/core/features/PdfInvoiceModal';
 
 function PencilIcon({ className = 'w-3 h-3' }: { className?: string }) {
@@ -131,14 +133,62 @@ export default function PlatformSuperAdminPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccessMsg, setSaveSuccessMsg] = useState('');
   const [saveError, setSaveError] = useState('');
+  const [isPricingLoaded, setIsPricingLoaded] = useState(false);
 
-  // Fetch initial config from real database
+  // Fetch initial config from real database and localStorage
   useEffect(() => {
     async function loadPlatformConfig() {
+      // 1. Initial hydration from localStorage if available
+      if (typeof window !== 'undefined') {
+        try {
+          const cached = localStorage.getItem('samiq_live_pricing_config');
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            if (typeof parsed.priceMultiplier === 'number') setPriceMultiplier(parsed.priceMultiplier);
+            if (typeof parsed.isDiscountEnabled === 'boolean') setIsDiscountEnabled(parsed.isDiscountEnabled);
+            if (typeof parsed.discountPercent === 'number') setDiscountPercent(parsed.discountPercent);
+            if (typeof parsed.customDiscountUsd === 'number') setCustomDiscountUsd(parsed.customDiscountUsd);
+            if (typeof parsed.matchOriginalPrice === 'boolean') setIsMatchOriginal(parsed.matchOriginalPrice);
+            if (parsed.priceOverrides && typeof parsed.priceOverrides === 'object') setPriceOverrides(parsed.priceOverrides);
+            if (parsed.domainTierPrices && typeof parsed.domainTierPrices === 'object') {
+              setDomainTierPrices({
+                subdomain_free: parsed.domainTierPrices.subdomain_free ?? 0,
+                custom_com: parsed.domainTierPrices.custom_com ?? 20,
+                custom_ye: parsed.domainTierPrices.custom_ye ?? 35,
+              });
+            }
+            if (typeof parsed.firstYearHostingUsd === 'number') setProjectFirstYearHostingUsd(parsed.firstYearHostingUsd);
+            if (typeof parsed.annualHostingUsd === 'number') setProjectAnnualHostingUsd(parsed.annualHostingUsd);
+            if (typeof parsed.annualAiUsd === 'number') setProjectAnnualAiUsd(parsed.annualAiUsd);
+          }
+        } catch (e) {
+          console.warn('Could not read cached pricing config:', e);
+        }
+      }
+
       try {
         const res = await fetch('/api/platform/config');
         const data = await res.json();
         if (data.success) {
+          if (data.pricingConfig) {
+            const cfg = data.pricingConfig;
+            if (typeof cfg.priceMultiplier === 'number') setPriceMultiplier(cfg.priceMultiplier);
+            if (typeof cfg.isDiscountEnabled === 'boolean') setIsDiscountEnabled(cfg.isDiscountEnabled);
+            if (typeof cfg.discountPercent === 'number') setDiscountPercent(cfg.discountPercent);
+            if (typeof cfg.customDiscountUsd === 'number') setCustomDiscountUsd(cfg.customDiscountUsd);
+            if (typeof cfg.matchOriginalPrice === 'boolean') setIsMatchOriginal(cfg.matchOriginalPrice);
+            if (cfg.priceOverrides && typeof cfg.priceOverrides === 'object') setPriceOverrides(cfg.priceOverrides);
+            if (cfg.domainTierPrices && typeof cfg.domainTierPrices === 'object') {
+              setDomainTierPrices({
+                subdomain_free: cfg.domainTierPrices.subdomain_free ?? 0,
+                custom_com: cfg.domainTierPrices.custom_com ?? 20,
+                custom_ye: cfg.domainTierPrices.custom_ye ?? 35,
+              });
+            }
+            if (typeof cfg.firstYearHostingUsd === 'number') setProjectFirstYearHostingUsd(cfg.firstYearHostingUsd);
+            if (typeof cfg.annualHostingUsd === 'number') setProjectAnnualHostingUsd(cfg.annualHostingUsd);
+            if (typeof cfg.annualAiUsd === 'number') setProjectAnnualAiUsd(cfg.annualAiUsd);
+          }
           if (data.projects && Array.isArray(data.projects) && data.projects.length > 0) {
             setProjects(data.projects);
             const initialProj =
@@ -160,10 +210,65 @@ export default function PlatformSuperAdminPage() {
         }
       } catch (err) {
         console.error('Error fetching platform config:', err);
+      } finally {
+        setIsPricingLoaded(true);
       }
     }
     loadPlatformConfig();
   }, [targetMode]);
+
+  // Auto-sync pricing config across tabs, localStorage and server database
+  useEffect(() => {
+    if (!isPricingLoaded) return;
+
+    const currentConfig: PlatformPricingConfig = {
+      priceMultiplier,
+      isDiscountEnabled,
+      discountPercent,
+      customDiscountUsd,
+      matchOriginalPrice: isMatchOriginal,
+      priceOverrides,
+      domainTierPrices,
+      firstYearHostingUsd: projectFirstYearHostingUsd,
+      annualHostingUsd: projectAnnualHostingUsd,
+      annualAiUsd: projectAnnualAiUsd,
+    };
+
+    // 1. Instant local persistence & same-window/cross-tab broadcast
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('samiq_live_pricing_config', JSON.stringify(currentConfig));
+        window.dispatchEvent(new Event('samiq_pricing_updated'));
+      } catch (e) {}
+    }
+
+    // 2. Debounced persistence to database
+    const timer = setTimeout(async () => {
+      try {
+        await fetch('/api/platform/config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pricingConfig: currentConfig }),
+        });
+      } catch (err) {
+        console.warn('Auto-sync pricing to db failed:', err);
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [
+    isPricingLoaded,
+    priceMultiplier,
+    isDiscountEnabled,
+    discountPercent,
+    customDiscountUsd,
+    isMatchOriginal,
+    priceOverrides,
+    domainTierPrices,
+    projectFirstYearHostingUsd,
+    projectAnnualHostingUsd,
+    projectAnnualAiUsd,
+  ]);
 
   // Currently selected fleet project
   const selectedProject = useMemo(() => {
@@ -436,6 +541,18 @@ export default function PlatformSuperAdminPage() {
           annualHostingMaintenanceUsd: projectAnnualHostingUsd,
           aiPlanType: projectAiPlan,
           setupPriceUsd: pricing.totalUsd,
+          pricingConfig: {
+            priceMultiplier,
+            isDiscountEnabled,
+            discountPercent,
+            customDiscountUsd,
+            matchOriginalPrice: isMatchOriginal,
+            priceOverrides,
+            domainTierPrices,
+            firstYearHostingUsd: projectFirstYearHostingUsd,
+            annualHostingUsd: projectAnnualHostingUsd,
+            annualAiUsd: projectAnnualAiUsd,
+          },
         }),
       });
       const data = await res.json();
@@ -931,7 +1048,11 @@ export default function PlatformSuperAdminPage() {
               </p>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/70 border border-emerald-500/40 text-emerald-300 text-xs font-bold">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>متزامن تلقائياً مع صفحة العرض العام (/samiq)</span>
+              </div>
               <span className="text-xs px-3 py-1 rounded-full bg-gold/15 text-gold font-mono font-bold border border-gold/30">
                 المعامل النشط: ×{priceMultiplier}
               </span>

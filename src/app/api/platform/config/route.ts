@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getDb, saveDb, SamiqProjectRecord } from '@/core/db/store';
+import { getDb, saveDb, SamiqProjectRecord, DEFAULT_PRICING_CONFIG } from '@/core/db/store';
 import { ThemeId, isValidThemeId, FeatureFlags, PlatformMeta } from '@/themes/contract';
 import { MOCK_PLATFORM_META } from '@/core/store/mockData';
 import { FEATURES_REGISTRY } from '@/core/features/registry';
@@ -13,6 +13,7 @@ export async function GET() {
       features: db.features,
       projects: db.projects || [],
       platformMeta: db.platformMeta || MOCK_PLATFORM_META,
+      pricingConfig: db.pricingConfig || DEFAULT_PRICING_CONFIG,
       themeId: db.tenant.themeId || 'luxury-noir',
       productsCount: db.products ? db.products.length : 0,
       ordersCount: db.orders ? db.orders.length : 0,
@@ -217,6 +218,15 @@ export async function POST(req: Request) {
       };
     }
 
+    // 6. Update platform pricing config if provided
+    if (body.pricingConfig && typeof body.pricingConfig === 'object') {
+      db.pricingConfig = {
+        ...DEFAULT_PRICING_CONFIG,
+        ...(db.pricingConfig || {}),
+        ...body.pricingConfig,
+      };
+    }
+
     // Save directly to samiq-db.json
     saveDb(db);
 
@@ -228,6 +238,7 @@ export async function POST(req: Request) {
       projects: db.projects || [],
       themeId: db.tenant.themeId,
       platformMeta: db.platformMeta || MOCK_PLATFORM_META,
+      pricingConfig: db.pricingConfig || DEFAULT_PRICING_CONFIG,
     });
   } catch (error) {
     return NextResponse.json({ success: false, message: 'حدث خطأ أثناء حفظ تكوين المنصة' }, { status: 500 });

@@ -1,22 +1,23 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
   FEATURES_REGISTRY,
   calculateTierPrice,
   resolveEffectiveFeatures,
   FeatureDefinition,
+  PlatformPricingConfig,
+  DEFAULT_PRICING_CONFIG,
 } from '@/core/features/registry';
 import { SAMIQ_THEMES, ThemeId } from '@/themes/contract';
 import { PdfInvoiceModal } from '@/core/features/PdfInvoiceModal';
 
-// Pre-defined ready packages matching requirements
+// Pre-defined ready packages matching requirements (prices dynamically computed via calculateTierPrice)
 const READY_PACKAGES = [
   {
     id: 'starter',
     nameAr: 'باقة 1: الموقع التعريفي الثابت (Static Landing Page)',
-    priceUsd: 80,
     badge: 'الأسرع تدشيناً',
     features: ['tier_1_static'],
     description: 'واجهة فاخرة فائقة السرعة بدون أي منتجات وبدون لوحة تحكم، تركز على هوية المحل، قصة العلامة، الخريطة وأوقات العمل، وزر واتساب مباشر.',
@@ -33,7 +34,6 @@ const READY_PACKAGES = [
   {
     id: 'growth',
     nameAr: 'باقة 2: الموقع القابل للتعديل بلوحة إدارة (Editable Hub)',
-    priceUsd: 130,
     badge: 'لوحة تحكم للمدير',
     features: ['tier_1_static', 'tier_2_editable'],
     description: 'نفس الموقع التعريفي مع مدخل سري للوحة تحكم المدير لتعديل النصوص، الصور، أوقات العمل، أرقام التواصل، وترتيب الأقسام.',
@@ -48,7 +48,6 @@ const READY_PACKAGES = [
   {
     id: 'catalog',
     nameAr: 'باقة 3: كتالوج المنتجات والأقسام والوسوم (Full Catalog)',
-    priceUsd: 200,
     badge: 'كتالوج متكامل',
     features: ['tier_1_static', 'tier_2_editable', 'tier_3_catalog'],
     description: 'إضافة كتالوج المنتجات، الأقسام، الوسوم، الفلترة الفورية، صفحات تفاصيل المنتجات، 3 أنماط عملات، وإدارة الكتالوج من لوحة المدير.',
@@ -63,7 +62,6 @@ const READY_PACKAGES = [
   {
     id: 'commerce',
     nameAr: 'باقة التجارة وسلة واتساب (WhatsApp Commerce)',
-    priceUsd: 235,
     badge: 'الأكثر طلباً للتجارة',
     features: ['tier_1_static', 'tier_2_editable', 'tier_3_catalog', 'cart_whatsapp'],
     description: 'كتالوج المنتجات + سلة تسوق ذكية تحسب الإجمالي وتبني رسالة واتساب منسقة فورية وتوثق الطلب في لوحة الإدارة.',
@@ -77,7 +75,6 @@ const READY_PACKAGES = [
   {
     id: 'intelligence',
     nameAr: 'باقة الذكاء الاصطناعي والأصالة (Smart AI & Lab)',
-    priceUsd: 335,
     badge: 'ذكاء اصطناعي وأصالة',
     features: [
       'tier_1_static',
@@ -99,7 +96,6 @@ const READY_PACKAGES = [
   {
     id: 'royal',
     nameAr: 'الباقة الملكية الشاملة (Royal Enterprise)',
-    priceUsd: 495,
     badge: 'الحل الرقمي الأقوى',
     features: [
       'tier_1_static',
@@ -179,15 +175,114 @@ export default function SamiqShowcasePage() {
   const developerTelegramHandle = 'KorosSenpai';
   const developerTelegramUrl = 'https://t.me/KorosSenpai';
 
-  // Calculate pricing based on custom features with 1.5x anchor and 25% discount
+  // Dynamic Real-Time Platform Pricing Configuration (Synced with /platform & Database)
+  const [pricingConfig, setPricingConfig] = useState<PlatformPricingConfig>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('samiq_live_pricing_config');
+        if (cached) return { ...DEFAULT_PRICING_CONFIG, ...JSON.parse(cached) };
+      } catch (e) {}
+    }
+    return DEFAULT_PRICING_CONFIG;
+  });
+
+  const refreshPricingConfig = useCallback(async () => {
+    // 1. Check local cache first for instant sync
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('samiq_live_pricing_config');
+        if (cached) {
+          setPricingConfig((prev) => ({ ...prev, ...JSON.parse(cached) }));
+        }
+      } catch (e) {}
+    }
+    // 2. Query persistent server database
+    try {
+      const res = await fetch('/api/platform/config');
+      const data = await res.json();
+      if (data.success && data.pricingConfig) {
+        setPricingConfig(data.pricingConfig);
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.setItem('samiq_live_pricing_config', JSON.stringify(data.pricingConfig));
+          } catch (e) {}
+        }
+      }
+    } catch (err) {
+      console.warn('Could not refresh live pricing config:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshPricingConfig();
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'samiq_live_pricing_config' && e.newValue) {
+        try {
+          setPricingConfig(JSON.parse(e.newValue));
+        } catch (err) {}
+      }
+    };
+
+    const handleCustomUpdate = () => {
+      if (typeof window !== 'undefined') {
+        const cached = localStorage.getItem('samiq_live_pricing_config');
+        if (cached) {
+          try {
+            setPricingConfig(JSON.parse(cached));
+          } catch (err) {}
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('focus', refreshPricingConfig);
+    window.addEventListener('samiq_pricing_updated', handleCustomUpdate);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('focus', refreshPricingConfig);
+      window.removeEventListener('samiq_pricing_updated', handleCustomUpdate);
+    };
+  }, [refreshPricingConfig]);
+
+  // Helper to compute dynamic feature price with multiplier & overrides
+  const getFeaturePrice = useCallback(
+    (featId: string) => {
+      if (pricingConfig.priceOverrides && pricingConfig.priceOverrides[featId] !== undefined) {
+        return pricingConfig.priceOverrides[featId];
+      }
+      const base = FEATURES_REGISTRY[featId]?.basePriceUsd ?? 0;
+      return Math.round(base * (pricingConfig.priceMultiplier ?? 1.5));
+    },
+    [pricingConfig.priceOverrides, pricingConfig.priceMultiplier]
+  );
+
+  // Helper to calculate exact package pricing
+  const getPackagePricing = useCallback(
+    (features: string[]) => {
+      return calculateTierPrice(features, pricingConfig.priceOverrides, {
+        priceMultiplier: pricingConfig.priceMultiplier,
+        isDiscountEnabled: pricingConfig.isDiscountEnabled,
+        discountPercent: pricingConfig.discountPercent,
+        customDiscountUsd: pricingConfig.customDiscountUsd,
+        matchOriginalPrice: pricingConfig.matchOriginalPrice,
+      });
+    },
+    [pricingConfig]
+  );
+
+  // Calculate pricing based on custom features dynamically
   const customPricing = useMemo(
     () =>
-      calculateTierPrice(customFeatures, undefined, {
-        priceMultiplier: 1.5,
-        isDiscountEnabled: true,
-        discountPercent: 25,
+      calculateTierPrice(customFeatures, pricingConfig.priceOverrides, {
+        priceMultiplier: pricingConfig.priceMultiplier,
+        isDiscountEnabled: pricingConfig.isDiscountEnabled,
+        discountPercent: pricingConfig.discountPercent,
+        customDiscountUsd: pricingConfig.customDiscountUsd,
+        matchOriginalPrice: pricingConfig.matchOriginalPrice,
       }),
-    [customFeatures]
+    [customFeatures, pricingConfig]
   );
 
   // Handle ready package selection
@@ -223,16 +318,27 @@ export default function SamiqShowcasePage() {
     }
   };
 
-  // Current package object or custom (anchored 1.5x with 25% discount)
+  // Current package object or custom
   const currentPackageObj = READY_PACKAGES.find((p) => p.id === selectedPackageId);
+  const selectedPackagePricing = useMemo(() => {
+    if (!currentPackageObj) return null;
+    return getPackagePricing(currentPackageObj.features);
+  }, [currentPackageObj, getPackagePricing]);
+
   const effectivePrice =
-    activeTab === 'packages' && currentPackageObj
-      ? Math.round(Math.round(currentPackageObj.priceUsd * 1.5) * 0.75)
+    activeTab === 'packages' && selectedPackagePricing
+      ? selectedPackagePricing.totalUsd
       : customPricing.totalUsd;
   const currentTemplateObj = TEMPLATE_PREVIEWS.find((t) => t.id === selectedTemplate) || TEMPLATE_PREVIEWS[0];
 
-  const domainCostUsd = selectedDomainOption === 'com' ? 20 : selectedDomainOption === 'ye' ? 35 : 0;
-  const annualRenewalUsd = domainCostUsd + 45;
+  const domainCostUsd =
+    selectedDomainOption === 'com'
+      ? (pricingConfig.domainTierPrices?.custom_com ?? 20)
+      : selectedDomainOption === 'ye'
+      ? (pricingConfig.domainTierPrices?.custom_ye ?? 35)
+      : (pricingConfig.domainTierPrices?.subdomain_free ?? 0);
+  const annualHostingCostUsd = pricingConfig.annualHostingUsd ?? 45;
+  const annualRenewalUsd = domainCostUsd + annualHostingCostUsd;
 
   const effectiveStoreName = clientStoreTitle.trim() || 'متجري الجديد';
 
@@ -247,9 +353,9 @@ export default function SamiqShowcasePage() {
 
     const domainLabel =
       selectedDomainOption === 'com'
-        ? 'دومين رسمي خاص (.com) — $20 سنوياً'
+        ? `دومين رسمي خاص (.com) — $${pricingConfig.domainTierPrices?.custom_com ?? 20} سنوياً`
         : selectedDomainOption === 'ye'
-        ? 'دومين محلي رسمي (.ye) — $35 سنوياً'
+        ? `دومين محلي رسمي (.ye) — $${pricingConfig.domainTierPrices?.custom_ye ?? 35} سنوياً`
         : 'نطاق فرعي مجاني (*.samiq.shop) — $0 سنوياً';
 
     const text =
@@ -261,7 +367,7 @@ export default function SamiqShowcasePage() {
       `الباقة المختارة: ${packageName}\n` +
       `عقد التأسيس (مرة واحدة): $${effectivePrice} (يشمل استضافة السنة الأولى مجاناً)\n` +
       `خيار النطاق: ${domainLabel}\n` +
-      `تجديد الاستضافة السنوية (من السنة 2): $45 / سنوياً (السنة الأولى مجانية $0)\n` +
+      `تجديد الاستضافة السنوية (من السنة 2): $${annualHostingCostUsd} / سنوياً (السنة الأولى مجانية $0)\n` +
       `المزايا المحددة: ${featureNames}...\n\n` +
       `أرجو تزويدي بتفاصيل التجهيز، وقت التسليم، وآلية الربط. شكراً لك!`;
 
@@ -276,6 +382,8 @@ export default function SamiqShowcasePage() {
     selectedDomainOption,
     effectiveStoreName,
     clientContactName,
+    pricingConfig.domainTierPrices,
+    annualHostingCostUsd,
   ]);
 
   return (
@@ -288,12 +396,16 @@ export default function SamiqShowcasePage() {
         clientName={clientContactName}
         selectedTemplate={selectedTemplate}
         selectedFeatureIds={activeTab === 'packages' && currentPackageObj ? currentPackageObj.features : customFeatures}
+        priceOverrides={pricingConfig.priceOverrides}
+        discountUsd={pricingConfig.customDiscountUsd}
         domainType={selectedDomainOption === 'free' ? 'subdomain_free' : selectedDomainOption === 'com' ? 'custom_com' : 'custom_ye'}
         annualDomainUsd={domainCostUsd}
-        annualHostingUsd={45}
-        priceMultiplier={1.5}
-        isDiscountEnabled={true}
-        discountPercent={25}
+        annualHostingUsd={annualHostingCostUsd}
+        firstYearHostingUsd={pricingConfig.firstYearHostingUsd}
+        priceMultiplier={pricingConfig.priceMultiplier}
+        isDiscountEnabled={pricingConfig.isDiscountEnabled}
+        discountPercent={pricingConfig.discountPercent}
+        matchOriginalPrice={pricingConfig.matchOriginalPrice}
       />
 
       {/* Top Luxury Navigation Header */}
@@ -446,6 +558,7 @@ export default function SamiqShowcasePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {READY_PACKAGES.map((pkg) => {
                 const isSelected = selectedPackageId === pkg.id;
+                const pkgPricing = getPackagePricing(pkg.features);
                 return (
                   <div
                     key={pkg.id}
@@ -477,21 +590,27 @@ export default function SamiqShowcasePage() {
                       <div className="pt-2 border-t border-white/10 space-y-1.5">
                         <div className="flex items-center justify-between gap-2">
                           <span className="text-xs text-[#8E8B85] block">عقد التأسيس (مرة واحدة):</span>
-                          <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 font-bold">
-                            خصم خاص 25% لفترة محدودة
-                          </span>
+                          {pricingConfig.isDiscountEnabled && pkgPricing.discountUsd > 0 && (
+                            <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 font-bold">
+                              خصم خاص {pkgPricing.discountPercent}% لفترة محدودة
+                            </span>
+                          )}
                         </div>
                         <div className="flex items-baseline gap-2 mt-0.5">
                           <span className="text-3xl font-serif font-bold text-[#E8D390]">
-                            ${Math.round(Math.round(pkg.priceUsd * 1.5) * 0.75)}
+                            ${pkgPricing.totalUsd}
                           </span>
-                          <span className="text-sm font-mono text-[#8E8B85] line-through">
-                            ${Math.round(pkg.priceUsd * 1.5)}
-                          </span>
+                          {pricingConfig.isDiscountEnabled && pkgPricing.discountUsd > 0 && (
+                            <span className="text-sm font-mono text-[#8E8B85] line-through">
+                              ${pkgPricing.subtotalUsd}
+                            </span>
+                          )}
                           <span className="text-xs text-[#8E8B85]">دولار أمريكي</span>
                         </div>
                         <span className="text-xs text-emerald-400 block">
-                          يشمل استضافة السنة الأولى مجاناً ($0)
+                          {pricingConfig.firstYearHostingUsd > 0
+                            ? `استضافة السنة الأولى: $${pricingConfig.firstYearHostingUsd}`
+                            : 'يشمل استضافة السنة الأولى مجاناً ($0)'}
                         </span>
                       </div>
 
@@ -577,7 +696,7 @@ export default function SamiqShowcasePage() {
                         </div>
                       </div>
                       <span className="text-xs font-bold px-3 py-1 rounded-lg bg-[#C9A84C]/20 text-[#E8D390]">
-                        +$80 (أساسي)
+                        +${getFeaturePrice('tier_1_static')} (أساسي)
                       </span>
                     </div>
 
@@ -602,7 +721,7 @@ export default function SamiqShowcasePage() {
                             >
                               <span className="text-xs font-bold block">{feat.nameAr}</span>
                               <div className="flex items-center justify-between mt-2 pt-1 border-t border-white/5">
-                                <span className="text-xs text-[#E8D390] font-mono">+${feat.basePriceUsd}</span>
+                                <span className="text-xs text-[#E8D390] font-mono">+${getFeaturePrice(id)}</span>
                                 <span className={`text-xs ${active ? 'text-emerald-400 font-bold' : 'text-[#8E8B85]'}`}>
                                   {active ? 'مفعل' : 'معطل'}
                                 </span>
@@ -624,7 +743,7 @@ export default function SamiqShowcasePage() {
                             المستوى 2: الموقع القابل للتعديل ولوحة المدير (Tier 2: Editable Hub)
                           </span>
                           <span className="text-xs text-[#8E8B85]">
-                            دخول سري للمدير لتعديل النصوص والصور والأقسام (+$50 فوق الدرجة 1)
+                            دخول سري للمدير لتعديل النصوص والصور والأقسام (+${getFeaturePrice('tier_2_editable') - getFeaturePrice('tier_1_static')}$ فوق الدرجة 1)
                           </span>
                         </div>
                       </div>
@@ -636,7 +755,9 @@ export default function SamiqShowcasePage() {
                             : 'bg-white/10 text-[#FAF7F2] hover:bg-white/15'
                         }`}
                       >
-                        {customFeatures.includes('tier_2_editable') ? 'مفعل ($130 تراكمي)' : 'تفعيل (+$50)'}
+                        {customFeatures.includes('tier_2_editable')
+                          ? `مفعل ($${getFeaturePrice('tier_2_editable')} تراكمي)`
+                          : `تفعيل (+${getFeaturePrice('tier_2_editable') - getFeaturePrice('tier_1_static')}$)`}
                       </button>
                     </div>
 
@@ -662,7 +783,7 @@ export default function SamiqShowcasePage() {
                               >
                                 <span className="text-xs font-bold block">{feat.nameAr}</span>
                                 <div className="flex items-center justify-between mt-2 pt-1 border-t border-white/5">
-                                  <span className="text-xs text-[#E8D390] font-mono">+${feat.basePriceUsd}</span>
+                                  <span className="text-xs text-[#E8D390] font-mono">+${getFeaturePrice(id)}</span>
                                   <span className={`text-xs ${active ? 'text-emerald-400 font-bold' : 'text-[#8E8B85]'}`}>
                                     {active ? 'مفعل' : 'معطل'}
                                   </span>
@@ -693,7 +814,7 @@ export default function SamiqShowcasePage() {
                                     }`}
                                   >
                                     <span className="text-xs font-bold block">{feat.nameAr}</span>
-                                    <span className="text-xs text-sky-300 font-mono mt-1">+${feat.basePriceUsd}</span>
+                                    <span className="text-xs text-sky-300 font-mono mt-1">+${getFeaturePrice(id)}</span>
                                   </button>
                                 );
                               })}
@@ -714,7 +835,7 @@ export default function SamiqShowcasePage() {
                             المستوى 3: كتالوج المنتجات والأقسام والوسوم (Tier 3: Dynamic Catalog)
                           </span>
                           <span className="text-xs text-[#8E8B85]">
-                            كتالوج المنتجات، الأقسام، 3 أنماط عملات، والبحث (+$70 فوق الدرجة 2)
+                            كتالوج المنتجات، الأقسام، 3 أنماط عملات، والبحث (+${getFeaturePrice('tier_3_catalog') - getFeaturePrice('tier_2_editable')}$ فوق الدرجة 2)
                           </span>
                         </div>
                       </div>
@@ -726,7 +847,9 @@ export default function SamiqShowcasePage() {
                             : 'bg-white/10 text-[#FAF7F2] hover:bg-white/15'
                         }`}
                       >
-                        {customFeatures.includes('tier_3_catalog') ? 'مفعل ($200 تراكمي)' : 'تفعيل (+$70)'}
+                        {customFeatures.includes('tier_3_catalog')
+                          ? `مفعل ($${getFeaturePrice('tier_3_catalog')} تراكمي)`
+                          : `تفعيل (+${getFeaturePrice('tier_3_catalog') - getFeaturePrice('tier_2_editable')}$)`}
                       </button>
                     </div>
 
@@ -760,7 +883,7 @@ export default function SamiqShowcasePage() {
                               >
                                 <span className="text-xs font-bold block">{feat.nameAr}</span>
                                 <div className="flex items-center justify-between mt-2 pt-1 border-t border-white/5">
-                                  <span className="text-xs text-[#E8D390] font-mono">+${feat.basePriceUsd}</span>
+                                  <span className="text-xs text-[#E8D390] font-mono">+${getFeaturePrice(id)}</span>
                                   <span className={`text-xs ${active ? 'text-emerald-400 font-bold' : 'text-[#8E8B85]'}`}>
                                     {active ? 'مفعل' : 'معطل'}
                                   </span>
@@ -790,25 +913,33 @@ export default function SamiqShowcasePage() {
                   <div className="p-4 rounded-2xl bg-[#070709] border border-white/10 space-y-2.5">
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-[#8E8B85] block">إجمالي التأسيس لمرة واحدة:</span>
-                      <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 font-bold">
-                        خصم خاص 25% لفترة محدودة
-                      </span>
+                      {pricingConfig.isDiscountEnabled && customPricing.discountUsd > 0 && (
+                        <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 font-bold">
+                          خصم خاص {customPricing.discountPercent}% لفترة محدودة
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-baseline gap-2.5">
                       <span className="text-4xl font-serif font-bold text-[#E8D390]">
                         ${customPricing.totalUsd}
                       </span>
-                      <span className="text-base font-mono text-[#8E8B85] line-through">
-                        ${customPricing.subtotalUsd}
-                      </span>
+                      {pricingConfig.isDiscountEnabled && customPricing.discountUsd > 0 && (
+                        <span className="text-base font-mono text-[#8E8B85] line-through">
+                          ${customPricing.subtotalUsd}
+                        </span>
+                      )}
                       <span className="text-xs text-[#8E8B85]">دولار أمريكي</span>
                     </div>
-                    <div className="flex items-center justify-between text-xs text-emerald-400 font-semibold pt-1 border-t border-white/5">
-                      <span>وفرت بالعرض الخاص:</span>
-                      <span className="font-mono font-bold">-${customPricing.discountUsd} (25%)</span>
-                    </div>
+                    {pricingConfig.isDiscountEnabled && customPricing.discountUsd > 0 && (
+                      <div className="flex items-center justify-between text-xs text-emerald-400 font-semibold pt-1 border-t border-white/5">
+                        <span>وفرت بالعرض الخاص:</span>
+                        <span className="font-mono font-bold">-${customPricing.discountUsd} ({customPricing.discountPercent}%)</span>
+                      </div>
+                    )}
                     <p className="text-xs text-emerald-400 font-semibold">
-                      يشمل الاستضافة السحابية والتهيئة الأولية مجاناً ($0)
+                      {pricingConfig.firstYearHostingUsd > 0
+                        ? `استضافة السنة الأولى: $${pricingConfig.firstYearHostingUsd}`
+                        : 'يشمل الاستضافة السحابية والتهيئة الأولية مجاناً ($0)'}
                     </p>
                   </div>
 
@@ -886,7 +1017,9 @@ export default function SamiqShowcasePage() {
                         }`}
                       >
                         <span>دومين رسمي .com</span>
-                        <span className="font-mono text-[#E8D390] text-xs">+$20 / سنوياً</span>
+                        <span className="font-mono text-[#E8D390] text-xs">
+                          +${pricingConfig.domainTierPrices?.custom_com ?? 20} / سنوياً
+                        </span>
                       </button>
                     </div>
                   </div>
@@ -900,16 +1033,18 @@ export default function SamiqShowcasePage() {
                     <div className="flex items-center justify-between text-[#8E8B85]">
                       <span>النطاق السنوي:</span>
                       <span className="font-bold text-[#E8D390]">
-                        {selectedDomainOption === 'com' ? '$20 / سنوياً' : '$0 / سنوياً'}
+                        ${domainCostUsd} / سنوياً
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-[#8E8B85]">
                       <span>استضافة السنة الأولى:</span>
-                      <span className="font-bold text-emerald-400">مجاناً ($0)</span>
+                      <span className="font-bold text-emerald-400">
+                        {pricingConfig.firstYearHostingUsd > 0 ? `$${pricingConfig.firstYearHostingUsd}` : 'مجاناً ($0)'}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between text-[#8E8B85] pt-1 border-t border-white/5">
                       <span>تجديد الاستضافة من السنة 2:</span>
-                      <span className="font-mono text-[#FAF7F2]">$45 / سنوياً</span>
+                      <span className="font-mono text-[#FAF7F2]">${annualHostingCostUsd} / سنوياً</span>
                     </div>
                   </div>
 

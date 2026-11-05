@@ -3,6 +3,8 @@ import path from 'path';
 import { MOCK_STOREFRONT_DATA } from '../store/mockData';
 import { ProductCardData, ThemeCurrencyCode, TenantBrandInfo, PlatformMeta, CategoryItem } from '@/themes/contract';
 import { AuthenticityComparisonData } from '@/modules/blocks/types';
+import { PlatformPricingConfig, DEFAULT_PRICING_CONFIG } from '@/core/features/registry';
+export { type PlatformPricingConfig, DEFAULT_PRICING_CONFIG };
 
 export interface CouponRecord {
   code: string;
@@ -174,6 +176,7 @@ export interface SamiqDatabaseSchema {
   conversations: OmnichannelConversation[];
   platformMeta?: PlatformMeta;
   projects?: SamiqProjectRecord[];
+  pricingConfig?: PlatformPricingConfig;
 }
 
 export type ChannelType = 'web' | 'whatsapp' | 'telegram';
