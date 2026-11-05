@@ -291,10 +291,24 @@ export const FEATURES_REGISTRY: Record<string, FeatureDefinition> = {
   },
 };
 
+export interface PricingOptions {
+  priceMultiplier?: number;
+  isDiscountEnabled?: boolean;
+  discountPercent?: number;
+  customDiscountUsd?: number;
+  matchOriginalPrice?: boolean;
+}
+
 export interface PricingResult {
   totalUsd: number;
   subtotalUsd: number;
   discountUsd: number;
+  originalSubtotalUsd: number;
+  originalTotalUsd: number;
+  priceMultiplier: number;
+  discountPercent: number;
+  isDiscountEnabled: boolean;
+  isMatchOriginal: boolean;
   baseTierPriceUsd: number;
   addonsPriceUsd: number;
   selectedTier: string;
@@ -302,50 +316,95 @@ export interface PricingResult {
 }
 
 /**
- * Calculates estimated package investment in USD with optional overrides and discount
+ * Calculates estimated package investment in USD with optional overrides, multiplier, and discount
  */
 export function calculateTierPrice(
   selectedFeatureIds: string[],
   priceOverrides?: Record<string, number>,
-  discountUsd: number = 0
+  discountUsdOrOptions: number | PricingOptions = 0,
+  legacyMultiplier?: number
 ): PricingResult {
+  const options: PricingOptions =
+    typeof discountUsdOrOptions === 'number'
+      ? {
+          customDiscountUsd: discountUsdOrOptions,
+          priceMultiplier: legacyMultiplier ?? 1.0,
+          isDiscountEnabled: discountUsdOrOptions > 0,
+        }
+      : discountUsdOrOptions || {};
+
+  const multiplier = Math.max(0.1, options.priceMultiplier ?? 1.0);
+  const isDiscountEnabled = options.isDiscountEnabled ?? (options.discountPercent !== undefined ? options.discountPercent > 0 : false);
+  const discountPercent = Math.max(0, Math.min(100, options.discountPercent ?? 0));
+  const customDiscountUsd = Math.max(0, options.customDiscountUsd ?? 0);
+  const matchOriginal = !!options.matchOriginalPrice;
+
   const selectedSet = new Set(selectedFeatureIds);
 
   // Determine highest tier selected
   let baseTier = 'tier_1_static';
-  let baseTierPrice = priceOverrides?.['tier_1_static'] ?? FEATURES_REGISTRY.tier_1_static.basePriceUsd;
+  let originalBaseTierPrice = priceOverrides?.['tier_1_static'] ?? FEATURES_REGISTRY.tier_1_static.basePriceUsd;
 
   if (selectedSet.has('tier_3_catalog')) {
     baseTier = 'tier_3_catalog';
-    baseTierPrice = priceOverrides?.['tier_3_catalog'] ?? FEATURES_REGISTRY.tier_3_catalog.basePriceUsd;
+    originalBaseTierPrice = priceOverrides?.['tier_3_catalog'] ?? FEATURES_REGISTRY.tier_3_catalog.basePriceUsd;
   } else if (selectedSet.has('tier_2_editable')) {
     baseTier = 'tier_2_editable';
-    baseTierPrice = priceOverrides?.['tier_2_editable'] ?? FEATURES_REGISTRY.tier_2_editable.basePriceUsd;
+    originalBaseTierPrice = priceOverrides?.['tier_2_editable'] ?? FEATURES_REGISTRY.tier_2_editable.basePriceUsd;
   }
+
+  // Base tier with multiplier (if overridden in priceOverrides, use override as-is; otherwise multiply)
+  const isBaseOverridden = priceOverrides?.[baseTier] !== undefined;
+  const baseTierPrice = isBaseOverridden ? originalBaseTierPrice : Math.round(originalBaseTierPrice * multiplier);
 
   const itemized: Record<string, number> = {
     [baseTier]: baseTierPrice,
   };
 
   // Calculate sum of active addons / channels
+  let originalAddonsSum = 0;
   let addonsSum = 0;
+
   for (const featureId of selectedSet) {
     const feat = FEATURES_REGISTRY[featureId];
     if (feat && feat.category !== 'tier') {
-      const price = priceOverrides?.[featureId] ?? feat.basePriceUsd;
-      addonsSum += price;
-      itemized[featureId] = price;
+      const isOverridden = priceOverrides?.[featureId] !== undefined;
+      const orig = priceOverrides?.[featureId] ?? feat.basePriceUsd;
+      const effective = isOverridden ? orig : Math.round(orig * multiplier);
+      originalAddonsSum += orig;
+      addonsSum += effective;
+      itemized[featureId] = effective;
     }
   }
 
+  const originalSubtotal = originalBaseTierPrice + originalAddonsSum;
   const subtotal = baseTierPrice + addonsSum;
-  const cleanDiscount = Math.max(0, Math.min(discountUsd || 0, subtotal));
-  const total = Math.max(0, subtotal - cleanDiscount);
+
+  let calculatedDiscount = 0;
+  let effectiveDiscountPercent = discountPercent;
+
+  if (isDiscountEnabled) {
+    if (matchOriginal) {
+      calculatedDiscount = Math.max(0, subtotal - originalSubtotal);
+      effectiveDiscountPercent = subtotal > 0 ? Math.round((calculatedDiscount / subtotal) * 100) : 0;
+    } else {
+      const percentDiscountVal = Math.round((subtotal * discountPercent) / 100);
+      calculatedDiscount = Math.min(subtotal, percentDiscountVal + customDiscountUsd);
+    }
+  }
+
+  const total = Math.max(0, subtotal - calculatedDiscount);
 
   return {
     totalUsd: total,
     subtotalUsd: subtotal,
-    discountUsd: cleanDiscount,
+    discountUsd: calculatedDiscount,
+    originalSubtotalUsd: originalSubtotal,
+    originalTotalUsd: originalSubtotal,
+    priceMultiplier: multiplier,
+    discountPercent: effectiveDiscountPercent,
+    isDiscountEnabled,
+    isMatchOriginal: matchOriginal,
     baseTierPriceUsd: baseTierPrice,
     addonsPriceUsd: addonsSum,
     selectedTier: baseTier,

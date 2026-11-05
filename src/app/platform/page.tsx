@@ -61,6 +61,12 @@ export default function PlatformSuperAdminPage() {
   const [priceOverrides, setPriceOverrides] = useState<Record<string, number>>({});
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
 
+  // Anchoring & Multiplier Pricing Engine State
+  const [priceMultiplier, setPriceMultiplier] = useState<number>(1.5);
+  const [isDiscountEnabled, setIsDiscountEnabled] = useState<boolean>(true);
+  const [discountPercent, setDiscountPercent] = useState<number>(25);
+  const [isMatchOriginal, setIsMatchOriginal] = useState<boolean>(false);
+
   // Active Theme & Selected Features for the selected project / quote
   const [activeTheme, setActiveTheme] = useState<ThemeId>('luxury-noir');
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([
@@ -211,8 +217,15 @@ export default function PlatformSuperAdminPage() {
   }, [projects]);
 
   const pricing = useMemo(
-    () => calculateTierPrice(selectedFeatures, priceOverrides, customDiscountUsd),
-    [selectedFeatures, priceOverrides, customDiscountUsd]
+    () =>
+      calculateTierPrice(selectedFeatures, priceOverrides, {
+        priceMultiplier,
+        isDiscountEnabled,
+        discountPercent,
+        customDiscountUsd,
+        matchOriginalPrice: isMatchOriginal,
+      }),
+    [selectedFeatures, priceOverrides, priceMultiplier, isDiscountEnabled, discountPercent, customDiscountUsd, isMatchOriginal]
   );
   const validation = useMemo(() => validateFeatureDependencies(selectedFeatures), [selectedFeatures]);
 
@@ -260,13 +273,17 @@ export default function PlatformSuperAdminPage() {
   // Reset all price overrides & discounts to default
   const handleResetAllPrices = () => {
     setPriceOverrides({});
+    setPriceMultiplier(1.5);
+    setIsDiscountEnabled(true);
+    setDiscountPercent(25);
+    setIsMatchOriginal(false);
     setCustomDiscountUsd(0);
     setProjectFirstYearHostingUsd(0);
     setProjectAnnualHostingUsd(45);
     setProjectAnnualDomainUsd(20);
     setProjectAnnualAiUsd(90);
     setDomainTierPrices({ subdomain_free: 0, custom_com: 20, custom_ye: 35 });
-    setSaveSuccessMsg('تمت إعادة ضبط جميع الأسعار والخصومات إلى القيم القياسية الافتراضية.');
+    setSaveSuccessMsg('تمت إعادة ضبط جميع الأسعار والمعاملات والخصومات إلى القيم القياسية الافتراضية.');
     setTimeout(() => setSaveSuccessMsg(''), 3000);
   };
 
@@ -275,12 +292,16 @@ export default function PlatformSuperAdminPage() {
     const val = prompt('أدخل السعر الصافي المقطوع المطلوب لعقد التأسيس بالدولار ($):', String(pricing.totalUsd));
     if (val !== null) {
       const target = Math.max(0, Number(val) || 0);
+      setIsMatchOriginal(false);
       if (target <= pricing.subtotalUsd) {
+        setIsDiscountEnabled(true);
         setCustomDiscountUsd(pricing.subtotalUsd - target);
+        setDiscountPercent(0);
       } else {
+        setIsDiscountEnabled(false);
         setCustomDiscountUsd(0);
         const extra = target - pricing.subtotalUsd;
-        const currentTierPrice = priceOverrides[pricing.selectedTier] ?? FEATURES_REGISTRY[pricing.selectedTier]?.basePriceUsd ?? 80;
+        const currentTierPrice = priceOverrides[pricing.selectedTier] ?? Math.round((FEATURES_REGISTRY[pricing.selectedTier]?.basePriceUsd ?? 80) * priceMultiplier);
         setPriceOverrides((prev) => ({
           ...prev,
           [pricing.selectedTier]: currentTierPrice + extra,
@@ -576,7 +597,8 @@ export default function PlatformSuperAdminPage() {
   }) => {
     const isSelected = selectedFeatures.includes(id);
     const overridePrice = priceOverrides[id];
-    const displayPrice = overridePrice !== undefined ? overridePrice : price;
+    const defaultMultipliedPrice = Math.round(price * priceMultiplier);
+    const displayPrice = overridePrice !== undefined ? overridePrice : defaultMultipliedPrice;
 
     return (
       <div
@@ -620,7 +642,16 @@ export default function PlatformSuperAdminPage() {
               title="انقر لتعديل السعر لهذا العرض يدوياً"
               className="text-xs font-sans font-bold px-2.5 py-1 rounded-lg bg-gold/15 text-gold border border-gold/30 hover:bg-gold/30 hover:border-gold transition cursor-pointer inline-flex items-center gap-1"
             >
-              <span>{overridePrice !== undefined ? `$${displayPrice} (معدل)` : `+$${displayPrice}`}</span>
+              {overridePrice !== undefined ? (
+                <span>${displayPrice} (معدل)</span>
+              ) : priceMultiplier !== 1.0 ? (
+                <span className="inline-flex items-center gap-1">
+                  <span className="line-through text-muted-dim text-[11px]">${price}</span>
+                  <span>+${displayPrice}</span>
+                </span>
+              ) : (
+                <span>+${displayPrice}</span>
+              )}
               <PencilIcon className="w-2.5 h-2.5" />
             </button>
             {overridePrice !== undefined && (
@@ -671,6 +702,10 @@ export default function PlatformSuperAdminPage() {
         aiPlanType={projectAiPlan}
         annualAiUsd={projectAiPlan === 'managed_annual' ? projectAnnualAiUsd : 0}
         firstYearHostingUsd={projectFirstYearHostingUsd}
+        priceMultiplier={priceMultiplier}
+        isDiscountEnabled={isDiscountEnabled}
+        discountPercent={discountPercent}
+        matchOriginalPrice={isMatchOriginal}
       />
 
       {/* Top Header */}
@@ -866,11 +901,258 @@ export default function PlatformSuperAdminPage() {
                   type="number"
                   min="0"
                   value={customDiscountUsd}
-                  onChange={(e) => setCustomDiscountUsd(Math.max(0, Number(e.target.value) || 0))}
+                  onChange={(e) => {
+                    setIsMatchOriginal(false);
+                    setCustomDiscountUsd(Math.max(0, Number(e.target.value) || 0));
+                  }}
                   placeholder="0"
                   className="w-full min-h-[44px] px-3.5 rounded-xl bg-white/5 border border-white/10 text-emerald-400 font-mono font-bold focus:border-gold outline-hidden text-sm"
                 />
                 <span className="absolute end-3 top-3 text-muted-dim text-xs">$ خصم</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ==================================================================== */}
+        {/* ANCHORING & MULTIPLIER PRICING ENGINE CARD                           */}
+        {/* ==================================================================== */}
+        <div className="p-6 rounded-3xl bg-surface border border-gold/40 shadow-2xl space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-gold animate-pulse" />
+                <h2 className="text-base sm:text-lg font-serif font-bold text-ivory">
+                  محرك مضاعف الأسعار والعروض الترويجية (Anchoring & Multiplier Pricing Engine)
+                </h2>
+              </div>
+              <p className="text-xs text-muted-lux mt-1">
+                التحكم الذكي بمضاعف التسعير لإبراز القيمة النفسية العالية (Anchoring) وتطبيق التخفيضات الترويجية مع موازنة السعر بنقرة واحدة
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-xs px-3 py-1 rounded-full bg-gold/15 text-gold font-mono font-bold border border-gold/30">
+                المعامل النشط: ×{priceMultiplier}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setPriceMultiplier(1.5);
+                  setIsDiscountEnabled(true);
+                  setDiscountPercent(25);
+                  setIsMatchOriginal(false);
+                  setCustomDiscountUsd(0);
+                }}
+                className="text-xs text-muted-lux hover:text-ivory px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 transition"
+              >
+                الافتراضي (×1.5 + خصم 25%)
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {/* Control 1: Price Multiplier */}
+            <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-champagne block">
+                  معامل ضرب الأسعار (Multiplier ×):
+                </label>
+                <span className="text-xs font-mono font-bold text-gold">×{priceMultiplier}</span>
+              </div>
+              <div className="relative">
+                <input
+                  type="number"
+                  step="0.05"
+                  min="0.1"
+                  max="10"
+                  value={priceMultiplier}
+                  onChange={(e) => {
+                    const val = Number(e.target.value);
+                    if (!isNaN(val) && val >= 0.1) {
+                      setPriceMultiplier(Number(val.toFixed(2)));
+                    }
+                  }}
+                  className="w-full min-h-[44px] px-3.5 rounded-xl bg-white/5 border border-white/10 text-ivory font-mono font-bold focus:border-gold outline-hidden text-sm"
+                />
+                <span className="absolute end-3 top-3 text-muted-dim text-xs">معامل ×</span>
+              </div>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-[11px] text-muted-dim">أزرار سريعة:</span>
+                {[
+                  { label: '×0.5', val: 0.5 },
+                  { label: '×1.0', val: 1.0 },
+                  { label: '×1.33', val: 1.33 },
+                  { label: '×1.5', val: 1.5 },
+                  { label: '×2.0', val: 2.0 },
+                ].map((item) => (
+                  <button
+                    key={item.label}
+                    type="button"
+                    onClick={() => {
+                      setPriceMultiplier(item.val);
+                    }}
+                    className={`px-2 py-1 rounded-lg text-xs font-mono font-bold transition border ${
+                      priceMultiplier === item.val
+                        ? 'bg-gold text-obsidian-dark border-gold shadow-xs'
+                        : 'bg-white/5 text-muted-lux hover:text-ivory border-white/10 hover:border-white/20'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+              <p className="text-[11px] text-muted-dim leading-snug">
+                يضاعف أسعار الباقة والميزات غير المعدلة يدوياً بنسبة {Math.round((priceMultiplier - 1) * 100)}% لرفع القيمة المدركة.
+              </p>
+            </div>
+
+            {/* Control 2: Discount Offer Settings */}
+            <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-champagne block">
+                  عرض التخفيض المعتمد (Discount Offer):
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsDiscountEnabled(!isDiscountEnabled);
+                    setIsMatchOriginal(false);
+                  }}
+                  className={`px-3 py-1 rounded-full text-xs font-bold transition border ${
+                    isDiscountEnabled
+                      ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                      : 'bg-white/5 text-muted-dim border-white/10'
+                  }`}
+                >
+                  {isDiscountEnabled ? 'مفعّل (ON)' : 'معطّل (OFF)'}
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[11px] text-muted-lux block">نسبة التخفيض (%):</label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min="0"
+                      max="90"
+                      disabled={!isDiscountEnabled}
+                      value={discountPercent}
+                      onChange={(e) => {
+                        setIsMatchOriginal(false);
+                        setDiscountPercent(Math.max(0, Math.min(90, Number(e.target.value) || 0)));
+                      }}
+                      className="w-full min-h-[44px] px-3 rounded-xl bg-white/5 border border-white/10 text-emerald-400 font-mono font-bold focus:border-gold outline-hidden text-sm disabled:opacity-40"
+                    />
+                    <span className="absolute end-3 top-3 text-muted-dim text-xs">%</span>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[11px] text-muted-lux block">خصم إضافي ($):</label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min="0"
+                      value={customDiscountUsd}
+                      onChange={(e) => {
+                        setIsMatchOriginal(false);
+                        setCustomDiscountUsd(Math.max(0, Number(e.target.value) || 0));
+                      }}
+                      placeholder="0"
+                      className="w-full min-h-[44px] px-3 rounded-xl bg-white/5 border border-white/10 text-emerald-400 font-mono font-bold focus:border-gold outline-hidden text-sm"
+                    />
+                    <span className="absolute end-3 top-3 text-muted-dim text-xs">$</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-[11px] text-muted-dim">نسب سريعة:</span>
+                {[10, 15, 20, 25, 33, 50].map((pct) => (
+                  <button
+                    key={pct}
+                    type="button"
+                    disabled={!isDiscountEnabled}
+                    onClick={() => {
+                      setIsMatchOriginal(false);
+                      setDiscountPercent(pct);
+                    }}
+                    className={`px-2 py-0.5 rounded-lg text-xs font-mono font-bold transition border disabled:opacity-40 ${
+                      discountPercent === pct && !isMatchOriginal
+                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                        : 'bg-white/5 text-muted-lux hover:text-ivory border-white/10 hover:border-white/20'
+                    }`}
+                  >
+                    {pct}%
+                  </button>
+                ))}
+              </div>
+
+              <p className="text-[11px] text-muted-dim leading-snug">
+                يظهر للعميل السعر المرتكز مشطوباً مع شارة الخصم لإبراز الصفقة الاستثنائية.
+              </p>
+            </div>
+
+            {/* Control 3: Smart 1-Click Match Original & Summary */}
+            <div className="p-4 rounded-2xl bg-white/[0.02] border border-gold/20 space-y-3 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-champagne block">
+                    الموازنة الذكية (Smart Match):
+                  </span>
+                  {isMatchOriginal && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/20 text-gold border border-gold/30 font-bold">
+                      نشطة
+                    </span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMatchOriginal(!isMatchOriginal);
+                    if (!isMatchOriginal) {
+                      setIsDiscountEnabled(true);
+                    }
+                  }}
+                  className={`w-full p-3 rounded-xl border text-start transition flex flex-col gap-1 ${
+                    isMatchOriginal
+                      ? 'bg-gold/20 border-gold text-ivory shadow-[0_0_15px_rgba(201,168,76,0.2)]'
+                      : 'bg-white/5 border-white/10 hover:border-gold/40 text-muted-lux hover:text-ivory'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-ivory">
+                      موازنة التخفيض ليعود للسعر الأصلي (100% Match)
+                    </span>
+                    <span className="text-xs font-mono font-bold text-gold">
+                      {isMatchOriginal ? 'مفعّل' : 'تفعيل بنقرة'}
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-muted-dim leading-snug">
+                    يضبط الخصم تلقائياً ليكون الصافي مساوياً تماماً للسعر الأصلي قبل المضاعفة (${pricing.originalSubtotalUsd})، مع إظهار السعر المضروب (${pricing.subtotalUsd}) مشطوباً!
+                  </span>
+                </button>
+              </div>
+
+              {/* Live Metric Bar */}
+              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/5 text-xs font-sans">
+                <div className="p-2 rounded-xl bg-white/[0.03] border border-white/5">
+                  <span className="text-[10px] text-muted-dim block">المعروض للعميل:</span>
+                  <div className="flex items-center gap-1 mt-0.5">
+                    {pricing.discountUsd > 0 && (
+                      <span className="line-through text-muted-dim font-mono text-xs">${pricing.subtotalUsd}</span>
+                    )}
+                    <span className="font-mono font-bold text-emerald-400 text-sm">${pricing.totalUsd}</span>
+                  </div>
+                </div>
+                <div className="p-2 rounded-xl bg-white/[0.03] border border-white/5">
+                  <span className="text-[10px] text-muted-dim block">قيمة التوفير المعلنة:</span>
+                  <span className="font-mono font-bold text-gold text-sm mt-0.5 block">
+                    ${pricing.discountUsd} ({pricing.discountPercent}%)
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -1853,7 +2135,8 @@ export default function PlatformSuperAdminPage() {
               {Object.values(FEATURES_REGISTRY).map((feat) => {
                 const isSelected = selectedFeatures.includes(feat.id);
                 const overridePrice = priceOverrides[feat.id];
-                const displayPrice = overridePrice !== undefined ? overridePrice : feat.basePriceUsd;
+                const defaultMultipliedPrice = Math.round(feat.basePriceUsd * priceMultiplier);
+                const displayPrice = overridePrice !== undefined ? overridePrice : defaultMultipliedPrice;
 
                 return (
                   <div
@@ -1890,7 +2173,16 @@ export default function PlatformSuperAdminPage() {
                           title="تعديل السعر يدوياً"
                           className="px-2.5 py-1 rounded-lg text-xs font-sans font-bold bg-gold/15 text-gold border border-gold/30 hover:bg-gold/30 hover:border-gold transition cursor-pointer inline-flex items-center gap-1"
                         >
-                          <span>{overridePrice !== undefined ? `$${displayPrice} (معدل)` : `+$${displayPrice}`}</span>
+                          {overridePrice !== undefined ? (
+                            <span>${displayPrice} (معدل)</span>
+                          ) : priceMultiplier !== 1.0 ? (
+                            <span className="inline-flex items-center gap-1">
+                              <span className="line-through text-muted-dim text-[11px]">${feat.basePriceUsd}</span>
+                              <span>+${displayPrice}</span>
+                            </span>
+                          ) : (
+                            <span>+${displayPrice}</span>
+                          )}
                           <PencilIcon className="w-2.5 h-2.5" />
                         </button>
                         {overridePrice !== undefined && (
@@ -1970,9 +2262,14 @@ export default function PlatformSuperAdminPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Column 1: One-Time Setup Costs */}
             <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3.5">
-              <span className="text-xs font-bold text-champagne block border-b border-white/5 pb-2">
-                1. عقد التأسيس لمرة واحدة (Setup Investment):
-              </span>
+              <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                <span className="text-xs font-bold text-champagne block">
+                  1. عقد التأسيس لمرة واحدة (Setup Investment):
+                </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-gold/15 text-gold border border-gold/30">
+                  معامل الضرب: ×{priceMultiplier}
+                </span>
+              </div>
 
               <div className="space-y-2.5 text-xs font-sans">
                 {/* Base Tier with Edit Button */}
@@ -1988,13 +2285,20 @@ export default function PlatformSuperAdminPage() {
                       <PencilIcon className="w-2.5 h-2.5" />
                     </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleSetPriceOverride(pricing.selectedTier)}
-                    className="text-base font-serif font-bold text-ivory hover:text-gold transition cursor-pointer"
-                  >
-                    ${pricing.baseTierPriceUsd}
-                  </button>
+                  <div className="flex items-center gap-1.5">
+                    {priceOverrides[pricing.selectedTier] === undefined && priceMultiplier !== 1.0 && (
+                      <span className="text-xs line-through text-muted-dim">
+                        ${FEATURES_REGISTRY[pricing.selectedTier]?.basePriceUsd}
+                      </span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => handleSetPriceOverride(pricing.selectedTier)}
+                      className="text-base font-serif font-bold text-ivory hover:text-gold transition cursor-pointer"
+                    >
+                      ${pricing.baseTierPriceUsd}
+                    </button>
+                  </div>
                 </div>
 
                 {/* Addons sum */}
@@ -2005,18 +2309,87 @@ export default function PlatformSuperAdminPage() {
                   </span>
                 </div>
 
-                {/* Subtotal */}
+                {/* Subtotal (Anchored before discount) */}
                 <div className="flex items-center justify-between text-muted-lux">
-                  <span>المجموع الإفرادي (Subtotal):</span>
-                  <span className="font-mono text-sm font-semibold text-ivory">
-                    ${pricing.subtotalUsd}
-                  </span>
+                  <span>المجموع الإفرادي (قبل الخصم):</span>
+                  <div className="flex items-center gap-1.5">
+                    {pricing.discountUsd > 0 && (
+                      <span className="line-through text-muted-dim font-mono text-xs">
+                        ${pricing.subtotalUsd}
+                      </span>
+                    )}
+                    <span className="font-mono text-sm font-semibold text-ivory">
+                      ${pricing.subtotalUsd}
+                    </span>
+                  </div>
                 </div>
 
-                {/* Special Discount with direct input */}
+                {/* Multiplier & Discount Controls inline in summary */}
+                <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10 space-y-2 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-lux font-semibold">عرض التخفيض المعتمد:</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsDiscountEnabled(!isDiscountEnabled);
+                        setIsMatchOriginal(false);
+                      }}
+                      className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold transition border ${
+                        isDiscountEnabled
+                          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                          : 'bg-white/5 text-muted-dim border-white/10'
+                      }`}
+                    >
+                      {isDiscountEnabled ? 'مفعّل (ON)' : 'معطّل (OFF)'}
+                    </button>
+                  </div>
+
+                  {isDiscountEnabled && (
+                    <>
+                      <div className="flex items-center justify-between gap-2">
+                        <label className="text-muted-lux">نسبة الخصم (%):</label>
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="number"
+                            min="0"
+                            max="90"
+                            value={discountPercent}
+                            onChange={(e) => {
+                              setIsMatchOriginal(false);
+                              setDiscountPercent(Math.max(0, Math.min(90, Number(e.target.value) || 0)));
+                            }}
+                            className="w-16 min-h-[32px] px-2 rounded-lg bg-white/5 border border-white/10 text-emerald-400 font-mono font-bold text-center text-xs"
+                          />
+                          <span className="text-muted-dim text-xs">%</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between text-emerald-400 font-mono">
+                        <span>قيمة الخصم المحسوبة:</span>
+                        <span className="font-bold">-${pricing.discountUsd} ({pricing.discountPercent}%)</span>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setIsMatchOriginal(!isMatchOriginal)}
+                        className={`w-full py-1.5 px-2 rounded-lg text-[11px] font-bold transition border ${
+                          isMatchOriginal
+                            ? 'bg-gold/20 text-gold border-gold'
+                            : 'bg-white/5 text-muted-lux hover:text-ivory border-white/10'
+                        }`}
+                      >
+                        {isMatchOriginal
+                          ? 'تم تفعيل موازنة السعر للأصلي (100% Match)'
+                          : 'موازنة التخفيض ليعود للسعر الأصلي تماماً (×1.0)'}
+                      </button>
+                    </>
+                  )}
+                </div>
+
+                {/* Additional custom dollar discount */}
                 <div className="space-y-1 pt-1 border-t border-white/5">
                   <div className="flex items-center justify-between">
-                    <label className="text-muted-lux font-semibold">خصم خاص معتمد ($):</label>
+                    <label className="text-muted-lux font-semibold">خصم إضافي مقطوع بالدولار ($):</label>
                     <span className="font-mono text-xs font-bold text-emerald-400">-${customDiscountUsd}</span>
                   </div>
                   <div className="relative">
@@ -2024,7 +2397,10 @@ export default function PlatformSuperAdminPage() {
                       type="number"
                       min="0"
                       value={customDiscountUsd}
-                      onChange={(e) => setCustomDiscountUsd(Math.max(0, Number(e.target.value) || 0))}
+                      onChange={(e) => {
+                        setIsMatchOriginal(false);
+                        setCustomDiscountUsd(Math.max(0, Number(e.target.value) || 0));
+                      }}
                       placeholder="0"
                       className="w-full min-h-[40px] px-3 rounded-xl bg-white/5 border border-white/10 text-emerald-400 font-mono font-bold focus:border-gold outline-hidden text-xs"
                     />
@@ -2051,6 +2427,11 @@ export default function PlatformSuperAdminPage() {
                         ? `استضافة السنة الأولى: $${projectFirstYearHostingUsd}`
                         : 'شامل استضافة السنة الأولى مجاناً ($0)'}
                     </span>
+                    {pricing.discountUsd > 0 && (
+                      <span className="text-[11px] text-emerald-400 font-bold block mt-0.5">
+                        وفر العميل: ${pricing.discountUsd} ({pricing.discountPercent}%)
+                      </span>
+                    )}
                   </div>
                   <button
                     type="button"
@@ -2198,9 +2579,14 @@ export default function PlatformSuperAdminPage() {
               <span className="w-2.5 h-2.5 rounded-full bg-gold animate-pulse" />
               <span className="text-xs font-serif font-bold text-ivory">سَامِق · التسعير الحي</span>
             </div>
-            <span className="text-[11px] font-sans font-bold px-2 py-0.5 rounded-full bg-emerald-950/70 border border-emerald-500/40 text-emerald-300">
-              {selectedFeatures.length} ميزة نشطة
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md bg-gold/20 text-champagne border border-gold/30">
+                ×{priceMultiplier}
+              </span>
+              <span className="text-[11px] font-sans font-bold px-2 py-0.5 rounded-full bg-emerald-950/70 border border-emerald-500/40 text-emerald-300">
+                {selectedFeatures.length} ميزة نشطة
+              </span>
+            </div>
           </div>
 
           {/* Live Figures */}
@@ -2224,6 +2610,12 @@ export default function PlatformSuperAdminPage() {
                 title="انقر لتعديل الصافي مقطوعاً"
                 className="text-start mt-1 group cursor-pointer"
               >
+                {pricing.discountUsd > 0 && (
+                  <div className="flex items-center gap-1 text-[11px]">
+                    <span className="line-through text-muted-dim font-mono">${pricing.subtotalUsd}</span>
+                    <span className="text-emerald-400 font-bold text-[10px]">خصم {pricing.discountPercent}%</span>
+                  </div>
+                )}
                 <span className="text-lg sm:text-xl font-serif font-bold text-champagne block group-hover:text-gold transition">
                   ${pricing.totalUsd}
                 </span>

@@ -179,8 +179,16 @@ export default function SamiqShowcasePage() {
   const developerTelegramHandle = 'KorosSenpai';
   const developerTelegramUrl = 'https://t.me/KorosSenpai';
 
-  // Calculate pricing based on custom features
-  const customPricing = useMemo(() => calculateTierPrice(customFeatures), [customFeatures]);
+  // Calculate pricing based on custom features with 1.5x anchor and 25% discount
+  const customPricing = useMemo(
+    () =>
+      calculateTierPrice(customFeatures, undefined, {
+        priceMultiplier: 1.5,
+        isDiscountEnabled: true,
+        discountPercent: 25,
+      }),
+    [customFeatures]
+  );
 
   // Handle ready package selection
   const handleSelectPackage = (pkg: typeof READY_PACKAGES[0]) => {
@@ -215,9 +223,12 @@ export default function SamiqShowcasePage() {
     }
   };
 
-  // Current package object or custom
+  // Current package object or custom (anchored 1.5x with 25% discount)
   const currentPackageObj = READY_PACKAGES.find((p) => p.id === selectedPackageId);
-  const effectivePrice = activeTab === 'packages' && currentPackageObj ? currentPackageObj.priceUsd : customPricing.totalUsd;
+  const effectivePrice =
+    activeTab === 'packages' && currentPackageObj
+      ? Math.round(Math.round(currentPackageObj.priceUsd * 1.5) * 0.75)
+      : customPricing.totalUsd;
   const currentTemplateObj = TEMPLATE_PREVIEWS.find((t) => t.id === selectedTemplate) || TEMPLATE_PREVIEWS[0];
 
   const domainCostUsd = selectedDomainOption === 'com' ? 20 : selectedDomainOption === 'ye' ? 35 : 0;
@@ -276,10 +287,13 @@ export default function SamiqShowcasePage() {
         projectName={effectiveStoreName}
         clientName={clientContactName}
         selectedTemplate={selectedTemplate}
-        selectedFeatureIds={customFeatures}
+        selectedFeatureIds={activeTab === 'packages' && currentPackageObj ? currentPackageObj.features : customFeatures}
         domainType={selectedDomainOption === 'free' ? 'subdomain_free' : selectedDomainOption === 'com' ? 'custom_com' : 'custom_ye'}
         annualDomainUsd={domainCostUsd}
         annualHostingUsd={45}
+        priceMultiplier={1.5}
+        isDiscountEnabled={true}
+        discountPercent={25}
       />
 
       {/* Top Luxury Navigation Header */}
@@ -460,15 +474,23 @@ export default function SamiqShowcasePage() {
                         </p>
                       </div>
 
-                      <div className="pt-2 border-t border-white/10">
-                        <span className="text-xs text-[#8E8B85] block">عقد التأسيس (مرة واحدة):</span>
-                        <div className="flex items-baseline gap-1 mt-0.5">
+                      <div className="pt-2 border-t border-white/10 space-y-1.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs text-[#8E8B85] block">عقد التأسيس (مرة واحدة):</span>
+                          <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 font-bold">
+                            خصم خاص 25% لفترة محدودة
+                          </span>
+                        </div>
+                        <div className="flex items-baseline gap-2 mt-0.5">
                           <span className="text-3xl font-serif font-bold text-[#E8D390]">
-                            ${pkg.priceUsd}
+                            ${Math.round(Math.round(pkg.priceUsd * 1.5) * 0.75)}
+                          </span>
+                          <span className="text-sm font-mono text-[#8E8B85] line-through">
+                            ${Math.round(pkg.priceUsd * 1.5)}
                           </span>
                           <span className="text-xs text-[#8E8B85]">دولار أمريكي</span>
                         </div>
-                        <span className="text-xs text-emerald-400 block mt-1">
+                        <span className="text-xs text-emerald-400 block">
                           يشمل استضافة السنة الأولى مجاناً ($0)
                         </span>
                       </div>
@@ -765,15 +787,27 @@ export default function SamiqShowcasePage() {
                     </h3>
                   </div>
 
-                  <div className="p-4 rounded-2xl bg-[#070709] border border-white/10 space-y-2">
-                    <span className="text-xs text-[#8E8B85] block">إجمالي التأسيس لمرة واحدة:</span>
-                    <div className="flex items-baseline gap-2">
+                  <div className="p-4 rounded-2xl bg-[#070709] border border-white/10 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-[#8E8B85] block">إجمالي التأسيس لمرة واحدة:</span>
+                      <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 font-bold">
+                        خصم خاص 25% لفترة محدودة
+                      </span>
+                    </div>
+                    <div className="flex items-baseline gap-2.5">
                       <span className="text-4xl font-serif font-bold text-[#E8D390]">
                         ${customPricing.totalUsd}
                       </span>
+                      <span className="text-base font-mono text-[#8E8B85] line-through">
+                        ${customPricing.subtotalUsd}
+                      </span>
                       <span className="text-xs text-[#8E8B85]">دولار أمريكي</span>
                     </div>
-                    <p className="text-xs text-emerald-400 font-semibold pt-1">
+                    <div className="flex items-center justify-between text-xs text-emerald-400 font-semibold pt-1 border-t border-white/5">
+                      <span>وفرت بالعرض الخاص:</span>
+                      <span className="font-mono font-bold">-${customPricing.discountUsd} (25%)</span>
+                    </div>
+                    <p className="text-xs text-emerald-400 font-semibold">
                       يشمل الاستضافة السحابية والتهيئة الأولية مجاناً ($0)
                     </p>
                   </div>

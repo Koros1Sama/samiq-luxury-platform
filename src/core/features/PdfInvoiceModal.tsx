@@ -23,6 +23,10 @@ export interface PdfInvoiceModalProps {
   aiPlanType?: 'none' | 'byok' | 'managed_annual';
   annualAiUsd?: number;
   firstYearHostingUsd?: number;
+  priceMultiplier?: number;
+  isDiscountEnabled?: boolean;
+  discountPercent?: number;
+  matchOriginalPrice?: boolean;
   customRef?: string;
 }
 
@@ -41,13 +45,31 @@ export function PdfInvoiceModal({
   aiPlanType = 'none',
   annualAiUsd,
   firstYearHostingUsd = 0,
+  priceMultiplier = 1.0,
+  isDiscountEnabled = true,
+  discountPercent = 0,
+  matchOriginalPrice = false,
   customRef,
 }: PdfInvoiceModalProps) {
   const instanceId = useId().replace(/:/g, '');
 
   const pricing = useMemo(() => {
-    return calculateTierPrice(selectedFeatureIds, priceOverrides, discountUsd);
-  }, [selectedFeatureIds, priceOverrides, discountUsd]);
+    return calculateTierPrice(selectedFeatureIds, priceOverrides, {
+      priceMultiplier,
+      customDiscountUsd: discountUsd,
+      discountPercent,
+      isDiscountEnabled,
+      matchOriginalPrice,
+    });
+  }, [
+    selectedFeatureIds,
+    priceOverrides,
+    discountUsd,
+    priceMultiplier,
+    discountPercent,
+    isDiscountEnabled,
+    matchOriginalPrice,
+  ]);
 
   const quoteNumber = useMemo(() => {
     if (customRef) return customRef;
@@ -389,14 +411,23 @@ export function PdfInvoiceModal({
               <div className="space-y-2 text-xs font-sans">
                 <div className="flex items-center justify-between text-muted-lux print:text-neutral-700">
                   <span>إجمالي التأسيس قبل الخصم:</span>
-                  <span className="font-mono text-sm font-semibold text-ivory print:text-black">
+                  <span
+                    className={`font-mono text-sm font-semibold print:text-black ${
+                      pricing.discountUsd > 0
+                        ? 'line-through text-muted-dim print:text-neutral-500'
+                        : 'text-ivory'
+                    }`}
+                  >
                     ${pricing.subtotalUsd}
                   </span>
                 </div>
 
                 {pricing.discountUsd > 0 && (
                   <div className="flex items-center justify-between text-emerald-400 print:text-emerald-700 font-semibold">
-                    <span>خصم خاص معتمد من إدارة منصة سَامِق:</span>
+                    <span>
+                      خصم خاص معتمد من إدارة منصة سَامِق{' '}
+                      {pricing.discountPercent > 0 ? `(${pricing.discountPercent}%)` : ''}:
+                    </span>
                     <span className="font-mono text-sm font-bold">
                       -${pricing.discountUsd}
                     </span>
