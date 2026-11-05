@@ -9,59 +9,76 @@ import {
   FeatureDefinition,
 } from '@/core/features/registry';
 import { SAMIQ_THEMES, ThemeId } from '@/themes/contract';
+import { PdfInvoiceModal } from '@/core/features/PdfInvoiceModal';
 
 // Pre-defined ready packages matching requirements
 const READY_PACKAGES = [
   {
     id: 'starter',
-    nameAr: 'باقة الانطلاقة (Static Core)',
-    priceUsd: 100,
+    nameAr: 'باقة 1: الموقع التعريفي الثابت (Static Landing Page)',
+    priceUsd: 80,
     badge: 'الأسرع تدشيناً',
     features: ['tier_1_static'],
-    description: 'واجهة فاخرة أحادية فائقة السرعة مع هوية بصرية مخصصة ونموذج طلب واتساب مباشر.',
+    description: 'واجهة فاخرة فائقة السرعة بدون أي منتجات وبدون لوحة تحكم، تركز على هوية المحل، قصة العلامة، الخريطة وأوقات العمل، وزر واتساب مباشر.',
     highlights: [
+      'واجهة فاخرة أحادية بدون أي منتجات أو كتالوج مع هوية بصرية مخصصة',
       'سرعة تحميل فائقة (Cold Load أقل من 150 كيلوبايت)',
       'تصميم متجاوب بالكامل مع أصغر شاشات الجوال (320px)',
-      'عرض بطاقات المنتجات مع تفاصيل المكونات الأصلية',
-      'زر طلب سريع موجه إلى واتساب المتجر',
-      'استضافة سحابية عالمية مع حماية SSL مجانية',
+      'عرض هوية العلامة، قصة المحل، وأوقات العمل بدقة',
+      'موقع المحل على الخريطة وروابط التواصل الاجتماعي',
+      'زر محادثة وطلب مباشر موجه إلى واتساب المتجر',
+      'استضافة سحابية عالمية مع حماية SSL مجانية للسنة الأولى ($0)',
     ],
   },
   {
     id: 'growth',
-    nameAr: 'باقة النمو (Editable Hub)',
-    priceUsd: 250,
-    badge: 'الأكثر طلباً للبدء',
+    nameAr: 'باقة 2: الموقع القابل للتعديل بلوحة إدارة (Editable Hub)',
+    priceUsd: 130,
+    badge: 'لوحة تحكم للمدير',
     features: ['tier_1_static', 'tier_2_editable'],
-    description: 'لوحة تحكم إدارية خاصة بالتاجر لإدارة المنتجات والأسعار والمخزون مع إحصائيات مبسطة.',
+    description: 'نفس الموقع التعريفي مع مدخل سري للوحة تحكم المدير لتعديل النصوص، الصور، أوقات العمل، أرقام التواصل، وترتيب الأقسام.',
     highlights: [
-      'كافة مزايا باقة الانطلاقة',
-      'لوحة تحكم إدارية كاملة وسهلة الاستخدام باللغة العربية',
-      'إضافة وتعديل وحذف المنتجات وتحديث الأسعار لحظياً',
-      'إدارة المخزون والتنبيه عند نفاد الكميات',
-      'سجل وتتبع الطلبات الواردة وإحصائيات الزوار',
+      'كافة مزايا باقة الموقع التعريفي الثابت',
+      'مدخل سري للوحة تحكم المدير بإيميل وكلمة سر خاصة',
+      'إمكانية تعديل كافة النصوص والعناوين والصور لحظياً',
+      'تعديل أوقات الدوام، أرقام التواصل، وروابط السوشيال ميديا',
+      'إمكانية إخفاء وإظهار وترتيب أقسام الصفحة الرئيسية في أي وقت',
+    ],
+  },
+  {
+    id: 'catalog',
+    nameAr: 'باقة 3: كتالوج المنتجات والأقسام والوسوم (Full Catalog)',
+    priceUsd: 200,
+    badge: 'كتالوج متكامل',
+    features: ['tier_1_static', 'tier_2_editable', 'tier_3_catalog'],
+    description: 'إضافة كتالوج المنتجات، الأقسام، الوسوم، الفلترة الفورية، صفحات تفاصيل المنتجات، 3 أنماط عملات، وإدارة الكتالوج من لوحة المدير.',
+    highlights: [
+      'كافة مزايا باقتي التعريفي ولوحة الإدارة',
+      'إضافة قسم المنتجات والأقسام والوسوم مع فلترة فورية سريعة',
+      'صفحات تفاصيل مستقلة لكل منتج بالصور والمواصفات',
+      'دعم 3 أنماط لعرض العملات (عملة واحدة / تحويل تلقائي / أسعار يدوية)',
+      'إدارة المنتجات، الأسعار، والمخزون بالكامل من لوحة المدير',
     ],
   },
   {
     id: 'commerce',
-    nameAr: 'باقة التجارة المتكاملة (Omni Commerce)',
-    priceUsd: 400,
-    badge: 'تجارة إلكترونية كاملة',
-    features: ['tier_1_static', 'tier_2_editable', 'cart_whatsapp'],
-    description: 'سلة تسوق متطورة، نظام كوبونات تخفيض، مناطق شحن، وتعدد عملات (YER / SAR / USD).',
+    nameAr: 'باقة التجارة وسلة واتساب (WhatsApp Commerce)',
+    priceUsd: 235,
+    badge: 'الأكثر طلباً للتجارة',
+    features: ['tier_1_static', 'tier_2_editable', 'tier_3_catalog', 'cart_whatsapp'],
+    description: 'كتالوج المنتجات + سلة تسوق ذكية تحسب الإجمالي وتبني رسالة واتساب منسقة فورية وتوثق الطلب في لوحة الإدارة.',
     highlights: [
-      'كافة مزايا باقة النمو الإدارية',
-      'سلة تسوق ذكية تحسب الإجمالي وتبني رسالة واتساب مفصلة',
-      'نظام كوبونات الخصم وقسائم الترويج',
-      'تعدد العملات بالريال اليمني والسعودي والدولار الأمريكي',
-      'إدارة مناطق ورسوم الشحن والتوصيل للمحافظات',
+      'كافة مزايا باقة الكتالوج المتكامل',
+      'سلة تسوق ذكية تحفظ المنتجات تلقائياً وتبني فاتورة واتساب',
+      'توثيق الطلبات الواردة في لوحة الإدارة',
+      'خيار الدفع عند الاستلام أو التحويل المباشر',
     ],
   },
   {
     id: 'intelligence',
-    nameAr: 'باقة الاحتراف والذكاء التخصصي (Smart AI Hub)',
-    priceUsd: 550,
-    badge: 'ذكاء اصطناعي تخصصي',
+    nameAr: 'باقة الذكاء الاصطناعي والأصالة (Smart AI & Lab)',
+    priceUsd: 335,
+    badge: 'ذكاء اصطناعي وأصالة',
     features: [
       'tier_1_static',
       'tier_2_editable',
@@ -71,19 +88,18 @@ const READY_PACKAGES = [
       'authenticity_guide',
       'skin_routine_advisor',
     ],
-    description: 'الوسوم الذكية بالذكاء الاصطناعي، فلترة تخصصية عميقة، مختبر كشف الأصالة، ومستشار الروتين.',
+    description: 'كتالوج المنتجات + السلة + مساعد الوسوم الذكية بالذكاء الاصطناعي + مختبر كشف الأصالة + مستشار الروتين التفاعلي.',
     highlights: [
-      'كافة مزايا باقة التجارة المتكاملة',
-      'توليد وتصنيف الوسوم التلقائية بالذكاء الاصطناعي (#الوسوم_الذكية)',
-      'مختبر كشف المقلد وفحص التشغيلات التفاعلي لبناء ثقة المشتري',
-      'مستشار روتين العناية وتحديد مشاكل البشرة التفاعلي',
-      'كتالوج ديناميكي متعدد الأقسام والتصنيفات الدقيقة',
+      'كافة مزايا باقة التجارة وسلة واتساب',
+      'توليد وتصنيف الوسوم التلقائية بالذكاء الاصطناعي مع SEO والبحث الدلالي',
+      'مختبر كشف المقلد وفحص أرقام التشغيلات التفاعلي لبناء ثقة المشتري',
+      'مستشار روتين العناية وتحديد المنتجات الأنسب لاحتياج الزبون',
     ],
   },
   {
     id: 'royal',
     nameAr: 'الباقة الملكية الشاملة (Royal Enterprise)',
-    priceUsd: 700,
+    priceUsd: 495,
     badge: 'الحل الرقمي الأقوى',
     features: [
       'tier_1_static',
@@ -95,14 +111,17 @@ const READY_PACKAGES = [
       'skin_routine_advisor',
       'customer_accounts',
       'ai_chatbot',
+      'whatsapp_channel',
+      'delivery_zones',
+      'coupons',
     ],
-    description: 'مستشار ذكي AI مدرب باللهجة المحلية 24/7، بوابة حسابات العملاء ونقاط الولاء، وأتمتة شاملة.',
+    description: 'مستشار ذكي AI في الموقع وشات بوت واتساب، حسابات الزبائن والمفضلة، كوبونات التخفيض، ومناطق التوصيل.',
     highlights: [
-      'كافة مزايا باقة الاحتراف والذكاء التخصصي',
-      'مستشار تجميلي ذكي (AI Chatbot) يجيب باللهجة اليمنية مدار الساعة',
-      'بوابة حسابات العملاء مع نظام نقاط الولاء واستبدال القسائم',
-      'تجهيز للربط مع بوابات الدفع الإلكتروني والمحافظ اليمنية',
-      'دعم هندسي مستمر وتحديثات أمنية ذات أولوية قصوى',
+      'كافة مزايا باقة الذكاء الاصطناعي والأصالة',
+      'مستشار ذكي AI في الموقع يجيب 24/7 ببطاقات منتجات تفاعلية',
+      'شات بوت منصة واتساب التفاعلي (بـ 3 أنماط تشغيل)',
+      'بوابة حسابات العملاء المستقلة وقوائم المفضلة وسجل الطلبات',
+      'إدارة مناطق ورسوم الشحن والتوصيل مع نظام الكوبونات والخصومات',
     ],
   },
 ];
@@ -150,6 +169,10 @@ export default function SamiqShowcasePage() {
   const [selectedTemplate, setSelectedTemplate] = useState<string>('luxury-noir');
   const [selectedPackageId, setSelectedPackageId] = useState<string>('intelligence');
   const [selectedDomainOption, setSelectedDomainOption] = useState<'free' | 'com' | 'ye'>('com');
+  const [clientStoreTitle, setClientStoreTitle] = useState<string>('');
+  const [clientContactName, setClientContactName] = useState<string>('');
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
+
   const [customFeatures, setCustomFeatures] = useState<string[]>([
     'tier_1_static',
     'tier_2_editable',
@@ -209,6 +232,8 @@ export default function SamiqShowcasePage() {
   const domainCostUsd = selectedDomainOption === 'com' ? 20 : selectedDomainOption === 'ye' ? 35 : 0;
   const annualRenewalUsd = domainCostUsd + 45;
 
+  const effectiveStoreName = clientStoreTitle.trim() || 'متجري الجديد';
+
   // Pre-filled Telegram order URL
   const telegramOrderUrl = useMemo(() => {
     const packageName =
@@ -223,11 +248,13 @@ export default function SamiqShowcasePage() {
         ? 'دومين رسمي خاص (.com) — $20 سنوياً'
         : selectedDomainOption === 'ye'
         ? 'دومين محلي رسمي (.ye) — $35 سنوياً'
-        : 'نطاق فرعي مجاني (*.samiq.app) — $0 سنوياً';
+        : 'نطاق فرعي مجاني (*.samiq.shop) — $0 سنوياً';
 
     const text =
       `السلام عليكم أخي المطور (@${developerTelegramHandle})،\n` +
       `أرغب بطلب متجر رقمي فاخر عبر محرك منصة سَامِق (SAMIQ).\n\n` +
+      `اسم المتجر / المشروع: ${effectiveStoreName}\n` +
+      (clientContactName.trim() ? `اسم العميل: ${clientContactName.trim()}\n` : '') +
       `القالب المفضل: ${currentTemplateObj.nameAr}\n` +
       `الباقة المختارة: ${packageName}\n` +
       `عقد التأسيس (مرة واحدة): $${effectivePrice} (يشمل استضافة السنة الأولى مجاناً)\n` +
@@ -245,10 +272,25 @@ export default function SamiqShowcasePage() {
     currentTemplateObj.nameAr,
     effectivePrice,
     selectedDomainOption,
+    effectiveStoreName,
+    clientContactName,
   ]);
 
   return (
     <div className="min-h-screen bg-[#070709] text-[#FAF7F2] font-sans selection:bg-[#C9A84C]/30 selection:text-[#E8D390]">
+      {/* Official PDF Invoice Modal */}
+      <PdfInvoiceModal
+        isOpen={isPdfModalOpen}
+        onClose={() => setIsPdfModalOpen(false)}
+        projectName={effectiveStoreName}
+        clientName={clientContactName}
+        selectedTemplate={selectedTemplate}
+        selectedFeatureIds={customFeatures}
+        domainType={selectedDomainOption === 'free' ? 'subdomain_free' : selectedDomainOption === 'com' ? 'custom_com' : 'custom_ye'}
+        annualDomainUsd={domainCostUsd}
+        annualHostingUsd={45}
+      />
+
       {/* Top Luxury Navigation Header */}
       <header className="sticky top-0 z-40 w-full bg-[#070709]/95 backdrop-blur-md border-b border-white/[0.08] shadow-2xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
@@ -271,7 +313,19 @@ export default function SamiqShowcasePage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <button
+              type="button"
+              onClick={() => setIsPdfModalOpen(true)}
+              className="min-h-[44px] px-4 py-2 rounded-xl bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-obsidian-dark font-bold text-xs hover:brightness-110 shadow-lg transition flex items-center gap-1.5"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="6 9 6 2 18 2 18 9" />
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                <rect x="6" y="14" width="12" height="8" />
+              </svg>
+              <span>تحميل عرض السعر (PDF)</span>
+            </button>
             <Link
               href="/"
               className="min-h-[44px] px-4 rounded-xl bg-white/5 hover:bg-white/10 text-[#FAF7F2] border border-white/10 text-xs font-semibold transition inline-flex items-center gap-1.5"
@@ -283,12 +337,9 @@ export default function SamiqShowcasePage() {
               href={telegramOrderUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="min-h-[44px] px-5 rounded-xl bg-gradient-to-r from-[#BF953F] to-[#AA771C] hover:from-[#C9A84C] hover:to-[#B38728] text-[#070709] text-xs font-bold transition shadow-lg inline-flex items-center gap-2"
+              className="min-h-[44px] px-4 rounded-xl bg-white/10 hover:bg-white/20 text-[#FAF7F2] border border-white/15 text-xs font-bold transition inline-flex items-center gap-2"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21.198 2.433a2.242 2.242 0 0 0-1.022.215l-16.7 6.4a2.25 2.25 0 0 0 .126 4.195l4.312 1.348 1.624 5.228a1.5 1.5 0 0 0 2.45.64l2.58-2.203 4.802 3.535a2.25 2.25 0 0 0 3.524-1.39l3.3-15.5a2.242 2.242 0 0 0-1.996-2.468z" />
-              </svg>
-              <span>طلب متجر فوري</span>
+              <span>طلب عبر تيليجرام</span>
             </a>
           </div>
         </div>
@@ -301,20 +352,19 @@ export default function SamiqShowcasePage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 space-y-6">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#C9A84C]/10 border border-[#C9A84C]/30 text-[#E8D390] text-xs font-semibold">
             <span className="w-2 h-2 rounded-full bg-[#C9A84C]" />
-            <span>محرك معماري مستقل فائق السرعة للعلامات التخصصية</span>
+            <span>محرك معماري مستقل فائق السرعة يبدأ من $80 فقط</span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-serif font-bold text-[#FAF7F2] leading-tight">
             متجرك الرقمي القادم بفخامة عالمية،
             <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#E8D390] via-[#C9A84C] to-[#AA771C]">
-              وذكاء اصطناعي يرفع مبيعاتك 3 أضعاف
+              وتدرج هندسي يبدأ من واجهة تعريفية إلى أتمتة شاملة
             </span>
           </h1>
 
           <p className="text-sm sm:text-lg text-[#A09D94] max-w-3xl mx-auto leading-relaxed">
-            محرك سَامِق (SAMIQ) ليس قالباً مكرراً، بل بنية معمارية فريدة تجمع بين سرعة التحميل الخارقة،
-            3 قوالب بصرية فاخرة، سلة طلبات واتساب متطورة، وتصنيف ذكي للمنتجات بالذكاء الاصطناعي مع دعم كامل للسوق اليمني والخليجي.
+            محرك سَامِق (SAMIQ) يقدم لك 3 درجات أساسية تراكمية: موقع تعريفي ثابت بدون منتجات ($80)، ثم قابل للتعديل مع لوحة تحكم المدير ($130)، ثم كتالوج المنتجات والأقسام والوسوم ($200)، مع إضافات مستقلة تختار منها ما يناسب ميزانيتك وطبيعة نشاطك.
           </p>
 
           {/* Quick Advantage Badges */}
@@ -342,7 +392,7 @@ export default function SamiqShowcasePage() {
       {/* Main Interactive Workspace: Tabs */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10">
         <div className="flex items-center justify-center">
-          <div className="p-1 rounded-2xl bg-white/[0.04] border border-white/10 inline-flex items-center gap-1">
+          <div className="p-1 rounded-2xl bg-white/[0.04] border border-white/10 inline-flex items-center gap-1 flex-wrap justify-center">
             <button
               onClick={() => setActiveTab('packages')}
               className={`min-h-[44px] px-5 rounded-xl text-xs sm:text-sm font-bold transition ${
@@ -351,7 +401,7 @@ export default function SamiqShowcasePage() {
                   : 'text-[#A09D94] hover:text-[#FAF7F2]'
               }`}
             >
-              الباقات الجاهزة المعتمدة (Ready Packages)
+              الباقات الجاهزة المعتمدة (6 باقات)
             </button>
             <button
               onClick={() => setActiveTab('custom')}
@@ -381,76 +431,99 @@ export default function SamiqShowcasePage() {
           <div className="space-y-8 animate-fadeIn">
             <div className="text-center max-w-2xl mx-auto space-y-2">
               <h2 className="text-2xl sm:text-3xl font-serif font-bold text-[#FAF7F2]">
-                اختر الباقة المناسبة لمرحلة نمو تجارتك
+                اختر الباقة الأنسب لمرحلة نشاطك التجاري
               </h2>
               <p className="text-xs sm:text-sm text-[#8E8B85]">
-                أسعار شفافة لمرة واحدة تشمل الإعداد والتهيئة دون اشتراكات خفية
+                كل باقة تشمل استضافة السنة الأولى مجاناً ($0)، بدون أي عمولات على المبيعات، مع إمكانية الترقية في أي وقت.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {READY_PACKAGES.map((pkg) => {
                 const isSelected = selectedPackageId === pkg.id;
                 return (
                   <div
                     key={pkg.id}
-                    onClick={() => handleSelectPackage(pkg)}
-                    className={`rounded-3xl p-5 flex flex-col justify-between transition-all cursor-pointer border ${
+                    className={`rounded-3xl p-6 border transition-all duration-300 flex flex-col justify-between gap-6 relative ${
                       isSelected
-                        ? 'bg-gradient-to-b from-[#C9A84C]/15 to-[#070709] border-[#C9A84C] shadow-[0_0_30px_rgba(201,168,76,0.15)] ring-1 ring-[#C9A84C]'
-                        : 'bg-white/[0.02] border-white/10 hover:border-white/20 hover:bg-white/[0.04]'
+                        ? 'bg-gradient-to-b from-[#C9A84C]/15 to-[#070709] border-[#C9A84C] shadow-[0_0_30px_rgba(201,168,76,0.2)] ring-1 ring-[#C9A84C]/50'
+                        : 'bg-white/[0.02] border-white/10 hover:border-white/20'
                     }`}
                   >
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[#E8D390] font-semibold">
+                        <span className="text-xs px-3 py-1 rounded-full bg-[#C9A84C]/15 text-[#E8D390] font-semibold">
                           {pkg.badge}
                         </span>
                         {isSelected && (
-                          <span className="w-2.5 h-2.5 rounded-full bg-[#C9A84C] ring-4 ring-[#C9A84C]/30" />
+                          <span className="text-xs text-emerald-400 font-bold">المحددة حالياً</span>
                         )}
                       </div>
 
                       <div>
-                        <h3 className="font-serif font-bold text-base sm:text-lg text-[#FAF7F2]">
+                        <h3 className="font-serif font-bold text-lg sm:text-xl text-[#FAF7F2]">
                           {pkg.nameAr}
                         </h3>
-                        <p className="text-xs text-[#8E8B85] mt-1.5 leading-relaxed line-clamp-2">
+                        <p className="text-xs text-[#8E8B85] mt-1 leading-relaxed">
                           {pkg.description}
                         </p>
                       </div>
 
                       <div className="pt-2 border-t border-white/10">
-                        <span className="text-xs text-[#8E8B85] block">التكلفة التقديرية:</span>
-                        <div className="flex items-baseline gap-1">
+                        <span className="text-xs text-[#8E8B85] block">عقد التأسيس (مرة واحدة):</span>
+                        <div className="flex items-baseline gap-1 mt-0.5">
                           <span className="text-3xl font-serif font-bold text-[#E8D390]">
                             ${pkg.priceUsd}
                           </span>
-                          <span className="text-xs text-[#8E8B85]">دولار</span>
+                          <span className="text-xs text-[#8E8B85]">دولار أمريكي</span>
                         </div>
+                        <span className="text-xs text-emerald-400 block mt-1">
+                          يشمل استضافة السنة الأولى مجاناً ($0)
+                        </span>
                       </div>
 
-                      <ul className="space-y-2 pt-2 border-t border-white/5 text-xs text-[#FAF7F2]/90">
-                        {pkg.highlights.map((item, idx) => (
-                          <li key={idx} className="flex items-start gap-1.5">
-                            <svg className="w-3.5 h-3.5 text-[#C9A84C] shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                              <polyline points="20 6 9 17 4 12" />
-                            </svg>
-                            <span className="text-xs text-[#A09D94]">{item}</span>
-                          </li>
-                        ))}
-                      </ul>
+                      <div className="space-y-2 pt-2 border-t border-white/5">
+                        <span className="text-xs font-semibold text-[#FAF7F2] block">أهم المميزات:</span>
+                        <ul className="space-y-1.5 text-xs text-[#A09D94]">
+                          {pkg.highlights.map((h, i) => (
+                            <li key={i} className="flex items-start gap-2">
+                              <svg className="w-3.5 h-3.5 text-gold shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="20 6 9 17 4 12" />
+                              </svg>
+                              <span>{h}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     </div>
 
-                    <div className="pt-6">
+                    <div className="space-y-2 pt-4 border-t border-white/10">
                       <button
-                        className={`w-full min-h-[44px] rounded-xl text-xs font-bold transition ${
+                        type="button"
+                        onClick={() => handleSelectPackage(pkg)}
+                        className={`w-full min-h-[44px] rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
                           isSelected
-                            ? 'bg-[#C9A84C] text-[#070709]'
-                            : 'bg-white/5 text-[#FAF7F2] hover:bg-white/10'
+                            ? 'bg-[#C9A84C] text-[#070709] shadow-lg'
+                            : 'bg-white/5 hover:bg-white/10 text-[#FAF7F2] border border-white/10'
                         }`}
                       >
-                        {isSelected ? 'الباقة المحددة حالياً' : 'تحديد هذه الباقة'}
+                        <span>{isSelected ? 'الباقة المعتمدة للطلب' : 'اختيار هذه الباقة'}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          handleSelectPackage(pkg);
+                          setIsPdfModalOpen(true);
+                        }}
+                        className="w-full min-h-[40px] rounded-xl bg-white/5 hover:bg-white/10 text-champagne border border-gold/30 text-xs font-semibold transition flex items-center justify-center gap-1.5"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="6 9 6 2 18 2 18 9" />
+                          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                          <rect x="6" y="14" width="12" height="8" />
+                        </svg>
+                        <span>تصدير فاتورة هذه الباقة (PDF)</span>
                       </button>
                     </div>
                   </div>
@@ -460,62 +533,48 @@ export default function SamiqShowcasePage() {
           </div>
         )}
 
-        {/* TAB 2: INTERACTIVE CUSTOM PROPOSAL & DEPENDENCY TREE */}
+        {/* TAB 2: INTERACTIVE CUSTOM CONFIGURATOR & TREE */}
         {activeTab === 'custom' && (
           <div className="space-y-8 animate-fadeIn">
             <div className="text-center max-w-2xl mx-auto space-y-2">
               <h2 className="text-2xl sm:text-3xl font-serif font-bold text-[#FAF7F2]">
-                شجرة الترابطات الهندسية وحاسبة التكلفة المخصصة
+                شجرة الترابطات الهندسية وحاسبة التخصيص الدقيق
               </h2>
               <p className="text-xs sm:text-sm text-[#8E8B85]">
-                اضغط على أي ميزة لتفعيلها أو إيقافها؛ يضمن النظام تفعيل المتطلبات السابقة تلقائياً وإلغاء التبعيات بأمان.
+                انقري على أي درجة أو ميزة لتفعيلها تلقائياً مع كافة متطلباتها الهندسية المسبقة، وشاهدي التكلفة تتحدث لحظياً.
               </p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-              {/* Left Column: Interactive Tree View */}
-              <div className="lg:col-span-8 p-6 rounded-3xl bg-white/[0.02] border border-white/10 space-y-6">
-                <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                  <div>
-                    <h3 className="font-serif font-bold text-lg text-[#FAF7F2]">
-                      المسار المعماري للترابطات (Architecture Hierarchy)
-                    </h3>
-                    <p className="text-xs text-[#8E8B85]">
-                      المستوى 1 الأساسي يفتح المستوى 2 والملحقات، والمستوى 2 يفتح الكتالوج والمستشار الذكي.
-                    </p>
-                  </div>
-                  <span className="text-xs px-3 py-1 rounded-full bg-[#C9A84C]/15 border border-[#C9A84C]/30 text-[#E8D390] font-bold">
-                    {customFeatures.length} مزايا مفعلة
-                  </span>
-                </div>
-
-                <div className="space-y-4">
-                  {/* Root Tier 1 */}
+              {/* Left Column: Interactive Tree */}
+              <div className="lg:col-span-8 space-y-6">
+                <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/10 space-y-6">
+                  {/* Level 1: Static Core */}
                   <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <span className="w-3 h-3 rounded-full bg-[#C9A84C]" />
                         <div>
                           <span className="text-sm font-bold text-[#FAF7F2] block">
-                            باقة الحضور الرقمي الفاخر (Tier 1: Static Core)
+                            المستوى 1: باقة الموقع التعريفي الثابت (Tier 1: Static Core)
                           </span>
                           <span className="text-xs text-[#8E8B85]">
-                            الأساس المعماري الإلزامي لكافة المتاجر
+                            واجهة فاخرة بدون منتجات وبدون لوحة تحكم — الأساس الإلزامي
                           </span>
                         </div>
                       </div>
                       <span className="text-xs font-bold px-3 py-1 rounded-lg bg-[#C9A84C]/20 text-[#E8D390]">
-                        +$100 (أساسي)
+                        +$80 (أساسي)
                       </span>
                     </div>
 
                     {/* Direct Addons to Tier 1 */}
                     <div className="mr-6 pr-4 border-r-2 border-white/10 space-y-2 pt-2">
                       <span className="text-xs text-[#8E8B85] font-semibold block">
-                        ملحقات المستوى الأول المباشرة:
+                        إضافات المستوى الأول المباشرة:
                       </span>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                        {['cart_whatsapp', 'authenticity_guide', 'skin_routine_advisor'].map((id) => {
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
+                        {['custom_domain', 'second_language', 'pwa_app', 'analytics_stats'].map((id) => {
                           const feat = FEATURES_REGISTRY[id];
                           const active = customFeatures.includes(id);
                           return (
@@ -549,10 +608,10 @@ export default function SamiqShowcasePage() {
                         <span className={`w-3 h-3 rounded-full ${customFeatures.includes('tier_2_editable') ? 'bg-[#C9A84C]' : 'bg-white/20'}`} />
                         <div>
                           <span className="text-sm font-bold text-[#FAF7F2] block">
-                            لوحة التحكم وإدارة المحتوى (Tier 2: Editable Merchant Hub)
+                            المستوى 2: الموقع القابل للتعديل ولوحة المدير (Tier 2: Editable Hub)
                           </span>
                           <span className="text-xs text-[#8E8B85]">
-                            يتطلب Tier 1 ويفتح حسابات العملاء وشات بوت الذكاء الاصطناعي
+                            دخول سري للمدير لتعديل النصوص والصور والأقسام (+$50 فوق الدرجة 1)
                           </span>
                         </div>
                       </div>
@@ -564,7 +623,7 @@ export default function SamiqShowcasePage() {
                             : 'bg-white/10 text-[#FAF7F2] hover:bg-white/15'
                         }`}
                       >
-                        {customFeatures.includes('tier_2_editable') ? 'مفعل (+$150)' : 'تفعيل (+$150)'}
+                        {customFeatures.includes('tier_2_editable') ? 'مفعل ($130 تراكمي)' : 'تفعيل (+$50)'}
                       </button>
                     </div>
 
@@ -572,10 +631,10 @@ export default function SamiqShowcasePage() {
                     {customFeatures.includes('tier_2_editable') && (
                       <div className="mr-6 pr-4 border-r-2 border-white/10 space-y-2 pt-2 animate-fadeIn">
                         <span className="text-xs text-[#8E8B85] font-semibold block">
-                          ملحقات المستوى الثاني:
+                          إضافات المستوى الثاني والشات بوت:
                         </span>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          {['customer_accounts', 'ai_chatbot'].map((id) => {
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                          {['bookings', 'blog', 'ai_chatbot'].map((id) => {
                             const feat = FEATURES_REGISTRY[id];
                             const active = customFeatures.includes(id);
                             return (
@@ -599,21 +658,50 @@ export default function SamiqShowcasePage() {
                             );
                           })}
                         </div>
+
+                        {/* Channels under AI Chatbot */}
+                        {customFeatures.includes('ai_chatbot') && (
+                          <div className="mr-4 pr-3 border-r-2 border-sky-400/30 space-y-2 pt-2">
+                            <span className="text-xs text-sky-400 font-bold block">
+                              قنوات التواصل الاجتماعي المربوطة بالشات بوت:
+                            </span>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                              {['telegram_channel', 'whatsapp_channel', 'instagram_channel'].map((id) => {
+                                const feat = FEATURES_REGISTRY[id];
+                                const active = customFeatures.includes(id);
+                                return (
+                                  <button
+                                    key={id}
+                                    onClick={() => toggleCustomFeature(id)}
+                                    className={`p-2.5 rounded-xl border text-start flex flex-col justify-between transition min-h-[44px] ${
+                                      active
+                                        ? 'bg-sky-950/40 border-sky-400/50 text-[#FAF7F2]'
+                                        : 'bg-white/[0.02] border-white/10 text-[#8E8B85]'
+                                    }`}
+                                  >
+                                    <span className="text-xs font-bold block">{feat.nameAr}</span>
+                                    <span className="text-xs text-sky-300 font-mono mt-1">+${feat.basePriceUsd}</span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
 
-                  {/* Level 3: Full Catalog & AI Smart Tags */}
+                  {/* Level 3: Full Catalog Core */}
                   <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <span className={`w-3 h-3 rounded-full ${customFeatures.includes('tier_3_catalog') ? 'bg-[#C9A84C]' : 'bg-white/20'}`} />
                         <div>
                           <span className="text-sm font-bold text-[#FAF7F2] block">
-                            الكتالوج الشامل والوسوم الذكية (Tier 3: Dynamic Catalog)
+                            المستوى 3: كتالوج المنتجات والأقسام والوسوم (Tier 3: Dynamic Catalog)
                           </span>
                           <span className="text-xs text-[#8E8B85]">
-                            يتطلب Tier 2 ويفتح الوسوم التلقائية بالذكاء الاصطناعي وبوابات الدفع
+                            كتالوج المنتجات، الأقسام، 3 أنماط عملات، والبحث (+$70 فوق الدرجة 2)
                           </span>
                         </div>
                       </div>
@@ -625,18 +713,26 @@ export default function SamiqShowcasePage() {
                             : 'bg-white/10 text-[#FAF7F2] hover:bg-white/15'
                         }`}
                       >
-                        {customFeatures.includes('tier_3_catalog') ? 'مفعل (+$200)' : 'تفعيل (+$200)'}
+                        {customFeatures.includes('tier_3_catalog') ? 'مفعل ($200 تراكمي)' : 'تفعيل (+$70)'}
                       </button>
                     </div>
 
                     {/* Direct Addons to Tier 3 */}
                     {customFeatures.includes('tier_3_catalog') && (
-                      <div className="mr-6 pr-4 border-r-2 border-white/10 space-y-2 pt-2 animate-fadeIn">
+                      <div className="mr-6 pr-4 border-r-2 border-white/10 space-y-3 pt-2 animate-fadeIn">
                         <span className="text-xs text-[#8E8B85] font-semibold block">
-                          ملحقات المستوى الثالث والذكاء الاصطناعي:
+                          ملحقات المستوى الثالث والكتالوج:
                         </span>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          {['smart_tags_ai', 'payment_gateways'].map((id) => {
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                          {[
+                            'cart_whatsapp',
+                            'inventory_variants',
+                            'smart_tags_ai',
+                            'customer_accounts',
+                            'authenticity_guide',
+                            'skin_routine_advisor',
+                            'multi_branch',
+                          ].map((id) => {
                             const feat = FEATURES_REGISTRY[id];
                             const active = customFeatures.includes(id);
                             return (
@@ -668,7 +764,7 @@ export default function SamiqShowcasePage() {
 
               {/* Right Column: Live Proposal Summary Card */}
               <div className="lg:col-span-4 sticky top-28 space-y-6">
-                <div className="p-6 rounded-3xl bg-gradient-to-b from-white/[0.05] to-white/[0.02] border border-[#C9A84C]/30 shadow-2xl space-y-6">
+                <div className="p-6 rounded-3xl bg-gradient-to-b from-white/[0.05] to-white/[0.02] border border-[#C9A84C]/40 shadow-2xl space-y-6">
                   <div>
                     <span className="text-xs px-2.5 py-1 rounded-full bg-[#C9A84C]/15 text-[#E8D390] font-semibold">
                       ملخص عرض السعر المخصص
@@ -679,7 +775,7 @@ export default function SamiqShowcasePage() {
                   </div>
 
                   <div className="p-4 rounded-2xl bg-[#070709] border border-white/10 space-y-2">
-                    <span className="text-xs text-[#8E8B85] block">الإجمالي التقديري لمرة واحدة:</span>
+                    <span className="text-xs text-[#8E8B85] block">إجمالي التأسيس لمرة واحدة:</span>
                     <div className="flex items-baseline gap-2">
                       <span className="text-4xl font-serif font-bold text-[#E8D390]">
                         ${customPricing.totalUsd}
@@ -687,12 +783,40 @@ export default function SamiqShowcasePage() {
                       <span className="text-xs text-[#8E8B85]">دولار أمريكي</span>
                     </div>
                     <p className="text-xs text-emerald-400 font-semibold pt-1">
-                      يشمل الاستضافة السحابية والتهيئة الأولية
+                      يشمل الاستضافة السحابية والتهيئة الأولية مجاناً ($0)
                     </p>
                   </div>
 
+                  {/* Project / Store Name Input */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-[#FAF7F2] block">
+                      اكتب اسم مشروعك أو متجرك لإصدار عرض السعر الرسمي:
+                    </label>
+                    <input
+                      type="text"
+                      value={clientStoreTitle}
+                      onChange={(e) => setClientStoreTitle(e.target.value)}
+                      placeholder="مثال: متجر أصالة، عيادة النخبة..."
+                      className="w-full min-h-[44px] px-3.5 rounded-xl bg-white/5 border border-white/15 text-xs text-[#FAF7F2] focus:border-[#C9A84C] outline-hidden font-semibold"
+                    />
+                  </div>
+
+                  {/* Client Name Input */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-[#8E8B85] block">
+                      اسم العميل أو صفتك (اختياري):
+                    </label>
+                    <input
+                      type="text"
+                      value={clientContactName}
+                      onChange={(e) => setClientContactName(e.target.value)}
+                      placeholder="مثال: الأستاذ محمد"
+                      className="w-full min-h-[44px] px-3.5 rounded-xl bg-white/5 border border-white/15 text-xs text-[#FAF7F2] focus:border-[#C9A84C] outline-hidden"
+                    />
+                  </div>
+
                   {/* Pick Template for Proposal */}
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <label className="text-xs font-bold text-[#FAF7F2] block">
                       القالب المعماري المفضل:
                     </label>
@@ -710,7 +834,7 @@ export default function SamiqShowcasePage() {
                   </div>
 
                   {/* Domain Option Toggle for Proposal */}
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     <label className="text-xs font-bold text-[#FAF7F2] block">
                       خيار النطاق الرسمي (Domain Name):
                     </label>
@@ -724,7 +848,7 @@ export default function SamiqShowcasePage() {
                             : 'bg-white/5 border-white/10 text-[#8E8B85] hover:border-white/20'
                         }`}
                       >
-                        <span>نطاق مجاني</span>
+                        <span>نطاق فرعي مجاني</span>
                         <span className="font-mono text-emerald-400 text-xs">$0 / سنوياً</span>
                       </button>
                       <button
@@ -764,31 +888,30 @@ export default function SamiqShowcasePage() {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <span className="text-xs font-bold text-[#8E8B85] block">المزايا المضمنة ({customFeatures.length}):</span>
-                    <div className="max-h-48 overflow-y-auto space-y-1 pr-1 text-xs text-[#A09D94]">
-                      {customFeatures.map((fid) => (
-                        <div key={fid} className="flex items-center justify-between py-1 border-b border-white/5">
-                          <span className="truncate">{FEATURES_REGISTRY[fid]?.nameAr || fid}</span>
-                          <span className="font-mono text-[#E8D390] shrink-0">
-                            +${FEATURES_REGISTRY[fid]?.basePriceUsd || 0}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <div className="space-y-2.5 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setIsPdfModalOpen(true)}
+                      className="w-full min-h-[46px] rounded-2xl bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-obsidian-dark text-xs sm:text-sm font-bold transition shadow-xl flex items-center justify-center gap-2 hover:brightness-110"
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="6 9 6 2 18 2 18 9" />
+                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                        <rect x="6" y="14" width="12" height="8" />
+                      </svg>
+                      <span>تحميل عرض السعر والفاتورة الرسمية (PDF)</span>
+                    </button>
 
-                  <div className="pt-2">
                     <a
                       href={telegramOrderUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full min-h-[48px] rounded-2xl bg-gradient-to-r from-[#BF953F] to-[#AA771C] hover:from-[#C9A84C] hover:to-[#B38728] text-[#070709] text-xs sm:text-sm font-bold transition shadow-xl flex items-center justify-center gap-2"
+                      className="w-full min-h-[44px] rounded-2xl bg-white/10 hover:bg-white/15 text-[#FAF7F2] text-xs font-bold transition flex items-center justify-center gap-2 border border-white/15"
                     >
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M21.198 2.433a2.242 2.242 0 0 0-1.022.215l-16.7 6.4a2.25 2.25 0 0 0 .126 4.195l4.312 1.348 1.624 5.228a1.5 1.5 0 0 0 2.45.64l2.58-2.203 4.802 3.535a2.25 2.25 0 0 0 3.524-1.39l3.3-15.5a2.242 2.242 0 0 0-1.996-2.468z" />
                       </svg>
-                      <span>اطلب هذه الباقة عبر تيليجرام (@{developerTelegramHandle})</span>
+                      <span>إرسال الباقة المختارة عبر تيليجرام</span>
                     </a>
                   </div>
                 </div>
@@ -887,7 +1010,7 @@ export default function SamiqShowcasePage() {
             </h2>
 
             <p className="text-xs sm:text-sm text-[#A09D94] leading-relaxed">
-              نؤمن في سَامِق بالوضوح المالي التام مع عملائنا منذ اليوم الأول. إليك التفصيل الدقيق لرسوم البناء لمرة واحدة ورسوم التشغيل والتجديد السنوية الحقيقية دون أي تكاليف مستترة:
+              نؤمن في سَامِق بالوضوح المالي التام مع عملائنا منذ اليوم الأول. إليك التفصيل الدقيق لرسوم البناء لمرة واحدة وررسوم التشغيل والتجديد السنوية الحقيقية دون أي تكاليف مستترة:
             </p>
           </div>
 
@@ -906,8 +1029,8 @@ export default function SamiqShowcasePage() {
                 </div>
                 <div className="pt-2">
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-serif font-bold text-[#E8D390]">$100 - $700+</span>
-                    <span className="text-xs text-muted-lux">حسب الباقة</span>
+                    <span className="text-3xl font-serif font-bold text-[#E8D390]">$80 - $500+</span>
+                    <span className="text-xs text-muted-lux">حسب الباقة المعتمدة</span>
                   </div>
                 </div>
                 <ul className="space-y-2 pt-2 border-t border-white/5 text-xs text-[#A09D94]">
@@ -969,7 +1092,7 @@ export default function SamiqShowcasePage() {
                     }`}
                   >
                     <div>
-                      <span className="font-bold block">نطاق فرعي مجاني (*.samiq.app)</span>
+                      <span className="font-bold block">نطاق فرعي مجاني (*.samiq.shop)</span>
                       <span className="text-muted-dim text-xs">مدى الحياة بدون أي تجديد</span>
                     </div>
                     <span className="font-mono text-emerald-400 font-bold">$0</span>
@@ -985,7 +1108,7 @@ export default function SamiqShowcasePage() {
                   >
                     <div>
                       <span className="font-bold block">دومين عالمي خاص (.com / .net)</span>
-                      <span className="text-muted-dim text-xs">شامل حماية SSL وCloudflare</span>
+                      <span className="text-muted-dim text-xs">شامل حماية SSL وسيرفرات Cloudflare</span>
                     </div>
                     <span className="font-mono text-gold font-bold">$20/سنة</span>
                   </div>
@@ -1022,7 +1145,7 @@ export default function SamiqShowcasePage() {
                 </div>
                 <div className="pt-2">
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-serif font-bold text-emerald-400">$35 - $50</span>
+                    <span className="text-3xl font-serif font-bold text-emerald-400">$45</span>
                     <span className="text-xs text-muted-lux">/ سنوياً (أقل من $4/شهرياً)</span>
                   </div>
                 </div>
@@ -1069,17 +1192,29 @@ export default function SamiqShowcasePage() {
               </p>
             </div>
 
-            <a
-              href={telegramOrderUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="min-h-[44px] px-6 rounded-xl bg-gradient-to-r from-[#BF953F] to-[#AA771C] hover:from-[#C9A84C] hover:to-[#B38728] text-obsidian-dark text-xs font-bold transition shadow-lg inline-flex items-center gap-2 shrink-0"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21.198 2.433a2.242 2.242 0 0 0-1.022.215l-16.7 6.4a2.25 2.25 0 0 0 .126 4.195l4.312 1.348 1.624 5.228a1.5 1.5 0 0 0 2.45.64l2.58-2.203 4.802 3.535a2.25 2.25 0 0 0 3.524-1.39l3.3-15.5a2.242 2.242 0 0 0-1.996-2.468z" />
-              </svg>
-              <span>طلب المتجر بهذا الخيار عبر تيليجرام</span>
-            </a>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsPdfModalOpen(true)}
+                className="min-h-[44px] px-5 rounded-xl bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-obsidian-dark text-xs font-bold transition shadow-lg inline-flex items-center gap-1.5"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="6 9 6 2 18 2 18 9" />
+                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                  <rect x="6" y="14" width="12" height="8" />
+                </svg>
+                <span>تصدير الفاتورة (PDF)</span>
+              </button>
+
+              <a
+                href={telegramOrderUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="min-h-[44px] px-5 rounded-xl bg-white/10 hover:bg-white/20 text-[#FAF7F2] text-xs font-bold transition shadow-md inline-flex items-center gap-2 border border-white/15"
+              >
+                <span>طلب عبر تيليجرام</span>
+              </a>
+            </div>
           </div>
         </section>
 
@@ -1098,15 +1233,24 @@ export default function SamiqShowcasePage() {
           </div>
 
           <div className="flex items-center justify-center gap-4 flex-wrap pt-2">
+            <button
+              type="button"
+              onClick={() => setIsPdfModalOpen(true)}
+              className="min-h-[48px] px-7 rounded-full bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-obsidian-dark text-sm font-bold transition shadow-xl inline-flex items-center gap-2 hover:brightness-110"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="6 9 6 2 18 2 18 9" />
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                <rect x="6" y="14" width="12" height="8" />
+              </svg>
+              <span>تحميل عرض السعر والفاتورة الرسمية (PDF)</span>
+            </button>
             <a
               href={telegramOrderUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="min-h-[48px] px-8 rounded-full bg-gradient-to-r from-[#BF953F] to-[#AA771C] hover:from-[#C9A84C] hover:to-[#B38728] text-[#070709] text-sm font-bold transition shadow-xl inline-flex items-center gap-2"
+              className="min-h-[48px] px-8 rounded-full bg-white/10 hover:bg-white/20 text-[#FAF7F2] text-sm font-bold transition shadow-xl inline-flex items-center gap-2 border border-white/15"
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21.198 2.433a2.242 2.242 0 0 0-1.022.215l-16.7 6.4a2.25 2.25 0 0 0 .126 4.195l4.312 1.348 1.624 5.228a1.5 1.5 0 0 0 2.45.64l2.58-2.203 4.802 3.535a2.25 2.25 0 0 0 3.524-1.39l3.3-15.5a2.242 2.242 0 0 0-1.996-2.468z" />
-              </svg>
               <span>اطلب متجرك الآن عبر تيليجرام (@{developerTelegramHandle})</span>
             </a>
             <Link

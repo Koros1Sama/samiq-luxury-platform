@@ -79,11 +79,13 @@ export function LuxuryNoirTheme(_props: ThemeLayoutProps) {
       {/* 1. Header (Sticky 56px on Mobile, 64px on Desktop - Utility strip deleted) */}
       <LuxuryHeader onOpenAdvisor={() => setIsAdvisorOpen(true)} />
 
-      {/* 2. Category Chips Row (44px, directly under header) */}
-      <QuickCategoryStoriesBar
-        activeCategory={activeCategory}
-        onSelectCategory={setActiveCategory}
-      />
+      {/* 2. Category Chips Row (44px, directly under header) - only shown when catalog is enabled */}
+      {features.tier_3_catalog && (
+        <QuickCategoryStoriesBar
+          activeCategory={activeCategory}
+          onSelectCategory={setActiveCategory}
+        />
+      )}
 
       {/* 3. Dynamic Sections Outlet */}
       <main>

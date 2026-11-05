@@ -10,13 +10,22 @@ import {
 } from '@/core/features/registry';
 import { ThemeId, SAMIQ_THEMES, isValidThemeId } from '@/themes/contract';
 import { SamiqProjectRecord } from '@/core/db/store';
+import { PdfInvoiceModal } from '@/core/features/PdfInvoiceModal';
 
 export default function PlatformSuperAdminPage() {
   // Fleet of Projects State
   const [projects, setProjects] = useState<SamiqProjectRecord[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string>('proj-miftah');
 
-  // Active Theme & Selected Features for the selected project
+  // Mode: 'custom_quote' (general quote for any project) | 'fleet_project' (linked to a registered project in fleet)
+  const [targetMode, setTargetMode] = useState<'custom_quote' | 'fleet_project'>('custom_quote');
+  const [quoteProjectTitle, setQuoteProjectTitle] = useState<string>('متجر النخبة الفاخر');
+  const [quoteClientName, setQuoteClientName] = useState<string>('');
+  const [customDiscountUsd, setCustomDiscountUsd] = useState<number>(0);
+  const [priceOverrides, setPriceOverrides] = useState<Record<string, number>>({});
+  const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
+
+  // Active Theme & Selected Features for the selected project / quote
   const [activeTheme, setActiveTheme] = useState<ThemeId>('luxury-noir');
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([
     'tier_1_static',
@@ -30,7 +39,7 @@ export default function PlatformSuperAdminPage() {
     'smart_tags_ai',
   ]);
 
-  // Operational & Recurring Costs State for Selected Project
+  // Operational & Recurring Costs State
   const [projectDomainType, setProjectDomainType] = useState<'subdomain_free' | 'custom_com' | 'custom_ye'>('custom_com');
   const [projectAnnualDomainUsd, setProjectAnnualDomainUsd] = useState<number>(20);
   const [projectAnnualHostingUsd, setProjectAnnualHostingUsd] = useState<number>(45);
@@ -50,7 +59,7 @@ export default function PlatformSuperAdminPage() {
     whatsapp: '967770000000',
     city: 'صنعاء',
     adminPasscode: 'samiq2026',
-    setupPriceUsd: 450,
+    setupPriceUsd: 235,
   });
 
   // View Mode: synchronized (default) | tree_only | matrix_only
@@ -86,21 +95,14 @@ export default function PlatformSuperAdminPage() {
             const initialProj =
               data.projects.find((p: SamiqProjectRecord) => p.id === 'proj-miftah') || data.projects[0];
             setSelectedProjectId(initialProj.id);
-            setActiveTheme(initialProj.themeId);
-            setSelectedFeatures(resolveEffectiveFeatures(initialProj.enabledFeatures || []));
-            setProjectDomainType(initialProj.domainType || 'custom_com');
-            setProjectAnnualDomainUsd(initialProj.annualDomainUsd ?? 20);
-            setProjectAnnualHostingUsd(initialProj.annualHostingMaintenanceUsd ?? 45);
-            setProjectAiPlan(initialProj.aiPlanType || 'byok');
-          } else {
-            if (data.themeId) setActiveTheme(data.themeId);
-            if (data.features) {
-              const activeKeys = Object.entries(data.features)
-                .filter(([_, active]) => Boolean(active))
-                .map(([key]) => key);
-              if (activeKeys.length > 0) {
-                setSelectedFeatures(resolveEffectiveFeatures(activeKeys));
-              }
+            if (targetMode === 'fleet_project') {
+              setActiveTheme(initialProj.themeId);
+              setSelectedFeatures(resolveEffectiveFeatures(initialProj.enabledFeatures || []));
+              setQuoteProjectTitle(initialProj.name);
+              setProjectDomainType(initialProj.domainType || 'custom_com');
+              setProjectAnnualDomainUsd(initialProj.annualDomainUsd ?? 20);
+              setProjectAnnualHostingUsd(initialProj.annualHostingMaintenanceUsd ?? 45);
+              setProjectAiPlan(initialProj.aiPlanType || 'byok');
             }
           }
           if (data.platformMeta) {
@@ -112,23 +114,32 @@ export default function PlatformSuperAdminPage() {
       }
     }
     loadPlatformConfig();
-  }, []);
+  }, [targetMode]);
 
-  // Currently selected project
+  // Currently selected fleet project
   const selectedProject = useMemo(() => {
     return projects.find((p) => p.id === selectedProjectId) || projects[0] || null;
   }, [projects, selectedProjectId]);
 
-  // Sync state when selected project changes
-  const handleSelectProject = (proj: SamiqProjectRecord) => {
+  // Effective display project name
+  const effectiveProjectTitle = useMemo(() => {
+    if (targetMode === 'fleet_project' && selectedProject) {
+      return selectedProject.name;
+    }
+    return quoteProjectTitle.trim() || 'مشروع جديد';
+  }, [targetMode, selectedProject, quoteProjectTitle]);
+
+  // Sync state when fleet project is selected
+  const handleSelectFleetProject = (proj: SamiqProjectRecord) => {
     setSelectedProjectId(proj.id);
     setActiveTheme(proj.themeId);
     setSelectedFeatures(resolveEffectiveFeatures(proj.enabledFeatures || []));
+    setQuoteProjectTitle(proj.name);
     setProjectDomainType(proj.domainType || 'custom_com');
     setProjectAnnualDomainUsd(proj.annualDomainUsd ?? 20);
     setProjectAnnualHostingUsd(proj.annualHostingMaintenanceUsd ?? 45);
     setProjectAiPlan(proj.aiPlanType || 'byok');
-    setSaveSuccessMsg(`تم تحديد مشروع «${proj.name}» للتخصيص والتعديل.`);
+    setSaveSuccessMsg(`تم تحديد مشروع «${proj.name}» للتخصيص والتطبيق.`);
     setTimeout(() => setSaveSuccessMsg(''), 3000);
   };
 
@@ -156,7 +167,10 @@ export default function PlatformSuperAdminPage() {
     };
   }, [projects]);
 
-  const pricing = useMemo(() => calculateTierPrice(selectedFeatures), [selectedFeatures]);
+  const pricing = useMemo(
+    () => calculateTierPrice(selectedFeatures, priceOverrides, customDiscountUsd),
+    [selectedFeatures, priceOverrides, customDiscountUsd]
+  );
   const validation = useMemo(() => validateFeatureDependencies(selectedFeatures), [selectedFeatures]);
 
   // Selected project annual recurring total
@@ -206,15 +220,44 @@ export default function PlatformSuperAdminPage() {
     }
   };
 
-  // Switch Theme for current project
+  // Handle manual price override for a feature
+  const handleSetPriceOverride = (featId: string) => {
+    const currentPrice = priceOverrides[featId] ?? FEATURES_REGISTRY[featId]?.basePriceUsd ?? 0;
+    const input = prompt(`أدخل السعر المخصص لميزة «${FEATURES_REGISTRY[featId]?.nameAr}» بالدولار ($):`, String(currentPrice));
+    if (input !== null) {
+      const num = Number(input);
+      if (!isNaN(num) && num >= 0) {
+        setPriceOverrides((prev) => ({
+          ...prev,
+          [featId]: num,
+        }));
+      }
+    }
+  };
+
+  // Switch Theme
   const handleSwitchTheme = (themeId: ThemeId) => {
     setActiveTheme(themeId);
-    setSaveSuccessMsg(`تم تحديد القالب ${SAMIQ_THEMES[themeId].nameAr} للمشروع المحدد. يرجى الضغط على حفظ لتأكيد التغيير.`);
-    setTimeout(() => setSaveSuccessMsg(''), 4000);
+    setSaveSuccessMsg(`تم تحديد القالب ${SAMIQ_THEMES[themeId].nameAr}.`);
+    setTimeout(() => setSaveSuccessMsg(''), 3000);
   };
 
   // Save Full Config for Selected Project & Platform
   const handleSavePlatformConfig = async () => {
+    if (targetMode === 'custom_quote') {
+      // In custom quote mode, prompt to create a new project with these settings
+      setNewProjectForm((prev) => ({
+        ...prev,
+        name: quoteProjectTitle.trim() || 'مشروع جديد',
+        slug: (quoteProjectTitle.trim() || 'store').toLowerCase().replace(/[^\w-]/g, '-'),
+        setupPriceUsd: pricing.totalUsd,
+        themeId: activeTheme,
+        domainType: projectDomainType,
+      }));
+      setIsCreateModalOpen(true);
+      return;
+    }
+
     setIsSaving(true);
     setSaveError('');
     setSaveSuccessMsg('');
@@ -239,7 +282,7 @@ export default function PlatformSuperAdminPage() {
           setProjects(data.projects);
         }
         setSaveSuccessMsg(
-          `تم بنجاح حفظ وتطبيق تكوين مشروع «${selectedProject?.name || ''}» (التأسيس: $${pricing.totalUsd} · التجديد: $${selectedProjectAnnualTotal}/سنوياً).`
+          `تم بنجاح حفظ وتطبيق تكوين مشروع «${effectiveProjectTitle}» (التأسيس: $${pricing.totalUsd} · التجديد: $${selectedProjectAnnualTotal}/سنوياً).`
         );
       } else {
         setSaveError(data.message || 'حدث خطأ أثناء الحفظ');
@@ -266,7 +309,7 @@ export default function PlatformSuperAdminPage() {
       const domainVal =
         newProjectForm.domain.trim() ||
         (newProjectForm.domainType === 'subdomain_free'
-          ? `${newProjectForm.slug.trim()}.samiq.app`
+          ? `${newProjectForm.slug.trim()}.samiq.shop`
           : `${newProjectForm.slug.trim()}.com`);
 
       const annualDomainCost =
@@ -278,7 +321,7 @@ export default function PlatformSuperAdminPage() {
         body: JSON.stringify({
           action: 'create_project',
           name: newProjectForm.name.trim(),
-          legalName: `${newProjectForm.name.trim()} — لكشف المقلد`,
+          legalName: `${newProjectForm.name.trim()} — متجر رسمي`,
           slug: newProjectForm.slug.trim(),
           industryAr: newProjectForm.industryAr,
           domain: domainVal,
@@ -290,8 +333,8 @@ export default function PlatformSuperAdminPage() {
           whatsapp: newProjectForm.whatsapp.trim(),
           city: newProjectForm.city.trim(),
           adminPasscode: newProjectForm.adminPasscode.trim(),
-          setupPriceUsd: Number(newProjectForm.setupPriceUsd) || 450,
-          enabledFeatures: ['tier_1_static', 'tier_2_editable', 'tier_3_catalog', 'cart_whatsapp'],
+          setupPriceUsd: Number(newProjectForm.setupPriceUsd) || pricing.totalUsd,
+          enabledFeatures: selectedFeatures,
         }),
       });
 
@@ -300,11 +343,10 @@ export default function PlatformSuperAdminPage() {
         setProjects(data.projects);
         if (data.project) {
           setSelectedProjectId(data.project.id);
+          setTargetMode('fleet_project');
+          setQuoteProjectTitle(data.project.name);
           setActiveTheme(data.project.themeId);
           setSelectedFeatures(data.project.enabledFeatures);
-          setProjectDomainType(data.project.domainType);
-          setProjectAnnualDomainUsd(data.project.annualDomainUsd);
-          setProjectAnnualHostingUsd(data.project.annualHostingMaintenanceUsd);
         }
         setIsCreateModalOpen(false);
         setSaveSuccessMsg(`تم تدشين مشروع «${newProjectForm.name}» بنجاح وإضافته للأسطول!`);
@@ -350,7 +392,7 @@ export default function PlatformSuperAdminPage() {
     const url =
       typeof window !== 'undefined'
         ? `${window.location.origin}/samiq`
-        : 'https://samiq-luxury-platform.vercel.app/samiq';
+        : 'https://samiq.shop/samiq';
     navigator.clipboard.writeText(url);
     setCopySuccess(true);
     setTimeout(() => setCopySuccess(false), 3000);
@@ -383,24 +425,31 @@ export default function PlatformSuperAdminPage() {
     label,
     price,
     requires,
+    incrementalDiff,
   }: {
     id: string;
     label: string;
     price: number;
     requires?: string[];
+    incrementalDiff?: string;
   }) => {
     const isSelected = selectedFeatures.includes(id);
+    const overridePrice = priceOverrides[id];
+    const displayPrice = overridePrice !== undefined ? overridePrice : price;
+
     return (
-      <button
-        type="button"
-        onClick={() => toggleFeatureWithCascade(id)}
+      <div
         className={`w-full min-h-[44px] p-3.5 rounded-2xl border text-start transition-all duration-300 relative group flex flex-col justify-between gap-2.5 ${
           isSelected
             ? 'bg-elevated border-gold/60 shadow-[0_0_15px_rgba(201,168,76,0.18)]'
             : 'bg-white/[0.02] border-white/5 opacity-60 hover:opacity-100 hover:border-white/20'
         }`}
       >
-        <div className="flex items-start gap-2.5 w-full">
+        <button
+          type="button"
+          onClick={() => toggleFeatureWithCascade(id)}
+          className="w-full text-start flex items-start gap-2.5 focus:outline-hidden"
+        >
           <span
             className={`w-2.5 h-2.5 mt-1.5 rounded-full shrink-0 transition-colors ${
               isSelected ? 'bg-gold animate-pulse' : 'bg-white/20'
@@ -420,26 +469,56 @@ export default function PlatformSuperAdminPage() {
               </span>
             )}
           </div>
-        </div>
+        </button>
 
         <div className="flex items-center justify-between w-full pt-2 border-t border-white/5">
-          <span className="text-xs font-sans font-bold px-2 py-0.5 rounded bg-gold/15 text-gold border border-gold/30">
-            +${price}
-          </span>
-          <span
-            className={`text-xs font-sans font-bold px-2 py-0.5 rounded ${
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => handleSetPriceOverride(id)}
+              title="انقر لتعديل السعر لهذا العرض يدوياً"
+              className="text-xs font-sans font-bold px-2 py-0.5 rounded bg-gold/15 text-gold border border-gold/30 hover:bg-gold/25 transition cursor-pointer"
+            >
+              {overridePrice !== undefined ? `$${displayPrice} (معدل)` : `+$${displayPrice}`}
+            </button>
+            {incrementalDiff && (
+              <span className="text-xs text-muted-lux font-semibold">
+                ({incrementalDiff})
+              </span>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => toggleFeatureWithCascade(id)}
+            className={`text-xs font-sans font-bold px-2 py-0.5 rounded transition ${
               isSelected ? 'bg-emerald-950/60 text-emerald-300' : 'bg-white/5 text-muted-dim'
             }`}
           >
             {isSelected ? 'مفعل' : 'معطل'}
-          </span>
+          </button>
         </div>
-      </button>
+      </div>
     );
   };
 
   return (
     <div className="min-h-screen bg-obsidian text-ivory font-sans pb-20">
+      {/* Official PDF Invoice Modal */}
+      <PdfInvoiceModal
+        isOpen={isInvoiceModalOpen}
+        onClose={() => setIsInvoiceModalOpen(false)}
+        projectName={effectiveProjectTitle}
+        clientName={quoteClientName}
+        selectedTemplate={activeTheme}
+        selectedFeatureIds={selectedFeatures}
+        priceOverrides={priceOverrides}
+        discountUsd={customDiscountUsd}
+        domainType={projectDomainType}
+        annualDomainUsd={projectAnnualDomainUsd}
+        annualHostingUsd={projectAnnualHostingUsd}
+        aiPlanType={projectAiPlan}
+      />
+
       {/* Top Header */}
       <header className="sticky top-0 z-30 w-full bg-[#070709]/95 backdrop-blur-md border-b border-white/[0.08] shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
@@ -453,22 +532,34 @@ export default function PlatformSuperAdminPage() {
                   منصة سَامِق (SAMIQ Fleet & Multi-Tenant Studio)
                 </h1>
                 <span className="text-xs px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/30 font-semibold">
-                  لوحة إدارة الأسطول الموحدة
+                  حاسبة عروض الأسعار والأسطول
                 </span>
               </div>
               <p className="text-xs text-muted-lux">
-                إدارة أسطول المتاجر المتعددة عبر مختلف القطاعات، شجرة الترابطات الهندسية، والعوائد السنوية
+                إصدار عروض الأسعار الرسمية (PDF)، شجرة الترابطات الهندسية، وإدارة أسطول المشاريع
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2.5 flex-wrap">
+            <button
+              type="button"
+              onClick={() => setIsInvoiceModalOpen(true)}
+              className="min-h-[44px] px-4 py-2 rounded-xl bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-obsidian-dark font-bold text-xs hover:brightness-110 shadow-lg transition flex items-center gap-1.5"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="6 9 6 2 18 2 18 9" />
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                <rect x="6" y="14" width="12" height="8" />
+              </svg>
+              <span>تصدير عرض السعر / الفاتورة (PDF)</span>
+            </button>
             <Link
               href="/samiq"
               target="_blank"
               className="min-h-[44px] px-3.5 py-2 rounded-xl bg-gradient-to-r from-gold/20 to-gold/10 hover:from-gold/30 hover:to-gold/20 text-champagne border border-gold/40 text-xs font-bold transition inline-flex items-center gap-1.5"
             >
-              <span>صفحة الأسعار العامة للعملاء (/samiq)</span>
+              <span>صفحة الأسعار العامة (/samiq)</span>
               <span>↗</span>
             </Link>
             <button
@@ -484,12 +575,6 @@ export default function PlatformSuperAdminPage() {
               <span>معاينة المتجر الحي</span>
               <span>←</span>
             </Link>
-            <Link
-              href="/admin"
-              className="min-h-[44px] px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-ivory border border-white/10 text-xs font-semibold transition inline-flex items-center"
-            >
-              لوحة المحل (Admin)
-            </Link>
           </div>
         </div>
       </header>
@@ -500,7 +585,7 @@ export default function PlatformSuperAdminPage() {
           <div className="p-4 rounded-2xl bg-surface border border-white/5 space-y-1">
             <span className="text-xs text-muted-lux font-medium">إجمالي المشاريع والمتاجر المدارة:</span>
             <div className="text-2xl font-serif font-bold text-ivory">{fleetMetrics.totalProjects} مشاريع</div>
-            <span className="text-xs text-emerald-400 font-bold">موزعة على قطاعات التجميل، المطاعم، والعيادات</span>
+            <span className="text-xs text-emerald-400 font-bold">موزعة على كافة القطاعات</span>
           </div>
 
           <div className="p-4 rounded-2xl bg-surface border border-white/5 space-y-1">
@@ -512,7 +597,7 @@ export default function PlatformSuperAdminPage() {
           <div className="p-4 rounded-2xl bg-surface border border-white/5 space-y-1">
             <span className="text-xs text-muted-lux font-medium">العائد السنوي المتكرر (الدومينات + الاستضافة):</span>
             <div className="text-2xl font-serif font-bold text-emerald-400">${fleetMetrics.totalAnnualRecurringUsd} / سنوياً</div>
-            <span className="text-xs text-muted-dim font-bold">مجموع رسوم التجديد السنوية للدومينات والسيرفرات</span>
+            <span className="text-xs text-muted-dim font-bold">مجموع رسوم التجديد السنوية</span>
           </div>
 
           <div className="p-4 rounded-2xl bg-surface border border-white/5 space-y-1">
@@ -525,19 +610,132 @@ export default function PlatformSuperAdminPage() {
         </div>
 
         {/* ==================================================================== */}
-        {/* MULTI-PROJECT FLEET MANAGER SECTION                                   */}
+        {/* QUOTE & TARGET MODE SELECTOR CARD                                    */}
         {/* ==================================================================== */}
-        <div className="p-6 rounded-3xl bg-surface border border-gold/30 shadow-2xl space-y-6">
+        <div className="p-6 rounded-3xl bg-surface border border-gold/40 shadow-2xl space-y-5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
             <div>
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-gold" />
                 <h2 className="text-base sm:text-lg font-serif font-bold text-ivory">
-                  إدارة أسطول مشاريع وعملاء منصة سَامِق (Multi-Project Fleet Manager)
+                  شريط تحديد الهدف وبيانات العرض (Quote / Target Mode)
                 </h2>
               </div>
               <p className="text-xs text-muted-lux mt-1">
-                إدارة مركزية لكافة مشاريع العملاء المستضافة عبر مختلف القطاعات (تجميل، مطاعم، عيادات)، مع تفاصيل النطاق، القالب، وحالة المتجر
+                حددي ما إذا كنت تصدرين عرض سعر لمشروع جديد/مخصص أو تطبقين الإعدادات على متجر مسجل بالأسطول
+              </p>
+            </div>
+
+            {/* Target Mode Switcher Buttons */}
+            <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-[#0d0c11] border border-white/10 shrink-0">
+              <button
+                type="button"
+                onClick={() => setTargetMode('custom_quote')}
+                className={`min-h-[40px] px-4 rounded-xl text-xs font-bold transition ${
+                  targetMode === 'custom_quote'
+                    ? 'bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark shadow-md'
+                    : 'text-ivory/70 hover:text-ivory'
+                }`}
+              >
+                عرض سعر / مشروع جديد أو عام (Custom Quote)
+              </button>
+              <button
+                type="button"
+                onClick={() => setTargetMode('fleet_project')}
+                className={`min-h-[40px] px-4 rounded-xl text-xs font-bold transition ${
+                  targetMode === 'fleet_project'
+                    ? 'bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark shadow-md'
+                    : 'text-ivory/70 hover:text-ivory'
+                }`}
+              >
+                ربط وتطبيق على مشروع بالأسطول
+              </button>
+            </div>
+          </div>
+
+          {/* Target Mode Details & Input Fields */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-sans">
+            {targetMode === 'custom_quote' ? (
+              <div className="space-y-1.5 sm:col-span-2">
+                <label className="text-ivory/80 font-semibold block">
+                  اسم المشروع أو المتجر المقترح (Project Title):
+                </label>
+                <input
+                  type="text"
+                  value={quoteProjectTitle}
+                  onChange={(e) => setQuoteProjectTitle(e.target.value)}
+                  placeholder="مثال: مجوهرات الملكة، عطور الأصالة، عيادة النخبة..."
+                  className="w-full min-h-[44px] px-3.5 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-hidden text-sm font-semibold"
+                />
+              </div>
+            ) : (
+              <div className="space-y-1.5 sm:col-span-2">
+                <label className="text-ivory/80 font-semibold block">
+                  اختر المشروع المستهدف من الأسطول:
+                </label>
+                <select
+                  value={selectedProjectId}
+                  onChange={(e) => {
+                    const proj = projects.find((p) => p.id === e.target.value);
+                    if (proj) handleSelectFleetProject(proj);
+                  }}
+                  className="w-full min-h-[44px] px-3.5 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-hidden text-sm font-semibold"
+                >
+                  {projects.map((proj) => (
+                    <option key={proj.id} value={proj.id} className="bg-obsidian text-ivory">
+                      {proj.name} ({proj.industryAr}) — {proj.domain}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <div className="space-y-1.5">
+              <label className="text-ivory/80 font-semibold block">
+                اسم العميل أو الجهة المستلمة (اختياري):
+              </label>
+              <input
+                type="text"
+                value={quoteClientName}
+                onChange={(e) => setQuoteClientName(e.target.value)}
+                placeholder="مثال: الأستاذ محمد"
+                className="w-full min-h-[44px] px-3.5 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-hidden text-sm"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-ivory/80 font-semibold block">
+                خصم خاص من منصة سَامِق ($):
+              </label>
+              <div className="relative">
+                <input
+                  type="number"
+                  min="0"
+                  value={customDiscountUsd}
+                  onChange={(e) => setCustomDiscountUsd(Math.max(0, Number(e.target.value) || 0))}
+                  placeholder="0"
+                  className="w-full min-h-[44px] px-3.5 rounded-xl bg-white/5 border border-white/10 text-emerald-400 font-mono font-bold focus:border-gold outline-hidden text-sm"
+                />
+                <span className="absolute end-3 top-3 text-muted-dim text-xs">$ خصم</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ==================================================================== */}
+        {/* MULTI-PROJECT FLEET CARDS (When Fleet Mode or Overview)              */}
+        {/* ==================================================================== */}
+        <div className="p-6 rounded-3xl bg-surface border border-white/10 shadow-xl space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-champagne" />
+                <h2 className="text-base sm:text-lg font-serif font-bold text-ivory">
+                  أسطول مشاريع وعملاء منصة سَامِق (SAMIQ Fleet Manager)
+                </h2>
+              </div>
+              <p className="text-xs text-muted-lux mt-1">
+                إدارة مركزية لكافة مشاريع العملاء المستضافة في قاعدة البيانات، مع إمكانية التحديد والتبديل المباشر
               </p>
             </div>
 
@@ -546,10 +744,6 @@ export default function PlatformSuperAdminPage() {
               onClick={() => setIsCreateModalOpen(true)}
               className="min-h-[44px] px-5 py-2 rounded-xl bg-gradient-to-r from-[#BF953F] to-[#AA771C] hover:from-[#C9A84C] hover:to-[#B38728] text-obsidian-dark font-sans font-bold text-xs transition shadow-lg inline-flex items-center gap-2 shrink-0"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
               <span>+ تدشين مشروع لعميل جديد</span>
             </button>
           </div>
@@ -557,7 +751,7 @@ export default function PlatformSuperAdminPage() {
           {/* Projects Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {projects.map((proj) => {
-              const isSelected = selectedProjectId === proj.id;
+              const isSelected = targetMode === 'fleet_project' && selectedProjectId === proj.id;
               const annualSum = (proj.annualDomainUsd || 0) + (proj.annualHostingMaintenanceUsd || 0) + (proj.aiPlanType === 'managed_annual' ? 90 : 0);
 
               const statusBadge =
@@ -610,10 +804,6 @@ export default function PlatformSuperAdminPage() {
                         <span>القالب المعتمد:</span>
                         <span className="text-champagne font-semibold">{SAMIQ_THEMES[proj.themeId]?.nameAr || proj.themeId}</span>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span>المنتجات / الطلبات:</span>
-                        <span className="text-ivory">{proj.productsCount} منتجات · {proj.ordersCount} طلبات</span>
-                      </div>
                     </div>
                   </div>
 
@@ -621,7 +811,10 @@ export default function PlatformSuperAdminPage() {
                   <div className="space-y-2 pt-2 border-t border-white/5">
                     <button
                       type="button"
-                      onClick={() => handleSelectProject(proj)}
+                      onClick={() => {
+                        setTargetMode('fleet_project');
+                        handleSelectFleetProject(proj);
+                      }}
                       className={`w-full min-h-[42px] px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
                         isSelected
                           ? 'bg-gold text-obsidian-dark shadow-md'
@@ -734,6 +927,7 @@ export default function PlatformSuperAdminPage() {
                       <option value="المطاعم والمقاهي المختصة" className="bg-obsidian text-ivory">المطاعم والمقاهي المختصة</option>
                       <option value="العيادات والصيدليات التخصصية" className="bg-obsidian text-ivory">العيادات والصيدليات التخصصية</option>
                       <option value="الأزياء والعطور الحصرية" className="bg-obsidian text-ivory">الأزياء والعطور الحصرية</option>
+                      <option value="المجوهرات والساعات الثمينة" className="bg-obsidian text-ivory">المجوهرات والساعات الثمينة</option>
                       <option value="الإلكترونيات والتقنية" className="bg-obsidian text-ivory">الإلكترونيات والتقنية</option>
                     </select>
                   </div>
@@ -746,7 +940,7 @@ export default function PlatformSuperAdminPage() {
                       className="w-full min-h-[44px] px-3.5 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-hidden"
                     >
                       <option value="custom_com" className="bg-obsidian text-ivory">دومين عالمي رسمي .com ($20 / سنوياً)</option>
-                      <option value="subdomain_free" className="bg-obsidian text-ivory">نطاق فرعي مجاني samiq.app ($0 / سنوياً)</option>
+                      <option value="subdomain_free" className="bg-obsidian text-ivory">نطاق فرعي مجاني samiq.shop ($0 / سنوياً)</option>
                       <option value="custom_ye" className="bg-obsidian text-ivory">دومين يمني .ye ($35 / سنوياً)</option>
                     </select>
                   </div>
@@ -770,7 +964,7 @@ export default function PlatformSuperAdminPage() {
                       type="number"
                       value={newProjectForm.setupPriceUsd}
                       onChange={(e) => setNewProjectForm({ ...newProjectForm, setupPriceUsd: Number(e.target.value) })}
-                      className="w-full min-h-[44px] px-3.5 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-hidden"
+                      className="w-full min-h-[44px] px-3.5 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-hidden font-mono"
                     />
                   </div>
 
@@ -819,7 +1013,7 @@ export default function PlatformSuperAdminPage() {
         )}
 
         {/* ==================================================================== */}
-        {/* OPERATIONAL & ANNUAL COSTS CONFIGURATOR FOR SELECTED PROJECT          */}
+        {/* OPERATIONAL & ANNUAL COSTS CONFIGURATOR                              */}
         {/* ==================================================================== */}
         <div className="p-6 rounded-3xl bg-surface border border-white/10 shadow-xl space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
@@ -827,11 +1021,11 @@ export default function PlatformSuperAdminPage() {
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
                 <h2 className="text-base sm:text-lg font-serif font-bold text-ivory">
-                  التكاليف السنوية والتشغيلية للمشروع المحدد — الدومين، الاستضافة، والذكاء الاصطناعي
+                  التكاليف السنوية والتشغيلية — الدومين، الاستضافة، والذكاء الاصطناعي
                 </h2>
               </div>
               <p className="text-xs text-muted-lux mt-1">
-                تخصيص رسوم التجديد السنوية لمشروع: <span className="text-champagne font-bold">{selectedProject?.name}</span> ({selectedProject?.industryAr})
+                تخصيص رسوم التجديد السنوية لـ: <span className="text-champagne font-bold">{effectiveProjectTitle}</span>
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -858,7 +1052,7 @@ export default function PlatformSuperAdminPage() {
                       : 'bg-white/5 border-white/5 text-muted-lux hover:border-white/20'
                   }`}
                 >
-                  <span>نطاق فرعي مجاني (*.samiq.app)</span>
+                  <span>نطاق فرعي مجاني (*.samiq.shop)</span>
                   <span className="font-mono text-emerald-400">$0 / سنوياً</span>
                 </button>
                 <button
@@ -887,7 +1081,7 @@ export default function PlatformSuperAdminPage() {
                 </button>
               </div>
               <p className="text-xs text-muted-dim leading-snug">
-                يشمل الدومين حجز الاسم الرسمي السنوي، شهادة الأمان SSL وحماية Cloudflare السحابية.
+                يشمل الدومين حجز الاسم السنوي الرسمي، شهادة الأمان SSL وحماية سحابية عالمية.
               </p>
             </div>
 
@@ -975,14 +1169,14 @@ export default function PlatformSuperAdminPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <h2 className="text-base sm:text-lg font-serif font-bold text-ivory">
-                القالب المعماري للمشروع المحدد ({selectedProject?.name})
+                القالب المعماري المقترح لـ ({effectiveProjectTitle})
               </h2>
               <p className="text-xs text-muted-lux">
-                اختاري القالب النشط ليتم تطبيقه فورياً في قاعدة البيانات وحفظه للمشروع المحدد
+                اختاري القالب المعتمد ليتم تطبيقه فورياً وإدراجه في وثيقة الفاتورة الرسمية
               </p>
             </div>
             <span className="text-xs font-bold text-gold px-3 py-1 rounded-full bg-gold/10 border border-gold/30">
-              القالب الحالي: {SAMIQ_THEMES[activeTheme]?.nameAr}
+              القالب المعتمد: {SAMIQ_THEMES[activeTheme]?.nameAr}
             </span>
           </div>
 
@@ -1030,6 +1224,533 @@ export default function PlatformSuperAdminPage() {
           </div>
         </div>
 
+        {/* View Mode Switcher & Save Confirmation Alerts */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-surface border border-white/10">
+            <button
+              type="button"
+              onClick={() => setViewMode('sync')}
+              className={`min-h-[40px] px-3.5 rounded-xl text-xs font-sans font-bold transition ${
+                viewMode === 'sync'
+                  ? 'bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark shadow-md'
+                  : 'text-ivory/70 hover:text-ivory'
+              }`}
+            >
+              العرض المتزامن (شجري + مصفوفة)
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('tree')}
+              className={`min-h-[40px] px-3.5 rounded-xl text-xs font-sans font-bold transition ${
+                viewMode === 'tree'
+                  ? 'bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark shadow-md'
+                  : 'text-ivory/70 hover:text-ivory'
+              }`}
+            >
+              المخطط الشجري فقط
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('matrix')}
+              className={`min-h-[40px] px-3.5 rounded-xl text-xs font-sans font-bold transition ${
+                viewMode === 'matrix'
+                  ? 'bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark shadow-md'
+                  : 'text-ivory/70 hover:text-ivory'
+              }`}
+            >
+              مصفوفة الميزات فقط
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => setIsInvoiceModalOpen(true)}
+              className="min-h-[44px] px-5 py-2.5 rounded-2xl bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-obsidian-dark font-sans font-bold text-xs hover:brightness-110 shadow-lg transition inline-flex items-center gap-2"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="6 9 6 2 18 2 18 9" />
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                <rect x="6" y="14" width="12" height="8" />
+              </svg>
+              <span>تصدير الفاتورة الرسمية (PDF)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleSavePlatformConfig}
+              disabled={isSaving}
+              className="min-h-[44px] px-5 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-ivory border border-white/15 font-sans font-bold text-xs transition inline-flex items-center justify-center gap-2"
+            >
+              {isSaving
+                ? 'جارٍ الحفظ...'
+                : targetMode === 'custom_quote'
+                ? `تدشين مشروع جديد بالأسطول (${effectiveProjectTitle})`
+                : `حفظ وتطبيق الإعدادات على «${effectiveProjectTitle}»`}
+            </button>
+          </div>
+        </div>
+
+        {saveSuccessMsg && (
+          <div className="p-4 rounded-2xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs font-sans text-center">
+            {saveSuccessMsg}
+          </div>
+        )}
+        {saveError && (
+          <div className="p-4 rounded-2xl bg-rose-950/60 border border-rose-500/40 text-rose-300 text-xs font-sans text-center">
+            {saveError}
+          </div>
+        )}
+
+        {/* ==================================================================== */}
+        {/* SYNCHRONIZED INTERACTIVE DEPENDENCY TREE VIEW                        */}
+        {/* ==================================================================== */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* LEFT/CENTER: TREE VIEW (Rendered in 'sync' or 'tree' modes) */}
+          {(viewMode === 'sync' || viewMode === 'tree') && (
+            <div
+              className={`${
+                viewMode === 'tree' ? 'lg:col-span-12' : 'lg:col-span-8'
+              } p-6 sm:p-8 rounded-3xl bg-surface border border-white/5 space-y-8`}
+            >
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <div>
+                  <h3 className="text-base sm:text-xl font-serif font-bold text-ivory">
+                    المخطط الشجري للترابطات الهندسية — {effectiveProjectTitle}
+                  </h3>
+                  <p className="text-xs text-muted-lux mt-1">
+                    انقري على أي عقدة شجرية لتفعيلها تلقائياً مع كافة متطلباتها، أو انقري على السعر لتعديله يدوياً.
+                  </p>
+                </div>
+                <span className="text-xs text-gold font-bold">
+                  {selectedFeatures.length} ميزة نشطة
+                </span>
+              </div>
+
+              {/* TREE STRUCTURE */}
+              <div className="space-y-6">
+                {/* Level 1: Root - Tier 1 Static Landing Page */}
+                <div className="space-y-3">
+                  <span className="text-xs font-sans font-bold text-gold block">
+                    المستوى 1 (الجذر الأساسي — موقع تعريفي فخم بدون منتجات وبدون لوحة تحكم):
+                  </span>
+                  <TreeNode
+                    id="tier_1_static"
+                    label={FEATURES_REGISTRY.tier_1_static.nameAr}
+                    price={FEATURES_REGISTRY.tier_1_static.basePriceUsd}
+                  />
+
+                  {/* Branches directly from Tier 1 */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 ps-3 sm:ps-6 border-s-2 border-gold/30">
+                    <TreeNode
+                      id="custom_domain"
+                      label={FEATURES_REGISTRY.custom_domain.nameAr}
+                      price={FEATURES_REGISTRY.custom_domain.basePriceUsd}
+                      requires={['tier_1_static']}
+                    />
+                    <TreeNode
+                      id="second_language"
+                      label={FEATURES_REGISTRY.second_language.nameAr}
+                      price={FEATURES_REGISTRY.second_language.basePriceUsd}
+                      requires={['tier_1_static']}
+                    />
+                    <TreeNode
+                      id="pwa_app"
+                      label={FEATURES_REGISTRY.pwa_app.nameAr}
+                      price={FEATURES_REGISTRY.pwa_app.basePriceUsd}
+                      requires={['tier_1_static']}
+                    />
+                    <TreeNode
+                      id="analytics_stats"
+                      label={FEATURES_REGISTRY.analytics_stats.nameAr}
+                      price={FEATURES_REGISTRY.analytics_stats.basePriceUsd}
+                      requires={['tier_1_static']}
+                    />
+                  </div>
+                </div>
+
+                {/* Level 2: Editable Site + Admin */}
+                <div className="ps-4 sm:ps-8 border-s-2 border-gold/40 space-y-3">
+                  <span className="text-xs font-sans font-bold text-champagne block">
+                    ──► المستوى 2 (موقع تعريفي قابل للتعديل + مدخل سري للوحة تحكم المدير):
+                  </span>
+                  <TreeNode
+                    id="tier_2_editable"
+                    label={FEATURES_REGISTRY.tier_2_editable.nameAr}
+                    price={FEATURES_REGISTRY.tier_2_editable.basePriceUsd}
+                    requires={['tier_1_static']}
+                    incrementalDiff="+$50 فوق الدرجة 1"
+                  />
+
+                  {/* Branches directly from Tier 2 */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 ps-3 sm:ps-6 border-s-2 border-gold/30">
+                    <TreeNode
+                      id="bookings"
+                      label={FEATURES_REGISTRY.bookings.nameAr}
+                      price={FEATURES_REGISTRY.bookings.basePriceUsd}
+                      requires={['tier_2_editable']}
+                    />
+                    <TreeNode
+                      id="blog"
+                      label={FEATURES_REGISTRY.blog.nameAr}
+                      price={FEATURES_REGISTRY.blog.basePriceUsd}
+                      requires={['tier_2_editable']}
+                    />
+                    <div className="space-y-2">
+                      <TreeNode
+                        id="ai_chatbot"
+                        label={FEATURES_REGISTRY.ai_chatbot.nameAr}
+                        price={FEATURES_REGISTRY.ai_chatbot.basePriceUsd}
+                        requires={['tier_2_editable']}
+                      />
+                      {/* Sub-branches from AI Chatbot (Degree 7) */}
+                      <div className="ps-3 border-s-2 border-sky-400/40 space-y-2 pt-1">
+                        <span className="text-xs text-sky-400 font-bold block">
+                          قنوات التواصل الاجتماعي المربوطة بالشات بوت:
+                        </span>
+                        <TreeNode
+                          id="telegram_channel"
+                          label={FEATURES_REGISTRY.telegram_channel.nameAr}
+                          price={FEATURES_REGISTRY.telegram_channel.basePriceUsd}
+                          requires={['ai_chatbot']}
+                        />
+                        <TreeNode
+                          id="whatsapp_channel"
+                          label={FEATURES_REGISTRY.whatsapp_channel.nameAr}
+                          price={FEATURES_REGISTRY.whatsapp_channel.basePriceUsd}
+                          requires={['ai_chatbot']}
+                        />
+                        <TreeNode
+                          id="instagram_channel"
+                          label={FEATURES_REGISTRY.instagram_channel.nameAr}
+                          price={FEATURES_REGISTRY.instagram_channel.basePriceUsd}
+                          requires={['ai_chatbot']}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Level 3: Full Interactive Product Catalog */}
+                <div className="ps-8 sm:ps-16 border-s-2 border-gold/60 space-y-4">
+                  <span className="text-xs font-sans font-bold text-gold block">
+                    ──► المستوى 3 (كتالوج المنتجات والأقسام والوسوم + 3 أنماط عملات والبحث):
+                  </span>
+                  <TreeNode
+                    id="tier_3_catalog"
+                    label={FEATURES_REGISTRY.tier_3_catalog.nameAr}
+                    price={FEATURES_REGISTRY.tier_3_catalog.basePriceUsd}
+                    requires={['tier_2_editable']}
+                    incrementalDiff="+$70 فوق الدرجة 2"
+                  />
+
+                  {/* BRANCHES FROM TIER 3 */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                    {/* Branch A: Commerce & Orders */}
+                    <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3">
+                      <span className="text-xs font-sans font-bold text-emerald-400 block border-b border-white/5 pb-1.5">
+                        فرع التجارة وسلة واتساب (Commerce & Checkout Branch)
+                      </span>
+                      <div className="space-y-2">
+                        <TreeNode
+                          id="cart_whatsapp"
+                          label={FEATURES_REGISTRY.cart_whatsapp.nameAr}
+                          price={FEATURES_REGISTRY.cart_whatsapp.basePriceUsd}
+                          requires={['tier_3_catalog']}
+                        />
+                        {/* Sub-branches from Cart */}
+                        <div className="ps-3 border-s-2 border-emerald-500/40 space-y-2 pt-1">
+                          <span className="text-xs text-emerald-400/90 font-bold block">
+                            تفريعات سلة المشتريات:
+                          </span>
+                          <TreeNode
+                            id="delivery_zones"
+                            label={FEATURES_REGISTRY.delivery_zones.nameAr}
+                            price={FEATURES_REGISTRY.delivery_zones.basePriceUsd}
+                            requires={['cart_whatsapp']}
+                          />
+                          <TreeNode
+                            id="coupons"
+                            label={FEATURES_REGISTRY.coupons.nameAr}
+                            price={FEATURES_REGISTRY.coupons.basePriceUsd}
+                            requires={['cart_whatsapp']}
+                          />
+                          <TreeNode
+                            id="owner_notifications"
+                            label={FEATURES_REGISTRY.owner_notifications.nameAr}
+                            price={FEATURES_REGISTRY.owner_notifications.basePriceUsd}
+                            requires={['cart_whatsapp']}
+                          />
+                          <TreeNode
+                            id="payment_gateways"
+                            label={FEATURES_REGISTRY.payment_gateways.nameAr}
+                            price={FEATURES_REGISTRY.payment_gateways.basePriceUsd}
+                            requires={['cart_whatsapp']}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Branch B: Catalog Intelligence & Customer Auth */}
+                    <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3">
+                      <span className="text-xs font-sans font-bold text-gold block border-b border-white/5 pb-1.5">
+                        فرع الذكاء، المخزون، وحسابات الزبائن (Intelligence & Accounts)
+                      </span>
+                      <div className="space-y-2">
+                        <TreeNode
+                          id="inventory_variants"
+                          label={FEATURES_REGISTRY.inventory_variants.nameAr}
+                          price={FEATURES_REGISTRY.inventory_variants.basePriceUsd}
+                          requires={['tier_3_catalog']}
+                        />
+                        <TreeNode
+                          id="smart_tags_ai"
+                          label={FEATURES_REGISTRY.smart_tags_ai.nameAr}
+                          price={FEATURES_REGISTRY.smart_tags_ai.basePriceUsd}
+                          requires={['tier_3_catalog']}
+                        />
+                        <TreeNode
+                          id="customer_accounts"
+                          label={FEATURES_REGISTRY.customer_accounts.nameAr}
+                          price={FEATURES_REGISTRY.customer_accounts.basePriceUsd}
+                          requires={['tier_3_catalog']}
+                        />
+                        {/* Sub-branch from Customer Accounts */}
+                        <div className="ps-3 border-s-2 border-gold/40 space-y-2 pt-1">
+                          <TreeNode
+                            id="reviews_ratings"
+                            label={FEATURES_REGISTRY.reviews_ratings.nameAr}
+                            price={FEATURES_REGISTRY.reviews_ratings.basePriceUsd}
+                            requires={['customer_accounts']}
+                          />
+                        </div>
+                        <TreeNode
+                          id="authenticity_guide"
+                          label={FEATURES_REGISTRY.authenticity_guide.nameAr}
+                          price={FEATURES_REGISTRY.authenticity_guide.basePriceUsd}
+                          requires={['tier_3_catalog']}
+                        />
+                        <TreeNode
+                          id="skin_routine_advisor"
+                          label={FEATURES_REGISTRY.skin_routine_advisor.nameAr}
+                          price={FEATURES_REGISTRY.skin_routine_advisor.basePriceUsd}
+                          requires={['tier_3_catalog']}
+                        />
+                        <TreeNode
+                          id="multi_branch"
+                          label={FEATURES_REGISTRY.multi_branch.nameAr}
+                          price={FEATURES_REGISTRY.multi_branch.basePriceUsd}
+                          requires={['tier_3_catalog']}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* RIGHT: PRICING SUMMARY & LIVE METRICS (4 cols in sync mode) */}
+          <div
+            className={`${
+              viewMode === 'tree' ? 'lg:col-span-12' : viewMode === 'matrix' ? 'lg:col-span-4' : 'lg:col-span-4'
+            } p-6 sm:p-8 rounded-3xl bg-gradient-to-b from-elevated to-surface border border-gold/40 shadow-2xl space-y-6 sticky top-24`}
+          >
+            <div>
+              <span className="text-xs font-bold text-gold block">
+                ملخص التسعير والاستثمار — {effectiveProjectTitle}
+              </span>
+              <h3 className="text-base font-serif font-bold text-ivory mt-0.5">
+                حاسبة الباقة والتكاليف المتكررة
+              </h3>
+            </div>
+
+            <div className="space-y-2.5 text-xs font-sans">
+              <div className="flex items-baseline justify-between text-muted-lux">
+                <span>سعر الباقة الأساسية ({pricing.selectedTier}):</span>
+                <span className="text-base font-serif font-bold text-ivory">
+                  ${pricing.baseTierPriceUsd}
+                </span>
+              </div>
+              <div className="flex items-baseline justify-between text-muted-lux">
+                <span>مجموع الإضافات والقنوات:</span>
+                <span className="text-base font-serif font-bold text-gold">
+                  +${pricing.addonsPriceUsd}
+                </span>
+              </div>
+              <div className="flex items-baseline justify-between text-muted-lux">
+                <span>المجموع الإفرادي (Subtotal):</span>
+                <span className="font-mono text-sm font-semibold text-ivory">
+                  ${pricing.subtotalUsd}
+                </span>
+              </div>
+              {pricing.discountUsd > 0 && (
+                <div className="flex items-baseline justify-between text-emerald-400 font-semibold">
+                  <span>خصم خاص معتمد:</span>
+                  <span className="font-mono text-sm font-bold">
+                    -${pricing.discountUsd}
+                  </span>
+                </div>
+              )}
+              <div className="pt-3 border-t border-white/10 flex items-baseline justify-between">
+                <div>
+                  <span className="text-sm font-bold text-ivory block">عقد التأسيس الصافي:</span>
+                  <span className="text-xs text-muted-dim">يشمل استضافة السنة الأولى مجاناً ($0)</span>
+                </div>
+                <span className="text-3xl font-serif font-bold text-champagne drop-shadow-[0_2px_15px_rgba(201,168,76,0.3)]">
+                  ${pricing.totalUsd}
+                </span>
+              </div>
+            </div>
+
+            {/* Recurring Annual Renewal Summary */}
+            <div className="p-4 rounded-2xl bg-white/[0.03] border border-gold/20 space-y-2.5 text-xs font-sans">
+              <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                <span className="font-bold text-champagne">التجديد السنوي (ابتداءً من السنة 2):</span>
+                <span className="font-mono text-base font-bold text-emerald-400">
+                  ${selectedProjectAnnualTotal} / سنوياً
+                </span>
+              </div>
+              <div className="space-y-1.5 text-muted-lux">
+                <div className="flex items-center justify-between">
+                  <span>- النطاق الرسمي ({projectDomainType}):</span>
+                  <span className="font-mono text-ivory">${projectAnnualDomainUsd} / سنوياً</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>- الاستضافة والصيانة السحابية:</span>
+                  <span className="font-mono text-ivory">${projectAnnualHostingUsd} / سنوياً</span>
+                </div>
+                {projectAiPlan === 'managed_annual' && (
+                  <div className="flex items-center justify-between">
+                    <span>- استهلاك ذكاء اصطناعي شامل:</span>
+                    <span className="font-mono text-gold">$90 / سنوياً</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 space-y-2 text-xs font-sans">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-lux">اسم المتجر / المشروع:</span>
+                <span className="text-gold font-bold">{effectiveProjectTitle}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-lux">عدد المزايا المفعلة:</span>
+                <span className="text-ivory font-bold">{selectedFeatures.length} ميزة</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-lux">صلاحية شروط الترابط (requires):</span>
+                <span
+                  className={
+                    validation.isValid ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'
+                  }
+                >
+                  {validation.isValid ? 'سليمة 100%' : 'توجد نواقص'}
+                </span>
+              </div>
+            </div>
+
+            {/* Prominent Action Buttons */}
+            <div className="space-y-2.5 pt-1">
+              <button
+                type="button"
+                onClick={() => setIsInvoiceModalOpen(true)}
+                className="w-full min-h-[46px] py-3 rounded-2xl bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-obsidian-dark font-sans font-bold text-xs hover:brightness-110 shadow-lg transition flex items-center justify-center gap-2"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="6 9 6 2 18 2 18 9" />
+                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                  <rect x="6" y="14" width="12" height="8" />
+                </svg>
+                <span>تصدير عرض السعر / الفاتورة كملف PDF</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSavePlatformConfig}
+                disabled={isSaving}
+                className="w-full min-h-[44px] py-3 rounded-2xl bg-white/10 hover:bg-white/15 text-ivory border border-white/15 font-sans font-bold text-xs transition inline-flex items-center justify-center"
+              >
+                {isSaving
+                  ? 'جارٍ الحفظ...'
+                  : targetMode === 'custom_quote'
+                  ? `إنشاء وتدشين مشروع جديد بالأسطول بهذه الإعدادات`
+                  : `حفظ وتطبيق الإعدادات على مشروع «${effectiveProjectTitle}»`}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* MATRIX GRID (Rendered in 'sync' or 'matrix' modes) */}
+        {(viewMode === 'sync' || viewMode === 'matrix') && (
+          <div className="p-6 sm:p-8 rounded-3xl bg-surface border border-white/5 space-y-6">
+            <div>
+              <h3 className="text-base sm:text-lg font-serif font-bold text-ivory">
+                مصفوفة الميزات التفصيلية (Features Matrix Grid) — {effectiveProjectTitle}
+              </h3>
+              <p className="text-xs text-muted-lux">
+                قائمة كافة الإضافات الموديلية التابعة لمنصة سامق مع إمكانية التفعيل والتعطيل بنقرة واحدة
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {Object.values(FEATURES_REGISTRY).map((feat) => {
+                const isSelected = selectedFeatures.includes(feat.id);
+                const overridePrice = priceOverrides[feat.id];
+                const displayPrice = overridePrice !== undefined ? overridePrice : feat.basePriceUsd;
+
+                return (
+                  <div
+                    key={feat.id}
+                    onClick={() => toggleFeatureWithCascade(feat.id)}
+                    className={`cursor-pointer p-4 rounded-2xl border transition-all duration-300 flex items-start justify-between gap-3 ${
+                      isSelected
+                        ? 'bg-elevated border-gold/50 shadow-md'
+                        : 'bg-white/[0.02] border-white/5 opacity-60 hover:opacity-100'
+                    }`}
+                  >
+                    <div className="space-y-1 pe-1">
+                      <span className="text-xs sm:text-sm font-bold text-ivory block">
+                        {feat.nameAr}
+                      </span>
+                      <p className="text-xs text-muted-lux leading-relaxed">
+                        {feat.descriptionAr}
+                      </p>
+                      {feat.requires.length > 0 && (
+                        <span className="text-xs text-gold/80 block pt-1">
+                          تتطلب: {feat.requires.join(', ')}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col items-end gap-2 shrink-0">
+                      <span
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSetPriceOverride(feat.id);
+                        }}
+                        title="تعديل السعر يدوياً"
+                        className="px-2 py-0.5 rounded text-xs font-sans font-bold bg-gold/15 text-gold border border-gold/30 hover:bg-gold/30 transition cursor-pointer"
+                      >
+                        {overridePrice !== undefined ? `$${displayPrice}*` : `+$${displayPrice}`}
+                      </span>
+                      <span
+                        className={`text-xs font-sans font-bold px-2 py-0.5 rounded ${
+                          isSelected
+                            ? 'bg-emerald-950/60 text-emerald-300'
+                            : 'bg-white/5 text-muted-dim'
+                        }`}
+                      >
+                        {isSelected ? 'مفعل' : 'معطل'}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Platform & Developer Identity Configuration Section */}
         <div className="p-6 rounded-3xl bg-surface border border-gold/30 shadow-xl space-y-5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
@@ -1044,16 +1765,6 @@ export default function PlatformSuperAdminPage() {
                 تخصيص بيانات مطور محرك سَامِق ورابط تيليجرام وعرض الأسعار عبر قاعدة البيانات الموحدة
               </p>
             </div>
-            <div className="flex items-center gap-2">
-              <Link
-                href="/samiq"
-                target="_blank"
-                className="min-h-[44px] px-4 rounded-xl bg-gold/20 hover:bg-gold/30 text-champagne border border-gold/40 text-xs font-bold transition inline-flex items-center gap-1.5"
-              >
-                <span>فتح صفحة العرض العامة (/samiq)</span>
-                <span>↗</span>
-              </Link>
-            </div>
           </div>
 
           {metaSaveMsg && (
@@ -1065,17 +1776,15 @@ export default function PlatformSuperAdminPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-sans">
             <div className="space-y-1.5">
               <label className="text-ivory/80 font-semibold block">معرف تيليجرام للمطور (Telegram Handle):</label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={platformMetaState.developerTelegramHandle}
-                  onChange={(e) =>
-                    setPlatformMetaState({ ...platformMetaState, developerTelegramHandle: e.target.value })
-                  }
-                  className="w-full min-h-[44px] px-3 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-hidden dir-ltr text-end"
-                  placeholder="KorosSenpai"
-                />
-              </div>
+              <input
+                type="text"
+                value={platformMetaState.developerTelegramHandle}
+                onChange={(e) =>
+                  setPlatformMetaState({ ...platformMetaState, developerTelegramHandle: e.target.value })
+                }
+                className="w-full min-h-[44px] px-3 rounded-xl bg-white/5 border border-white/10 text-ivory focus:border-gold outline-hidden dir-ltr text-end"
+                placeholder="KorosSenpai"
+              />
             </div>
 
             <div className="space-y-1.5">
@@ -1131,372 +1840,6 @@ export default function PlatformSuperAdminPage() {
             </button>
           </div>
         </div>
-
-        {/* View Mode Switcher & Save Confirmation Alerts */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-surface border border-white/10">
-            <button
-              type="button"
-              onClick={() => setViewMode('sync')}
-              className={`min-h-[40px] px-3.5 rounded-xl text-xs font-sans font-bold transition ${
-                viewMode === 'sync'
-                  ? 'bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark shadow-md'
-                  : 'text-ivory/70 hover:text-ivory'
-              }`}
-            >
-              العرض المتزامن (شجري + مصفوفة)
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode('tree')}
-              className={`min-h-[40px] px-3.5 rounded-xl text-xs font-sans font-bold transition ${
-                viewMode === 'tree'
-                  ? 'bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark shadow-md'
-                  : 'text-ivory/70 hover:text-ivory'
-              }`}
-            >
-              المخطط الشجري فقط
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode('matrix')}
-              className={`min-h-[40px] px-3.5 rounded-xl text-xs font-sans font-bold transition ${
-                viewMode === 'matrix'
-                  ? 'bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark shadow-md'
-                  : 'text-ivory/70 hover:text-ivory'
-              }`}
-            >
-              مصفوفة الميزات فقط
-            </button>
-          </div>
-
-          <button
-            type="button"
-            onClick={handleSavePlatformConfig}
-            disabled={isSaving}
-            className="min-h-[44px] px-6 py-2.5 rounded-2xl bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-obsidian-dark font-sans font-bold text-xs hover:brightness-110 shadow-lg transition inline-flex items-center justify-center gap-2"
-          >
-            {isSaving ? 'جارٍ الحفظ والتطبيق...' : `حفظ وتطبيق إعدادات مشروع «${selectedProject?.name || ''}»`}
-          </button>
-        </div>
-
-        {saveSuccessMsg && (
-          <div className="p-4 rounded-2xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs font-sans text-center">
-            {saveSuccessMsg}
-          </div>
-        )}
-        {saveError && (
-          <div className="p-4 rounded-2xl bg-rose-950/60 border border-rose-500/40 text-rose-300 text-xs font-sans text-center">
-            {saveError}
-          </div>
-        )}
-
-        {/* ==================================================================== */}
-        {/* SYNCHRONIZED INTERACTIVE DEPENDENCY TREE VIEW                        */}
-        {/* ==================================================================== */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* LEFT/CENTER: TREE VIEW (Rendered in 'sync' or 'tree' modes) */}
-          {(viewMode === 'sync' || viewMode === 'tree') && (
-            <div
-              className={`${
-                viewMode === 'tree' ? 'lg:col-span-12' : 'lg:col-span-8'
-              } p-6 sm:p-8 rounded-3xl bg-surface border border-white/5 space-y-8`}
-            >
-              <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                <div>
-                  <h3 className="text-base sm:text-xl font-serif font-bold text-ivory">
-                    المخطط الشجري للترابطات الهندسية — {selectedProject?.name}
-                  </h3>
-                  <p className="text-xs text-muted-lux mt-1">
-                    انقري على أي عقدة شجرية لتفعيلها تلقائياً مع كافة متطلباتها، أو إيقافها مع تسلسل
-                    إيقاف الأبناء التابعين.
-                  </p>
-                </div>
-                <span className="text-xs text-gold font-bold">
-                  {selectedFeatures.length} ميزة نشطة
-                </span>
-              </div>
-
-              {/* TREE STRUCTURE */}
-              <div className="space-y-6">
-                {/* Level 1: Root */}
-                <div className="space-y-2">
-                  <span className="text-xs font-sans font-bold text-gold block">
-                    المستوى 1 (الجذر الأساسي):
-                  </span>
-                  <TreeNode
-                    id="tier_1_static"
-                    label={FEATURES_REGISTRY.tier_1_static.nameAr}
-                    price={FEATURES_REGISTRY.tier_1_static.basePriceUsd}
-                  />
-                </div>
-
-                {/* Level 2: Dynamic Engine */}
-                <div className="ps-4 sm:ps-8 border-s-2 border-gold/30 space-y-2">
-                  <span className="text-xs font-sans font-bold text-champagne block">
-                    ──► المستوى 2 (المحرك الديناميكي):
-                  </span>
-                  <TreeNode
-                    id="tier_2_editable"
-                    label={FEATURES_REGISTRY.tier_2_editable.nameAr}
-                    price={FEATURES_REGISTRY.tier_2_editable.basePriceUsd}
-                    requires={['tier_1_static']}
-                  />
-                </div>
-
-                {/* Level 3: Full Catalog Core */}
-                <div className="ps-8 sm:ps-16 border-s-2 border-gold/40 space-y-4">
-                  <span className="text-xs font-sans font-bold text-champagne block">
-                    ──► المستوى 3 (نواة الكتالوج الذكي):
-                  </span>
-                  <TreeNode
-                    id="tier_3_catalog"
-                    label={FEATURES_REGISTRY.tier_3_catalog.nameAr}
-                    price={FEATURES_REGISTRY.tier_3_catalog.basePriceUsd}
-                    requires={['tier_2_editable']}
-                  />
-
-                  {/* BRANCHES FROM TIER 3 */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
-                    {/* Branch A: Commerce & Accounts */}
-                    <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3">
-                      <span className="text-xs font-sans font-bold text-emerald-400 block border-b border-white/5 pb-1.5">
-                        فرع التجارة والولاء (Commerce Branch)
-                      </span>
-                      <div className="space-y-2">
-                        <TreeNode
-                          id="cart_whatsapp"
-                          label={FEATURES_REGISTRY.cart_whatsapp.nameAr}
-                          price={FEATURES_REGISTRY.cart_whatsapp.basePriceUsd}
-                        />
-                        <TreeNode
-                          id="customer_accounts"
-                          label={FEATURES_REGISTRY.customer_accounts.nameAr}
-                          price={FEATURES_REGISTRY.customer_accounts.basePriceUsd}
-                        />
-                        <TreeNode
-                          id="payment_gateways"
-                          label={FEATURES_REGISTRY.payment_gateways.nameAr}
-                          price={FEATURES_REGISTRY.payment_gateways.basePriceUsd}
-                          requires={['tier_3_catalog']}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Branch B: Domain Intelligence & Tagging */}
-                    <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3">
-                      <span className="text-xs font-sans font-bold text-gold block border-b border-white/5 pb-1.5">
-                        فرع الذكاء التخصصي والوسوم (AI & Tagging)
-                      </span>
-                      <div className="space-y-2">
-                        <TreeNode
-                          id="smart_tags_ai"
-                          label={FEATURES_REGISTRY.smart_tags_ai.nameAr}
-                          price={FEATURES_REGISTRY.smart_tags_ai.basePriceUsd}
-                          requires={['tier_3_catalog']}
-                        />
-                        <TreeNode
-                          id="authenticity_guide"
-                          label={FEATURES_REGISTRY.authenticity_guide.nameAr}
-                          price={FEATURES_REGISTRY.authenticity_guide.basePriceUsd}
-                        />
-                        <TreeNode
-                          id="skin_routine_advisor"
-                          label={FEATURES_REGISTRY.skin_routine_advisor.nameAr}
-                          price={FEATURES_REGISTRY.skin_routine_advisor.basePriceUsd}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Branch C: AI Agents & Channels */}
-                    <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3">
-                      <span className="text-xs font-sans font-bold text-sky-400 block border-b border-white/5 pb-1.5">
-                        فرع الأتمتة والوكلاء الأذكياء (AI Agents)
-                      </span>
-                      <div className="space-y-2">
-                        <TreeNode
-                          id="ai_chatbot"
-                          label={FEATURES_REGISTRY.ai_chatbot.nameAr}
-                          price={FEATURES_REGISTRY.ai_chatbot.basePriceUsd}
-                        />
-                        <TreeNode
-                          id="whatsapp_channel"
-                          label={FEATURES_REGISTRY.whatsapp_channel.nameAr}
-                          price={FEATURES_REGISTRY.whatsapp_channel.basePriceUsd}
-                          requires={['ai_chatbot']}
-                        />
-                        <TreeNode
-                          id="telegram_channel"
-                          label={FEATURES_REGISTRY.telegram_channel.nameAr}
-                          price={FEATURES_REGISTRY.telegram_channel.basePriceUsd}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* RIGHT: PRICING SUMMARY & LIVE METRICS (4 cols in sync mode) */}
-          <div
-            className={`${
-              viewMode === 'tree' ? 'lg:col-span-12' : viewMode === 'matrix' ? 'lg:col-span-4' : 'lg:col-span-4'
-            } p-6 sm:p-8 rounded-3xl bg-gradient-to-b from-elevated to-surface border border-gold/40 shadow-2xl space-y-6 sticky top-24`}
-          >
-            <div>
-              <span className="text-xs font-bold text-gold block">
-                ملخص التسعير والاستثمار — {selectedProject?.name}
-              </span>
-              <h3 className="text-base font-serif font-bold text-ivory mt-0.5">
-                حاسبة الباقة والتكاليف المتكررة
-              </h3>
-            </div>
-
-            <div className="space-y-2.5 text-xs font-sans">
-              <div className="flex items-baseline justify-between text-muted-lux">
-                <span>سعر الباقة الأساسية:</span>
-                <span className="text-base font-serif font-bold text-ivory">
-                  ${pricing.baseTierPriceUsd}
-                </span>
-              </div>
-              <div className="flex items-baseline justify-between text-muted-lux">
-                <span>مجموع الإضافات والقنوات:</span>
-                <span className="text-base font-serif font-bold text-gold">
-                  +${pricing.addonsPriceUsd}
-                </span>
-              </div>
-              <div className="pt-3 border-t border-white/10 flex items-baseline justify-between">
-                <div>
-                  <span className="text-sm font-bold text-ivory block">عقد التأسيس (مرة واحدة):</span>
-                  <span className="text-xs text-muted-dim">يشمل استضافة السنة الأولى مجاناً</span>
-                </div>
-                <span className="text-3xl font-serif font-bold text-champagne drop-shadow-[0_2px_15px_rgba(201,168,76,0.3)]">
-                  ${pricing.totalUsd}
-                </span>
-              </div>
-            </div>
-
-            {/* Recurring Annual Renewal Summary */}
-            <div className="p-4 rounded-2xl bg-white/[0.03] border border-gold/20 space-y-2.5 text-xs font-sans">
-              <div className="flex items-center justify-between border-b border-white/5 pb-2">
-                <span className="font-bold text-champagne">التجديد السنوي (ابتداءً من السنة 2):</span>
-                <span className="font-mono text-base font-bold text-emerald-400">
-                  ${selectedProjectAnnualTotal} / سنوياً
-                </span>
-              </div>
-              <div className="space-y-1.5 text-muted-lux">
-                <div className="flex items-center justify-between">
-                  <span>- النطاق الرسمي ({projectDomainType}):</span>
-                  <span className="font-mono text-ivory">${projectAnnualDomainUsd} / سنوياً</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>- الاستضافة والصيانة السحابية:</span>
-                  <span className="font-mono text-ivory">${projectAnnualHostingUsd} / سنوياً</span>
-                </div>
-                {projectAiPlan === 'managed_annual' && (
-                  <div className="flex items-center justify-between">
-                    <span>- استهلاك ذكاء اصطناعي شامل:</span>
-                    <span className="font-mono text-gold">$90 / سنوياً</span>
-                  </div>
-                )}
-              </div>
-              <p className="text-xs text-muted-dim leading-snug pt-1 border-t border-white/5">
-                ملاحظة: النطاق الرسمي ($20 أو $35) يُدفع سنوياً منذ البداية، وتجديد الاستضافة يبدأ من السنة الثانية.
-              </p>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 space-y-2 text-xs font-sans">
-              <div className="flex items-center justify-between">
-                <span className="text-muted-lux">المشروع المحدد:</span>
-                <span className="text-gold font-bold">{selectedProject?.name}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-lux">عدد المزايا المفعلة:</span>
-                <span className="text-ivory font-bold">{selectedFeatures.length} ميزة</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-lux">صلاحية شروط الترابط (requires):</span>
-                <span
-                  className={
-                    validation.isValid ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'
-                  }
-                >
-                  {validation.isValid ? 'سليمة 100%' : 'توجد نواقص'}
-                </span>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleSavePlatformConfig}
-              disabled={isSaving}
-              className="w-full min-h-[44px] py-3.5 rounded-2xl bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-obsidian-dark font-sans font-bold text-xs hover:brightness-110 shadow-lg transition inline-flex items-center justify-center"
-            >
-              {isSaving ? 'جارٍ الحفظ...' : 'حفظ إعدادات المشروع في samiq-db.json'}
-            </button>
-          </div>
-        </div>
-
-        {/* MATRIX GRID (Rendered in 'sync' or 'matrix' modes) */}
-        {(viewMode === 'sync' || viewMode === 'matrix') && (
-          <div className="p-6 sm:p-8 rounded-3xl bg-surface border border-white/5 space-y-6">
-            <div>
-              <h3 className="text-base sm:text-lg font-serif font-bold text-ivory">
-                مصفوفة الميزات التفصيلية (Features Matrix Grid) — {selectedProject?.name}
-              </h3>
-              <p className="text-xs text-muted-lux">
-                قائمة كافة الإضافات الموديلية التابعة لمنصة سامق مع إمكانية التفعيل والتعطيل بنقرة واحدة
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {Object.values(FEATURES_REGISTRY).map((feat) => {
-                const isSelected = selectedFeatures.includes(feat.id);
-                return (
-                  <div
-                    key={feat.id}
-                    onClick={() => toggleFeatureWithCascade(feat.id)}
-                    className={`cursor-pointer p-4 rounded-2xl border transition-all duration-300 flex items-start justify-between gap-3 ${
-                      isSelected
-                        ? 'bg-elevated border-gold/50 shadow-md'
-                        : 'bg-white/[0.02] border-white/5 opacity-60 hover:opacity-100'
-                    }`}
-                  >
-                    <div className="space-y-1 pe-1">
-                      <span className="text-xs sm:text-sm font-bold text-ivory block">
-                        {feat.nameAr}
-                      </span>
-                      <p className="text-xs text-muted-lux leading-relaxed">
-                        {feat.descriptionAr}
-                      </p>
-                      {feat.requires.length > 0 && (
-                        <span className="text-xs text-gold/80 block pt-1">
-                          تتطلب: {feat.requires.join(', ')}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex flex-col items-end gap-2 shrink-0">
-                      <span className="px-2 py-0.5 rounded text-xs font-sans font-bold bg-gold/15 text-gold border border-gold/30">
-                        +${feat.basePriceUsd}
-                      </span>
-                      <span
-                        className={`text-xs font-sans font-bold px-2 py-0.5 rounded ${
-                          isSelected
-                            ? 'bg-emerald-950/60 text-emerald-300'
-                            : 'bg-white/5 text-muted-dim'
-                        }`}
-                      >
-                        {isSelected ? 'مفعل' : 'معطل'}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
       </main>
     </div>
   );

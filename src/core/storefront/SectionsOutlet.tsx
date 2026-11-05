@@ -25,6 +25,12 @@ export function SectionsOutlet({ sections, renderers }: SectionsOutletProps) {
           return null;
         }
 
+        // Tier 1 and Tier 2 landing page mandate:
+        // When tier_3_catalog is false, hide product-grid and category-grid completely
+        if (!features.tier_3_catalog && (section.type === 'product-grid' || section.type === 'category-grid')) {
+          return null;
+        }
+
         // 1. Handle modular blocks
         if (section.type === 'block') {
           const blockKey = (section.props?.blockKey as string) || '';

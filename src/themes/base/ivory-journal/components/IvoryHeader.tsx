@@ -23,7 +23,7 @@ interface IvoryHeaderProps {
 }
 
 export function IvoryHeader({ onOpenSearch, onOpenAdvisor }: IvoryHeaderProps) {
-  const { tenant, cart, currency, setCurrency } = useStorefront();
+  const { tenant, cart, currency, setCurrency, features } = useStorefront();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const scrollTo = (hash: string) => {
@@ -60,27 +60,33 @@ export function IvoryHeader({ onOpenSearch, onOpenAdvisor }: IvoryHeaderProps) {
 
           {/* Desktop Left Nav Links */}
           <nav className="hidden lg:flex items-center gap-6 text-sm font-sans font-medium text-[#554D46]">
-            <button
-              type="button"
-              onClick={() => scrollTo('#mosaic')}
-              className="hover:text-[#1B1612] transition-colors min-h-[44px] px-2 flex items-center"
-            >
-              اختيارات الأسبوع
-            </button>
-            <button
-              type="button"
-              onClick={() => scrollTo('#categories')}
-              className="hover:text-[#1B1612] transition-colors min-h-[44px] px-2 flex items-center"
-            >
-              فهرس الأقسام
-            </button>
-            <button
-              type="button"
-              onClick={() => scrollTo('#authenticity')}
-              className="hover:text-[#1B1612] transition-colors min-h-[44px] px-2 flex items-center"
-            >
-              فحص الأصالة
-            </button>
+            {features.tier_3_catalog && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => scrollTo('#mosaic')}
+                  className="hover:text-[#1B1612] transition-colors min-h-[44px] px-2 flex items-center"
+                >
+                  اختيارات الأسبوع
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollTo('#categories')}
+                  className="hover:text-[#1B1612] transition-colors min-h-[44px] px-2 flex items-center"
+                >
+                  فهرس الأقسام
+                </button>
+              </>
+            )}
+            {features.tier_3_catalog && features.authenticity_guide && (
+              <button
+                type="button"
+                onClick={() => scrollTo('#authenticity')}
+                className="hover:text-[#1B1612] transition-colors min-h-[44px] px-2 flex items-center"
+              >
+                فحص الأصالة
+              </button>
+            )}
           </nav>
         </div>
 
@@ -117,16 +123,18 @@ export function IvoryHeader({ onOpenSearch, onOpenAdvisor }: IvoryHeaderProps) {
             ))}
           </div>
 
-          {/* Search Trigger */}
-          <button
-            type="button"
-            data-testid="search-button"
-            aria-label="البحث في المجلة"
-            onClick={onOpenSearch}
-            className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center text-[#1B1612] hover:text-[#5E6B5A] transition-colors rounded-sm"
-          >
-            <SearchIcon size={20} color="#1B1612" />
-          </button>
+          {/* Search Trigger (Shown when catalog tier 3 is active) */}
+          {features.tier_3_catalog && (
+            <button
+              type="button"
+              data-testid="search-button"
+              aria-label="البحث في المجلة"
+              onClick={onOpenSearch}
+              className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center text-[#1B1612] hover:text-[#5E6B5A] transition-colors rounded-sm"
+            >
+              <SearchIcon size={20} color="#1B1612" />
+            </button>
+          )}
 
           {/* Advisor Chat Trigger */}
           <button

@@ -286,6 +286,7 @@ export interface StorefrontContextValue {
   whatsapp: StorefrontWhatsApp;
   platformMeta?: PlatformMeta;
   blocksData: Record<string, unknown>;
+  setFeatures?: (features: FeatureFlags) => void;
 }
 
 export interface ThemeLayoutProps {

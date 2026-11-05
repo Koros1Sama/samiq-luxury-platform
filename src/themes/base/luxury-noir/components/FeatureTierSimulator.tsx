@@ -18,7 +18,14 @@ interface FeatureTierSimulatorProps {
 export function FeatureTierSimulator(props: FeatureTierSimulatorProps) {
   const sf = useStorefront();
   const currentFeatures = props.currentFeatures || sf.features;
-  const onFeaturesUpdate = props.onFeaturesUpdate || (() => {});
+  const onFeaturesUpdate = (newFlags: FeatureFlags) => {
+    if (sf.setFeatures) {
+      sf.setFeatures(newFlags);
+    }
+    if (props.onFeaturesUpdate) {
+      props.onFeaturesUpdate(newFlags);
+    }
+  };
 
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -31,7 +38,20 @@ export function FeatureTierSimulator(props: FeatureTierSimulatorProps) {
     let newKeys: string[];
 
     if (isCurrentlyOn) {
-      newKeys = activeKeys.filter((k) => k !== featureId);
+      const toRemove = new Set<string>([featureId]);
+      let changed = true;
+      while (changed) {
+        changed = false;
+        for (const [fId, def] of Object.entries(FEATURES_REGISTRY)) {
+          if (!toRemove.has(fId) && activeKeys.includes(fId)) {
+            if (def.requires.some((r) => toRemove.has(r))) {
+              toRemove.add(fId);
+              changed = true;
+            }
+          }
+        }
+      }
+      newKeys = activeKeys.filter((k) => !toRemove.has(k));
       if (
         !newKeys.includes('tier_1_static') &&
         !newKeys.includes('tier_2_editable') &&
@@ -55,14 +75,20 @@ export function FeatureTierSimulator(props: FeatureTierSimulatorProps) {
       telegram_channel: newKeys.includes('telegram_channel'),
     };
 
+    for (const key of Object.keys(FEATURES_REGISTRY)) {
+      updatedFlags[key] = newKeys.includes(key);
+    }
+
     onFeaturesUpdate(updatedFlags);
   };
 
-  const applyPreset = (preset: 'starter' | 'merchant' | 'ultimate') => {
+  const applyPreset = (preset: 'tier1' | 'tier2' | 'tier3' | 'royal') => {
     let presetKeys: string[];
-    if (preset === 'starter') {
-      presetKeys = ['tier_1_static', 'cart_whatsapp'];
-    } else if (preset === 'merchant') {
+    if (preset === 'tier1') {
+      presetKeys = ['tier_1_static'];
+    } else if (preset === 'tier2') {
+      presetKeys = ['tier_1_static', 'tier_2_editable'];
+    } else if (preset === 'tier3') {
       presetKeys = [
         'tier_1_static',
         'tier_2_editable',
@@ -75,9 +101,12 @@ export function FeatureTierSimulator(props: FeatureTierSimulatorProps) {
         'tier_2_editable',
         'tier_3_catalog',
         'cart_whatsapp',
-        'ai_chatbot',
-        'payment_gateways',
+        'authenticity_guide',
+        'smart_tags_ai',
+        'skin_routine_advisor',
         'customer_accounts',
+        'ai_chatbot',
+        'whatsapp_channel',
       ];
     }
     const resolved = resolveEffectiveFeatures(presetKeys);
@@ -92,16 +121,28 @@ export function FeatureTierSimulator(props: FeatureTierSimulatorProps) {
       whatsapp_channel: resolved.includes('whatsapp_channel'),
       telegram_channel: resolved.includes('telegram_channel'),
     };
+
+    for (const key of Object.keys(FEATURES_REGISTRY)) {
+      updatedFlags[key] = resolved.includes(key);
+    }
+
     onFeaturesUpdate(updatedFlags);
   };
 
   return (
     <div className="w-full bg-[#111016] border-b border-gold/40 text-ivory transition-all z-20">
-      <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between gap-3 flex-wrap">
+      <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2">
           <TuningSliderIcon size={16} color="#C9A84C" />
           <span className="text-xs font-semibold text-champagne">
-            محاكي باقات سَامِق (وضع المعاينة التجريبي):
+            محاكي باقات سَامِق (وضع المعاينة الحي — ؟demo=panel):
+          </span>
+          <span className="text-xs px-2 py-0.5 rounded bg-gold/15 text-gold font-bold font-mono">
+            {pricing.selectedTier === 'tier_1_static'
+              ? 'الدرجة 1: تعريفي ثابت بدون منتجات'
+              : pricing.selectedTier === 'tier_2_editable'
+              ? 'الدرجة 2: تعريفي بلوحة إدارة'
+              : 'الدرجة 3: كتالوج منتجات كامل'}
           </span>
           <span className="text-xs font-bold font-mono text-gold">${pricing.totalUsd}</span>
         </div>
@@ -109,9 +150,9 @@ export function FeatureTierSimulator(props: FeatureTierSimulatorProps) {
         <button
           type="button"
           onClick={() => setIsExpanded(!isExpanded)}
-          className="px-3 py-1 rounded-full bg-white/5 hover:bg-gold/15 border border-gold/30 text-xs font-semibold text-champagne transition"
+          className="min-h-[44px] px-3.5 py-1.5 rounded-full bg-white/5 hover:bg-gold/15 border border-gold/30 text-xs font-semibold text-champagne transition flex items-center justify-center"
         >
-          {isExpanded ? 'إخفاء لوحة التحكم ▲' : 'تخصيص المزايا والأسعار ▼'}
+          {isExpanded ? 'إخفاء لوحة المحاكي ▲' : 'تبديل الدرجات والمزايا فورياً ▼'}
         </button>
       </div>
 
@@ -119,27 +160,46 @@ export function FeatureTierSimulator(props: FeatureTierSimulatorProps) {
         <div className="max-w-7xl mx-auto px-4 py-4 border-t border-white/5 space-y-4 animate-fadeIn">
           {/* Quick Presets */}
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs text-muted-lux">نماذج جاهزة:</span>
+            <span className="text-xs text-muted-lux">الدرجات الأساسية والنماذج:</span>
             <button
               type="button"
-              onClick={() => applyPreset('starter')}
-              className="px-2.5 py-1 rounded-lg text-xs bg-white/5 hover:bg-white/10 border border-white/10 text-ivory"
+              onClick={() => applyPreset('tier1')}
+              className={`px-3 py-1.5 rounded-lg text-xs border transition ${
+                pricing.selectedTier === 'tier_1_static' && activeKeys.length === 1
+                  ? 'bg-gold text-obsidian-dark font-bold border-gold shadow-sm'
+                  : 'bg-white/5 hover:bg-white/10 border-white/10 text-ivory'
+              }`}
             >
-              باقة الحضور ($140)
+              الدرجة 1: موقع تعريفي ثابت ($80)
             </button>
             <button
               type="button"
-              onClick={() => applyPreset('merchant')}
-              className="px-2.5 py-1 rounded-lg text-xs bg-gold/10 hover:bg-gold/20 border border-gold/30 text-champagne font-semibold"
+              onClick={() => applyPreset('tier2')}
+              className={`px-3 py-1.5 rounded-lg text-xs border transition ${
+                pricing.selectedTier === 'tier_2_editable' && !currentFeatures.tier_3_catalog
+                  ? 'bg-gold text-obsidian-dark font-bold border-gold shadow-sm'
+                  : 'bg-white/5 hover:bg-white/10 border-white/10 text-ivory'
+              }`}
             >
-              باقة التميز ($425)
+              الدرجة 2: تعريفي بلوحة إدارة ($130)
             </button>
             <button
               type="button"
-              onClick={() => applyPreset('ultimate')}
-              className="px-2.5 py-1 rounded-lg text-xs bg-gradient-to-r from-gold/20 to-gold/5 border border-gold text-ivory font-bold"
+              onClick={() => applyPreset('tier3')}
+              className={`px-3 py-1.5 rounded-lg text-xs border transition ${
+                currentFeatures.tier_3_catalog && !currentFeatures.ai_chatbot
+                  ? 'bg-gold text-obsidian-dark font-bold border-gold shadow-sm'
+                  : 'bg-white/5 hover:bg-white/10 border-white/10 text-ivory'
+              }`}
             >
-              الباقة الكاملة ($700+)
+              الدرجة 3: كتالوج وسلة واتساب ($235)
+            </button>
+            <button
+              type="button"
+              onClick={() => applyPreset('royal')}
+              className="px-3 py-1.5 rounded-lg text-xs bg-gradient-to-r from-gold/20 to-gold/5 border border-gold text-ivory font-bold hover:brightness-110"
+            >
+              الباقة الملكية بالذكاء الاصطناعي ($500+)
             </button>
           </div>
 

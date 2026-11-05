@@ -17,7 +17,7 @@ interface ClinicHeaderProps {
 }
 
 export function ClinicHeader({ onOpenAdvisor, onOpenCart }: ClinicHeaderProps) {
-  const { tenant, cart, currency, setCurrency, search } = useStorefront();
+  const { tenant, cart, currency, setCurrency, search, features } = useStorefront();
 
   const handleCurrencyChange = (newCurr: ThemeCurrencyCode) => {
     setCurrency(newCurr);
@@ -107,33 +107,35 @@ export function ClinicHeader({ onOpenAdvisor, onOpenCart }: ClinicHeaderProps) {
         </div>
       </div>
 
-      {/* Row 2: Always-Visible Clinical Search Bar (Height ~48px) */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 pb-2 pt-0.5">
-        <div className="relative flex items-center w-full">
-          <div className="absolute start-3 pointer-events-none text-[#0F4C4A]/60 flex items-center justify-center">
-            <SearchIcon size={18} />
+      {/* Row 2: Always-Visible Clinical Search Bar (Shown when catalog tier 3 is active) */}
+      {features.tier_3_catalog && (
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 pb-2 pt-0.5">
+          <div className="relative flex items-center w-full">
+            <div className="absolute start-3 pointer-events-none text-[#0F4C4A]/60 flex items-center justify-center">
+              <SearchIcon size={18} />
+            </div>
+            <input
+              type="search"
+              data-testid="search-input"
+              value={search.query}
+              onChange={(e) => search.setQuery(e.target.value)}
+              placeholder="ابحث بالاسم، التركيبة، أو المادة الفعالة..."
+              className="w-full h-10 ps-10 pe-10 bg-[#F2F7F5] border border-[#D4E5E0] rounded-lg text-sm text-[#0F4C4A] placeholder:text-[#64748B] focus:bg-white focus:border-[#0F4C4A] focus:outline-hidden focus:ring-1 focus:ring-[#0F4C4A] transition-all"
+              aria-label="البحث عن منتج أو مادة طبية"
+            />
+            {search.query && (
+              <button
+                type="button"
+                onClick={() => search.setQuery('')}
+                className="absolute end-1 min-w-[40px] min-h-[40px] flex items-center justify-center text-[#64748B] hover:text-[#0F4C4A]"
+                aria-label="مسح البحث"
+              >
+                <CloseIcon size={16} />
+              </button>
+            )}
           </div>
-          <input
-            type="search"
-            data-testid="search-input"
-            value={search.query}
-            onChange={(e) => search.setQuery(e.target.value)}
-            placeholder="ابحث بالاسم، التركيبة، أو المادة الفعالة..."
-            className="w-full h-10 ps-10 pe-10 bg-[#F2F7F5] border border-[#D4E5E0] rounded-lg text-sm text-[#0F4C4A] placeholder:text-[#64748B] focus:bg-white focus:border-[#0F4C4A] focus:outline-hidden focus:ring-1 focus:ring-[#0F4C4A] transition-all"
-            aria-label="البحث عن منتج أو مادة طبية"
-          />
-          {search.query && (
-            <button
-              type="button"
-              onClick={() => search.setQuery('')}
-              className="absolute end-1 min-w-[40px] min-h-[40px] flex items-center justify-center text-[#64748B] hover:text-[#0F4C4A]"
-              aria-label="مسح البحث"
-            >
-              <CloseIcon size={16} />
-            </button>
-          )}
         </div>
-      </div>
+      )}
     </header>
   );
 }

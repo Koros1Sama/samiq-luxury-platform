@@ -50,6 +50,19 @@ export function StorefrontProvider({
   platformMeta,
   children,
 }: StorefrontProviderProps) {
+  // 0. Features state with live reactive capability
+  const [featuresState, setFeaturesState] = useState<FeatureFlags>(features);
+  useEffect(() => {
+    setFeaturesState(features);
+  }, [features]);
+
+  const updateFeatures = useCallback((newFeatures: FeatureFlags) => {
+    setFeaturesState((prev) => ({
+      ...prev,
+      ...newFeatures,
+    }));
+  }, []);
+
   // 1. Currency State (hydrated safely in useEffect)
   const [currency, setCurrencyState] = useState<ThemeCurrencyCode>(initialCurrency);
 
@@ -276,7 +289,7 @@ export function StorefrontProvider({
   const contextValue: StorefrontContextValue = useMemo(
     () => ({
       tenant,
-      features,
+      features: featuresState,
       products,
       categories,
       currency,
@@ -315,11 +328,12 @@ export function StorefrontProvider({
       },
       platformMeta: platformMeta || tenant.platformMeta || DEFAULT_PLATFORM_META,
       blocksData,
+      setFeatures: updateFeatures,
     }),
     [
       tenant,
       platformMeta,
-      features,
+      featuresState,
       products,
       categories,
       currency,
@@ -344,6 +358,7 @@ export function StorefrontProvider({
       buildOrderWhatsAppUrl,
       buildProductWhatsAppUrl,
       blocksData,
+      updateFeatures,
     ]
   );
 

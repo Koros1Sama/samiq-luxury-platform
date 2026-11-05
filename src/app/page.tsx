@@ -6,6 +6,7 @@ import { ThemeHost } from '@/themes/ThemeHost';
 import { loadAllBlocksData } from '@/modules/blocks/registry';
 import { DEMO_RESTAURANT_PRODUCTS, DEMO_RESTAURANT_CATEGORIES } from '@/core/store/mockData';
 import { TenantBrandInfo, ThemeId, resolveThemeId } from '@/themes/contract';
+import { FeatureTierSimulator } from '@/themes/base/luxury-noir/components/FeatureTierSimulator';
 
 export const revalidate = 0; // Dynamic real-time persistence
 
@@ -57,6 +58,8 @@ export default async function StorefrontHomePage(props: PageProps) {
   );
   const categories = isDemoRestaurant ? DEMO_RESTAURANT_CATEGORIES : db.categories;
 
+  const showDemoPanel = searchParams.demo === 'panel';
+
   return (
     <StorefrontProvider
       tenant={tenantData}
@@ -67,6 +70,7 @@ export default async function StorefrontHomePage(props: PageProps) {
       platformMeta={db.platformMeta}
       initialCurrency="YER"
     >
+      {showDemoPanel && <FeatureTierSimulator />}
       <ThemeHost themeId={themeId} />
     </StorefrontProvider>
   );

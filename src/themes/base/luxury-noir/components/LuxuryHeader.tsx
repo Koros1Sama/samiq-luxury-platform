@@ -70,12 +70,12 @@ export function LuxuryHeader(props: LuxuryHeaderProps) {
   };
 
   const navLinks = [
-    { label: 'الرئيسية', href: '/' },
-    { label: 'المنتجات', href: '/#products-catalog' },
-    { label: 'مختبر كشف المقلد', href: '/#authenticity-lab' },
-    { label: 'المجلة', href: '/blog' },
-    { label: 'حجز استشارة', href: '/bookings' },
-  ];
+    { label: 'الرئيسية', href: '/', show: true },
+    { label: 'المنتجات', href: '/#products-catalog', show: !!features.tier_3_catalog },
+    { label: 'مختبر كشف المقلد', href: '/#authenticity-lab', show: !!features.tier_3_catalog && !!features.authenticity_guide },
+    { label: 'المجلة', href: '/blog', show: !!features.blog },
+    { label: 'حجز استشارة', href: '/bookings', show: !!features.bookings },
+  ].filter((link) => link.show);
 
   return (
     <>
@@ -123,26 +123,28 @@ export function LuxuryHeader(props: LuxuryHeaderProps) {
               />
             </div>
 
-            {/* Search Button */}
-            <button
-              type="button"
-              data-testid="search-button"
-              onClick={() => {
-                if (props.onOpenSearch) props.onOpenSearch();
-                else setSearchModalOpen(true);
-              }}
-              className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center text-ivory/80 hover:text-champagne hover:bg-white/5 transition"
-              aria-label="بحث في المنتجات"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.75}
-                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-                />
-              </svg>
-            </button>
+            {/* Search Button (Only shown when catalog tier 3 is active) */}
+            {features.tier_3_catalog && (
+              <button
+                type="button"
+                data-testid="search-button"
+                onClick={() => {
+                  if (props.onOpenSearch) props.onOpenSearch();
+                  else setSearchModalOpen(true);
+                }}
+                className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center text-ivory/80 hover:text-champagne hover:bg-white/5 transition"
+                aria-label="بحث في المنتجات"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.75}
+                    d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+                  />
+                </svg>
+              </button>
+            )}
 
             {/* Account Portal Link */}
             <Link

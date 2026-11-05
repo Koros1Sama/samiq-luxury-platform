@@ -1,6 +1,6 @@
 /**
  * SAMIQ Feature Registry & Modular Engine
- * Manages tiers (Tier 1: $100 -> Tier 3: $450) and independent addons (up to $700+)
+ * Manages tiers (Tier 1: $80 -> Tier 2: $130 -> Tier 3: $200) and independent addons (up to $500+)
  * Enforces strict dependency graph validation (requires)
  */
 
@@ -16,161 +16,340 @@ export interface FeatureDefinition {
   requires: string[];
   minTier?: 'tier_1_static' | 'tier_2_editable' | 'tier_3_catalog';
   iconName?: string;
+  recurringCostAnnualUsd?: number;
 }
 
 export const FEATURES_REGISTRY: Record<string, FeatureDefinition> = {
-  // --- Tiers ---
+  // =========================================================================
+  // 1. CUMULATIVE BASE TIERS (category: 'tier') — Each tier includes previous
+  // =========================================================================
   tier_1_static: {
     id: 'tier_1_static',
-    nameEn: 'Luxury Presence Core',
-    nameAr: 'باقة الحضور الرقمي الفاخر (Static Core)',
-    descriptionAr: 'واجهة فاخرة فائقة السرعة مع هوية بصرية مخصصة وطلب مباشر عبر واتساب',
+    nameEn: 'Static Landing Page Core',
+    nameAr: 'الدرجة 1: باقة الموقع التعريفي الثابت (Static Landing Page)',
+    descriptionAr:
+      'صفحة موقع فخمة بدون أي منتجات أو كتالوج وبدون لوحة تحكم، تركز على هوية المحل، قصة العلامة، الموقع على الخريطة، أوقات العمل، وزر محادثة واتساب مباشر.',
     category: 'tier',
-    basePriceUsd: 100,
+    basePriceUsd: 80,
     requires: [],
   },
   tier_2_editable: {
     id: 'tier_2_editable',
-    nameEn: 'Editable Merchant Hub',
-    nameAr: 'باقة المتجر المرن (Editable Store)',
-    descriptionAr: 'لوحة تحكم للمنتجات وتعديل الأسعار والمخزون مع إحصائيات مبسطة',
+    nameEn: 'Editable Site + Secret Admin Login',
+    nameAr: 'الدرجة 2: باقة الموقع التعريفي القابل للتعديل (Editable Hub)',
+    descriptionAr:
+      'نفس الموقع التعريفي مع مدخل سري للوحة تحكم المدير بإيميل وكلمة سر لتعديل النصوص، الصور، أوقات الدوام، أرقام التواصل، وترتيب الأقسام في أي وقت.',
     category: 'tier',
-    basePriceUsd: 250,
+    basePriceUsd: 130, // Cumulative: $80 + $50 = $130
     requires: ['tier_1_static'],
     minTier: 'tier_2_editable',
   },
   tier_3_catalog: {
     id: 'tier_3_catalog',
-    nameEn: 'Dynamic Multi-Category Catalog',
-    nameAr: 'باقة الكتالوج الديناميكي الشامل (Full Catalog)',
-    descriptionAr: 'كتالوج متكامل بفلترة سريعة وأقسام متعددة وتدرجات ألوان وأحجام المنتجات',
+    nameEn: 'Interactive Product Catalog & Admin',
+    nameAr: 'الدرجة 3: باقة كتالوج المنتجات والأقسام والوسوم (Interactive Catalog)',
+    descriptionAr:
+      'إضافة قسم المنتجات، الأقسام، الوسوم، الفلترة الفورية، صفحات تفاصيل المنتجات، 3 أنماط عملات، وإدارة الكتالوج بالكامل من لوحة المدير السرية.',
     category: 'tier',
-    basePriceUsd: 450,
+    basePriceUsd: 200, // Cumulative: $130 + $70 = $200
     requires: ['tier_2_editable'],
     minTier: 'tier_3_catalog',
   },
 
-  // --- Addons ---
-  cart_whatsapp: {
-    id: 'cart_whatsapp',
-    nameEn: 'Smart WhatsApp Cart',
-    nameAr: 'سلة التسوق الذكية الموجهة لواتساب',
-    descriptionAr: 'سلة أنيقة تحسب الإجمالي تلقائياً وتبني رسالة واتساب منسقة فورية',
+  // =========================================================================
+  // 2. ADD-ONS ON TIER 1 (requires: ['tier_1_static'])
+  // =========================================================================
+  custom_domain: {
+    id: 'custom_domain',
+    nameEn: 'Custom Brand Domain Link',
+    nameAr: 'ربط دومين خاص رسمي (brand.com بدلاً من samiq.shop)',
+    descriptionAr:
+      'ربط مباشر بدون تحويل مع شهادة حماية SSL مشفرة وتأمين سحابي عالمي (رسوم حجز النطاق السنوية $20/سنة).',
+    category: 'addon',
+    basePriceUsd: 15,
+    requires: ['tier_1_static'],
+    recurringCostAnnualUsd: 20,
+  },
+  second_language: {
+    id: 'second_language',
+    nameEn: 'Second Language (Arabic RTL + English LTR)',
+    nameAr: 'اللغة الثانية (عربي RTL + إنجليزي LTR)',
+    descriptionAr:
+      'واجهة ومحتوى متكامل بلغتين مع تبديل فوري للاتجاه وتنسيق طباعي مخصص لكل لغة.',
+    category: 'addon',
+    basePriceUsd: 35,
+    requires: ['tier_1_static'],
+  },
+  pwa_app: {
+    id: 'pwa_app',
+    nameEn: 'Installable PWA Mobile App',
+    nameAr: 'تطبيق الجوال القابل للتثبيت (PWA App)',
+    descriptionAr:
+      'تثبيت الموقع كتطبيق جوال مستقل بأيقونة وشاشة تحميل خاصة على أجهزة الزبائن وجوال التاجر.',
+    category: 'addon',
+    basePriceUsd: 25,
+    requires: ['tier_1_static'],
+  },
+  analytics_stats: {
+    id: 'analytics_stats',
+    nameEn: 'Traffic & Engagement Analytics',
+    nameAr: 'إحصائيات وتقارير الزيارات والمبيعات',
+    descriptionAr:
+      'لوحة تقارير وإحصائيات دقيقة لعدد الزوار، مصادر الزيارات، والصفحات الأكثر مشاهدة وتفاعلاً.',
+    category: 'addon',
+    basePriceUsd: 20,
+    requires: ['tier_1_static'],
+  },
+
+  // =========================================================================
+  // 3. ADD-ONS ON TIER 2 (requires: ['tier_2_editable'])
+  // =========================================================================
+  bookings: {
+    id: 'bookings',
+    nameEn: 'Appointments & Bookings System',
+    nameAr: 'نظام الحجوزات والمواعيد',
+    descriptionAr:
+      'مناسب للصالونات والعيادات والاستشارات والمطاعم مع إدارة وتأكيد المواعيد وساعات العمل من لوحة المحل.',
     category: 'addon',
     basePriceUsd: 40,
-    requires: ['tier_1_static'],
+    requires: ['tier_2_editable'],
   },
-  authenticity_guide: {
-    id: 'authenticity_guide',
-    nameEn: 'Authenticity Interactive Slider',
-    nameAr: 'مختبر كشف المقلد وفحص الدفعات التفاعلي',
-    descriptionAr: 'أداة سحب تفاعلية وفاحص رقم تشغيلة لمطابقة تفاصيل العبوة والقوام والباركود لبناء الثقة المطلقة',
+  blog: {
+    id: 'blog',
+    nameEn: 'SEO Articles & News Blog',
+    nameAr: 'المدونة والأخبار والمقالات (SEO Blog)',
+    descriptionAr:
+      'نشر مقالات وأخبار ونصائح ترفع تصنيف المتجر وتجلب زواراً مجانيين من محركات بحث جوجل.',
     category: 'addon',
-    basePriceUsd: 75,
-    requires: ['tier_1_static'],
+    basePriceUsd: 30,
+    requires: ['tier_2_editable'],
   },
-  skin_routine_advisor: {
-    id: 'skin_routine_advisor',
-    nameEn: 'Skin Routine & Active Actives Advisor',
-    nameAr: 'مستشار روتين العناية ومخطط المكونات الفعالة',
-    descriptionAr: 'تحديد نوع البشرة واقتراح الروتين المناسب مع خريطة بصرية لجزيئات المكونات',
+  ai_chatbot: {
+    id: 'ai_chatbot',
+    nameEn: 'On-Site AI Smart Advisor',
+    nameAr: 'الدرجة 6: الشات بوت الذكي في الموقع (On-Site AI Advisor)',
+    descriptionAr:
+      'يرد على استفسارات الزبائن من معلومات ومنتجات الموقع الحقيقية ويعرض بطاقات تفاعلية بالأسعار والروابط ($15/سنة أو حسب الاستهلاك).',
+    category: 'intelligence',
+    basePriceUsd: 50,
+    requires: ['tier_2_editable'],
+    recurringCostAnnualUsd: 15,
+  },
+  telegram_channel: {
+    id: 'telegram_channel',
+    nameEn: 'AI Telegram Channel Bot',
+    nameAr: 'شات بوت منصة تيليجرام (الدرجة 7)',
+    descriptionAr:
+      'يرد تلقائياً في تيليجرام بصورة المنتج والوصف وسعره وزر رابط مباشر مع تحويل المحادثة للمالك.',
+    category: 'channel',
+    basePriceUsd: 35,
+    requires: ['ai_chatbot'],
+  },
+  whatsapp_channel: {
+    id: 'whatsapp_channel',
+    nameEn: 'AI WhatsApp Channel Bot (3 Modes)',
+    nameAr: 'شات بوت منصة واتساب بـ 3 أنماط (الدرجة 7)',
+    descriptionAr:
+      'رد آلي تفاعلي على واتساب ببطاقات المنتجات ويدعم 3 أنماط: أندرويد Webhook مجاني، مسح QR كود، أو Meta Cloud API الرسمي.',
+    category: 'channel',
+    basePriceUsd: 45,
+    requires: ['ai_chatbot'],
+  },
+  instagram_channel: {
+    id: 'instagram_channel',
+    nameEn: 'AI Instagram & Messenger Bot',
+    nameAr: 'شات بوت منصة إنستغرام وفيسبوك (الدرجة 7)',
+    descriptionAr:
+      'رد ذكي في رسائل إنستغرام وماسنجر ببطاقات منتجات متتالية (Carousel) وروابط مباشرة.',
+    category: 'channel',
+    basePriceUsd: 45,
+    requires: ['ai_chatbot'],
+  },
+
+  // =========================================================================
+  // 4. ADD-ONS ON TIER 3 (requires: ['tier_3_catalog'])
+  // =========================================================================
+  cart_whatsapp: {
+    id: 'cart_whatsapp',
+    nameEn: 'Smart WhatsApp Cart & Checkout',
+    nameAr: 'سلة المشتريات وإتمام الطلب عبر واتساب أو الدفع عند الاستلام',
+    descriptionAr:
+      'سلة ذكية تحفظ تلقائياً وترسل فاتورة الطلب المنسقة لواتساب المحل وتوثق الطلب في لوحة الإدارة.',
     category: 'addon',
-    basePriceUsd: 60,
-    requires: ['tier_1_static'],
+    basePriceUsd: 35,
+    requires: ['tier_3_catalog'],
+  },
+  delivery_zones: {
+    id: 'delivery_zones',
+    nameEn: 'Delivery Zones & Shipping Rates',
+    nameAr: 'مناطق التوصيل ورسومها حسب المدينة أو الحي',
+    descriptionAr:
+      'تحديد رسوم التوصيل لكل مديرية أو منطقة مع تحديد سقف للطلبات المؤهلة للتوصيل المجاني.',
+    category: 'addon',
+    basePriceUsd: 20,
+    requires: ['cart_whatsapp'],
+  },
+  coupons: {
+    id: 'coupons',
+    nameEn: 'Coupons & Discount Promotions',
+    nameAr: 'الكوبونات والعروض والخصومات',
+    descriptionAr:
+      'أكواد خصم بنسبة مئوية أو مبلغ ثابت مع تحديد تاريخ الصلاحية وسقف عدد مرات الاستخدام.',
+    category: 'addon',
+    basePriceUsd: 20,
+    requires: ['cart_whatsapp'],
+  },
+  owner_notifications: {
+    id: 'owner_notifications',
+    nameEn: 'Instant Order Alerts for Merchant',
+    nameAr: 'إشعارات فورية لصاحب المحل بالطلبات الجديدة',
+    descriptionAr:
+      'تنبيه فوري على تيليجرام أو واتساب التاجر في نفس اللحظة التي يؤكد فيها الزبون طلبه.',
+    category: 'addon',
+    basePriceUsd: 20,
+    requires: ['cart_whatsapp'],
+  },
+  payment_gateways: {
+    id: 'payment_gateways',
+    nameEn: 'Electronic Payments & Local Wallets',
+    nameAr: 'الدرجة 5: بوابات الدفع الإلكتروني والمحافظ المحلية',
+    descriptionAr:
+      'الدفع بالبطاقات والمحافظ الرقمية وتحديث حالة سداد الطلبات تلقائياً في النظام.',
+    category: 'integration',
+    basePriceUsd: 50,
+    requires: ['cart_whatsapp'],
+  },
+  inventory_variants: {
+    id: 'inventory_variants',
+    nameEn: 'Inventory Stock & Variants Control',
+    nameAr: 'إدارة المخزون والمستودع وخيارات المنتج',
+    descriptionAr:
+      'تتبع الكميات، الخصم التلقائي، خيارات المنتج (الأحجام/الألوان/المقاسات) وعزل مستودع التاجر عن العرض العام.',
+    category: 'addon',
+    basePriceUsd: 35,
+    requires: ['tier_3_catalog'],
   },
   smart_tags_ai: {
     id: 'smart_tags_ai',
-    nameEn: 'AI Smart Multi-Tags & Auto Classification',
-    nameAr: 'الوسوم الذكية والتصنيف بالذكاء الاصطناعي (AI Smart Tags)',
-    descriptionAr: 'توليد وسوم متعددة الأبعاد تلقائياً بالذكاء الاصطناعي وتصنيف المنتجات حسب مشاكل البشرة والمكونات مع فلترة فورية.',
+    nameEn: 'AI Smart Tags & Semantic Search',
+    nameAr: 'مساعد المنتجات والوسوم الذكية بالذكاء الاصطناعي',
+    descriptionAr:
+      'تحليل صورة واسم المنتج لاقتراح الوسوم والوصف الاحترافي وترجمته وتجهيز SEO والبحث الدلالي الفوري.',
     category: 'intelligence',
-    basePriceUsd: 75,
+    basePriceUsd: 35,
     requires: ['tier_3_catalog'],
   },
   customer_accounts: {
     id: 'customer_accounts',
-    nameEn: 'Customer Hub & Order History',
-    nameAr: 'حسابات العملاء وتتبع الطلبات السابقة',
-    descriptionAr: 'تسجيل دخول سلس برقم الجوال لمتابعة حالة الشحنات والطلبات السابقة',
+    nameEn: 'Customer Auth & Order History',
+    nameAr: 'الدرجة 4: حسابات الزبائن والبروفايل وقائمة المفضلة',
+    descriptionAr:
+      'تسجيل دخول مستقل لكل محل بالإيميل أو الجوال مع ملف شخصي، قائمة مفضلات محفوظة، وسجل للطلبات السابقة.',
     category: 'addon',
-    basePriceUsd: 80,
-    requires: ['tier_2_editable'],
-  },
-  payment_gateways: {
-    id: 'payment_gateways',
-    nameEn: 'Yemeni Electronic Wallets',
-    nameAr: 'بوابات الدفع الإلكتروني اليمنية',
-    descriptionAr: 'الدفع المباشر عبر الكريمي، جوالي، فلوسك، ون كاش ومحفظة جيب',
-    category: 'integration',
-    basePriceUsd: 120,
+    basePriceUsd: 40,
     requires: ['tier_3_catalog'],
   },
-  ai_chatbot: {
-    id: 'ai_chatbot',
-    nameEn: 'AI Beauty & Authenticity Consultant',
-    nameAr: 'المستشار الذكي (اسأل خبير لكشف المقلد)',
-    descriptionAr: 'شات بوت ذكي يقترح المنتجات المناسبة ويجيب على أسئلة الأصالة باللهجة اليمنية 24/7',
+  reviews_ratings: {
+    id: 'reviews_ratings',
+    nameEn: 'Customer Reviews & Ratings',
+    nameAr: 'تقييمات ومراجعات المنتجات بالنجوم',
+    descriptionAr:
+      'تقييمات موثقة من الزبائن المسجلين مع تحكم صاحب المحل بمراجعتها واعتماد ظهورها.',
     category: 'addon',
-    basePriceUsd: 150,
-    requires: ['tier_2_editable'],
+    basePriceUsd: 20,
+    requires: ['customer_accounts'],
   },
-  whatsapp_channel: {
-    id: 'whatsapp_channel',
-    nameEn: 'Interactive WhatsApp Business Bot',
-    nameAr: 'قناة بوت الواتساب التفاعلية',
-    descriptionAr: 'استقبال الاستفسارات والطلبات آلياً عبر محادثة تطبيق الواتساب مباشرة',
-    category: 'channel',
-    basePriceUsd: 90,
-    requires: ['ai_chatbot'],
+  authenticity_guide: {
+    id: 'authenticity_guide',
+    nameEn: 'Authenticity Lab & Batch Verifier',
+    nameAr: 'مختبر ودليل كشف المقلد وفحص الدفعات',
+    descriptionAr:
+      'مقارنة تفاعلية بين الأصلي والبدائل، شارة الأصالة، فاحص رقم التشغيلة، وربط مقاطع الفيديو التوضيحية.',
+    category: 'addon',
+    basePriceUsd: 35,
+    requires: ['tier_3_catalog'],
   },
-  telegram_channel: {
-    id: 'telegram_channel',
-    nameEn: 'Interactive Telegram Storefront',
-    nameAr: 'قناة بوت التيليجرام الذكي',
-    descriptionAr: 'تصفح الكتالوج والطلب المباشر من خلال تطبيق التيليجرام',
-    category: 'channel',
-    basePriceUsd: 50,
-    requires: ['tier_2_editable'],
+  skin_routine_advisor: {
+    id: 'skin_routine_advisor',
+    nameEn: 'Interactive Selection & Routine Advisor',
+    nameAr: 'مستشار الاختيار والروتين التفاعلي',
+    descriptionAr:
+      'أداة تفاعلية تساعد الزبون في اختيار المنتجات الأنسب لاحتياجه ونوع استخدامه مع خريطة بصرية.',
+    category: 'addon',
+    basePriceUsd: 30,
+    requires: ['tier_3_catalog'],
+  },
+  multi_branch: {
+    id: 'multi_branch',
+    nameEn: 'Multi-Branch Management',
+    nameAr: 'تعدد الفروع للمحل الواحد (Multi-Branch)',
+    descriptionAr:
+      'إدارة أكثر من فرع للمحل (مثلاً صنعاء، عدن، الرياض) لكل فرع عنوانه، أوقات دوامه، ورقم واتسابه ومخزونه.',
+    category: 'addon',
+    basePriceUsd: 40,
+    requires: ['tier_3_catalog'],
   },
 };
 
-/**
- * Calculates estimated package investment in USD
- */
-export function calculateTierPrice(selectedFeatureIds: string[]): {
+export interface PricingResult {
   totalUsd: number;
+  subtotalUsd: number;
+  discountUsd: number;
   baseTierPriceUsd: number;
   addonsPriceUsd: number;
   selectedTier: string;
-} {
+  itemizedPrices: Record<string, number>;
+}
+
+/**
+ * Calculates estimated package investment in USD with optional overrides and discount
+ */
+export function calculateTierPrice(
+  selectedFeatureIds: string[],
+  priceOverrides?: Record<string, number>,
+  discountUsd: number = 0
+): PricingResult {
   const selectedSet = new Set(selectedFeatureIds);
 
   // Determine highest tier selected
   let baseTier = 'tier_1_static';
-  let baseTierPrice = FEATURES_REGISTRY.tier_1_static.basePriceUsd;
+  let baseTierPrice = priceOverrides?.['tier_1_static'] ?? FEATURES_REGISTRY.tier_1_static.basePriceUsd;
 
   if (selectedSet.has('tier_3_catalog')) {
     baseTier = 'tier_3_catalog';
-    baseTierPrice = FEATURES_REGISTRY.tier_3_catalog.basePriceUsd;
+    baseTierPrice = priceOverrides?.['tier_3_catalog'] ?? FEATURES_REGISTRY.tier_3_catalog.basePriceUsd;
   } else if (selectedSet.has('tier_2_editable')) {
     baseTier = 'tier_2_editable';
-    baseTierPrice = FEATURES_REGISTRY.tier_2_editable.basePriceUsd;
+    baseTierPrice = priceOverrides?.['tier_2_editable'] ?? FEATURES_REGISTRY.tier_2_editable.basePriceUsd;
   }
+
+  const itemized: Record<string, number> = {
+    [baseTier]: baseTierPrice,
+  };
 
   // Calculate sum of active addons / channels
   let addonsSum = 0;
   for (const featureId of selectedSet) {
     const feat = FEATURES_REGISTRY[featureId];
     if (feat && feat.category !== 'tier') {
-      addonsSum += feat.basePriceUsd;
+      const price = priceOverrides?.[featureId] ?? feat.basePriceUsd;
+      addonsSum += price;
+      itemized[featureId] = price;
     }
   }
 
+  const subtotal = baseTierPrice + addonsSum;
+  const cleanDiscount = Math.max(0, Math.min(discountUsd || 0, subtotal));
+  const total = Math.max(0, subtotal - cleanDiscount);
+
   return {
-    totalUsd: baseTierPrice + addonsSum,
+    totalUsd: total,
+    subtotalUsd: subtotal,
+    discountUsd: cleanDiscount,
     baseTierPriceUsd: baseTierPrice,
     addonsPriceUsd: addonsSum,
     selectedTier: baseTier,
+    itemizedPrices: itemized,
   };
 }
 
