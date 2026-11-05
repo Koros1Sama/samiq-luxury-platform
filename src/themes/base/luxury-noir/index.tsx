@@ -13,6 +13,7 @@ import { TrustFooterBar } from './components/TrustFooterBar';
 import { MobileAppBottomNav } from './components/MobileAppBottomNav';
 import { BrandBentoGrid } from './components/BrandBentoGrid';
 import { StoreLocationAndSocial } from './components/StoreLocationAndSocial';
+import { PwaInstallPrompt } from './components/PwaInstallPrompt';
 
 const AuthenticityCompareSlider = dynamic(
   () => import('./components/AuthenticityCompareSlider').then((m) => m.AuthenticityCompareSlider),
@@ -97,6 +98,9 @@ export function LuxuryNoirTheme(_props: ThemeLayoutProps) {
 
       {/* 5. Native Mobile App Bottom Navigation Bar (56px, opaque #0A0A0D) */}
       <MobileAppBottomNav />
+
+      {/* PWA App Install Button */}
+      <PwaInstallPrompt className="fixed bottom-20 end-4 z-40" />
 
       {/* 6. WhatsApp Cart Drawer (Loaded strictly on-demand when user opens cart) */}
       {features.cart_whatsapp && cart.isOpen && (

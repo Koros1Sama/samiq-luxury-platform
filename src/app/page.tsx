@@ -56,7 +56,7 @@ export default async function StorefrontHomePage(props: PageProps) {
   );
   const categories = db.categories;
 
-  const showDemoPanel = searchParams.demo === 'panel';
+  const showDemoPanel = searchParams.demo === 'panel' || searchParams.demo === '1' || isDevOrDemo;
 
   return (
     <StorefrontProvider
@@ -66,6 +66,8 @@ export default async function StorefrontHomePage(props: PageProps) {
       categories={categories}
       blocksData={blocksData}
       platformMeta={db.platformMeta}
+      branches={db.branches || []}
+      shippingZones={db.shippingZones || []}
       initialCurrency="YER"
     >
       {showDemoPanel && <FeatureTierSimulator />}

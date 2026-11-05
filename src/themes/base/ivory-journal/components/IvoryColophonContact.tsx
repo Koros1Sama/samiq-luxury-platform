@@ -14,7 +14,7 @@ import {
 } from './IvoryIcons';
 
 export function IvoryColophonContact(_props: Partial<SectionComponentProps>) {
-  const { tenant, platformMeta } = useStorefront();
+  const { tenant, platformMeta, features, branches } = useStorefront();
 
   const mapUrl = tenant.contact?.map?.url || tenant.googleMaps || 'https://maps.google.com';
   const whatsappNum = tenant.contact?.whatsapp || tenant.whatsapp || '775234989';
@@ -166,6 +166,49 @@ export function IvoryColophonContact(_props: Partial<SectionComponentProps>) {
             </div>
           </div>
         </div>
+
+        {/* Multi-Branch Network (Gated by multi_branch feature) */}
+        {features?.multi_branch !== false && branches && branches.length > 0 && (
+          <div className="pt-8 border-t border-[#E8E2D8] space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="font-serif font-bold text-base sm:text-lg text-[#1B1612]">
+                فروع ومنافذ التوزيع المعتمدة ({branches.length})
+              </span>
+              <span className="text-xs font-sans text-[#5E6B5A]">
+                استلام فوري وفحص معتمد
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {branches.map((b: any) => (
+                <div
+                  key={b.id}
+                  className="p-4 rounded-xl bg-[#FAF7F2] border border-[#E8E2D8] space-y-2 text-xs font-sans"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-serif font-bold text-sm text-[#1B1612]">
+                      {b.nameAr || b.name}
+                    </span>
+                    {b.isMain && (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#EBF5EE] text-[#2D6A4F] font-bold">
+                        المقر الرئيسي
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[#554D46] leading-[1.6]">
+                    {b.cityAr || b.city} — {b.addressAr || b.address}
+                  </p>
+                  <div className="pt-2 border-t border-[#E8E2D8] flex items-center justify-between text-[#877E75]">
+                    <span>{b.hoursAr || b.workingHours || 'يومياً 9 ص - 10 م'}</span>
+                    <a href={`tel:${b.phone}`} className="font-mono font-bold text-[#1B1612] hover:underline">
+                      {b.phone}
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Dedicated SAMIQ Engine Developer Signature Bar */}
         <div className="border border-[#DCD3C5] bg-[#EFE9DC] p-5 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-sans">

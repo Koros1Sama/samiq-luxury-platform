@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { CloseIcon } from './LuxuryIcons';
+import { useStorefront } from '@/core/storefront/StorefrontProvider';
 
 interface PwaInstallPromptProps {
   className?: string;
@@ -9,6 +10,7 @@ interface PwaInstallPromptProps {
 }
 
 export function PwaInstallPrompt({ className = '', isCompact = false }: PwaInstallPromptProps) {
+  const { features, locale } = useStorefront();
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isInstallable, setIsInstallable] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
@@ -31,6 +33,10 @@ export function PwaInstallPrompt({ className = '', isCompact = false }: PwaInsta
     };
   }, []);
 
+  if (features?.pwa_app === false) {
+    return null;
+  }
+
   const handleInstallClick = async () => {
     if (deferredPrompt) {
       deferredPrompt.prompt();
@@ -48,12 +54,14 @@ export function PwaInstallPrompt({ className = '', isCompact = false }: PwaInsta
     return null;
   }
 
+  const isEn = locale === 'en';
+
   return (
     <>
       <button
         type="button"
         onClick={handleInstallClick}
-        title="تثبيت التطبيق على هاتفك"
+        title={isEn ? 'Install app on your phone' : 'تثبيت التطبيق على هاتفك'}
         className={`min-w-[40px] min-h-[40px] flex items-center justify-center gap-2 px-3.5 py-2 rounded-full bg-gold/10 hover:bg-gold/20 text-champagne border border-gold/30 text-xs font-sans font-semibold transition ${className}`}
       >
         <svg
@@ -70,7 +78,7 @@ export function PwaInstallPrompt({ className = '', isCompact = false }: PwaInsta
           <polyline points="7 10 12 15 17 10" />
           <line x1="12" y1="15" x2="12" y2="3" />
         </svg>
-        {!isCompact && <span>تثبيت التطبيق</span>}
+        {!isCompact && <span>{isEn ? 'Install App' : 'تثبيت التطبيق'}</span>}
       </button>
 
       {/* Instructions Modal */}
@@ -78,7 +86,9 @@ export function PwaInstallPrompt({ className = '', isCompact = false }: PwaInsta
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
           <div className="w-full max-w-sm p-6 rounded-3xl bg-surface border border-gold/40 shadow-2xl space-y-4 text-ivory text-xs font-sans">
             <div className="flex items-center justify-between pb-3 border-b border-white/10">
-              <h4 className="text-sm font-serif font-bold text-champagne">تثبيت التطبيق</h4>
+              <h4 className="text-sm font-serif font-bold text-champagne">
+                {isEn ? 'Install App' : 'تثبيت التطبيق'}
+              </h4>
               <button
                 type="button"
                 onClick={() => setShowInstructions(false)}
@@ -90,7 +100,9 @@ export function PwaInstallPrompt({ className = '', isCompact = false }: PwaInsta
             </div>
 
             <p className="text-muted-lux leading-relaxed">
-              لتثبيت المتجر كتطبيق فوري على شاشة هاتفك الرئيسية:
+              {isEn
+                ? 'To install this store as an instant app on your phone:'
+                : 'لتثبيت المتجر كتطبيق فوري على شاشة هاتفك الرئيسية:'}
             </p>
 
             <div className="space-y-2.5 p-3 rounded-2xl bg-white/5 border border-white/10">
@@ -98,13 +110,21 @@ export function PwaInstallPrompt({ className = '', isCompact = false }: PwaInsta
                 <span className="w-5 h-5 rounded-full bg-gold/20 text-gold flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
                   1
                 </span>
-                <span className="leading-relaxed">اضغطي على زر المشاركة (Share) أسفل المتصفح (Safari أو Chrome).</span>
+                <span className="leading-relaxed">
+                  {isEn
+                    ? 'Tap the share or browser menu icon.'
+                    : 'اضغطي على زر المشاركة أو خيارات المتصفح.'}
+                </span>
               </div>
               <div className="flex items-start gap-2">
                 <span className="w-5 h-5 rounded-full bg-gold/20 text-gold flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
                   2
                 </span>
-                <span className="leading-relaxed">اختاري &quot;إضافة إلى الصفحة الرئيسية&quot; (Add to Home Screen).</span>
+                <span className="leading-relaxed">
+                  {isEn
+                    ? 'Select "Add to Home Screen" or "Install".'
+                    : 'اختاري "إضافة إلى الصفحة الرئيسية" أو "تثبيت".'}
+                </span>
               </div>
             </div>
 
@@ -113,7 +133,7 @@ export function PwaInstallPrompt({ className = '', isCompact = false }: PwaInsta
               onClick={() => setShowInstructions(false)}
               className="w-full min-h-[44px] py-2.5 rounded-xl bg-gold/15 text-gold border border-gold/30 font-bold hover:bg-gold/25 transition text-xs"
             >
-              تم الفهم
+              {isEn ? 'Got it' : 'تم الفهم'}
             </button>
           </div>
         </div>

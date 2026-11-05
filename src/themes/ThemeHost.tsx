@@ -3,6 +3,7 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
 import { ThemeId } from './contract';
+import { useStorefront } from '@/core/storefront/StorefrontProvider';
 
 const LuxuryNoirTheme = dynamic(
   () => import(/* webpackChunkName: "theme-luxury" */ './base/luxury-noir'),
@@ -18,10 +19,13 @@ const ClinicLabTheme = dynamic(
 );
 
 export function ThemeHost({ themeId }: { themeId: ThemeId }) {
-  if (themeId === 'ivory-journal') {
+  const sf = useStorefront();
+  const effectiveTheme = sf.activeTheme || themeId;
+
+  if (effectiveTheme === 'ivory-journal') {
     return <IvoryJournalTheme />;
   }
-  if (themeId === 'clinic-lab') {
+  if (effectiveTheme === 'clinic-lab') {
     return <ClinicLabTheme />;
   }
   return <LuxuryNoirTheme />;

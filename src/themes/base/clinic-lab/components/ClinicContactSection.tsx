@@ -11,7 +11,7 @@ import {
 } from './ClinicIcons';
 
 export function ClinicContactSection() {
-  const { tenant, platformMeta } = useStorefront();
+  const { tenant, platformMeta, features, branches } = useStorefront();
 
   const phone = tenant.contact?.phone || tenant.phone || '775234989';
   const whatsapp = tenant.contact?.whatsapp || tenant.whatsapp || '775234989';
@@ -123,6 +123,49 @@ export function ClinicContactSection() {
             </div>
           </div>
         </div>
+
+        {/* Multi-Branch Network (Gated by multi_branch feature) */}
+        {features?.multi_branch !== false && branches && branches.length > 0 && (
+          <div className="mt-8 pt-6 border-t border-[#E2ECE9] space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base sm:text-lg font-bold text-[#0F4C4A]">
+                مراكز الفحص والاستلام المعتمدة ({branches.length})
+              </h3>
+              <span className="text-xs text-[#4A5568] font-medium">
+                معاينة مباشرة وختم أصالة معتمد
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {branches.map((b: any) => (
+                <div
+                  key={b.id}
+                  className="p-4 rounded-xl bg-[#F2F7F5] border border-[#D4E5E0] space-y-2 text-xs font-sans"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-sm text-[#0F4C4A]">
+                      {b.nameAr || b.name}
+                    </span>
+                    {b.isMain && (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#CFE8E1] text-[#0F4C4A] font-bold">
+                        المقر الرئيسي
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[#4A5568] leading-[1.6]">
+                    {b.cityAr || b.city} — {b.addressAr || b.address}
+                  </p>
+                  <div className="pt-2 border-t border-[#D4E5E0] flex items-center justify-between text-[#4A5568]">
+                    <span>{b.hoursAr || b.workingHours || 'يومياً 9 ص - 10 م'}</span>
+                    <a href={`tel:${b.phone}`} className="font-mono font-bold text-[#0F4C4A] hover:underline">
+                      {b.phone}
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Dedicated SAMIQ Engine Developer Signature Bar */}
         <div className="mt-8 p-4 rounded-2xl bg-[#E8F3F0] border border-[#C5DFD8] flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-sans">

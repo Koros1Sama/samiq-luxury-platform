@@ -6,6 +6,39 @@ import { AuthenticityComparisonData } from '@/modules/blocks/types';
 import { PlatformPricingConfig, DEFAULT_PRICING_CONFIG } from '@/core/features/registry';
 export { type PlatformPricingConfig, DEFAULT_PRICING_CONFIG };
 
+export interface BrandPaletteConfig {
+  primaryColor?: string;
+  backgroundColor?: string;
+  surfaceColor?: string;
+  textColor?: string;
+  isCustomPalette?: boolean;
+}
+
+export interface PaymentAccountsConfig {
+  kuraimiAccount?: string;
+  floosakAccount?: string;
+  jeebAccount?: string;
+  jawaliAccount?: string;
+  accountHolderName?: string;
+}
+
+export interface NotificationConfig {
+  telegramBotToken?: string;
+  telegramChatId?: string;
+  ownerWhatsapp?: string;
+  geminiApiKey?: string;
+}
+
+export interface TenantConfig extends TenantBrandInfo {
+  heroTitle?: string;
+  heroSubtitle?: string;
+  announcementText?: string;
+  industryPreset?: string;
+  brandPalette?: BrandPaletteConfig;
+  paymentAccounts?: PaymentAccountsConfig;
+  notificationConfig?: NotificationConfig;
+}
+
 export interface CouponRecord {
   code: string;
   discountPercentage: number;
@@ -19,13 +52,16 @@ export interface CouponRecord {
 export interface ShippingZoneRecord {
   id: string;
   nameAr: string;
-  nameEn: string;
+  nameEn?: string;
+  governorateAr?: string;
   city: string;
   feeYer: number;
   feeSar: number;
   feeUsd: number;
-  estimatedDeliveryHours: string;
+  estimatedDeliveryHours?: string;
+  etaHours?: string;
   isAvailable: boolean;
+  active?: boolean;
 }
 
 export interface CustomerOrderHistoryItem {
@@ -116,17 +152,23 @@ export interface ReviewRecord {
   isVerifiedPurchase: boolean;
   batchCodeVerified?: string;
   createdAt: string;
+  approved?: boolean;
 }
 
 export interface BranchRecord {
   id: string;
   tenantId: string;
   name: string;
+  nameAr?: string;
   city: string;
+  cityAr?: string;
   address: string;
+  addressAr?: string;
   phone: string;
-  whatsapp: string;
+  whatsapp?: string;
   hoursAr: string;
+  workingHours?: string;
+  mapUrl?: string;
   isMain: boolean;
   isActive: boolean;
 }
@@ -156,7 +198,7 @@ export interface SamiqProjectRecord {
 }
 
 export interface SamiqDatabaseSchema {
-  tenant: TenantBrandInfo;
+  tenant: TenantConfig;
   features: typeof MOCK_STOREFRONT_DATA.features;
   products: ProductCardData[];
   categories: typeof MOCK_STOREFRONT_DATA.categories;
@@ -226,7 +268,7 @@ function getDatabaseFilePath(): string {
  */
 function createDefaultSeed(): SamiqDatabaseSchema {
   return {
-    tenant: MOCK_STOREFRONT_DATA.tenant,
+    tenant: MOCK_STOREFRONT_DATA.tenant as unknown as TenantConfig,
     features: MOCK_STOREFRONT_DATA.features,
     products: MOCK_STOREFRONT_DATA.products,
     categories: MOCK_STOREFRONT_DATA.categories,
@@ -1228,9 +1270,14 @@ export function updateHomeSections(sections: any[]): void {
 }
 
 // 8. Reviews
+export function getAllReviews(): ReviewRecord[] {
+  const db = getDb();
+  return db.reviews || [];
+}
+
 export function getProductReviews(productId: string): ReviewRecord[] {
   const db = getDb();
-  return db.reviews.filter((r) => r.productId === productId);
+  return (db.reviews || []).filter((r) => r.productId === productId && r.approved !== false);
 }
 
 export function addReview(review: Omit<ReviewRecord, 'id' | 'createdAt'>): ReviewRecord {
@@ -1239,10 +1286,57 @@ export function addReview(review: Omit<ReviewRecord, 'id' | 'createdAt'>): Revie
     ...review,
     id: `rev-${Date.now()}`,
     createdAt: new Date().toISOString(),
+    approved: review.approved !== undefined ? review.approved : true,
   };
+  if (!db.reviews) db.reviews = [];
   db.reviews.unshift(newReview);
   saveDb(db);
   return newReview;
+}
+
+export function moderateReview(reviewId: string, operation: 'delete' | 'toggle_approve'): boolean {
+  const db = getDb();
+  if (!db.reviews) return false;
+  if (operation === 'delete') {
+    const initialLen = db.reviews.length;
+    db.reviews = db.reviews.filter((r) => r.id !== reviewId);
+    if (db.reviews.length !== initialLen) {
+      saveDb(db);
+      return true;
+    }
+    return false;
+  }
+  if (operation === 'toggle_approve') {
+    const target = db.reviews.find((r) => r.id === reviewId);
+    if (target) {
+      target.approved = target.approved === false ? true : false;
+      saveDb(db);
+      return true;
+    }
+  }
+  return false;
+}
+
+export function updateShippingZones(zones: ShippingZoneRecord[]): void {
+  const db = getDb();
+  db.shippingZones = zones;
+  saveDb(db);
+}
+
+export function updateBranches(branches: BranchRecord[]): void {
+  const db = getDb();
+  db.branches = branches;
+  saveDb(db);
+}
+
+export function updateTenant(partialTenant: Partial<TenantConfig>): TenantConfig {
+  const db = getDb();
+  db.tenant = {
+    ...db.tenant,
+    ...partialTenant,
+  };
+  saveDb(db);
+  return db.tenant;
 }
 
 // 9. Customers & Wishlist

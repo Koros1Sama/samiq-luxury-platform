@@ -96,6 +96,15 @@ export default function PlatformSuperAdminPage() {
   const [projectAiPlan, setProjectAiPlan] = useState<'none' | 'byok' | 'managed_annual'>('byok');
   const [projectAnnualAiUsd, setProjectAnnualAiUsd] = useState<number>(90);
 
+  // Chameleon Rebranding & Color Studio State
+  const [activeClientPreset, setActiveClientPreset] = useState<string>('cosmetics_miftah');
+  const [customPrimaryColor, setCustomPrimaryColor] = useState<string>('#C9A84C');
+  const [customBackgroundColor, setCustomBackgroundColor] = useState<string>('#070709');
+  const [customSurfaceColor, setCustomSurfaceColor] = useState<string>('#0E0E12');
+  const [customTextColor, setCustomTextColor] = useState<string>('#FAF7F2');
+  const [isCustomColorPalette, setIsCustomColorPalette] = useState<boolean>(false);
+  const [isRebrandingLoading, setIsRebrandingLoading] = useState<boolean>(false);
+
   // Create Project Modal State
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isCreatingProject, setIsCreatingProject] = useState(false);
@@ -295,6 +304,70 @@ export default function PlatformSuperAdminPage() {
     setProjectAiPlan(proj.aiPlanType || 'byok');
     setSaveSuccessMsg(`تم تحديد مشروع «${proj.name}» للتخصيص والتطبيق.`);
     setTimeout(() => setSaveSuccessMsg(''), 3000);
+  };
+
+  const handleApplyClientPreset = async (presetKey: string) => {
+    setIsRebrandingLoading(true);
+    try {
+      const res = await fetch('/api/admin/store', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'apply_client_preset', presetKey }),
+      });
+      const data = await res.json();
+      if (data.success && data.tenant) {
+        setActiveClientPreset(presetKey);
+        if (data.tenant.brandPalette) {
+          setCustomPrimaryColor(data.tenant.brandPalette.primaryColor || '#C9A84C');
+          setCustomBackgroundColor(data.tenant.brandPalette.backgroundColor || '#070709');
+          setCustomSurfaceColor(data.tenant.brandPalette.surfaceColor || '#0E0E12');
+          setCustomTextColor(data.tenant.brandPalette.textColor || '#FAF7F2');
+          setIsCustomColorPalette(!!data.tenant.brandPalette.isCustomPalette);
+        }
+        if (data.tenant.themeId) {
+          setActiveTheme(data.tenant.themeId);
+        }
+        setSaveSuccessMsg(`تم تطبيق نمط «${data.tenant.name}» وتحديث المتجر المباشر.`);
+        setTimeout(() => setSaveSuccessMsg(''), 4000);
+        window.dispatchEvent(new Event('samiq_pricing_updated'));
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsRebrandingLoading(false);
+    }
+  };
+
+  const handleSaveLiveColorPalette = async () => {
+    setIsRebrandingLoading(true);
+    try {
+      const res = await fetch('/api/admin/store', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update_tenant',
+          tenant: {
+            brandPalette: {
+              primaryColor: customPrimaryColor,
+              backgroundColor: customBackgroundColor,
+              surfaceColor: customSurfaceColor,
+              textColor: customTextColor,
+              isCustomPalette: isCustomColorPalette,
+            },
+          },
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSaveSuccessMsg('تم حفظ وتطبيق لوحة الألوان المخصصة على المتجر المباشر.');
+        setTimeout(() => setSaveSuccessMsg(''), 4000);
+        window.dispatchEvent(new Event('samiq_pricing_updated'));
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsRebrandingLoading(false);
+    }
   };
 
   // Fleet Aggregated Metrics (Industry-Agnostic)
@@ -1584,6 +1657,177 @@ export default function PlatformSuperAdminPage() {
             </div>
           </div>
         )}
+
+        {/* ==================================================================== */}
+        {/* QUICK CLIENT REBRAND & LIVE COLOR STUDIO                             */}
+        {/* ==================================================================== */}
+        <div className="p-6 rounded-3xl bg-surface border border-gold/30 shadow-xl space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-gold" />
+                <h2 className="text-base sm:text-lg font-serif font-bold text-champagne">
+                  تجهيز سريع لعميل جديد (Quick Client Rebrand & Color Studio)
+                </h2>
+              </div>
+              <p className="text-xs text-muted-lux mt-1">
+                تبديل هوية المتجر وألوان الواجهة فورياً بنقرة واحدة لتقديم عروض تفاعلية حية أمام العملاء الجدد
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <a
+                href="/?demo=1"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs px-3.5 py-1.5 rounded-xl bg-gold/15 hover:bg-gold/25 border border-gold/30 text-champagne font-bold transition inline-flex items-center gap-1.5"
+              >
+                <span>معاينة المتجر المباشر</span>
+                <span>↗</span>
+              </a>
+            </div>
+          </div>
+
+          {/* 5 Industry Presets */}
+          <div className="space-y-2">
+            <span className="text-xs text-gold font-bold block">أنماط العلامات الجاهزة بنقرة واحدة:</span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+              {[
+                { id: 'cosmetics_miftah', name: 'مفتاح الجمال', tag: 'مستحضرات وعناية', theme: 'luxury-noir', color: '#C9A84C' },
+                { id: 'royal_oud', name: 'دار السمو', tag: 'عود وعطور ملكية', theme: 'luxury-noir', color: '#D4AF37' },
+                { id: 'derma_clinic', name: 'عيادة ديرما كير', tag: 'جلدية وسريرية', theme: 'clinic-lab', color: '#0F4C4A' },
+                { id: 'luxury_jewelry', name: 'قصر العقيق', tag: 'مجوهرات وأزياء', theme: 'ivory-journal', color: '#8C5E3C' },
+                { id: 'specialty_coffee', name: 'سُقيا للقهوة', tag: 'محمصة وبن مختص', theme: 'luxury-noir', color: '#C87D4B' },
+              ].map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  disabled={isRebrandingLoading}
+                  onClick={() => handleApplyClientPreset(p.id)}
+                  className={`p-3.5 rounded-2xl border text-start transition flex flex-col justify-between space-y-2 ${
+                    activeClientPreset === p.id
+                      ? 'border-gold bg-gold/15 shadow-md ring-1 ring-gold'
+                      : 'border-white/10 bg-white/5 hover:border-gold/40'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-ivory block">{p.name}</span>
+                    <span className="w-3.5 h-3.5 rounded-full border border-white/20 shrink-0" style={{ backgroundColor: p.color }} />
+                  </div>
+                  <span className="text-[11px] text-muted-dim block">{p.tag}</span>
+                  <span className="text-[10px] text-champagne font-mono block">
+                    {activeClientPreset === p.id ? 'النمط المطبق' : 'تطبيق النمط'}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Custom Color Palette */}
+          <div className="pt-4 border-t border-white/10 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <span className="text-xs text-gold font-bold block">تخصيص ألوان الواجهة الحية (Live Color Palette):</span>
+                <p className="text-[11px] text-muted-lux mt-0.5">تغيير الألوان الرئيسية فورياً لعرض الموقع بألوان هوية العميل أمام عينيه</p>
+              </div>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isCustomColorPalette}
+                  onChange={(e) => setIsCustomColorPalette(e.target.checked)}
+                  className="w-4 h-4 rounded text-gold bg-white/5 border-white/20"
+                />
+                <span className="text-xs text-ivory font-bold">تفعيل الألوان المخصصة</span>
+              </label>
+            </div>
+
+            {isCustomColorPalette && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[11px] text-muted-lux block">اللون الأساسي (Primary):</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={customPrimaryColor}
+                      onChange={(e) => setCustomPrimaryColor(e.target.value)}
+                      className="w-8 h-8 rounded cursor-pointer border-0 p-0 bg-transparent"
+                    />
+                    <input
+                      type="text"
+                      value={customPrimaryColor}
+                      onChange={(e) => setCustomPrimaryColor(e.target.value)}
+                      className="w-full min-h-[36px] px-2 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-ivory"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[11px] text-muted-lux block">خلفية الموقع (Background):</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={customBackgroundColor}
+                      onChange={(e) => setCustomBackgroundColor(e.target.value)}
+                      className="w-8 h-8 rounded cursor-pointer border-0 p-0 bg-transparent"
+                    />
+                    <input
+                      type="text"
+                      value={customBackgroundColor}
+                      onChange={(e) => setCustomBackgroundColor(e.target.value)}
+                      className="w-full min-h-[36px] px-2 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-ivory"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[11px] text-muted-lux block">لون البطاقات (Surface):</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={customSurfaceColor}
+                      onChange={(e) => setCustomSurfaceColor(e.target.value)}
+                      className="w-8 h-8 rounded cursor-pointer border-0 p-0 bg-transparent"
+                    />
+                    <input
+                      type="text"
+                      value={customSurfaceColor}
+                      onChange={(e) => setCustomSurfaceColor(e.target.value)}
+                      className="w-full min-h-[36px] px-2 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-ivory"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[11px] text-muted-lux block">لون النصوص (Text):</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={customTextColor}
+                      onChange={(e) => setCustomTextColor(e.target.value)}
+                      className="w-8 h-8 rounded cursor-pointer border-0 p-0 bg-transparent"
+                    />
+                    <input
+                      type="text"
+                      value={customTextColor}
+                      onChange={(e) => setCustomTextColor(e.target.value)}
+                      className="w-full min-h-[36px] px-2 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-ivory"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center justify-end">
+              <button
+                type="button"
+                disabled={isRebrandingLoading}
+                onClick={handleSaveLiveColorPalette}
+                className="min-h-[40px] px-5 py-2 rounded-xl bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-sans font-bold text-xs shadow-md hover:brightness-110 transition"
+              >
+                {isRebrandingLoading ? 'جاري التطبيق...' : 'حفظ وتطبيق الألوان على المتجر المباشر'}
+              </button>
+            </div>
+          </div>
+        </div>
 
         {/* ==================================================================== */}
         {/* OPERATIONAL & ANNUAL COSTS CONFIGURATOR                              */}

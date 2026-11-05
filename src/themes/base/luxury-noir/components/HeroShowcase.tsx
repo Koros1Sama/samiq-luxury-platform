@@ -10,18 +10,25 @@ interface HeroShowcaseProps extends Partial<SectionComponentProps> {
 }
 
 export function HeroShowcase({ onCtaClick, section }: HeroShowcaseProps) {
-  const { tenant } = useStorefront();
+  const { tenant, locale } = useStorefront();
+  const isEn = locale === 'en';
 
   const scrollTo = (id: string) => {
     const el = document.querySelector(id);
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const title = (section?.props?.title as string) || tenant.name || 'مفتاح الجمال — لكشف المقلد';
+  const title =
+    (tenant as any).heroTitle ||
+    (section?.props?.title as string) ||
+    tenant.name ||
+    'مفتاح الجمال — لكشف المقلد';
   const subtitle =
+    (tenant as any).heroSubtitle ||
     (section?.props?.subtitle as string) ||
     tenant.tagline ||
     'بوابتك الموثوقة للمنتجات الأصلية وخدمات التسوق الفاخرة في اليمن';
+  const ctaText = isEn ? 'Shop Now' : 'تسوق الآن';
 
   return (
     <section className="relative overflow-hidden w-full h-[155px] sm:h-[185px] lg:h-[230px] border-b border-white/[0.08] bg-[#070709]">
@@ -61,7 +68,7 @@ export function HeroShowcase({ onCtaClick, section }: HeroShowcaseProps) {
             }}
             className="min-w-[44px] min-h-[44px] h-11 px-5 sm:px-6 rounded-full bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-obsidian-dark font-sans font-bold text-xs sm:text-sm shadow-[0_4px_20px_rgba(201,168,76,0.35)] hover:brightness-110 active:scale-[0.98] transition flex items-center justify-center gap-2 self-start"
           >
-            <span>تسوق الآن</span>
+            <span>{ctaText}</span>
             <span className="inline-block rtl:-scale-x-100 font-serif">←</span>
           </button>
         </div>

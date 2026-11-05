@@ -16,17 +16,16 @@ import {
 } from './IvoryIcons';
 
 export function IvoryCartDrawer() {
-  const { cart, currency } = useStorefront();
+  const { cart, currency, features } = useStorefront();
   const checkout = useCheckout();
 
   if (!cart.isOpen) return null;
 
   const paymentOptions: { id: PaymentMethodType; label: string }[] = [
-    { id: 'whatsapp', label: 'واتساب مباشر' },
-    { id: 'cod', label: 'دفع عند الاستلام' },
-    { id: 'kuraimi', label: 'حساب الكريمي' },
-    { id: 'jawali', label: 'محفظة جوالي' },
+    { id: 'cod', label: 'الدفع عند الاستلام (كاش)' },
+    { id: 'kuraimi', label: 'بنك الكريمي (ام فلوس)' },
     { id: 'floosak', label: 'محفظة فلوسك' },
+    { id: 'jeeb', label: 'محفظة جيب / جوالي' },
   ];
 
   return (
@@ -141,23 +140,25 @@ export function IvoryCartDrawer() {
                 })}
               </div>
 
-              {/* Shipping Zone Selector */}
-              <div className="space-y-2">
-                <label className="text-xs font-sans font-bold text-[#1B1612] block">
-                  منطقة التوصيل والشحن:
-                </label>
-                <select
-                  value={checkout.selectedZoneId}
-                  onChange={(e) => checkout.setSelectedZoneId(e.target.value)}
-                  className="w-full h-11 min-h-[44px] px-3 rounded-md border border-[#E8E2D8] bg-[#FAF7F2] font-sans text-xs sm:text-sm text-[#1B1612] focus:outline-none focus:border-[#5E6B5A]"
-                >
-                  {checkout.shippingZones.map((z) => (
-                    <option key={z.id} value={z.id}>
-                      {z.nameAr} ({z.estimatedDeliveryHours}) — {formatCurrency(currency === 'SAR' ? z.feeSar : currency === 'USD' ? z.feeUsd : z.feeYer, currency)}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {/* Shipping Zone Selector (Gated by delivery_zones feature) */}
+              {features?.delivery_zones !== false && (
+                <div className="space-y-2">
+                  <label className="text-xs font-sans font-bold text-[#1B1612] block">
+                    منطقة التوصيل والشحن:
+                  </label>
+                  <select
+                    value={checkout.selectedZoneId}
+                    onChange={(e) => checkout.setSelectedZoneId(e.target.value)}
+                    className="w-full h-11 min-h-[44px] px-3 rounded-md border border-[#E8E2D8] bg-[#FAF7F2] font-sans text-xs sm:text-sm text-[#1B1612] focus:outline-none focus:border-[#5E6B5A]"
+                  >
+                    {checkout.shippingZones.map((z) => (
+                      <option key={z.id} value={z.id}>
+                        {z.nameAr} ({z.estimatedDeliveryHours}) — {formatCurrency(currency === 'SAR' ? z.feeSar : currency === 'USD' ? z.feeUsd : z.feeYer, currency)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               {/* Customer Contact Details */}
               <div className="space-y-3 pt-2">
@@ -187,69 +188,107 @@ export function IvoryCartDrawer() {
                 </div>
               </div>
 
-              {/* Coupon Code Section */}
-              <div className="space-y-2 pt-2">
-                <label className="text-xs font-sans font-medium text-[#554D46] block">
-                  كود الخصم التحريري:
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={checkout.couponCode}
-                    onChange={(e) => checkout.setCouponCode(e.target.value)}
-                    placeholder="كود الخصم"
-                    className="flex-1 h-11 min-h-[44px] px-3 rounded-md border border-[#E8E2D8] bg-[#FAF7F2] font-mono text-xs text-[#1B1612] uppercase focus:outline-none focus:border-[#5E6B5A]"
-                  />
-                  <button
-                    type="button"
-                    onClick={checkout.applyCoupon}
-                    disabled={checkout.isApplyingCoupon}
-                    className="min-h-[44px] px-4 rounded-md border border-[#1B1612] text-[#1B1612] hover:bg-[#1B1612] hover:text-[#FAF7F2] text-xs font-sans font-bold transition-colors"
-                  >
-                    تطبيق
-                  </button>
-                </div>
-                {checkout.couponError && (
-                  <span className="text-xs text-[#A93226] font-sans block">
-                    {checkout.couponError}
-                  </span>
-                )}
-                {checkout.appliedCoupon && (
-                  <div className="flex items-center justify-between p-2 rounded bg-[#EBF5EE] text-[#2D6A4F] text-xs font-sans">
-                    <span>تم تطبيق الخصم: {checkout.appliedCoupon.code}</span>
+              {/* Coupon Code Section (Gated by coupons feature) */}
+              {features?.coupons !== false && (
+                <div className="space-y-2 pt-2">
+                  <label className="text-xs font-sans font-medium text-[#554D46] block">
+                    كود الخصم التحريري:
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={checkout.couponCode}
+                      onChange={(e) => checkout.setCouponCode(e.target.value)}
+                      placeholder="كود الخصم"
+                      className="flex-1 h-11 min-h-[44px] px-3 rounded-md border border-[#E8E2D8] bg-[#FAF7F2] font-mono text-xs text-[#1B1612] uppercase focus:outline-none focus:border-[#5E6B5A]"
+                    />
                     <button
                       type="button"
-                      onClick={checkout.removeCoupon}
-                      className="text-xs underline text-[#A93226]"
+                      onClick={checkout.applyCoupon}
+                      disabled={checkout.isApplyingCoupon}
+                      className="min-h-[44px] px-4 rounded-md border border-[#1B1612] text-[#1B1612] hover:bg-[#1B1612] hover:text-[#FAF7F2] text-xs font-sans font-bold transition-colors"
                     >
-                      إلغاء
+                      تطبيق
                     </button>
                   </div>
-                )}
-              </div>
-
-              {/* Payment Method Selector */}
-              <div className="space-y-2 pt-2">
-                <label className="text-xs font-sans font-bold text-[#1B1612] block">
-                  طريقة الدفع:
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {paymentOptions.map((opt) => (
-                    <button
-                      key={opt.id}
-                      type="button"
-                      onClick={() => checkout.setPaymentMethod(opt.id)}
-                      className={`min-h-[40px] px-2.5 py-2 rounded-md text-xs font-sans font-medium border text-start transition-all ${
-                        checkout.paymentMethod === opt.id
-                          ? 'border-[#1B1612] bg-[#1B1612] text-[#FAF7F2]'
-                          : 'border-[#E8E2D8] bg-[#FAF7F2] text-[#554D46] hover:border-[#1B1612]'
-                      }`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
+                  {checkout.couponError && (
+                    <span className="text-xs text-[#A93226] font-sans block">
+                      {checkout.couponError}
+                    </span>
+                  )}
+                  {checkout.appliedCoupon && (
+                    <div className="flex items-center justify-between p-2 rounded bg-[#EBF5EE] text-[#2D6A4F] text-xs font-sans">
+                      <span>تم تطبيق الخصم: {checkout.appliedCoupon.code}</span>
+                      <button
+                        type="button"
+                        onClick={checkout.removeCoupon}
+                        className="text-xs underline text-[#A93226]"
+                      >
+                        إلغاء
+                      </button>
+                    </div>
+                  )}
                 </div>
-              </div>
+              )}
+
+              {/* Payment Method Selector (Gated by payment_gateways feature) */}
+              {features?.payment_gateways !== false && (
+                <div className="space-y-2 pt-2">
+                  <label className="text-xs font-sans font-bold text-[#1B1612] block">
+                    طريقة الدفع:
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {paymentOptions.map((opt) => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => checkout.setPaymentMethod(opt.id)}
+                        className={`min-h-[40px] px-2.5 py-2 rounded-md text-xs font-sans font-medium border text-start transition-all ${
+                          checkout.paymentMethod === opt.id
+                            ? 'border-[#1B1612] bg-[#1B1612] text-[#FAF7F2]'
+                            : 'border-[#E8E2D8] bg-[#FAF7F2] text-[#554D46] hover:border-[#1B1612]'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Merchant Wallet Information Box */}
+                  {checkout.paymentMethod !== 'cod' && (
+                    <div className="p-3.5 rounded-lg bg-[#FAF5EC] border border-[#E8E2D8] text-xs font-sans space-y-1.5 animate-fade-in">
+                      <div className="flex items-center justify-between text-[#1B1612] font-bold">
+                        <span>
+                          {checkout.paymentMethod === 'kuraimi'
+                            ? 'بيانات التحويل — بنك الكريمي (ام فلوس):'
+                            : checkout.paymentMethod === 'floosak'
+                            ? 'بيانات التحويل — محفظة فلوسك:'
+                            : 'بيانات التحويل — محفظة جيب / جوالي:'}
+                        </span>
+                        <span className="font-mono text-[#8C5E3C] text-sm font-extrabold">
+                          {checkout.paymentMethod === 'kuraimi'
+                            ? checkout.kuraimiAccount
+                            : checkout.paymentMethod === 'floosak'
+                            ? checkout.floosakAccount
+                            : checkout.jeebAccount}
+                        </span>
+                      </div>
+                      <p className="text-[#554D46] text-[11px]">
+                        اسم صاحب الحساب: <span className="font-semibold text-[#1B1612]">{checkout.accountHolder}</span>
+                      </p>
+                      <div className="pt-1">
+                        <input
+                          type="text"
+                          value={checkout.transferRef}
+                          onChange={(e) => checkout.setTransferRef(e.target.value)}
+                          placeholder="رقم إشعار الحوالة (اختياري)"
+                          className="w-full h-9 px-3 rounded border border-[#E8E2D8] bg-white text-xs text-[#1B1612] outline-none font-mono"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </>
           )}
         </div>

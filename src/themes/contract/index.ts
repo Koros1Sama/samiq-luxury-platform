@@ -148,6 +148,24 @@ export interface TenantBrandInfo {
     clinic?: string;
     [key: string]: string | undefined;
   };
+  brandPalette?: {
+    isCustomPalette?: boolean;
+    primaryColor?: string;
+    backgroundColor?: string;
+    surfaceColor?: string;
+    textColor?: string;
+  };
+  paymentAccounts?: {
+    kuraimiAccount?: string;
+    floosakAccount?: string;
+    jeebAccount?: string;
+    jawaliAccount?: string;
+    accountHolderName?: string;
+  };
+  heroTitle?: string;
+  heroSubtitle?: string;
+  announcementText?: string;
+  activeTheme?: ThemeId;
   noindex?: boolean;
   contact: TenantContactInfo;
   homeSections: Section[];
@@ -287,6 +305,15 @@ export interface StorefrontContextValue {
   platformMeta?: PlatformMeta;
   blocksData: Record<string, unknown>;
   setFeatures?: (features: FeatureFlags) => void;
+  activeTheme?: ThemeId;
+  setActiveTheme?: (themeId: ThemeId) => void;
+  locale?: 'ar' | 'en';
+  setLocale?: (locale: 'ar' | 'en') => void;
+  palette?: any;
+  customPalette?: any;
+  setCustomPalette?: (palette: any) => void;
+  branches?: any[];
+  shippingZones?: any[];
 }
 
 export interface ThemeLayoutProps {

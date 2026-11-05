@@ -14,6 +14,7 @@ import { ClinicCompareSlider } from './components/ClinicCompareSlider';
 import { ClinicRoutineSteps } from './components/ClinicRoutineSteps';
 import { ClinicContactSection } from './components/ClinicContactSection';
 import { ClinicAdvisorModalProps } from './components/ClinicAdvisorModal';
+import { PwaInstallPrompt } from '../luxury-noir/components/PwaInstallPrompt';
 import {
   ClinicFeatureStrip,
   ClinicRichText,
@@ -135,6 +136,9 @@ export function ClinicLabTheme(_props: ThemeLayoutProps) {
           onClose={() => setIsAdvisorOpen(false)}
         />
       )}
+
+      {/* PWA App Install Button */}
+      <PwaInstallPrompt className="fixed bottom-6 end-4 z-40" />
     </div>
   );
 }

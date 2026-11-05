@@ -19,6 +19,7 @@ interface WhatsAppCartDrawerProps {
 
 export function WhatsAppCartDrawer(props: WhatsAppCartDrawerProps) {
   const sf = useStorefront();
+  const features = sf.features;
 
   const isOpen = props.isOpen !== undefined ? props.isOpen : sf.cart.isOpen;
   const onClose = props.onClose || sf.cart.close;
@@ -49,10 +50,15 @@ export function WhatsAppCartDrawer(props: WhatsAppCartDrawerProps) {
     appliedCoupon,
     couponError,
     applyCoupon,
+    removeCoupon,
     paymentMethod,
     setPaymentMethod,
     transferRef,
     setTransferRef,
+    kuraimiAccount,
+    floosakAccount,
+    jeebAccount,
+    accountHolder,
     isSubmitting,
     subtotalCurrent,
     shippingFeeCurrent,
@@ -181,40 +187,82 @@ export function WhatsAppCartDrawer(props: WhatsAppCartDrawerProps) {
                 })}
               </div>
 
-              {/* Delivery Zone Selection */}
-              <div className="pt-2 space-y-2">
-                <label className="text-xs font-semibold text-champagne block">
-                  منطقة التوصيل والشحن:
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {shippingZones.map((zone) => {
-                    const isSelected = selectedZoneId === zone.id;
-                    const fee =
-                      currentCurrency === 'SAR'
-                        ? zone.feeSar
-                        : currentCurrency === 'USD'
-                        ? zone.feeUsd
-                        : zone.feeYer;
-                    return (
-                      <button
-                        key={zone.id}
-                        type="button"
-                        onClick={() => setSelectedZoneId(zone.id)}
-                        className={`min-h-[44px] p-3 rounded-xl border text-start transition flex items-center justify-between text-xs font-sans ${
-                          isSelected
-                            ? 'bg-gold/15 border-gold text-champagne font-bold'
-                            : 'bg-white/5 border-white/10 text-ivory/70 hover:border-white/20'
-                        }`}
-                      >
-                        <span className="truncate">{zone.nameAr}</span>
-                        <span className="text-xs font-bold text-gold shrink-0 ms-2">
-                          {formatCurrency(fee, currentCurrency)}
-                        </span>
-                      </button>
-                    );
-                  })}
+              {/* Delivery Zone Selection (Gated by delivery_zones feature) */}
+              {features?.delivery_zones !== false && (
+                <div className="pt-2 space-y-2">
+                  <label className="text-xs font-semibold text-champagne block">
+                    منطقة التوصيل والشحن:
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {shippingZones.map((zone) => {
+                      const isSelected = selectedZoneId === zone.id;
+                      const fee =
+                        currentCurrency === 'SAR'
+                          ? zone.feeSar
+                          : currentCurrency === 'USD'
+                          ? zone.feeUsd
+                          : zone.feeYer;
+                      return (
+                        <button
+                          key={zone.id}
+                          type="button"
+                          onClick={() => setSelectedZoneId(zone.id)}
+                          className={`min-h-[44px] p-3 rounded-xl border text-start transition flex items-center justify-between text-xs font-sans ${
+                            isSelected
+                              ? 'bg-gold/15 border-gold text-champagne font-bold'
+                              : 'bg-white/5 border-white/10 text-ivory/70 hover:border-white/20'
+                          }`}
+                        >
+                          <span className="truncate">{zone.nameAr}</span>
+                          <span className="text-xs font-bold text-gold shrink-0 ms-2">
+                            {formatCurrency(fee, currentCurrency)}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* Coupon Code Input (Gated by coupons feature) */}
+              {features?.coupons !== false && (
+                <div className="pt-2 space-y-2">
+                  <label className="text-xs font-semibold text-champagne block">
+                    كود الخصم:
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value)}
+                      placeholder="أدخل كود الخصم"
+                      className="flex-1 min-h-[44px] px-3 rounded-xl bg-white/5 border border-white/10 text-xs text-ivory uppercase font-mono outline-none focus:border-gold/50"
+                    />
+                    <button
+                      type="button"
+                      onClick={applyCoupon}
+                      className="min-h-[44px] px-4 rounded-xl bg-gold/15 hover:bg-gold/25 border border-gold/40 text-xs font-sans font-bold text-champagne transition"
+                    >
+                      تطبيق
+                    </button>
+                  </div>
+                  {couponError && (
+                    <span className="text-xs text-rose-400 font-sans block">{couponError}</span>
+                  )}
+                  {appliedCoupon && (
+                    <div className="flex items-center justify-between p-2 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 text-xs font-sans">
+                      <span>تم تطبيق الخصم: {appliedCoupon.code}</span>
+                      <button
+                        type="button"
+                        onClick={removeCoupon}
+                        className="text-xs underline text-rose-400"
+                      >
+                        إلغاء
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Customer Inputs */}
               <div className="space-y-3 pt-2">
@@ -256,36 +304,94 @@ export function WhatsAppCartDrawer(props: WhatsAppCartDrawerProps) {
                 </div>
               </div>
 
-              {/* Payment Method Selector */}
-              <div className="pt-2 space-y-2">
-                <label className="text-xs font-semibold text-champagne block">
-                  طريقة الدفع والتأكيد:
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('whatsapp')}
-                    className={`min-h-[44px] p-2.5 rounded-xl border text-center text-xs font-sans font-medium transition ${
-                      paymentMethod === 'whatsapp'
-                        ? 'bg-[#25D366]/15 border-[#25D366] text-[#25D366] font-bold'
-                        : 'bg-white/5 border-white/10 text-ivory/70 hover:border-white/20'
-                    }`}
-                  >
-                    تأكيد فوري عبر واتساب
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('cod')}
-                    className={`min-h-[44px] p-2.5 rounded-xl border text-center text-xs font-sans font-medium transition ${
-                      paymentMethod === 'cod'
-                        ? 'bg-gold/15 border-gold text-champagne font-bold'
-                        : 'bg-white/5 border-white/10 text-ivory/70 hover:border-white/20'
-                    }`}
-                  >
-                    الدفع نقداً عند الاستلام
-                  </button>
+              {/* Payment Method Selector (Gated by payment_gateways feature) */}
+              {features?.payment_gateways !== false && (
+                <div className="pt-2 space-y-2">
+                  <label className="text-xs font-semibold text-champagne block">
+                    طريقة الدفع والتأكيد:
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('cod')}
+                      className={`min-h-[44px] p-2.5 rounded-xl border text-center text-xs font-sans font-medium transition ${
+                        paymentMethod === 'cod'
+                          ? 'bg-gold/15 border-gold text-champagne font-bold'
+                          : 'bg-white/5 border-white/10 text-ivory/70 hover:border-white/20'
+                      }`}
+                    >
+                      الدفع عند الاستلام (كاش)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('kuraimi')}
+                      className={`min-h-[44px] p-2.5 rounded-xl border text-center text-xs font-sans font-medium transition ${
+                        paymentMethod === 'kuraimi'
+                          ? 'bg-gold/15 border-gold text-champagne font-bold'
+                          : 'bg-white/5 border-white/10 text-ivory/70 hover:border-white/20'
+                      }`}
+                    >
+                      بنك الكريمي (ام فلوس)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('floosak')}
+                      className={`min-h-[44px] p-2.5 rounded-xl border text-center text-xs font-sans font-medium transition ${
+                        paymentMethod === 'floosak'
+                          ? 'bg-gold/15 border-gold text-champagne font-bold'
+                          : 'bg-white/5 border-white/10 text-ivory/70 hover:border-white/20'
+                      }`}
+                    >
+                      محفظة فلوسك
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('jeeb')}
+                      className={`min-h-[44px] p-2.5 rounded-xl border text-center text-xs font-sans font-medium transition ${
+                        paymentMethod === 'jeeb' || paymentMethod === 'jawali'
+                          ? 'bg-gold/15 border-gold text-champagne font-bold'
+                          : 'bg-white/5 border-white/10 text-ivory/70 hover:border-white/20'
+                      }`}
+                    >
+                      محفظة جيب / جوالي
+                    </button>
+                  </div>
+
+                  {/* Merchant Wallet Information Box */}
+                  {paymentMethod !== 'cod' && paymentMethod !== 'whatsapp' && (
+                    <div className="p-3.5 rounded-2xl bg-gold/10 border border-gold/30 text-xs font-sans space-y-1.5 animate-fadeIn">
+                      <div className="flex items-center justify-between text-champagne font-bold">
+                        <span>
+                          {paymentMethod === 'kuraimi'
+                            ? 'بيانات التحويل — بنك الكريمي (ام فلوس):'
+                            : paymentMethod === 'floosak'
+                            ? 'بيانات التحويل — محفظة فلوسك:'
+                            : 'بيانات التحويل — محفظة جيب / جوالي:'}
+                        </span>
+                        <span className="font-mono text-gold text-sm font-extrabold">
+                          {paymentMethod === 'kuraimi'
+                            ? kuraimiAccount
+                            : paymentMethod === 'floosak'
+                            ? floosakAccount
+                            : jeebAccount}
+                        </span>
+                      </div>
+                      <p className="text-ivory/80 text-[11px]">
+                        اسم صاحب الحساب: <span className="font-semibold text-ivory">{accountHolder}</span>
+                      </p>
+                      <div className="pt-1">
+                        <input
+                          type="text"
+                          value={transferRef}
+                          onChange={(e) => setTransferRef(e.target.value)}
+                          placeholder="رقم إشعار الحوالة (اختياري)"
+                          className="w-full min-h-[38px] px-3 rounded-lg bg-white/5 border border-white/10 text-xs text-ivory outline-none focus:border-gold/50 font-mono"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
+              )}
             </>
           )}
         </div>

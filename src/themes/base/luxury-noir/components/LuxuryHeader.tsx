@@ -54,6 +54,9 @@ export function LuxuryHeader(props: LuxuryHeaderProps) {
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [activeNav, setActiveNav] = useState('الرئيسية');
 
+  const locale = sf.locale || 'ar';
+  const isEn = locale === 'en';
+
   const contact = sf.tenant.contact || {
     whatsapp: sf.tenant.whatsapp || '775234989',
     phone: sf.tenant.phone || '775234989',
@@ -70,11 +73,11 @@ export function LuxuryHeader(props: LuxuryHeaderProps) {
   };
 
   const navLinks = [
-    { label: 'الرئيسية', href: '/', show: true },
-    { label: 'المنتجات', href: '/#products-catalog', show: !!features.tier_3_catalog },
-    { label: 'مختبر كشف المقلد', href: '/#authenticity-lab', show: !!features.tier_3_catalog && !!features.authenticity_guide },
-    { label: 'المجلة', href: '/blog', show: !!features.blog },
-    { label: 'حجز استشارة', href: '/bookings', show: !!features.bookings },
+    { labelAr: 'الرئيسية', labelEn: 'Home', href: '/', show: true },
+    { labelAr: 'المنتجات', labelEn: 'Products', href: '/#products-catalog', show: !!features.tier_3_catalog },
+    { labelAr: 'مختبر كشف المقلد', labelEn: 'Authenticity Lab', href: '/#authenticity-lab', show: !!features.tier_3_catalog && !!features.authenticity_guide },
+    { labelAr: 'المجلة', labelEn: 'Journal', href: '/blog', show: !!features.blog },
+    { labelAr: 'حجز استشارة', labelEn: 'Bookings', href: '/bookings', show: !!features.bookings },
   ].filter((link) => link.show);
 
   return (
@@ -95,17 +98,18 @@ export function LuxuryHeader(props: LuxuryHeaderProps) {
           {/* Center: Desktop Navigation Bar */}
           <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
             {navLinks.map((link) => {
-              const isActive = activeNav === link.label;
+              const label = isEn ? link.labelEn : link.labelAr;
+              const isActive = activeNav === link.labelAr;
               return (
                 <a
-                  key={link.label}
+                  key={link.labelAr}
                   href={link.href}
-                  onClick={() => setActiveNav(link.label)}
+                  onClick={() => setActiveNav(link.labelAr)}
                   className={`relative min-h-[40px] px-2 py-2 flex items-center text-xs xl:text-sm font-sans font-medium transition-colors ${
                     isActive ? 'text-champagne font-bold' : 'text-ivory/70 hover:text-ivory'
                   }`}
                 >
-                  {link.label}
+                  {label}
                   {isActive && (
                     <span className="absolute bottom-[-10px] inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#C9A84C] to-transparent rounded-full shadow-[0_0_8px_#C9A84C]" />
                   )}
@@ -116,6 +120,21 @@ export function LuxuryHeader(props: LuxuryHeaderProps) {
 
           {/* End: Action Buttons */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {/* Bilingual AR | EN Toggle (Gated by second_language feature) */}
+            {features?.second_language !== false && (
+              <button
+                type="button"
+                onClick={() => sf.setLocale?.(isEn ? 'ar' : 'en')}
+                className="min-h-[38px] px-2.5 rounded-full border border-gold/30 bg-gold/10 hover:bg-gold/20 text-champagne text-xs font-mono font-bold transition flex items-center gap-1"
+                title={isEn ? 'التبديل إلى العربية' : 'Switch to English'}
+                aria-label="تبديل اللغة"
+              >
+                <span className={!isEn ? 'font-bold text-gold' : 'opacity-50'}>AR</span>
+                <span className="opacity-30">|</span>
+                <span className={isEn ? 'font-bold text-gold' : 'opacity-50'}>EN</span>
+              </button>
+            )}
+
             <div className="hidden lg:block">
               <CurrencySwitcher
                 currentCurrency={currentCurrency}

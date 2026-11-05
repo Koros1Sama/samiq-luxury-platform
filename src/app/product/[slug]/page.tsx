@@ -18,6 +18,7 @@ import {
 import { CurrencySwitcher } from '@/themes/base/luxury-noir/components/CurrencySwitcher';
 import { MiftahLogoSvg } from '@/themes/base/luxury-noir/components/MiftahLogoSvg';
 import { WhatsAppCartDrawer } from '@/themes/base/luxury-noir/components/WhatsAppCartDrawer';
+import { SubpageThemeWrapper, useSubpageTheme } from '@/core/storefront/SubpageThemeWrapper';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -39,10 +40,22 @@ export default function ProductDetailPage() {
   const [reviewComment, setReviewComment] = useState('');
   const [batchCodeInput, setBatchCodeInput] = useState('');
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
+  const [features, setFeatures] = useState<any>({ reviews_ratings: true });
 
   useEffect(() => {
     async function loadData() {
       try {
+        // Fetch features
+        try {
+          const featRes = await fetch('/api/store/features');
+          const featData = await featRes.json();
+          if (featData && featData.features) {
+            setFeatures(featData.features);
+          }
+        } catch {
+          // fallback
+        }
+
         const res = await fetch('/api/store/products');
         const data = await res.json();
         if (data.success && data.products) {
@@ -149,7 +162,8 @@ export default function ProductDetailPage() {
   };
 
   return (
-    <div className="min-h-screen bg-obsidian text-ivory font-sans">
+    <SubpageThemeWrapper activeNav="product" showNavHeader={false}>
+      <div className="min-h-screen bg-obsidian text-ivory font-sans">
       {/* Top Navigation */}
       <header data-testid="header" className="sticky top-0 z-30 w-full bg-obsidian/90 backdrop-blur-md border-b border-white/[0.08]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
@@ -390,7 +404,8 @@ export default function ProductDetailPage() {
         )}
 
         {/* Customer Reviews & Verification Form */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {features?.reviews_ratings !== false && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Reviews List (7 cols) */}
           <div className="lg:col-span-7 space-y-4">
             <h3 className="text-xl font-serif font-bold text-ivory">
@@ -482,6 +497,7 @@ export default function ProductDetailPage() {
             )}
           </div>
         </div>
+        )}
       </main>
 
       {/* Cart Drawer */}
@@ -499,5 +515,6 @@ export default function ProductDetailPage() {
         whatsappNumber="967775234989"
       />
     </div>
+    </SubpageThemeWrapper>
   );
 }

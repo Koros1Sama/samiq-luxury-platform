@@ -3,12 +3,24 @@
 import React from 'react';
 import { SmartImage } from '@/core/ui/SmartImage';
 import { ShieldCheckIcon, FlaskIcon } from './ClinicIcons';
+import { useStorefront } from '@/core/storefront/StorefrontProvider';
 
 interface ClinicHeroProps {
   onExploreClick?: () => void;
 }
 
 export function ClinicHero({ onExploreClick }: ClinicHeroProps) {
+  const { tenant, locale } = useStorefront();
+  const isEn = locale === 'en';
+
+  const title =
+    (tenant as any).heroTitle ||
+    (tenant.name ? `${tenant.name} — فحص الأصالة والعناية السريرية` : 'مفتاح الجمال — فحص الأصالة والعناية السريرية');
+  const subtitle =
+    (tenant as any).heroSubtitle ||
+    tenant.tagline ||
+    'مستحضرات مصرحة ومطابقة لمعايير الهيئة العليا للأدوية والمستلزمات الطبية. نوفر روتيناً سريرياً مخصصاً لبشرتك مع فحص الأصالة وكشف المقلد.';
+
   return (
     <section className="relative w-full overflow-hidden bg-gradient-to-b from-[#F2F7F5] to-white border-b border-[#E2ECE9]">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 sm:py-6 lg:py-8">
@@ -18,33 +30,33 @@ export function ClinicHero({ onExploreClick }: ClinicHeroProps) {
             {/* Trust Pill */}
             <div className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full bg-[#CFE8E1] border border-[#0F4C4A]/20 text-[#0F4C4A] text-xs font-bold">
               <ShieldCheckIcon size={14} />
-              <span>فحص مخبري معتمد · لكشف المقلد</span>
+              <span>{isEn ? 'Certified Lab Inspection · Authenticity Verified' : 'فحص مخبري معتمد · لكشف المقلد'}</span>
             </div>
 
             {/* Headline */}
             <h1 className="text-sm sm:text-2xl lg:text-3xl font-bold text-[#0F4C4A] leading-tight truncate sm:whitespace-normal">
-              مفتاح الجمال — فحص الأصالة والعناية السريرية
+              {title}
             </h1>
 
             {/* Subtitle - Hidden on mobile (< sm) to preserve fold height for >= 3 product rows */}
             <p className="hidden sm:block text-sm sm:text-base text-[#4A5568] leading-[1.75] max-w-xl">
-              مستحضرات مصرحة ومطابقة لمعايير الهيئة العليا للأدوية والمستلزمات الطبية. نوفر روتيناً سريرياً مخصصاً لبشرتك مع فحص الأصالة وكشف المقلد.
+              {subtitle}
             </p>
 
             {/* Micro subtitle on mobile */}
             <span className="sm:hidden text-xs text-[#4A5568] leading-tight truncate">
-              مستحضرات مصرحة ومطابقة لمعايير الهيئة العليا للأدوية
+              {subtitle}
             </span>
 
             {/* Quick Metrics (Desktop / Tablet) */}
             <div className="hidden sm:flex flex-wrap items-center gap-3 pt-1 text-xs text-[#0F4C4A] font-semibold">
               <span className="inline-flex items-center gap-1 bg-white px-2.5 py-1 rounded-md border border-[#D4E5E0]">
                 <FlaskIcon size={14} />
-                تركيزات فعالة ونقية
+                {isEn ? 'Pure Active Concentrations' : 'تركيزات فعالة ونقية'}
               </span>
               <span className="inline-flex items-center gap-1 bg-white px-2.5 py-1 rounded-md border border-[#D4E5E0]">
                 <ShieldCheckIcon size={14} />
-                مطابق لمعايير الهيئة العليا للأدوية
+                {isEn ? 'Ministry of Health Compliant' : 'مطابق لمعايير الهيئة العليا للأدوية'}
               </span>
             </div>
           </div>

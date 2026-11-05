@@ -23,6 +23,7 @@ import {
   IvoryCta,
   IvorySkinRoutineBlock,
 } from './components/IvoryGenericSections';
+import { PwaInstallPrompt } from '../luxury-noir/components/PwaInstallPrompt';
 
 // Interactive Overlays & Modals ONLY (loaded on demand / user interaction)
 const IvoryQuickViewSheet = dynamic(
@@ -96,6 +97,9 @@ export function IvoryJournalTheme(_props: ThemeLayoutProps) {
 
       {/* 3. Navigation Pattern: Slim Bottom Cart Pill (the ONLY fixed bottom element, NO bottom tab bar) */}
       {features.cart_whatsapp && <IvoryCartPill />}
+
+      {/* PWA App Install Button */}
+      <PwaInstallPrompt className="fixed bottom-20 end-4 z-40" />
 
       {/* 4. Quick-View Bottom Sheet for Product Detail */}
       {selectedProduct && (

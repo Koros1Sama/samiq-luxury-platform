@@ -14,6 +14,7 @@ import {
 } from '@/themes/base/luxury-noir/components/LuxuryIcons';
 import { formatCurrency } from '@/core/currency/formatter';
 import { ProductCardData } from '@/themes/contract';
+import { SubpageThemeWrapper } from '@/core/storefront/SubpageThemeWrapper';
 
 const CONCERN_OPTIONS = [
   'تفتيح التصبغات',
@@ -319,63 +320,8 @@ export default function CustomerAccountPage() {
   });
 
   return (
-    <div className="min-h-screen bg-obsidian text-ivory font-sans pb-16">
-      {/* ==================================================================== */}
-      {/* 1. UNIFIED SUBPAGE HEADER WITH NAVIGATION BAR                        */}
-      {/* ==================================================================== */}
-      <header className="sticky top-0 z-30 w-full bg-[#070709]/95 backdrop-blur-md border-b border-white/[0.08] shadow-lg">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="h-16 flex items-center justify-between gap-3">
-            {/* Logo */}
-            <Link href="/" className="flex items-center shrink-0">
-              <MiftahLogoSvg size={38} showText={true} />
-            </Link>
-
-            {/* Subpage Nav Links */}
-            <nav className="flex items-center gap-1 sm:gap-2 overflow-x-auto no-scrollbar py-1">
-              <Link
-                href="/"
-                className="min-h-[44px] px-3 rounded-xl text-xs font-sans text-ivory/80 hover:text-champagne hover:bg-white/5 transition inline-flex items-center whitespace-nowrap"
-              >
-                الرئيسية
-              </Link>
-              <Link
-                href="/authenticity-hub"
-                className="min-h-[44px] px-3 rounded-xl text-xs font-sans text-ivory/80 hover:text-champagne hover:bg-white/5 transition inline-flex items-center whitespace-nowrap"
-              >
-                مختبر الأصالة
-              </Link>
-              <Link
-                href="/bookings"
-                className="min-h-[44px] px-3 rounded-xl text-xs font-sans text-ivory/80 hover:text-champagne hover:bg-white/5 transition inline-flex items-center whitespace-nowrap"
-              >
-                حجز استشارة
-              </Link>
-              <Link
-                href="/blog"
-                className="min-h-[44px] px-3 rounded-xl text-xs font-sans text-ivory/80 hover:text-champagne hover:bg-white/5 transition inline-flex items-center whitespace-nowrap"
-              >
-                المجلة
-              </Link>
-              <Link
-                href="/account"
-                className="min-h-[44px] px-3 rounded-xl text-xs font-sans font-bold text-champagne bg-gold/15 border border-gold/30 transition inline-flex items-center whitespace-nowrap"
-              >
-                حسابي
-              </Link>
-              <Link
-                href="/admin"
-                className="min-h-[44px] px-3 rounded-xl text-xs font-sans text-ivory/80 hover:text-champagne hover:bg-white/5 transition inline-flex items-center whitespace-nowrap"
-              >
-                الإدارة
-              </Link>
-            </nav>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Container */}
-      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-6 sm:pt-10 space-y-8">
+    <SubpageThemeWrapper activeNav="account" showNavHeader={true}>
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-6 sm:pt-10 space-y-8 pb-16">
         {/* ==================================================================== */}
         {/* CASE A: LOGGED IN AS ADMIN / STAFF LAUNCHPAD                        */}
         {/* ==================================================================== */}
@@ -1251,6 +1197,6 @@ export default function CustomerAccountPage() {
           </div>
         )}
       </main>
-    </div>
+    </SubpageThemeWrapper>
   );
 }

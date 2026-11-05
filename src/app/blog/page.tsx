@@ -2,8 +2,8 @@ import React from 'react';
 import Link from 'next/link';
 import { SmartImage } from '@/core/ui/SmartImage';
 import { getAllBlogPosts } from '@/core/db/store';
-import { MiftahLogoSvg } from '@/themes/base/luxury-noir/components/MiftahLogoSvg';
 import { SparkleStarIcon } from '@/themes/base/luxury-noir/components/LuxuryIcons';
+import { SubpageThemeWrapper } from '@/core/storefront/SubpageThemeWrapper';
 
 export const revalidate = 0;
 
@@ -13,43 +13,7 @@ export default function BlogIndexPage() {
   const regularPosts = posts.filter((p) => p.id !== featuredPost?.id);
 
   return (
-    <div className="min-h-screen bg-obsidian text-ivory font-sans">
-      {/* Header */}
-      <header className="sticky top-0 z-30 w-full bg-obsidian/90 backdrop-blur-md border-b border-white/[0.08]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
-          <Link href="/" className="flex items-center">
-            <MiftahLogoSvg size={46} />
-          </Link>
-          <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
-            <Link
-              href="/account"
-              className="min-h-[44px] px-3 rounded-lg bg-white/5 hover:bg-gold/15 border border-white/10 hover:border-gold/30 text-xs font-sans text-ivory/80 hover:text-champagne transition inline-flex items-center"
-            >
-              حسابي والولاء
-            </Link>
-            <Link
-              href="/authenticity-hub"
-              className="min-h-[44px] px-3 rounded-lg bg-white/5 hover:bg-gold/15 border border-white/10 hover:border-gold/30 text-xs font-sans text-ivory/80 hover:text-champagne transition inline-flex items-center"
-            >
-              الموسوعة
-            </Link>
-            <Link
-              href="/bookings"
-              className="min-h-[44px] px-3 rounded-lg bg-white/5 hover:bg-gold/15 border border-white/10 hover:border-gold/30 text-xs font-sans text-ivory/80 hover:text-champagne transition inline-flex items-center"
-            >
-              حجز موعد
-            </Link>
-            <Link
-              href="/"
-              className="min-h-[44px] px-3 rounded-lg bg-gold/15 hover:bg-gold/25 border border-gold/40 text-xs font-sans font-bold text-champagne transition inline-flex items-center gap-1"
-            >
-              <span>المتجر الرئيسي</span>
-              <span>←</span>
-            </Link>
-          </div>
-        </div>
-      </header>
-
+    <SubpageThemeWrapper activeNav="blog" showNavHeader={true}>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
         {/* Title */}
         <div className="text-center max-w-2xl mx-auto space-y-3">
@@ -159,6 +123,6 @@ export default function BlogIndexPage() {
           ))}
         </div>
       </main>
-    </div>
+    </SubpageThemeWrapper>
   );
 }

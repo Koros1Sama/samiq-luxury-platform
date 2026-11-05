@@ -9,6 +9,30 @@
     "city": "صنعاء",
     "deliveryCoverage": "توصيل فوري لجميع مديريات صنعاء وشحن آمن لكافة المحافظات",
     "heroBadge": "مضمون أصلي 100%",
+    "heroTitle": "مفتاح الجمال — لكشف المقلد والعناية الموثوقة",
+    "heroSubtitle": "مستحضرات مصرحة ومطابقة لمعايير الهيئة العليا للأدوية والمستلزمات الطبية.",
+    "announcementText": "مستحضرات مصرحة ومطابقة لمعايير الهيئة العليا للأدوية والمستلزمات الطبية — التوصيل متاح لكافة محافظات اليمن",
+    "industryPreset": "cosmetics_miftah",
+    "brandPalette": {
+      "primaryColor": "#C9A84C",
+      "backgroundColor": "#070709",
+      "surfaceColor": "#0E0E12",
+      "textColor": "#FAF7F2",
+      "isCustomPalette": false
+    },
+    "paymentAccounts": {
+      "accountHolderName": "مفتاح الجمال للتجارة والتوريدات",
+      "kuraimiAccount": "300894215",
+      "floosakAccount": "775234989",
+      "jeebAccount": "775234989",
+      "jawaliAccount": "775234989"
+    },
+    "notificationConfig": {
+      "telegramBotToken": "",
+      "telegramChatId": "",
+      "ownerWhatsapp": "967775234989",
+      "geminiApiKey": ""
+    },
     "themeId": "luxury-noir",
     "noindex": true,
     "contact": {
@@ -808,6 +832,7 @@
       "comment": "السيروم أصلي 100% ومصرح ومطابق لمعايير الهيئة العليا للأدوية والمستلزمات الطبية، ظهرت تفاصيل علامات الأصلي بدقة. النضارة بدأت تظهر من أول أسبوع.",
       "isVerifiedPurchase": true,
       "batchCodeVerified": "54U700",
+      "approved": true,
       "createdAt": "2026-10-20T12:00:00Z"
     },
     {
@@ -818,6 +843,7 @@
       "rating": 5,
       "comment": "غسول السيراميد ممتاز جداً للبشرة الجافة، التوصيل في صنعاء استغرق 3 ساعات فقط مع فحص العبوة قبل الدفع.",
       "isVerifiedPurchase": true,
+      "approved": true,
       "createdAt": "2026-10-22T15:30:00Z"
     },
     {
@@ -828,6 +854,7 @@
       "rating": 5,
       "comment": "سيروم نياسيناميد المركز أصلي وموثوق، الزجاجة ثقيلة وملمس المحلول خفيف، المسامات صغرت بشكل ملحوظ.",
       "isVerifiedPurchase": true,
+      "approved": true,
       "createdAt": "2026-10-29T18:15:00Z"
     }
   ],

@@ -23,8 +23,9 @@ interface IvoryHeaderProps {
 }
 
 export function IvoryHeader({ onOpenSearch, onOpenAdvisor }: IvoryHeaderProps) {
-  const { tenant, cart, currency, setCurrency, features } = useStorefront();
+  const { tenant, cart, currency, setCurrency, features, locale, setLocale } = useStorefront();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const isEn = locale === 'en';
 
   const scrollTo = (hash: string) => {
     setIsMenuOpen(false);
@@ -67,14 +68,14 @@ export function IvoryHeader({ onOpenSearch, onOpenAdvisor }: IvoryHeaderProps) {
                   onClick={() => scrollTo('#mosaic')}
                   className="hover:text-[#1B1612] transition-colors min-h-[44px] px-2 flex items-center"
                 >
-                  اختيارات الأسبوع
+                  {isEn ? 'Weekly Curations' : 'اختيارات الأسبوع'}
                 </button>
                 <button
                   type="button"
                   onClick={() => scrollTo('#categories')}
                   className="hover:text-[#1B1612] transition-colors min-h-[44px] px-2 flex items-center"
                 >
-                  فهرس الأقسام
+                  {isEn ? 'Categories Index' : 'فهرس الأقسام'}
                 </button>
               </>
             )}
@@ -84,7 +85,7 @@ export function IvoryHeader({ onOpenSearch, onOpenAdvisor }: IvoryHeaderProps) {
                 onClick={() => scrollTo('#authenticity')}
                 className="hover:text-[#1B1612] transition-colors min-h-[44px] px-2 flex items-center"
               >
-                فحص الأصالة
+                {isEn ? 'Authenticity Lab' : 'فحص الأصالة'}
               </button>
             )}
           </nav>
@@ -98,13 +99,28 @@ export function IvoryHeader({ onOpenSearch, onOpenAdvisor }: IvoryHeaderProps) {
           >
             <span>{tenant.name}</span>
             <span className="hidden sm:block text-xs font-sans text-[#5E6B5A] mt-0.5 leading-none">
-              لكشف المقلد ومجلة العناية الفاخرة
+              {isEn ? 'Luxury Care & Authenticity Journal' : 'لكشف المقلد ومجلة العناية الفاخرة'}
             </span>
           </a>
         </div>
 
         {/* End Side: Actions */}
         <div className="flex items-center justify-end gap-1 sm:gap-2 flex-1">
+          {/* Bilingual AR | EN Toggle (Gated by second_language feature) */}
+          {features?.second_language !== false && (
+            <button
+              type="button"
+              onClick={() => setLocale?.(isEn ? 'ar' : 'en')}
+              className="min-h-[36px] px-2.5 rounded-full border border-[#E8E2D8] bg-[#F4EFE6]/70 text-[#1B1612] text-xs font-mono font-bold transition flex items-center gap-1"
+              title={isEn ? 'التبديل إلى العربية' : 'Switch to English'}
+              aria-label="تبديل اللغة"
+            >
+              <span className={!isEn ? 'font-bold text-[#1B1612]' : 'opacity-50'}>AR</span>
+              <span className="opacity-30">|</span>
+              <span className={isEn ? 'font-bold text-[#1B1612]' : 'opacity-50'}>EN</span>
+            </button>
+          )}
+
           {/* Desktop Currency Switcher */}
           <div className="hidden lg:flex items-center border border-[#E8E2D8] rounded-full p-0.5 bg-[#F4EFE6]/70">
             {currencies.map((c) => (

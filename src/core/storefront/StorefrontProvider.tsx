@@ -8,9 +8,18 @@ import {
   ProductCardData,
   CategoryItem,
   ThemeCurrencyCode,
+  ThemeId,
+  isValidThemeId,
   CartItem,
   PlatformMeta,
 } from '@/themes/contract';
+import {
+  BrandPalette,
+  ResolvedThemePalette,
+  resolveThemePalette,
+  getClientActiveTheme,
+  getClientCustomPalette,
+} from './themePalette';
 
 const DEFAULT_PLATFORM_META: PlatformMeta = {
   platformNameAr: 'سَامِق',
@@ -37,6 +46,8 @@ interface StorefrontProviderProps {
   blocksData?: Record<string, unknown>;
   initialCurrency?: ThemeCurrencyCode;
   platformMeta?: PlatformMeta;
+  branches?: any[];
+  shippingZones?: any[];
   children: React.ReactNode;
 }
 
@@ -48,6 +59,8 @@ export function StorefrontProvider({
   blocksData = {},
   initialCurrency = 'YER',
   platformMeta,
+  branches = [],
+  shippingZones = [],
   children,
 }: StorefrontProviderProps) {
   // 0. Features state with live reactive capability
@@ -62,6 +75,23 @@ export function StorefrontProvider({
       ...newFeatures,
     }));
   }, []);
+
+  // Theme & Chameleon Palette State
+  const initialThemeId = (tenant.themeId || (tenant as any).activeTheme || 'luxury-noir') as ThemeId;
+  const [activeTheme, setActiveThemeState] = useState<ThemeId>(initialThemeId);
+  const [customPalette, setCustomPaletteState] = useState<BrandPalette | null>(
+    (tenant as any).brandPalette || null
+  );
+
+  // Bilingual Locale State
+  const [locale, setLocaleState] = useState<'ar' | 'en'>('ar');
+
+  // Injected shipping zones
+  useEffect(() => {
+    if (typeof window !== 'undefined' && shippingZones && shippingZones.length > 0) {
+      (window as any).__SAMIQ_SHIPPING_ZONES__ = shippingZones;
+    }
+  }, [shippingZones]);
 
   // 1. Currency State (hydrated safely in useEffect)
   const [currency, setCurrencyState] = useState<ThemeCurrencyCode>(initialCurrency);
@@ -97,6 +127,24 @@ export function StorefrontProvider({
   // SSR hydration guard: Load from localStorage only on client mount
   useEffect(() => {
     try {
+      // 1. Theme
+      const clientTheme = getClientActiveTheme(initialThemeId);
+      if (clientTheme) {
+        setActiveThemeState(clientTheme);
+      }
+
+      // 2. Custom Palette
+      const clientPalette = getClientCustomPalette();
+      if (clientPalette) {
+        setCustomPaletteState(clientPalette);
+      }
+
+      // 3. Locale
+      const savedLocale = localStorage.getItem('samiq_locale') as 'ar' | 'en';
+      if (savedLocale === 'ar' || savedLocale === 'en') {
+        setLocaleState(savedLocale);
+      }
+
       const savedCurrency = localStorage.getItem(STORAGE_KEYS.currency) as ThemeCurrencyCode;
       if (savedCurrency && ['YER', 'SAR', 'USD'].includes(savedCurrency)) {
         setCurrencyState(savedCurrency);
@@ -114,7 +162,53 @@ export function StorefrontProvider({
     } catch (e) {
       console.warn('Could not read from localStorage:', e);
     }
+  }, [initialThemeId]);
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.dir = locale === 'en' ? 'ltr' : 'rtl';
+      document.documentElement.lang = locale;
+    }
+  }, [locale]);
+
+  const setActiveTheme = useCallback((themeId: ThemeId) => {
+    setActiveThemeState(themeId);
+    try {
+      localStorage.setItem('samiq_demo_theme', themeId);
+      window.dispatchEvent(new CustomEvent('samiq_theme_changed', { detail: themeId }));
+    } catch (e) {
+      console.warn('Could not save theme to localStorage:', e);
+    }
   }, []);
+
+  const setCustomPalette = useCallback((p: BrandPalette | null) => {
+    setCustomPaletteState(p);
+    try {
+      if (p) {
+        localStorage.setItem('samiq_custom_palette', JSON.stringify(p));
+      } else {
+        localStorage.removeItem('samiq_custom_palette');
+      }
+      window.dispatchEvent(new CustomEvent('samiq_custom_palette_changed', { detail: p }));
+    } catch (e) {
+      console.warn('Could not save custom palette to localStorage:', e);
+    }
+  }, []);
+
+  const setLocale = useCallback((newLocale: 'ar' | 'en') => {
+    setLocaleState(newLocale);
+    try {
+      localStorage.setItem('samiq_locale', newLocale);
+      window.dispatchEvent(new CustomEvent('samiq_locale_changed', { detail: newLocale }));
+    } catch (e) {
+      console.warn('Could not save locale to localStorage:', e);
+    }
+  }, []);
+
+  const palette = useMemo(
+    () => resolveThemePalette(activeTheme, customPalette),
+    [activeTheme, customPalette]
+  );
 
   const setCurrency = useCallback((newCurrency: ThemeCurrencyCode) => {
     setCurrencyState(newCurrency);
@@ -329,6 +423,15 @@ export function StorefrontProvider({
       platformMeta: platformMeta || tenant.platformMeta || DEFAULT_PLATFORM_META,
       blocksData,
       setFeatures: updateFeatures,
+      activeTheme,
+      setActiveTheme,
+      locale,
+      setLocale,
+      palette,
+      customPalette,
+      setCustomPalette,
+      branches,
+      shippingZones,
     }),
     [
       tenant,
@@ -359,6 +462,15 @@ export function StorefrontProvider({
       buildProductWhatsAppUrl,
       blocksData,
       updateFeatures,
+      activeTheme,
+      setActiveTheme,
+      locale,
+      setLocale,
+      palette,
+      customPalette,
+      setCustomPalette,
+      branches,
+      shippingZones,
     ]
   );
 

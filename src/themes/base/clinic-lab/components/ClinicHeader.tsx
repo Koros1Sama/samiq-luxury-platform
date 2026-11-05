@@ -17,7 +17,8 @@ interface ClinicHeaderProps {
 }
 
 export function ClinicHeader({ onOpenAdvisor, onOpenCart }: ClinicHeaderProps) {
-  const { tenant, cart, currency, setCurrency, search, features } = useStorefront();
+  const { tenant, cart, currency, setCurrency, search, features, locale, setLocale } = useStorefront();
+  const isEn = locale === 'en';
 
   const handleCurrencyChange = (newCurr: ThemeCurrencyCode) => {
     setCurrency(newCurr);
@@ -41,37 +42,52 @@ export function ClinicHeader({ onOpenAdvisor, onOpenCart }: ClinicHeaderProps) {
               {tenant.name || 'مفتاح الجمال'}
             </span>
             <span className="text-xs text-[#0F4C4A]/70 font-medium">
-              لكشف المقلد والعناية السريرية
+              {isEn ? 'Clinical Care & Authenticity Lab' : 'لكشف المقلد والعناية السريرية'}
             </span>
           </div>
         </a>
 
-        {/* End Actions: Advisor, Account, Currency, Cart */}
+        {/* End Actions: Language, Advisor, Account, Currency, Cart */}
         <div className="flex items-center gap-1 sm:gap-2">
+          {/* Bilingual AR | EN Toggle (Gated by second_language feature) */}
+          {features?.second_language !== false && (
+            <button
+              type="button"
+              onClick={() => setLocale?.(isEn ? 'ar' : 'en')}
+              className="min-h-[38px] px-2 rounded-lg border border-[#D4E5E0] bg-[#F2F7F5] text-[#0F4C4A] text-xs font-mono font-bold transition flex items-center gap-1"
+              title={isEn ? 'التبديل إلى العربية' : 'Switch to English'}
+              aria-label="تبديل اللغة"
+            >
+              <span className={!isEn ? 'font-bold' : 'opacity-50'}>AR</span>
+              <span className="opacity-30">|</span>
+              <span className={isEn ? 'font-bold' : 'opacity-50'}>EN</span>
+            </button>
+          )}
+
           {/* AI Clinical Advisor Button */}
           <button
             type="button"
             data-testid="advisor-btn"
             onClick={onOpenAdvisor}
             className="min-w-[44px] min-h-[44px] px-2.5 py-1.5 rounded-lg border border-[#D4E5E0] bg-[#F2F7F5] text-[#0F4C4A] hover:bg-[#CFE8E1]/50 inline-flex items-center gap-1.5 text-xs font-semibold focus:outline-hidden focus:ring-2 focus:ring-[#0F4C4A] transition-colors"
-            title="استشارة مخبرية ذكية"
-            aria-label="استشارة مخبرية ذكية"
+            title={isEn ? 'Smart Consultation' : 'استشارة مخبرية ذكية'}
+            aria-label={isEn ? 'Smart Consultation' : 'استشارة مخبرية ذكية'}
           >
             <StethoscopeIcon size={18} />
-            <span className="hidden sm:inline">استشارة</span>
+            <span className="hidden sm:inline">{isEn ? 'Consult' : 'استشارة'}</span>
           </button>
 
           {/* Account & Medical Profile Link */}
           <a
             href="/account"
             className="min-w-[44px] min-h-[44px] px-2.5 py-1.5 rounded-lg border border-[#D4E5E0] bg-[#F2F7F5] text-[#0F4C4A] hover:bg-[#CFE8E1]/50 inline-flex items-center justify-center gap-1.5 text-xs font-semibold focus:outline-hidden focus:ring-2 focus:ring-[#0F4C4A] transition-colors"
-            title="حسابي والملف الطبي"
-            aria-label="حسابي والملف الطبي"
+            title={isEn ? 'My Profile' : 'حسابي والملف الطبي'}
+            aria-label={isEn ? 'My Profile' : 'حسابي والملف الطبي'}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
-            <span className="hidden md:inline">الملف الطبي</span>
+            <span className="hidden md:inline">{isEn ? 'Profile' : 'الملف الطبي'}</span>
           </a>
 
           {/* Currency Switcher */}

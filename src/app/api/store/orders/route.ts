@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getAllOrders, createOrder, updateOrderStatus, deleteOrder, OrderRecord } from '@/core/db/store';
+import { getAllOrders, createOrder, updateOrderStatus, deleteOrder, OrderRecord, getDb } from '@/core/db/store';
 
 export async function GET() {
   const orders = getAllOrders();
@@ -40,10 +40,12 @@ export async function POST(req: Request) {
     });
 
     // Optional Telegram notification if bot token configured
-    const botToken = process.env.TELEGRAM_BOT_TOKEN;
-    const chatId = process.env.TELEGRAM_OWNER_CHAT_ID;
+    const db = getDb();
+    const botToken = db.tenant?.notificationConfig?.telegramBotToken || process.env.TELEGRAM_BOT_TOKEN;
+    const chatId = db.tenant?.notificationConfig?.telegramChatId || process.env.TELEGRAM_OWNER_CHAT_ID;
     if (botToken && chatId) {
-      const text = `طلب جديد في متجر مفتاح الجمال:
+      const storeName = db.tenant?.name || 'مفتاح الجمال';
+      const text = `طلب جديد في متجر ${storeName}:
 رقم الطلب: ${newOrder.orderNumber}
 العميل: ${newOrder.customerName} (${newOrder.customerPhone})
 المدينة: ${newOrder.city} - ${newOrder.address}

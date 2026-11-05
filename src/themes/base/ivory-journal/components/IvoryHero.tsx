@@ -11,12 +11,15 @@ interface IvoryHeroProps extends Partial<SectionComponentProps> {
 }
 
 export function IvoryHero({ section }: IvoryHeroProps) {
-  const { tenant } = useStorefront();
+  const { tenant, locale } = useStorefront();
+  const isEn = locale === 'en';
 
   const title =
+    (tenant as any).heroTitle ||
     (section?.props?.title as string) ||
     (tenant.name ? `${tenant.name} — لكشف المقلد` : 'مفتاح الجمال — لكشف المقلد');
   const subtitle =
+    (tenant as any).heroSubtitle ||
     (section?.props?.subtitle as string) ||
     tenant.tagline ||
     'دليلك التحريري الشامل لمستحضرات العناية الأصلية والموثقة مخبرياً في اليمن';
@@ -58,7 +61,7 @@ export function IvoryHero({ section }: IvoryHeroProps) {
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border border-[#5E6B5A]/30 bg-[#F4EFE6]/80 text-[#5E6B5A]">
               <VerifiedStampIcon size={12} color="#5E6B5A" />
               <span className="text-xs font-sans font-medium">
-                مختارات العدد التحريري الموثق
+                {isEn ? 'Weekly Curated Editorial Edition' : 'مختارات العدد التحريري الموثق'}
               </span>
             </div>
 
@@ -79,7 +82,7 @@ export function IvoryHero({ section }: IvoryHeroProps) {
                 onClick={() => scrollTo('#mosaic')}
                 className="group inline-flex items-center gap-1.5 min-h-[44px] text-xs sm:text-base font-serif font-semibold text-[#1B1612] border-b-2 border-[#1B1612] pb-0.5 hover:text-[#5E6B5A] hover:border-[#5E6B5A] transition-colors"
               >
-                <span>اكتشفي روائع العدد الأسبوعي</span>
+                <span>{isEn ? 'Explore Curated Issue' : 'اكتشفي روائع العدد الأسبوعي'}</span>
                 <span className="rtl:-scale-x-100 transition-transform duration-300 group-hover:-translate-x-1">
                   <ArrowIcon size={14} color="currentColor" />
                 </span>

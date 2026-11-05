@@ -64,12 +64,12 @@ export const DEFAULT_SHIPPING_ZONES: ShippingZone[] = [
 ];
 
 export type PaymentMethodType =
-  | 'whatsapp'
   | 'cod'
   | 'kuraimi'
-  | 'jawali'
   | 'floosak'
-  | 'mada';
+  | 'jeeb'
+  | 'jawali'
+  | 'whatsapp';
 
 export interface AppliedCoupon {
   code: string;
@@ -97,7 +97,13 @@ export function useCheckout(options?: UseCheckoutOptions) {
     sf.tenant.whatsapp ||
     '967775234989';
 
-  const shippingZones = options?.customZones || DEFAULT_SHIPPING_ZONES;
+  const dynamicZones =
+    options?.customZones ||
+    (typeof window !== 'undefined' && (window as any).__SAMIQ_SHIPPING_ZONES__?.length > 0
+      ? (window as any).__SAMIQ_SHIPPING_ZONES__
+      : DEFAULT_SHIPPING_ZONES);
+  const shippingZones: ShippingZone[] = dynamicZones;
+
   const [selectedZoneId, setSelectedZoneId] = useState(
     options?.defaultZoneId || shippingZones[0]?.id || 'zone-sanaa'
   );
@@ -111,9 +117,15 @@ export function useCheckout(options?: UseCheckoutOptions) {
   const [couponError, setCouponError] = useState('');
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
 
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>('whatsapp');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>('cod');
   const [transferRef, setTransferRef] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const paymentAccounts = (sf.tenant as any).paymentAccounts || {};
+  const kuraimiAccount = paymentAccounts.kuraimiAccount || '3094821';
+  const floosakAccount = paymentAccounts.floosakAccount || '775234989';
+  const jeebAccount = paymentAccounts.jeebAccount || paymentAccounts.jawaliAccount || '775234989';
+  const accountHolder = paymentAccounts.accountHolderName || sf.tenant.name || 'مفتاح الجمال';
 
   const selectedZone = useMemo(
     () => shippingZones.find((z) => z.id === selectedZoneId) || shippingZones[0],
@@ -193,12 +205,24 @@ export function useCheckout(options?: UseCheckoutOptions) {
 
   const buildWhatsAppOrderUrl = useCallback(
     (orderNumber: string) => {
+      let paymentDesc = 'الدفع عند الاستلام (كاش)';
+      if (paymentMethod === 'kuraimi') {
+        paymentDesc = `بنك الكريمي (ام فلوس) - حساب: ${kuraimiAccount} باسم: ${accountHolder}`;
+      } else if (paymentMethod === 'floosak') {
+        paymentDesc = `محفظة فلوسك - حساب: ${floosakAccount} باسم: ${accountHolder}`;
+      } else if (paymentMethod === 'jeeb' || paymentMethod === 'jawali') {
+        paymentDesc = `محفظة جيب / جوالي - حساب: ${jeebAccount} باسم: ${accountHolder}`;
+      }
+      if (transferRef.trim()) {
+        paymentDesc += ` (رقم الحوالة: ${transferRef.trim()})`;
+      }
+
       let message = `*طلب موثق جديد: ${orderNumber}*\n`;
       message += `متجر ${sf.tenant.name}\n\n`;
       message += `الاسم: ${customerName.trim() || 'عميل المتجر'}\n`;
       message += `الهاتف: ${customerPhone.trim()}\n`;
       message += `المنطقة: ${selectedZone?.nameAr || ''} - ${customerAddress.trim()}\n`;
-      message += `طريقة الدفع: ${paymentMethod.toUpperCase()}${transferRef ? ` (رقم الحوالة: ${transferRef})` : ''}\n\n`;
+      message += `طريقة الدفع: ${paymentDesc}\n\n`;
       message += `المنتجات المطلوبة:\n`;
 
       items.forEach((item, index) => {
@@ -338,6 +362,12 @@ export function useCheckout(options?: UseCheckoutOptions) {
     transferRef,
     setTransferRef,
     isSubmitting,
+    // Accounts
+    paymentAccounts,
+    kuraimiAccount,
+    floosakAccount,
+    jeebAccount,
+    accountHolder,
     // Totals
     subtotalYer,
     subtotalCurrent,

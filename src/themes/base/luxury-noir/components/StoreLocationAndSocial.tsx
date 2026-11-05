@@ -12,7 +12,7 @@ import { useStorefront } from '@/core/storefront/StorefrontProvider';
 import { SectionComponentProps } from '../../../contract';
 
 export function StoreLocationAndSocial(_props: Partial<SectionComponentProps>) {
-  const { tenant } = useStorefront();
+  const { tenant, features, branches } = useStorefront();
 
   const contact = tenant.contact || {
     whatsapp: tenant.whatsapp || '775234989',
@@ -142,6 +142,54 @@ export function StoreLocationAndSocial(_props: Partial<SectionComponentProps>) {
             ))}
           </div>
         </div>
+
+        {/* Multi-Branch Network (Gated by multi_branch feature) */}
+        {features?.multi_branch !== false && branches && branches.length > 0 && (
+          <div className="pt-6 border-t border-white/5 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base sm:text-lg font-serif font-bold text-ivory">
+                شبكة فروع ومراكز الخدمة المعتمدة ({branches.length})
+              </h3>
+              <span className="text-xs text-gold font-sans font-semibold">
+                فحص فوري وتسليم مباشر
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {branches.map((b: any) => (
+                <div
+                  key={b.id}
+                  className="p-4 rounded-2xl bg-[#0E0E12] border border-white/5 hover:border-gold/30 transition space-y-2.5"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-bold text-ivory">
+                      {b.nameAr || b.name}
+                    </span>
+                    {b.isMain && (
+                      <span className="text-[11px] px-2 py-0.5 rounded-full bg-gold/15 text-gold font-bold">
+                        الفرع الرئيسي
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="text-xs text-muted-lux font-sans leading-relaxed">
+                    {b.cityAr || b.city} — {b.addressAr || b.address}
+                  </p>
+
+                  <div className="text-[11px] text-ivory/70 font-sans flex items-center justify-between pt-1 border-t border-white/5">
+                    <span>{b.hoursAr || b.workingHours || 'يومياً: 9 ص - 10 م'}</span>
+                    <a
+                      href={`tel:${b.phone}`}
+                      className="text-gold hover:underline font-mono"
+                    >
+                      {b.phone}
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
