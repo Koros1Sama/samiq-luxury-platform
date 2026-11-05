@@ -228,7 +228,7 @@ export function IvoryHeader({ onOpenSearch, onOpenAdvisor }: IvoryHeaderProps) {
               onClick={() => scrollTo('#authenticity')}
               className="w-full py-4 text-start font-serif font-bold text-2xl sm:text-4xl text-[#1B1612] hover:text-[#5E6B5A] border-b border-[#E8E2D8]/60 flex items-center justify-between group transition-colors min-h-[56px]"
             >
-              <span>فحص رقم التشغيلة وضمان الأصالة</span>
+              <span>فحص المنتج وكشف المقلد وضمان الأصالة</span>
               <span className="rtl:-scale-x-100 transition-transform duration-300 group-hover:-translate-x-2">
                 <ArrowIcon size={24} color="#5E6B5A" />
               </span>

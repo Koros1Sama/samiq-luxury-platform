@@ -46,7 +46,7 @@ export const SAMIQ_THEMES: Record<ThemeId, ThemeMeta> = {
     id: 'clinic-lab',
     nameAr: 'مفتاح الجمال — مختبر سريري نقي (Clinic Lab)',
     nameEn: 'Clinic Lab',
-    paletteDescription: 'الأبيض والضباب الهادئ مع تركواز كلينيكال عميق لفحص الأصالة والتشغيلات لمفتاح الجمال',
+    paletteDescription: 'الأبيض والضباب الهادئ مع تركواز كلينيكال عميق لفحص الأصالة وكشف المقلد لمفتاح الجمال',
     primaryColor: '#FFFFFF',
     accentColor: '#0F4C4A',
     badge: 'مخبري معتمد',

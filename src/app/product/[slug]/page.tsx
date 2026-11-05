@@ -117,7 +117,7 @@ export default function ProductDetailPage() {
   const handleDirectWhatsApp = () => {
     const formattedPrice = formatCurrency(price, currentCurrency);
     const varText = activeVariant ? ` (${activeVariant.title})` : '';
-    const text = `مرحباً متجر مفتاح الجمال، أود طلب المستحضر الأصلي: *${product.title}*${varText} بسعر ${formattedPrice}، مع التأكد من فحص رقم الدفعة الموثق.`;
+    const text = `مرحباً متجر مفتاح الجمال، أود طلب المستحضر الأصلي: *${product.title}*${varText} بسعر ${formattedPrice}، مع التأكد من مطابقة معايير الهيئة العليا للأدوية والمستلزمات الطبية.`;
     window.open(`https://wa.me/967775234989?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -334,7 +334,7 @@ export default function ProductDetailPage() {
             <div className="p-4 rounded-2xl bg-surface border border-white/5 space-y-2 text-xs font-sans text-muted-lux">
               <div className="flex items-center gap-2 text-ivory">
                 <ShieldCheckIcon size={16} color="#C9A84C" />
-                <span>رقم الدفعة المعتمد: محفور بالليزر وقابل للفحص بالعين المجردة</span>
+                <span>مستحضرات مصرحة ومطابقة لمعايير الهيئة العليا للأدوية والمستلزمات الطبية</span>
               </div>
               <div className="flex items-center gap-2 text-ivory">
                 <VerifiedCheckIcon size={14} color="#34D399" />
@@ -355,7 +355,7 @@ export default function ProductDetailPage() {
                 </h3>
               </div>
               <span className="text-xs font-sans text-champagne bg-gold/15 border border-gold/30 px-3 py-1 rounded-full">
-                كود الدفعة الرسمي: {authenticityGuide.original?.batchCode || '54U700'}
+                حالة المستحضر: مصرح ومطابق لمعايير الهيئة العليا للأدوية
               </span>
             </div>
 

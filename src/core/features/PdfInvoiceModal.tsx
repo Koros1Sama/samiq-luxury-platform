@@ -407,7 +407,7 @@ export function PdfInvoiceModal({
             <div className="p-4 rounded-xl bg-white/[0.02] border border-white/10 space-y-2.5 text-xs print:bg-neutral-50 print:border-neutral-200">
               <div className="flex items-center justify-between border-b border-white/10 pb-2 print:border-neutral-300">
                 <h3 className="text-xs font-serif font-bold text-champagne print:text-neutral-900">
-                  4. جدول التكاليف السنوية والتشغيلية الشفافة (ابتداءً من السنة الثانية)
+                  4. جدول التكاليف السنوية وخدمات السيرفرات الشفافة (ابتداءً من السنة الثانية)
                 </h3>
                 <span className="font-mono font-bold text-emerald-400 print:text-neutral-900">
                   المجموع: ${annualTotalStartingYearTwo} / سنوياً

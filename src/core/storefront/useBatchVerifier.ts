@@ -40,7 +40,7 @@ export function useBatchVerifier(options?: { apiEndpoint?: string }) {
     async (codeToVerify?: string): Promise<BatchVerificationResult | null> => {
       const code = (codeToVerify !== undefined ? codeToVerify : batchCode).trim();
       if (!code) {
-        setError('يرجى إدخال رقم الدفعة أو الباتش كود');
+        setError('يرجى كتابة اسم المستحضر للتحقق من علامات الأصلي');
         return null;
       }
 
@@ -51,7 +51,7 @@ export function useBatchVerifier(options?: { apiEndpoint?: string }) {
         const res = await fetch(apiEndpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ batchCode: code }),
+          body: JSON.stringify({ batchCode: code, query: code, productName: code }),
         });
         const data = await res.json();
 
@@ -65,7 +65,7 @@ export function useBatchVerifier(options?: { apiEndpoint?: string }) {
         } else {
           const resObj: BatchVerificationResult = {
             success: false,
-            message: data.message || 'رقم الدفعة غير مسجل أو يتطلب فحصاً مخبرياً إضافياً',
+            message: data.message || 'المستحضر غير مسجل أو يرجى التأكد من كتابة الاسم بشكل صحيح',
           };
           setResult(resObj);
           return resObj;

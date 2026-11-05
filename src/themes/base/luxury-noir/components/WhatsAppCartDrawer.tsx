@@ -328,7 +328,7 @@ export function WhatsAppCartDrawer(props: WhatsAppCartDrawerProps) {
 
             <div className="flex items-center justify-center gap-1.5 text-xs text-muted-lux font-sans">
               <VerifiedCheckIcon size={13} color="#34D399" />
-              <span>فحص ومطابقة الباركود والتشغيلة عند الاستلام</span>
+              <span>معاينة الختم والباركود وضمان الأصالة عند الاستلام</span>
             </div>
           </div>
         )}

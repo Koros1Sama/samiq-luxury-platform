@@ -91,7 +91,7 @@ export function StoreLocationAndSocial(_props: Partial<SectionComponentProps>) {
                 </div>
               </div>
               <p className="text-xs text-muted-lux font-sans leading-relaxed">
-                معرضنا مجهز بمختبر فحص الباركود والتشغيلة لمطابقة المنتجات الأصلية أمام العميل فوراً قبل الشراء.
+                معرضنا مجهز بدليل كشف المقلد وفحص علامات الأصلي ومطابقة معايير الهيئة العليا للأدوية أمام العميل فوراً قبل الشراء.
               </p>
               <div className="p-3 rounded-2xl bg-white/[0.02] border border-white/5 space-y-1 text-xs font-sans text-ivory/80">
                 <p>أوقات الدوام: يومياً من 9:00 صباحاً حتى 10:00 مساءً</p>

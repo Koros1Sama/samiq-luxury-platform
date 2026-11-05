@@ -189,7 +189,7 @@ export function ClinicProductSection(_props?: SectionComponentProps) {
             {/* Trust Pill */}
             <div className="p-3 rounded-xl bg-white border border-[#D4E5E0] text-xs text-[#0F4C4A] flex items-center gap-2">
               <ShieldCheckIcon size={16} className="shrink-0" />
-              <span className="leading-[1.75]">كافة المستحضرات مفحوصة برقم تشغيلة رسمي</span>
+              <span className="leading-[1.75]">كافة المستحضرات مفحوصة ومصرحة وفق معايير الهيئة العليا للأدوية</span>
             </div>
           </div>
 

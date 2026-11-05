@@ -96,7 +96,7 @@ export function ClinicCartDrawer(_props?: Record<string, never>) {
                 تم استلام طلبك بنجاح!
               </h3>
               <p className="text-sm text-[#4A5568] leading-[1.75]">
-                سيتم التواصل معك فوراً من قبل صيدلي مفتاح الجمال لتأكيد موعد التوصيل ومطابقة الدفعة.
+                سيتم التواصل معك فوراً من قبل صيدلي مفتاح الجمال لتأكيد موعد التوصيل ومطابقة بيانات المستحضر المعتمد.
               </p>
               <button
                 type="button"
@@ -243,7 +243,7 @@ export function ClinicCartDrawer(_props?: Record<string, never>) {
 
               <div className="p-2.5 rounded-xl bg-[#CFE8E1]/30 border border-[#0F4C4A]/20 flex items-center gap-2 text-xs text-[#0F4C4A] font-medium">
                 <ShieldCheckIcon size={16} className="shrink-0" />
-                <span>الدفع عند الاستلام بعد فحص سلامة العبوة والتشغيلة</span>
+                <span>الدفع عند الاستلام بعد معاينة سلامة العبوة وختم الأصالة</span>
               </div>
             </form>
           )}

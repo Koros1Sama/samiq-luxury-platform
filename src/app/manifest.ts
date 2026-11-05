@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'مفتاح الجمال — لكشف المقلد',
     short_name: 'مفتاح الجمال',
-    description: 'المتجر الرائد لمستحضرات التجميل والعناية بالبشرة الموثوقة مع فحص الأصالة ومقارنة الدفعات',
+    description: 'المتجر الرائد لمستحضرات التجميل والعناية بالبشرة الموثوقة مع فحص الأصالة وكشف المقلد باسم المنتج',
     start_url: '/',
     display: 'standalone',
     background_color: '#070709',

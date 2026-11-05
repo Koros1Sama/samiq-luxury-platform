@@ -47,7 +47,7 @@ export default function AuthenticityHubPage() {
       batchCode: '54U700',
       country: 'معتمد دولياً',
       originalMarkers: [
-        'رقم التشغيلة محفور بالليزر أسفل الزجاج وليس حبراً مطبوعاً',
+        'مستحضرات مصرحة ومطابقة لمعايير الهيئة العليا للأدوية والمستلزمات الطبية',
         'قوام انسيابي نقي بلون كهرماني بدون أي رغوة بيضاء',
         'قطارة طبية بسدادة محكمة تمنع دخول الأكسجين',
       ],
@@ -66,7 +66,7 @@ export default function AuthenticityHubPage() {
       originalMarkers: [
         'مضخة زرقاء مصبوبة ناعمة بدون حواف بلاستيكية خشنة',
         'لوشن أبيض كريمي خفيف لا يصنع رغوة قاسية',
-        'الباركود الدولي يقرأ بيانات الدفعة والوكالة الرسمية',
+        'الباركود الدولي يقرأ بيانات الاعتماد الرسمي ومطابقة معايير الهيئة',
       ],
       fakeRisks: [
         'مضخة رديئة تسرب السائل وتعلق عند الضغط',
@@ -149,7 +149,7 @@ export default function AuthenticityHubPage() {
           </h1>
           <p className="text-sm sm:text-base text-muted-lux font-sans leading-[1.75]">
             في متجر مفتاح الجمال، لا نكتفي بضمان الأصالة، بل نمكّنكِ من فحص أي مستحضر تجميلي
-            بنفسك عبر مطابقة رقم الدفعة (Batch Code) والخصائص الفيزيائية للعبوة والقوام.
+            بنفسك والتأكد من مطابقته لمعايير الهيئة العليا للأدوية والمستلزمات الطبية والخصائص الفيزيائية للعبوة والقوام.
           </p>
           <div className="pt-2 flex items-center justify-center gap-3 flex-wrap text-xs font-sans">
             <a
@@ -171,7 +171,7 @@ export default function AuthenticityHubPage() {
           </div>
         </div>
 
-        {/* Interactive Batch Code Verifier Card */}
+        {/* Interactive Authenticity & Counterfeit Detector Card */}
         <div className="p-2 sm:p-3 rounded-[2rem] bg-white/[0.03] border border-gold/30 shadow-2xl max-w-3xl mx-auto">
           <div className="rounded-[calc(2rem-0.5rem)] bg-gradient-to-b from-surface to-elevated p-6 sm:p-8 space-y-6">
             <div className="flex items-center gap-3">
@@ -180,10 +180,10 @@ export default function AuthenticityHubPage() {
               </div>
               <div>
                 <h3 className="text-lg font-serif font-bold text-ivory">
-                  فاحص رقم الدفعة المباشر (Batch Code Verifier)
+                  دليل وفاحص الأصالة وكشف المقلد باسم المنتج
                 </h3>
                 <p className="text-sm text-muted-lux font-sans leading-[1.75]">
-                  اكتبي الرمز المحفور في قاع العبوة لمطابقته مع بيانات الوكالة المعتمدة
+                  اكتبي اسم المستحضر لمعرفة علامات الأصلي ومطابقته لمعايير الهيئة العليا للأدوية
                 </p>
               </div>
             </div>
@@ -191,43 +191,43 @@ export default function AuthenticityHubPage() {
             <form onSubmit={handleVerify} className="flex flex-col sm:flex-row gap-3">
               <input
                 type="text"
-                placeholder="أدخلي رقم الدفعة (مثال: 54U700 أو 20T900)"
+                placeholder="اكتبي اسم المستحضر (مثال: سيروم فيتامين سي أو الغسول المرطب)"
                 value={batchCodeInput}
-                onChange={(e) => setBatchCodeInput(e.target.value.toUpperCase())}
-                className="min-h-[44px] flex-1 px-4 py-3 rounded-2xl bg-white/5 border border-white/10 text-sm text-ivory uppercase focus:border-gold outline-none"
+                onChange={(e) => setBatchCodeInput(e.target.value)}
+                className="min-h-[44px] flex-1 px-4 py-3 rounded-2xl bg-white/5 border border-white/10 text-sm text-ivory focus:border-gold outline-none"
               />
               <button
                 type="submit"
                 disabled={isLoading}
                 className="min-h-[44px] px-6 py-3 rounded-2xl bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-obsidian-dark font-sans font-bold text-sm shadow-[0_4px_20px_rgba(201,168,76,0.35)] hover:brightness-110 transition disabled:opacity-50 inline-flex items-center justify-center"
               >
-                {isLoading ? 'جاري الفحص...' : 'فحص الباتش كود ↵'}
+                {isLoading ? 'جاري الفحص...' : 'فحص المستحضر ↵'}
               </button>
             </form>
 
             {/* Quick Test Presets */}
             <div className="flex items-center gap-2 flex-wrap text-xs font-sans text-muted-lux">
-              <span>أكواد تجريبية معتمدة:</span>
+              <span>مستحضرات سريعة للاختيار:</span>
               <button
                 type="button"
-                onClick={() => setBatchCodeInput('54U700')}
+                onClick={() => setBatchCodeInput('سيروم فيتامين سي 10%')}
                 className="min-h-[44px] px-3 py-2 inline-flex items-center rounded-lg bg-white/5 hover:bg-gold/15 text-champagne border border-white/10"
               >
-                54U700 (سيروم فيتامين سي)
+                سيروم فيتامين سي 10%
               </button>
               <button
                 type="button"
-                onClick={() => setBatchCodeInput('20T900')}
+                onClick={() => setBatchCodeInput('الغسول المرطب للبشرة')}
                 className="min-h-[44px] px-3 py-2 inline-flex items-center rounded-lg bg-white/5 hover:bg-gold/15 text-champagne border border-white/10"
               >
-                20T900 (غسول مرطب)
+                الغسول المرطب للبشرة
               </button>
               <button
                 type="button"
-                onClick={() => setBatchCodeInput('1A02')}
+                onClick={() => setBatchCodeInput('سيروم نياسيناميد 10%')}
                 className="min-h-[44px] px-3 py-2 inline-flex items-center rounded-lg bg-white/5 hover:bg-gold/15 text-champagne border border-white/10"
               >
-                1A02 (سيروم نياسيناميد)
+                سيروم نياسيناميد 10%
               </button>
             </div>
 
@@ -237,10 +237,10 @@ export default function AuthenticityHubPage() {
                 <div className="flex items-center justify-between pb-3 border-b border-emerald-500/20">
                   <div className="flex items-center gap-2 text-emerald-300 font-bold text-sm font-sans">
                     <VerifiedCheckIcon size={18} color="#34D399" />
-                    <span>نتيجة الفحص: كود معتمد ومطابق للمعايير</span>
+                    <span>نتيجة الفحص: مستحضر مصرح ومطابق لمعايير الهيئة العليا للأدوية والمستلزمات الطبية</span>
                   </div>
                   <span className="text-xs text-gold font-sans font-semibold">
-                    {verificationResult.batchCode}
+                    {verificationResult.productName}
                   </span>
                 </div>
 

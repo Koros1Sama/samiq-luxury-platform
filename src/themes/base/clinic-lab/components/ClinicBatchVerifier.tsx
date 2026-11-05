@@ -37,10 +37,10 @@ export function ClinicBatchVerifier() {
           </div>
           <div className="flex flex-col text-start">
             <h2 className="text-base sm:text-lg lg:text-xl font-bold text-[#0F4C4A] leading-tight">
-              تحقق من رقم الدفعة والتشغيلة المخبرية
+              فحص المستحضر ودليل كشف المقلد باسم المنتج
             </h2>
             <p className="text-sm text-[#4A5568] leading-[1.75]">
-              أدخلي كود التشغيلة (Batch Code) المطبوع على عبوة المنتج لمطابقة بيانات المختبر الرسمي
+              اكتبي اسم المستحضر أو اختاريه من القائمة لمعرفة علامات المنتج الأصلي والتأكد من مطابقته لمعايير الهيئة العليا للأدوية والمستلزمات الطبية
             </p>
           </div>
         </div>
@@ -57,9 +57,9 @@ export function ClinicBatchVerifier() {
             data-testid="batch-input"
             value={batchCode}
             onChange={(e) => setBatchCode(e.target.value)}
-            placeholder="مثال: 40U700 أو B821 أو B742"
+            placeholder="مثال: سيروم فيتامين سي، الغسول المرطب، نياسيناميد..."
             className="w-full min-h-[44px] ps-10 pe-4 bg-[#F2F7F5] border border-[#D4E5E0] rounded-xl text-sm font-semibold text-[#0F4C4A] placeholder:text-[#64748B] focus:bg-white focus:border-[#0F4C4A] focus:outline-hidden focus:ring-1 focus:ring-[#0F4C4A]"
-            aria-label="رقم الدفعة أو الباتش كود"
+            aria-label="اسم المستحضر للتحقق"
           />
         </div>
 
@@ -73,7 +73,7 @@ export function ClinicBatchVerifier() {
           ) : (
             <>
               <ShieldCheckIcon size={18} />
-              <span>فحص الدفعة</span>
+              <span>فحص المستحضر</span>
             </>
           )}
         </button>
@@ -81,27 +81,34 @@ export function ClinicBatchVerifier() {
 
       {/* Quick Test Samples */}
       <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-[#4A5568]">
-        <span className="font-semibold text-[#0F4C4A]">أمثلة للتجربة المباشرة:</span>
+        <span className="font-semibold text-[#0F4C4A]">منتجات سريعة للاختيار:</span>
         <button
           type="button"
-          onClick={() => handleQuickCode('54U700')}
+          onClick={() => handleQuickCode('سيروم فيتامين سي 10%')}
           className="min-h-[40px] px-2.5 py-1 rounded-md bg-[#F2F7F5] border border-[#D4E5E0] text-[#0F4C4A] hover:bg-[#CFE8E1] font-semibold transition-colors"
         >
-          54U700 (أصلي مؤكد)
+          سيروم فيتامين سي 10%
         </button>
         <button
           type="button"
-          onClick={() => handleQuickCode('20T900')}
+          onClick={() => handleQuickCode('الغسول المرطب للبشرة')}
           className="min-h-[40px] px-2.5 py-1 rounded-md bg-[#F2F7F5] border border-[#D4E5E0] text-[#0F4C4A] hover:bg-[#CFE8E1] font-semibold transition-colors"
         >
-          20T900 (دفعة موثقة)
+          الغسول المرطب للبشرة
         </button>
         <button
           type="button"
-          onClick={() => handleQuickCode('SUSPICIOUS-CODE-999')}
-          className="min-h-[40px] px-2.5 py-1 rounded-md bg-[#F2F7F5] border border-[#D4E5E0] text-[#D9534F] hover:bg-[#D9534F]/10 font-semibold transition-colors"
+          onClick={() => handleQuickCode('سيروم نياسيناميد 10%')}
+          className="min-h-[40px] px-2.5 py-1 rounded-md bg-[#F2F7F5] border border-[#D4E5E0] text-[#0F4C4A] hover:bg-[#CFE8E1] font-semibold transition-colors"
         >
-          SUSPICIOUS-CODE-999 (تجربة تحذير)
+          سيروم نياسيناميد 10%
+        </button>
+        <button
+          type="button"
+          onClick={() => handleQuickCode('كريم الترطيب المكثف')}
+          className="min-h-[40px] px-2.5 py-1 rounded-md bg-[#F2F7F5] border border-[#D4E5E0] text-[#0F4C4A] hover:bg-[#CFE8E1] font-semibold transition-colors"
+        >
+          كريم الترطيب المكثف
         </button>
       </div>
 
@@ -126,10 +133,10 @@ export function ClinicBatchVerifier() {
                   </div>
                   <div>
                     <span className="font-bold text-sm sm:text-base text-[#0F4C4A] block">
-                      تشغيلة أصلية مطابقة للمواصفات السريرية
+                      مستحضر مصرح ومطابق لمعايير الهيئة العليا للأدوية والمستلزمات الطبية
                     </span>
                     <span className="text-xs text-[#0F4C4A]/80 font-medium">
-                      رقم الدفعة: {result.verification.batchCode || batchCode}
+                      المستحضر: {result.verification.productName || batchCode}
                     </span>
                   </div>
                 </div>
@@ -138,7 +145,7 @@ export function ClinicBatchVerifier() {
                   onClick={reset}
                   className="min-h-[40px] px-3 py-1 text-xs font-semibold text-[#0F4C4A] hover:underline"
                 >
-                  فحص كود آخر
+                  فحص مستحضر آخر
                 </button>
               </div>
 
@@ -147,17 +154,17 @@ export function ClinicBatchVerifier() {
                 <div className="bg-white/80 p-2.5 rounded-lg border border-[#0F4C4A]/15">
                   <span className="text-xs text-[#4A5568] block">المستحضر:</span>
                   <span className="font-bold text-[#0F4C4A]">
-                    {result.verification.productName || 'سيروم علاجي معتمد'}
+                    {result.verification.productName || 'مستحضر علاجي معتمد'}
                   </span>
                 </div>
                 <div className="bg-white/80 p-2.5 rounded-lg border border-[#0F4C4A]/15">
-                  <span className="text-xs text-[#4A5568] block">تاريخ الإنتاج:</span>
+                  <span className="text-xs text-[#4A5568] block">حالة الاعتماد:</span>
                   <span className="font-bold text-[#0F4C4A]">
-                    {result.verification.manufactureDate || 'حديث الإنتاج'}
+                    مطابق لمعايير الهيئة العليا للأدوية
                   </span>
                 </div>
                 <div className="bg-white/80 p-2.5 rounded-lg border border-[#0F4C4A]/15">
-                  <span className="text-xs text-[#4A5568] block">الصلاحية المتبقية:</span>
+                  <span className="text-xs text-[#4A5568] block">الصلاحية:</span>
                   <span className="font-bold text-[#0F4C4A]">
                     {result.verification.shelfLife || '36 شهراً'}
                   </span>
@@ -168,6 +175,20 @@ export function ClinicBatchVerifier() {
                 <p className="mt-3 text-sm text-[#0F4C4A] leading-[1.75] bg-white/60 p-2.5 rounded-lg border border-[#0F4C4A]/10">
                   {result.verification.statusNotes}
                 </p>
+              )}
+
+              {result.verification.inspectionChecklist && result.verification.inspectionChecklist.length > 0 && (
+                <div className="mt-3 pt-3 border-t border-[#0F4C4A]/15 space-y-1.5">
+                  <span className="text-xs font-bold text-[#0F4C4A] block">علامات المنتج الأصلي وكشف المقلد:</span>
+                  <ul className="space-y-1 text-xs text-[#0F4C4A]/90">
+                    {result.verification.inspectionChecklist.map((item, idx) => (
+                      <li key={idx} className="flex items-start gap-1.5">
+                        <CheckIcon size={14} className="text-[#0F4C4A] shrink-0 mt-0.5" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
             </div>
           ) : (
@@ -180,10 +201,10 @@ export function ClinicBatchVerifier() {
                   </div>
                   <div>
                     <span className="font-bold text-sm sm:text-base text-[#D9534F] block">
-                      تنبيه: رقم الدفعة غير مسجل أو مشتبه به
+                      تنبيه: المستحضر غير مسجل في السجلات المعتمدة
                     </span>
                     <span className="text-xs text-[#D9534F]/90 font-medium">
-                      الكود المدخل: {batchCode}
+                      الاسم أو الرمز المدخل: {batchCode}
                     </span>
                   </div>
                 </div>
@@ -198,7 +219,7 @@ export function ClinicBatchVerifier() {
 
               <p className="mt-3 text-sm leading-[1.75] bg-white/70 p-3 rounded-lg border border-[#D9534F]/20 text-[#D9534F]">
                 {result.message ||
-                  'لم يتم العثور على تشغيلة رسمية مطابقة لهذا الكود في سجلات المختبر. نوصي بعدم استخدام المنتج قبل فحصه لدى مركزنا في صنعاء.'}
+                  'لم يتم العثور على مستحضر بهذا الاسم في سجلات المستحضرات المصرحة. نوصي بالتأكد من كتابة الاسم أو التواصل مع أخصائيينا في صنعاء.'}
               </p>
             </div>
           )}

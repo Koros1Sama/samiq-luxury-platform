@@ -114,7 +114,7 @@ export function IvoryColophonContact(_props: Partial<SectionComponentProps>) {
                 المنصة: سامق للتجارة الإلكترونية الموثقة (SAMIQ Engine).
               </p>
               <p className="text-sm">
-                فحص الدفعات: يتم التحقق من كل تشغيلة عبر مطابقة أرقام الباركود والشهادات الجمركية الرسمية.
+                فحص الأصالة: مستحضرات مصرحة ومطابقة لمعايير الهيئة العليا للأدوية والمستلزمات الطبية.
               </p>
             </div>
           </div>

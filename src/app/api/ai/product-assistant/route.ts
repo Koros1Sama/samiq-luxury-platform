@@ -168,7 +168,7 @@ export async function POST(req: Request) {
         arabicDescription: classification.description,
         ingredients: classification.keyIngredients,
         authenticityPoints: [
-          'رقم التشغيلة (Batch Code) محفور بالليزر ومطابق لكرتون الوكالة الرسمي',
+          'مستحضر مصرح ومطابق لمعايير الهيئة العليا للأدوية والمستلزمات الطبية',
           'الباركود الدولي يقرأ بلد المنشأ وتاريخ الصلاحية الرسمي',
           'خلو التركيبة تماماً من الروائح الكيميائية الحادة أو الرغوة الشائبة',
         ],

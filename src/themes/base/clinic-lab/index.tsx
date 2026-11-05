@@ -104,7 +104,7 @@ export function ClinicLabTheme(_props: ThemeLayoutProps) {
         onOpenCart={cart.open}
       />
 
-      {/* 2. Scrollable Section Tabs Under Header ("المتجر | روتيني | تحقق من الدفعة | تواصل") */}
+      {/* 2. Scrollable Section Tabs Under Header ("المتجر | روتيني | فحص المنتج وكشف المقلد | تواصل") */}
       <ClinicNavTabs />
 
       {/* 3. Sections Dynamic Outlet */}

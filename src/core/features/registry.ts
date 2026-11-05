@@ -261,10 +261,10 @@ export const FEATURES_REGISTRY: Record<string, FeatureDefinition> = {
   },
   authenticity_guide: {
     id: 'authenticity_guide',
-    nameEn: 'Authenticity Lab & Batch Verifier',
-    nameAr: 'مختبر ودليل كشف المقلد وفحص الدفعات',
+    nameEn: 'Authenticity Lab & Counterfeit Detector',
+    nameAr: 'مختبر ودليل كشف المقلد والبحث باسم المنتج',
     descriptionAr:
-      'مقارنة تفاعلية بين الأصلي والبدائل، شارة الأصالة، فاحص رقم التشغيلة، وربط مقاطع الفيديو التوضيحية.',
+      'مقارنة تفاعلية بين الأصلي والبدائل، شارة الأصالة، فحص المنتج بالاسم لكشف المقلد، وربط مقاطع الفيديو التوضيحية.',
     category: 'addon',
     basePriceUsd: 35,
     requires: ['tier_3_catalog'],

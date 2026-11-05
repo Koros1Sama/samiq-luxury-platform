@@ -17,31 +17,31 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    // Check if adding/updating a verified batch guide
+    // Check if adding/updating an authenticity guide
     if (body.action === 'add_batch' || body.action === 'create_guide') {
-      const batchCode = (body.batchCode || '').trim().toUpperCase();
-      if (!batchCode) {
+      const productCode = (body.batchCode || body.productId || body.productTitle || '').trim();
+      if (!productCode) {
         return NextResponse.json(
-          { success: false, message: 'رقم التشغيلة / الباتش كود مطلوب' },
+          { success: false, message: 'اسم أو معرف المستحضر مطلوب' },
           { status: 400 }
         );
       }
 
       const guide: AuthenticityComparisonData = {
-        productId: body.productId || `prod-batch-${batchCode.toLowerCase()}`,
-        productTitle: body.productTitle || `مستحضر تشغيلة ${batchCode}`,
+        productId: body.productId || `prod-auth-${productCode.toLowerCase().replace(/\s+/g, '-')}`,
+        productTitle: body.productTitle || `مستحضر ${productCode}`,
         brand: body.brand || 'سيرومات نقية',
         original: {
           title: body.originalTitle || 'الأصلي المعتمد',
           image: body.image || '/media/products/serum-vitamin-c.jpg',
-          batchCode,
-          formulaNotes: body.formulaNotes || 'قوام نقي متجانس مطابق لمواصفات المختبر الأصلي',
-          packagingNotes: body.packagingNotes || 'زجاج معتم عازل للضوء مع رقم الباتش محفور بالليزر',
+          batchCode: 'مصرح ومطابق لمعايير الهيئة',
+          formulaNotes: body.formulaNotes || 'قوام نقي متجانس مطابق لمواصفات المختبر الأصلي ومعايير الهيئة العليا للأدوية',
+          packagingNotes: body.packagingNotes || 'زجاج معتم عازل للضوء مع ختم الأصالة والباركود المعتمد',
         },
         counterfeit: {
           title: 'التقليد المغشوش',
           image: body.image || '/media/products/serum-vitamin-c.jpg',
-          batchCode: 'بدون كود أو مطبوع بحبر باهت',
+          batchCode: 'بدون ختم اعتماد أو مطبوع بحبر باهت',
           formulaNotes: 'سائل معكر سريع التأكسد يسبب تهيج الجلد',
           packagingNotes: 'عبوة رديئة ومطاط يسرب الهواء',
         },
@@ -49,36 +49,36 @@ export async function POST(req: Request) {
           ? body.checklist
           : [
               {
-                title: 'رقم التشغيلة (Batch Code)',
-                originalFeature: `محفور بدقة في أسفل الزجاجة ومطابق للكرتون الخارجي (${batchCode}).`,
-                fakeRisk: 'مفقود نهائياً أو ملصق ورقي باهت يمكن تقشيره.',
+                title: 'ختم وتصريح الهيئة العليا للأدوية والمستلزمات الطبية',
+                originalFeature: `مصرح ومطابق للمواصفات الرسمية مع ختم الأصالة والباركود المعتمد.`,
+                fakeRisk: 'مفقود نهائياً أو ملصق تجاري باهت يمكن تقشيره.',
               },
               {
                 title: 'نقاء وتجانس التركيبة',
-                originalFeature: 'قوام متجانس بلون نقي طبيعي سريع الامتصاص.',
+                originalFeature: 'قوام متجانس بلون نقي طبيعي سريع الامتصاص وخالٍ من الروائح الكيميائية.',
                 fakeRisk: 'رغوة بيضاء عائمة وتعكر واضح.',
               },
             ],
       };
 
-      saveAuthenticityGuide(batchCode, guide);
+      saveAuthenticityGuide(productCode, guide);
       return NextResponse.json({ success: true, guide });
     }
 
-    const { batchCode, productId } = body;
+    const query = (body.query || body.productName || body.batchCode || body.productId || '').trim();
 
-    if (batchCode) {
-      const verification = verifyBatchCode(batchCode);
+    if (query) {
+      const verification = verifyBatchCode(query);
       return NextResponse.json({ success: true, verification });
     }
 
-    if (productId) {
-      const guide = getAuthenticityGuide(productId);
+    if (body.productId) {
+      const guide = getAuthenticityGuide(body.productId);
       return NextResponse.json({ success: true, guide });
     }
 
     return NextResponse.json(
-      { success: false, message: 'يرجى تقديم رقم الدفعة أو معرف المنتج' },
+      { success: false, message: 'يرجى كتابة اسم المستحضر للتحقق' },
       { status: 400 }
     );
   } catch (error) {
@@ -92,10 +92,10 @@ export async function POST(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const key = searchParams.get('key') || searchParams.get('batchCode') || '';
+    const key = searchParams.get('key') || searchParams.get('productId') || searchParams.get('batchCode') || '';
     if (!key) {
       return NextResponse.json(
-        { success: false, message: 'معرف التشغيلة مطلوب' },
+        { success: false, message: 'معرف المستحضر مطلوب' },
         { status: 400 }
       );
     }
@@ -104,7 +104,7 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ success: deleted });
   } catch (error) {
     return NextResponse.json(
-      { success: false, message: 'فشل حذف التشغيلة' },
+      { success: false, message: 'فشل حذف المستحضر' },
       { status: 500 }
     );
   }

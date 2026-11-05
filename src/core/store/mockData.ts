@@ -27,21 +27,21 @@ export const MOCK_AUTHENTICITY_GUIDE: AuthenticityComparisonData = {
   original: {
     title: 'الأصلي المعتمد',
     image: '/media/products/serum-vitamin-c.jpg',
-    batchCode: '54U700',
-    formulaNotes: 'سائل نقي ذهبي فاتح، رائحة حمضية منعشة وخفيفة، خالٍ تماماً من الرغوة أو الشوائب',
-    packagingNotes: 'زجاج داكن ثقيل عازل للضوء، رقم الباتش محفور بالليزر أسفل الزجاج، قطارة محكمة بسدادة مطاطية أصلية',
+    batchCode: 'مصرح من الهيئة العليا للأدوية',
+    formulaNotes: 'سائل نقي ذهبي فاتح، رائحة حمضية منعشة وخفيفة، خالٍ تماماً من الرغوة أو الشوائب ومطابق لمعايير الهيئة العليا للأدوية',
+    packagingNotes: 'زجاج داكن ثقيل عازل للضوء، ختم الأصالة محفور بالليزر أسفل الزجاج، قطارة محكمة بسدادة مطاطية أصلية',
   },
   counterfeit: {
     title: 'التقليد المغشوش المنتشر',
     image: '/media/products/serum-vitamin-c.jpg',
-    batchCode: 'بدون كود أو مطبوع بحبر باهت',
+    batchCode: 'بدون ختم اعتماد أو مطبوع بحبر باهت',
     formulaNotes: 'سائل معكر مائل للبياض، رغوة كثيفة تطفو عند الرج، رائحة كيميائية نفاذة تسبب تهيج البشرة',
     packagingNotes: 'زجاج خفيف رديء، غطاء قطارة بلاستيكي يسرب الهواء مما يسبب أكسدة وتلف التركيبة فوراً',
   },
   checklist: [
     {
-      title: 'رقم التشغيلة والباتش كود (Batch Code)',
-      originalFeature: 'محفور بالليزر في قاع الزجاج متطابق تماماً مع الكود المطبوع على الكرتون الخارجي (مثال: 54U700).',
+      title: 'ختم وتصريح الهيئة العليا للأدوية والمستلزمات الطبية',
+      originalFeature: 'مستحضرات مصرحة ومطابقة لمعايير الهيئة العليا للأدوية والمستلزمات الطبية مع ختم الأصالة والباركود المعتمد.',
       fakeRisk: 'مفقود نهائياً أو مطبوع بحبر باهت يمكن مسحه بسهولة بالإصبع.',
     },
     {
@@ -51,7 +51,7 @@ export const MOCK_AUTHENTICITY_GUIDE: AuthenticityComparisonData = {
     },
     {
       title: 'الباركود ومطابقة الوكالة الرسمية',
-      originalFeature: 'يقرأ الباركود مباشرة في تطبيق الفحص المعتمد ويظهر بيانات التشغيلة وتاريخ الإنتاج الموثق.',
+      originalFeature: 'يقرأ الباركود مباشرة في تطبيق الفحص المعتمد ويظهر بيانات الاعتماد الرسمي وتاريخ الإنتاج الموثق.',
       fakeRisk: 'باركود عشوائي لا يؤدي لأي صفحة أو يعطي منتجاً مختلفاً.',
     },
     {
@@ -264,7 +264,7 @@ export const MOCK_STOREFRONT_DATA = {
       ],
       isAuthenticGuaranteed: true,
       isFeatured: true,
-      badge: 'أصلي معتمد BATCH: 54U700',
+      badge: 'أصلي 100% · مصرح ومطابق للمعايير',
       visibilityStatus: 'published',
       isPublished: true,
       stockQuantity: 18,
@@ -338,7 +338,7 @@ export const MOCK_STOREFRONT_DATA = {
       ],
       isAuthenticGuaranteed: true,
       isFeatured: true,
-      badge: 'أصلي معتمد BATCH: 1A02',
+      badge: 'أصلي 100% · مصرح ومطابق للمعايير',
       visibilityStatus: 'published',
       isPublished: true,
       stockQuantity: 25,

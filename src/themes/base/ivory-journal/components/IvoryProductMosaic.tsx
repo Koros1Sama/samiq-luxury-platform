@@ -57,7 +57,7 @@ export function IvoryProductMosaic({ onSelectProduct }: IvoryProductMosaicProps)
             اختيارات الأسبوع
           </h2>
           <p className="font-sans text-sm text-[#554D46] mt-0.5 leading-[1.75] hidden sm:block">
-            مستحضرات منتقاة بعناية فائقة، خضعت لفحص الباركود والتشغيلة المخبرية
+            مستحضرات منتقاة بعناية فائقة، مصرحة ومطابقة لمعايير الهيئة العليا للأدوية والمستلزمات الطبية
           </p>
         </div>
 

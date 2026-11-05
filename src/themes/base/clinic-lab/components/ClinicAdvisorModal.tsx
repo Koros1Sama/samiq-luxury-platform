@@ -71,7 +71,7 @@ export function ClinicAdvisorModal({ isOpen, onClose }: ClinicAdvisorModalProps)
                 المستشار السريري الذكي
               </h2>
               <span className="text-xs text-[#0F4C4A]/70 font-medium">
-                تحليل نوع البشرة ومطابقة الأرقام التشغيلية
+                تحليل نوع البشرة ومطابقة معايير الهيئة العليا للأدوية
               </span>
             </div>
           </div>
@@ -197,7 +197,7 @@ export function ClinicAdvisorModal({ isOpen, onClose }: ClinicAdvisorModalProps)
             type="text"
             value={inputVal}
             onChange={(e) => setInputVal(e.target.value)}
-            placeholder="اكتبي استشارتك أو رقم التشغيلة..."
+            placeholder="اكتبي استشارتك أو اسم المستحضر..."
             disabled={isTyping}
             className="flex-1 min-h-[44px] px-3.5 bg-[#F2F7F5] border border-[#D4E5E0] rounded-xl text-xs sm:text-sm text-[#0F4C4A] placeholder:text-[#64748B] focus:bg-white focus:outline-hidden focus:ring-1 focus:ring-[#0F4C4A]"
           />

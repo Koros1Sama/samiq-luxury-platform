@@ -1021,7 +1021,7 @@ export default function PlatformSuperAdminPage() {
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
                 <h2 className="text-base sm:text-lg font-serif font-bold text-ivory">
-                  التكاليف السنوية والتشغيلية — الدومين، الاستضافة، والذكاء الاصطناعي
+                  التكاليف السنوية وخدمات السيرفرات — الدومين، الاستضافة، والذكاء الاصطناعي
                 </h2>
               </div>
               <p className="text-xs text-muted-lux mt-1">
@@ -1114,7 +1114,7 @@ export default function PlatformSuperAdminPage() {
             {/* 3. AI API Operational Plan */}
             <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-champagne block">خطة تشغيل الذكاء الاصطناعي (AI Plan):</span>
+                <span className="text-xs font-bold text-champagne block">خطة استهلاك الذكاء الاصطناعي (AI Plan):</span>
                 <span className="text-xs font-mono font-bold text-gold">
                   {projectAiPlan === 'managed_annual' ? '$90 / سنوياً' : '$0'}
                 </span>

@@ -5,7 +5,7 @@ import React from 'react';
 const TABS = [
   { id: 'tab-store', label: 'المتجر', href: '#products' },
   { id: 'tab-routine', label: 'روتيني', href: '#routine' },
-  { id: 'tab-auth', label: 'تحقق من الدفعة', href: '#authenticity' },
+  { id: 'tab-auth', label: 'فحص المنتج وكشف المقلد', href: '#authenticity' },
   { id: 'tab-account', label: 'الملف الطبي وحسابي', href: '/account' },
   { id: 'tab-bookings', label: 'حجز استشارة', href: '/bookings' },
   { id: 'tab-blog', label: 'المجلة السريرية', href: '/blog' },

@@ -211,7 +211,7 @@ export function useCheckout(options?: UseCheckoutOptions) {
         message += `الخصم (${appliedCoupon?.code}): -${formatCurrency(discountCurrent, currentCurrency)}\n`;
       }
       message += `*الإجمالي المطلوب:* ${formatCurrency(totalCurrent, currentCurrency)}\n`;
-      message += `ضمان الأصالة: فحص الباركود والتشغيلة عند الاستلام\n`;
+      message += `ضمان الأصالة: مستحضرات مصرحة ومطابقة لمعايير الهيئة العليا للأدوية والمستلزمات الطبية\n`;
 
       const cleanNumber = whatsappNumber.replace(/[^0-9]/g, '');
       return `https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`;

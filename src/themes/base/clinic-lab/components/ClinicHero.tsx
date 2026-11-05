@@ -28,12 +28,12 @@ export function ClinicHero({ onExploreClick }: ClinicHeroProps) {
 
             {/* Subtitle - Hidden on mobile (< sm) to preserve fold height for >= 3 product rows */}
             <p className="hidden sm:block text-sm sm:text-base text-[#4A5568] leading-[1.75] max-w-xl">
-              تركيبات علاجية نقية بتركيزات مدروسة وموثقة برقم التشغيلة الرسمي في اليمن. نوفر روتيناً سريرياً مخصصاً لبشرتك مع فحص الأصالة وكشف المقلد.
+              مستحضرات مصرحة ومطابقة لمعايير الهيئة العليا للأدوية والمستلزمات الطبية. نوفر روتيناً سريرياً مخصصاً لبشرتك مع فحص الأصالة وكشف المقلد.
             </p>
 
             {/* Micro subtitle on mobile */}
             <span className="sm:hidden text-xs text-[#4A5568] leading-tight truncate">
-              مفتاح الجمال · تركيبات علاجية نقية لكشف المقلد
+              مستحضرات مصرحة ومطابقة لمعايير الهيئة العليا للأدوية
             </span>
 
             {/* Quick Metrics (Desktop / Tablet) */}
@@ -44,7 +44,7 @@ export function ClinicHero({ onExploreClick }: ClinicHeroProps) {
               </span>
               <span className="inline-flex items-center gap-1 bg-white px-2.5 py-1 rounded-md border border-[#D4E5E0]">
                 <ShieldCheckIcon size={14} />
-                تتبع رقم الدفعة والباركود
+                مطابق لمعايير الهيئة العليا للأدوية
               </span>
             </div>
           </div>

@@ -149,7 +149,7 @@ export function ProductShowcase(props: ProductShowcaseProps) {
               </h2>
             </div>
             <p className="text-xs text-muted-lux font-sans leading-relaxed">
-              فحص ومطابقة الباركود والتشغيلة قبل الدفع • توصيل فوري
+              مستحضرات مصرحة ومطابقة لمعايير الهيئة العليا للأدوية • توصيل فوري
             </p>
           </div>
 
@@ -335,7 +335,7 @@ export function ProductShowcase(props: ProductShowcaseProps) {
                   ضمان الأصالة 100%
                 </h4>
                 <p className="text-xs text-muted-lux font-sans leading-relaxed">
-                  فحص ومطابقة الباركود والتشغيلة قبل الاستلام
+                  معاينة الختم والباركود وضمان الأصالة قبل الاستلام
                 </p>
               </div>
             </div>

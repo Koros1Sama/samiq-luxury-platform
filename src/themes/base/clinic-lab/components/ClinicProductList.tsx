@@ -105,7 +105,7 @@ export function ClinicProductList({ products }: ClinicProductListProps) {
               {/* Lab Verification Badge */}
               <div className="flex items-center gap-1 text-xs font-medium text-[#0F4C4A]">
                 <ShieldCheckIcon size={14} className="text-[#0F4C4A] shrink-0" />
-                <span className="whitespace-nowrap">أصلي 100% · تشغيلة موثقة</span>
+                <span className="whitespace-nowrap">أصلي 100% · مصرح ومطابق للمعايير</span>
               </div>
             </div>
 

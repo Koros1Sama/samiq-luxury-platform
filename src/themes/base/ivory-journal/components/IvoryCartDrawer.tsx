@@ -303,7 +303,7 @@ export function IvoryCartDrawer() {
             {/* Authenticity Assurance Note */}
             <div className="flex items-center justify-center gap-1.5 text-xs font-sans text-[#5E6B5A]">
               <VerifiedStampIcon size={14} color="#5E6B5A" />
-              <span>فحص الكود والتشغيلة ومعاينة المنتج متاحة عند الاستلام</span>
+              <span>معاينة المستحضر والتحقق من ختم الأصالة متاحة عند الاستلام</span>
             </div>
           </div>
         )}

@@ -18,7 +18,7 @@ export function IvoryAuthenticityCard(_props: Partial<SectionComponentProps>) {
     await verify();
   };
 
-  const sampleCodes = ['40W800', '38U300', '78S200'];
+  const sampleCodes = ['سيروم فيتامين سي', 'سيروم نياسيناميد', 'الغسول المرطب'];
 
   return (
     <section id="authenticity" className="w-full bg-[#FAF7F2] py-16 sm:py-24 border-b border-[#E8E2D8]">
@@ -50,10 +50,10 @@ export function IvoryAuthenticityCard(_props: Partial<SectionComponentProps>) {
                 </span>
                 <div>
                   <h3 className="font-serif font-bold text-lg sm:text-xl text-[#1B1612]">
-                    فحص رقم التشغيلة (Batch Code)
+                    فحص المستحضر باسم المنتج (Product Authenticity Lookup)
                   </h3>
                   <span className="font-sans text-xs text-[#6E675F]">
-                    مطابقة فورية مع سجلات المصانع العالمية
+                    مطابقة فورية مع معايير الهيئة العليا للأدوية والمستلزمات الطبية
                   </span>
                 </div>
               </div>
@@ -61,7 +61,7 @@ export function IvoryAuthenticityCard(_props: Partial<SectionComponentProps>) {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <label htmlFor="batch-code-input" className="block text-xs font-sans font-medium text-[#554D46]">
-                أدخلي كود التشغيلة المطبوع أسفل العبوة أو على الكرتون:
+                اكتبي اسم المستحضر لمطابقة علامات الأصلي وكشف المقلد:
               </label>
               <div className="flex flex-col sm:flex-row gap-3">
                 <div className="relative flex-1">
@@ -70,7 +70,7 @@ export function IvoryAuthenticityCard(_props: Partial<SectionComponentProps>) {
                     type="text"
                     value={batchCode}
                     onChange={(e) => setBatchCode(e.target.value)}
-                    placeholder="مثال: 40W800 أو 38U300"
+                    placeholder="مثال: سيروم فيتامين سي، الغسول المرطب، نياسيناميد..."
                     className="w-full h-11 min-h-[44px] px-4 rounded-md border border-[#E8E2D8] bg-[#FAF7F2] font-mono text-sm text-[#1B1612] placeholder:text-[#A0988E] focus:outline-none focus:border-[#5E6B5A] transition-colors"
                   />
                   {batchCode && (
@@ -91,13 +91,13 @@ export function IvoryAuthenticityCard(_props: Partial<SectionComponentProps>) {
                   className="min-h-[44px] min-w-[120px] px-6 py-2.5 rounded-md bg-[#1B1612] text-[#FAF7F2] hover:bg-[#332E27] font-sans font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors disabled:opacity-50 shadow-sm"
                 >
                   <SearchIcon size={16} color="#FAF7F2" />
-                  <span>{isVerifying ? 'جارٍ الفحص...' : 'فحص الكود'}</span>
+                  <span>{isVerifying ? 'جارٍ الفحص...' : 'فحص المستحضر'}</span>
                 </button>
               </div>
 
               {/* Sample Quick Codes */}
-              <div className="flex items-center gap-2 pt-1">
-                <span className="text-xs font-sans text-[#877E75]">أكواد تجريبية:</span>
+              <div className="flex items-center gap-2 pt-1 flex-wrap">
+                <span className="text-xs font-sans text-[#877E75]">منتجات سريعة:</span>
                 {sampleCodes.map((c) => (
                   <button
                     key={c}
@@ -127,26 +127,26 @@ export function IvoryAuthenticityCard(_props: Partial<SectionComponentProps>) {
                 <div className="flex items-center gap-2 text-[#5E6B5A]">
                   <VerifiedStampIcon size={20} color="#5E6B5A" />
                   <span className="font-serif font-bold text-base">
-                    تشغيلة أصلية موثقة ومطابقة للمعايير
+                    مستحضر مصرح ومطابق لمعايير الهيئة العليا للأدوية والمستلزمات الطبية
                   </span>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2 text-xs font-sans text-[#554D46]">
                   <div>
-                    <span className="block text-[#877E75]">رقم التشغيلة:</span>
+                    <span className="block text-[#877E75]">المستحضر:</span>
                     <span className="font-mono font-bold text-[#1B1612]">
-                      {result.verification.batchCode || batchCode}
+                      {result.verification.productName || batchCode}
                     </span>
                   </div>
                   <div>
-                    <span className="block text-[#877E75]">تاريخ الإنتاج:</span>
+                    <span className="block text-[#877E75]">حالة الاعتماد:</span>
                     <span className="font-mono font-bold text-[#1B1612]">
-                      {result.verification.manufactureDate || '2025-08'}
+                      مصرح ومطابق للمعايير
                     </span>
                   </div>
                   <div>
-                    <span className="block text-[#877E75]">الصلاحية المتبقية:</span>
+                    <span className="block text-[#877E75]">الصلاحية:</span>
                     <span className="font-mono font-bold text-[#5E6B5A]">
-                      {result.verification.shelfLife || '28 شهراً'}
+                      {result.verification.shelfLife || '36 شهراً'}
                     </span>
                   </div>
                 </div>
@@ -162,10 +162,10 @@ export function IvoryAuthenticityCard(_props: Partial<SectionComponentProps>) {
             {result && !result.success && (
               <div className="p-5 rounded-md border border-[#B89B5E]/40 bg-[#FFFDF9] space-y-2 text-xs font-sans text-[#554D46]">
                 <span className="font-serif font-bold text-sm text-[#1B1612] block">
-                  تنبيه تحريري: كود غير مسجل تلقائياً
+                  تنبيه تحريري: مستحضر غير مسجل تلقائياً
                 </span>
                 <p className="font-sans text-sm leading-[1.75]">
-                  {result.message || 'الكود المدخل يتطلب مراجعة الفاتورة الجمركية المباشرة. يمكنكِ تصوير قاع العبوة وإرساله لخبيرتنا عبر واتساب للتحقق اليدوي.'}
+                  {result.message || 'المستحضر المدخل يتطلب مراجعة الفاتورة الجمركية المباشرة. يمكنكِ تصوير قاع العبوة وإرساله لخبيرتنا عبر واتساب للتحقق اليدوي.'}
                 </p>
               </div>
             )}
@@ -203,10 +203,10 @@ export function IvoryAuthenticityCard(_props: Partial<SectionComponentProps>) {
               <div className="p-3.5 rounded bg-[#F7F4ED] border border-[#E8E2D8]/60 space-y-1">
                 <div className="flex items-center gap-2 text-xs font-sans font-bold text-[#1B1612]">
                   <CheckIcon size={16} color="#5E6B5A" />
-                  <span>2. تطابق الكود بين العبوة والكرتون</span>
+                  <span>2. ختم الأصالة وتطابق بيانات المستحضر المعتمد</span>
                 </div>
                 <p className="font-sans text-sm text-[#554D46] leading-[1.75] ps-6">
-                  رقم التشغيلة المحفور على قاعدة الزجاجة يجب أن يطابق تماماً الكود المطبوع على ظهر الكرتون الخارجي.
+                  بيانات المستحضر والباركود على العبوة مطابقة تماماً لمعايير الهيئة العليا للأدوية والمستلزمات الطبية.
                 </p>
               </div>
 

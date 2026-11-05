@@ -76,7 +76,7 @@ export function AuthenticityCompareSlider(props: AuthenticityCompareSliderProps)
     <section id="authenticity-lab" className="py-8 sm:py-16 bg-[#0E0E12]/80 border-y border-white/[0.08] relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
         {/* ==================================================================== */}
-        {/* 1. Header & Batch Code Verifier Card                                 */}
+        {/* 1. Header & Product Authenticity Card                               */}
         {/* ==================================================================== */}
         <div className="text-center max-w-2xl mx-auto space-y-2.5">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gold/10 border border-gold/30 text-champagne text-xs font-sans font-semibold">
@@ -84,10 +84,10 @@ export function AuthenticityCompareSlider(props: AuthenticityCompareSliderProps)
             <span>مختبر مفتاح الجمال لكشف المقلد</span>
           </div>
           <h2 className="text-xl sm:text-3xl lg:text-4xl font-serif font-bold text-ivory">
-            التحقق من رقم التشغيلة <span className="text-champagne">(Batch Code)</span>
+            البحث باسم المنتج <span className="text-champagne">لكشف المقلد ومعرفة علامات الأصلي</span>
           </h2>
           <p className="text-xs sm:text-sm text-muted-lux font-sans leading-relaxed">
-            أدخلي رقم الدفعة المطبوع أسفل العبوة للتحقق الفوري من تاريخ الصنع، المطابقة المخبرية، وسجل الاستيراد الرسمي.
+            مستحضرات مصرحة ومطابقة لمعايير الهيئة العليا للأدوية والمستلزمات الطبية. اكتبي اسم المستحضر للتحقق الفوري من علامات الأصلي وكشف المقلد.
           </p>
         </div>
 
@@ -98,8 +98,8 @@ export function AuthenticityCompareSlider(props: AuthenticityCompareSliderProps)
               type="text"
               value={batchCode}
               onChange={(e) => setBatchCode(e.target.value)}
-              placeholder="مثال: 54U700 أو 22T301 أو 48X902..."
-              className="flex-1 min-h-[44px] px-4 rounded-2xl bg-[#070709] border border-white/10 text-xs sm:text-sm text-ivory placeholder-muted-lux outline-none focus:border-gold transition font-mono uppercase"
+              placeholder="مثال: سيروم فيتامين سي، الغسول المرطب، نياسيناميد..."
+              className="flex-1 min-h-[44px] px-4 rounded-2xl bg-[#070709] border border-white/10 text-xs sm:text-sm text-ivory placeholder-muted-lux outline-none focus:border-gold transition font-sans"
             />
             <button
               type="submit"
@@ -107,7 +107,7 @@ export function AuthenticityCompareSlider(props: AuthenticityCompareSliderProps)
               className="min-h-[44px] min-w-[44px] px-6 rounded-2xl bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-obsidian-dark font-sans font-bold text-xs sm:text-sm shadow-md hover:brightness-110 active:scale-[0.98] transition flex items-center justify-center gap-2"
             >
               <ShieldCheckIcon size={16} color="#070709" />
-              <span>{isVerifying ? 'جاري الفحص...' : 'فحص التشغيلة'}</span>
+              <span>{isVerifying ? 'جاري الفحص...' : 'فحص المستحضر'}</span>
             </button>
           </form>
 
@@ -124,7 +124,7 @@ export function AuthenticityCompareSlider(props: AuthenticityCompareSliderProps)
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-emerald-400 font-sans font-bold text-xs sm:text-sm">
                     <VerifiedCheckIcon size={18} color="#34D399" />
-                    <span>دفعة أصلية موثقة ومطابقة لمواصفات الصانع</span>
+                    <span>مستحضر مصرح ومطابق لمعايير الهيئة العليا للأدوية والمستلزمات الطبية</span>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-2 text-xs font-sans">
                     <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
@@ -136,8 +136,8 @@ export function AuthenticityCompareSlider(props: AuthenticityCompareSliderProps)
                       <span className="text-ivory font-bold">{result.verification.productName}</span>
                     </div>
                     <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
-                      <span className="text-muted-lux block">رقم الدفعة:</span>
-                      <span className="text-champagne font-mono font-bold">{result.verification.batchCode}</span>
+                      <span className="text-muted-lux block">حالة الاعتماد:</span>
+                      <span className="text-champagne font-bold">مصرح ومطابق للمعايير</span>
                     </div>
                     <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
                       <span className="text-muted-lux block">تاريخ الإنتاج:</span>
@@ -239,7 +239,7 @@ export function AuthenticityCompareSlider(props: AuthenticityCompareSliderProps)
                     />
                     <div className="absolute inset-0 bg-rose-950/40 mix-blend-multiply" />
                     <div className="absolute top-3 end-3 px-3 py-1 rounded-md bg-rose-950/90 border border-rose-500/40 text-xs text-rose-300 font-sans font-bold">
-                      بديل مغشوش: رغوة + بدون Batch
+                      بديل مغشوش: رغوة + بدون ختم اعتماد
                     </div>
                   </div>
                 </div>
@@ -263,7 +263,7 @@ export function AuthenticityCompareSlider(props: AuthenticityCompareSliderProps)
                     <div className="absolute inset-0 bg-gold/10 mix-blend-overlay" />
                     <div className="absolute top-3 start-3 px-3 py-1 rounded-md bg-emerald-950/90 border border-emerald-500/40 text-xs text-emerald-300 font-sans font-bold flex items-center gap-1.5">
                       <VerifiedCheckIcon size={14} color="#34D399" />
-                      <span>الأصلي: BATCH 54U700</span>
+                      <span>الأصلي المعتمد: مصرح ومطابق للمعايير</span>
                     </div>
                   </div>
                 </div>

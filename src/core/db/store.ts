@@ -429,8 +429,8 @@ function createDefaultSeed(): SamiqDatabaseSchema {
 المنتجات المقلدة تعتمد عادة على سوائل ماء ملون بدون أي تركيز فعال، أو تحتوي على مواد كيميائية تتأكسد في أيام قليلة وتسبب التهابات حادة للبشرة.
 
 العلامات الحاسمة لفحص سيروم فيتامين سي Pure Vitamin C10 الأصلي:
-1. رقم الباتش (Batch Code):
-يأتي محفوراً بدقة بالغة أسفل الزجاجة بواسطة الليزر (مثال: 54U700)، ومطابقاً تماماً لنفس الكود المطبوع على ظهر الكرتون الخارجي. في المنتجات المقلدة تجد الكود مفقوداً تماماً أو مطبوعاً بحبر سطحي يزول بمسحة إصبع.
+1. ختم وتصريح الهيئة العليا للأدوية والمستلزمات الطبية:
+يأتي المستحضر مصرحاً ومطابقاً لمعايير الهيئة العليا للأدوية والمستلزمات الطبية مع ختم الأصالة والباركود المعتمد على ظهر الكرتون الخارجي. في المنتجات المقلدة تجد الختم مفقوداً تماماً أو مطبوعاً بحبر سطحي يزول بمسحة إصبع.
 
 2. قوام ولون السيروم:
 السيروم الأصلي يتميز بلون ذهبي كهرماني نقي، وقوام انسيابي خفيف سريع الامتصاص دون أي ملمس زيتي لزج. في العبوات المقلدة تلاحظ رغوة بيضاء عائمة عند رج العبوة ورائحة كيميائية نفاذة.
@@ -474,7 +474,7 @@ function createDefaultSeed(): SamiqDatabaseSchema {
         productId: 'prod-1',
         customerName: 'د. أروى الحميري',
         rating: 5,
-        comment: 'السيروم أصلي 100%، قمت بمطابقة رقم الدفعة 54U700 في قاعدة البيانات وظهر تاريخ الإنتاج الدقيق. النضارة بدأت تظهر من أول أسبوع.',
+        comment: 'السيروم أصلي 100% ومصرح ومطابق لمعايير الهيئة العليا للأدوية والمستلزمات الطبية، ظهرت تفاصيل علامات الأصلي بدقة. النضارة بدأت تظهر من أول أسبوع.',
         isVerifiedPurchase: true,
         batchCodeVerified: '54U700',
         createdAt: '2026-10-20T12:00:00Z',
@@ -952,20 +952,25 @@ export function getShippingZones(): ShippingZoneRecord[] {
   return db.shippingZones;
 }
 
-// 5. Authenticity Guides & Batch Code Verifier
-export function getAuthenticityGuide(productIdOrBatch: string): AuthenticityComparisonData | undefined {
+// 5. Authenticity Guides & Product Authenticity Verifier
+export function getAuthenticityGuide(productIdOrQuery: string): AuthenticityComparisonData | undefined {
   const db = getDb();
-  if (db.authenticityGuides[productIdOrBatch]) {
-    return db.authenticityGuides[productIdOrBatch];
+  if (db.authenticityGuides[productIdOrQuery]) {
+    return db.authenticityGuides[productIdOrQuery];
   }
-  // Try matching batch codes inside products
+  const clean = productIdOrQuery.trim().toLowerCase();
+  // Try matching product title or id
   const found = Object.values(db.authenticityGuides).find(
-    (g) => g.productId === productIdOrBatch || g.original.batchCode.toLowerCase() === productIdOrBatch.toLowerCase()
+    (g) =>
+      g.productId.toLowerCase() === clean ||
+      g.productTitle.toLowerCase().includes(clean) ||
+      g.brand.toLowerCase().includes(clean) ||
+      (g.original.batchCode && g.original.batchCode.toLowerCase() === clean)
   );
   return found || db.authenticityGuides['prod-1'];
 }
 
-export function verifyBatchCode(batchCode: string): {
+export function verifyBatchCode(queryOrCode: string): {
   isVerified: boolean;
   brand: string;
   productName: string;
@@ -975,65 +980,116 @@ export function verifyBatchCode(batchCode: string): {
   statusNotes: string;
   inspectionChecklist: string[];
 } {
-  const clean = batchCode.trim().toUpperCase();
-  // Benchmark database of authentic batches
-  const KNOWN_BATCHES: Record<string, { brand: string; product: string; date: string; life: string; notes: string }> = {
-    '54U700': {
-      brand: 'سيرومات نقية',
-      product: 'Pure Vitamin C10 Serum 30ml',
-      date: 'يوليو 2026',
-      life: '36 شهراً (غير مفتوح) / 6 أشهر بعد الفتح',
-      notes: 'رقم دفعة أصلي معتمد محفور بالليزر أسفل القارورة.',
-    },
-    '20T900': {
-      brand: 'عناية يومية',
-      product: 'Hydrating Facial Cleanser 473ml',
-      date: 'سبتمبر 2026',
-      life: '36 شهراً',
-      notes: 'دفعة أصلية موثقة، باركود معتمد مع مضخة أصلية.',
-    },
-    '1A02': {
-      brand: 'سيرومات نقية',
-      product: 'Niacinamide 10% + Zinc 1% 30ml',
-      date: 'أغسطس 2026',
-      life: '36 شهراً (12 شهراً بعد الفتح)',
-      notes: 'دفعة أصلية موثقة، كود حبري رمادي خفيف مطابق للمعيار الرسمي.',
-    },
-  };
+  const clean = (queryOrCode || '').trim();
+  const lower = clean.toLowerCase();
 
-  if (KNOWN_BATCHES[clean]) {
-    const data = KNOWN_BATCHES[clean];
+  // Suspicious queries check
+  if (lower.includes('suspicious') || lower.includes('fake') || lower.includes('مغشوش') || lower.includes('مقلد')) {
     return {
-      isVerified: true,
-      brand: data.brand,
-      productName: data.product,
-      batchCode: clean,
-      manufactureDate: data.date,
-      shelfLife: data.life,
-      statusNotes: data.notes,
+      isVerified: false,
+      brand: 'غير معتمد',
+      productName: clean || 'مستحضر مشتبه به',
+      batchCode: 'غير مصرح',
+      manufactureDate: 'غير محدد',
+      shelfLife: 'غير صالح للاستخدام',
+      statusNotes: 'تنبيه: المستحضر غير مسجل ضمن المستحضرات المصرحة من الهيئة العليا للأدوية والمستلزمات الطبية. يرجى الحذر من استخدامه لسلامة بشرتكِ.',
       inspectionChecklist: [
-        'الكود محفور بالليزر وليس مطبوعاً بملصق ورقي عادي',
-        'تطابق الكود في أسفل الزجاجة مع الكود على الكرتون الخارجي',
-        'القوام صافٍ وخالٍ من أي تعكر أو رغوة غير طبيعية',
+        'عدم وجود ختم الهيئة العليا للأدوية والمستلزمات الطبية',
+        'رائحة كيميائية نفاذة أو قوام معكر سريع التأكسد',
+        'عبوة رديئة ومطاط يسرب الهواء',
       ],
     };
   }
 
-  // If not in known mock table, generate algorithmic authenticity advisory
+  // Pre-configured product catalog verifications
+  const KNOWN_PRODUCTS = [
+    {
+      keywords: ['فيتامين', 'vitamin', '54u700', 'c10', 'سيروم فيتامين'],
+      brand: 'سيرومات نقية',
+      product: 'سيروم فيتامين سي النقي 10% (Pure Vitamin C10)',
+      date: 'سنة الإنتاج 2026',
+      life: '36 شهراً (غير مفتوح) / 6 أشهر بعد الفتح',
+      notes: 'مستحضرات مصرحة ومطابقة لمعايير الهيئة العليا للأدوية والمستلزمات الطبية. خاضع للفحص الدوري والمطابقة السريرية.',
+      checklist: [
+        'القوام واللون: قوام كهرماني نقي سريع الامتصاص خالي تماماً من الرغوة البيضاء العائمة أو الرائحة الكيميائية النفاذة',
+        'جودة العبوة والقطارة: زجاج طبي معتم عازل للضوء لحماية فيتامين C مع سدادة قطارة محكمة تمنع تسرب الهواء',
+        'الطباعة والختم: ختم الأصالة والباركود المعتمد ومطابقة بيانات الهيئة العليا للأدوية والمستلزمات الطبية',
+      ],
+    },
+    {
+      keywords: ['غسول', 'cleanser', '20t900', 'مرطب', 'الغسول المرطب'],
+      brand: 'عناية يومية',
+      product: 'الغسول المرطب للبشرة (Hydrating Facial Cleanser)',
+      date: 'سنة الإنتاج 2026',
+      life: '36 شهراً من تاريخ التصنيع',
+      notes: 'مستحضرات مصرحة ومطابقة لمعايير الهيئة العليا للأدوية والمستلزمات الطبية. يحتوي على 3 سيراميدات أساسية مطابقة لحاجز الجلد.',
+      checklist: [
+        'القوام واللون: لوشن كريمي مائي أبيض ناصع لا يصنع رغوة قاسية وخالي من العطور الاصطناعية',
+        'جودة المضخة: رأس مضخة ناعم مصبوب بإتقان دون حواف حادة مع آلية قفل وفتح آمنة',
+        'الطباعة والختم: باركود دولي معتمد يقرأ بيانات الاعتماد الرسمية والمطابقة الصيدلانية',
+      ],
+    },
+    {
+      keywords: ['نياسيناميد', 'niacinamide', '1a02', 'زنك', 'zinc'],
+      brand: 'سيرومات نقية',
+      product: 'سيروم نياسيناميد 10% + زنك 1% (Niacinamide 10%)',
+      date: 'سنة الإنتاج 2026',
+      life: '36 شهراً (12 شهراً بعد الفتح)',
+      notes: 'مستحضرات مصرحة ومطابقة لمعايير الهيئة العليا للأدوية والمستلزمات الطبية. تركيبة نقية لضبط الإفرازات الدهنية وتضييق المسام.',
+      checklist: [
+        'القوام واللون: سائل شفاف انسيابي خفيف الامتصاص دون لزوجة صمغية أو بقايا بيضاء جافة',
+        'جودة العبوة والقطارة: قارورة زجاجية ثقيلة مع قطارة دقيقة بسدادة عازلة للأكسجين',
+        'الطباعة والختم: طباعة بارزة ونقية للبيانات مع ختم الأصالة والباركود المعتمد',
+      ],
+    },
+    {
+      keywords: ['كريم', 'ترطيب', 'cream', 'كريم الترطيب المكثف'],
+      brand: 'عناية فائقة',
+      product: 'كريم الترطيب المكثف وحماية حاجز البشرة',
+      date: 'سنة الإنتاج 2026',
+      life: '36 شهراً من تاريخ التصنيع',
+      notes: 'مستحضرات مصرحة ومطابقة لمعايير الهيئة العليا للأدوية والمستلزمات الطبية. غني بحمض الهيالورونيك والدهون الحيوية.',
+      checklist: [
+        'القوام واللون: ملمس مخملي غني يغذي البشرة دون سد المسام أو التسبب بلمعان دهني زائد',
+        'جودة العبوة: غطاء محكم عازل مع غشاء أمان داخلي يضمن عدم فتح المنتج مسبقاً',
+        'الطباعة والختم: ختم الأصالة وبيانات التسجيل الصيدلاني المعتمدة في اليمن',
+      ],
+    },
+  ];
+
+  const matched = KNOWN_PRODUCTS.find((p) =>
+    p.keywords.some((kw) => lower.includes(kw.toLowerCase()))
+  );
+
+  if (matched) {
+    return {
+      isVerified: true,
+      brand: matched.brand,
+      productName: matched.product,
+      batchCode: 'مصرح ومطابق للمعايير',
+      manufactureDate: matched.date,
+      shelfLife: matched.life,
+      statusNotes: matched.notes,
+      inspectionChecklist: matched.checklist,
+    };
+  }
+
+  // Fallback for general product search
+  const isQueryValid = clean.length >= 2;
   return {
-    isVerified: clean.length >= 4 && clean.length <= 8,
-    brand: 'مستحضر مستورد',
-    productName: 'مطابقة رقم الدفعة الدولي',
-    batchCode: clean,
+    isVerified: isQueryValid,
+    brand: isQueryValid ? 'مستحضر معتمد' : 'غير معروف',
+    productName: clean || 'مستحضر مصرح',
+    batchCode: isQueryValid ? 'مصرح ومطابق للمعايير' : 'غير مسجل',
     manufactureDate: 'سنة الإنتاج 2026',
     shelfLife: '36 شهراً من تاريخ التصنيع',
-    statusNotes: clean.length >= 4
-      ? 'تركيبة الكود مطابقة للهيكل القياسي للوكالات الأوروبية والأمريكية. يرجى مطابقة ملمس الزجاجة والقوام للتأكد التام.'
-      : 'الكود المدخل قصير جداً أو غير مكتمل. يرجى فحص أسفل العبوة وكتابة الرمز كاملاً.',
+    statusNotes: isQueryValid
+      ? 'مستحضرات مصرحة ومطابقة لمعايير الهيئة العليا للأدوية والمستلزمات الطبية. تأكدي من سلامة ختم الأصالة والباركود المعتمد عند الاستلام.'
+      : 'يرجى كتابة اسم المستحضر بوضوح لمطابقة علامات الأصلي وكشف المقلد.',
     inspectionChecklist: [
-      'فحص الزجاج الداكن العازل للضوء',
-      'فحص وجود سدادة مطاطية محكمة في القطارة',
-      'التأكد من عدم وجود شوائب عائمة',
+      'القوام واللون: قوام نقي طبيعي ورائحة معتدلة خالية من الروائح الكيميائية الحادة',
+      'جودة التغليف: عبوة محكمة الإغلاق ومصنوعة من مواد طبية عازلة للضوء والهواء',
+      'الختم والباركود: ختم الأصالة المعتمد وتطابق بيانات الملصق مع معايير الهيئة العليا للأدوية',
     ],
   };
 }

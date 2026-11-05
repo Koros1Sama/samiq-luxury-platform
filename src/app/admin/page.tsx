@@ -328,11 +328,11 @@ export default function MerchantAdminPage() {
     setFormCostPriceYer(15000);
     setFormPriceSar(175);
     setFormPriceUsd(48);
-    setFormDescription('مستحضر مخبري متطور للعناية الفائقة بالبشرة، معتمد برقم دفعة ليزري رسمي.');
+    setFormDescription('مستحضر مخبري متطور للعناية الفائقة بالبشرة، مصرح ومطابق لمعايير الهيئة العليا للأدوية والمستلزمات الطبية.');
     setFormUsageInstructions('توضع 3 إلى 4 قطرات على بشرة نظيفة وجافة صباحاً ومساءً.');
     setFormKeyIngredients(['حمض الهيالورونيك', 'فيتامين C', 'النياسيناميد']);
     setFormTags(['تفتيح التصبغات', 'نضارة فورية', 'مضاد أكسدة']);
-    setFormBadge('أصلي معتمد BATCH: 54U700');
+    setFormBadge('أصلي 100% · مصرح ومطابق للمعايير');
     setAiConfidence(null);
     setImageUploadMessage('');
     setProdModalOpen(true);
@@ -404,7 +404,7 @@ export default function MerchantAdminPage() {
       usageInstructions: formUsageInstructions.trim(),
       keyIngredients: formKeyIngredients,
       tags: formTags,
-      badge: formBadge.trim() || `أصلي معتمد BATCH: ${formBatchCode}`,
+      badge: formBadge.trim() || 'أصلي 100% · مصرح ومطابق للمعايير',
       aiCategoryConfidence: aiConfidence || 98,
       isAuthenticGuaranteed: true,
     };
@@ -799,7 +799,7 @@ export default function MerchantAdminPage() {
   };
 
   // --------------------------------------------------------------------------
-  // AUTHENTICITY LAB BATCH ACTIONS
+  // AUTHENTICITY LAB ACTIONS
   // --------------------------------------------------------------------------
 
   const handleAddBatch = async (e: React.FormEvent) => {
@@ -825,19 +825,19 @@ export default function MerchantAdminPage() {
         setShowAddBatchModal(false);
         setNewBatchCode('');
         setBatchProductTitle('');
-        showToast('تم تسجيل كود التشغيلة المعتمد للمختبر بنجاح');
+        showToast('تم تسجيل دليل المستحضر المعتمد للمختبر بنجاح');
       }
     } catch (err) {}
   };
 
   const handleDeleteBatch = async (code: string) => {
-    if (!confirm(`هل أنت متأكد من حذف كود التشغيلة "${code}"؟`)) return;
+    if (!confirm(`هل أنت متأكد من حذف مستحضر المختبر "${code}"؟`)) return;
     try {
       const res = await fetch(`/api/store/authenticity?key=${code}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
         fetchAuthenticity();
-        showToast('تم حذف كود التشغيلة');
+        showToast('تم حذف مستحضر المختبر');
       }
     } catch (err) {}
   };
@@ -1443,7 +1443,7 @@ export default function MerchantAdminPage() {
 
                   <input
                     type="text"
-                    placeholder="بحث بالاسم، رمز SKU، أو كود التشغيلة..."
+                    placeholder="بحث بالاسم، رمز SKU، أو علامة الاعتماد..."
                     value={inventorySearch}
                     onChange={(e) => setInventorySearch(e.target.value)}
                     className="flex-1 min-h-[44px] px-3.5 rounded-xl bg-white/5 border border-white/10 text-ivory text-xs outline-none focus:border-gold"
@@ -1509,7 +1509,7 @@ export default function MerchantAdminPage() {
                           <div className="flex items-center gap-2 text-xs text-muted-lux font-mono">
                             <span>SKU: {p.sku || '-'}</span>
                             <span>•</span>
-                            <span>باتش: {p.batchCode || '-'}</span>
+                            <span>الاعتماد: {p.batchCode ? 'مصرح ومطابق' : '-'}</span>
                           </div>
                         </div>
                       </div>
@@ -2078,7 +2078,7 @@ export default function MerchantAdminPage() {
                   دليل ومختبر فحص الأصالة
                 </h2>
                 <p className="text-xs text-muted-lux font-sans mt-0.5">
-                  أكواد التشغيلات المعتمدة (Batch Codes) مع معايير الفحص المعتمدة لكشف المقلد
+                  المستحضرات المصرحة والمطابقة لمعايير الهيئة العليا للأدوية والمستلزمات الطبية مع أدلة كشف المقلد
                 </p>
               </div>
 
@@ -2088,7 +2088,7 @@ export default function MerchantAdminPage() {
                 className="min-h-[44px] px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-sans font-bold text-xs hover:brightness-110 shadow-md transition inline-flex items-center gap-1.5"
               >
                 <span>+</span>
-                <span>إضافة كود تشغيلة جديد للمختبر</span>
+                <span>إضافة مستحضر معتمد جديد للمختبر</span>
               </button>
             </div>
 
@@ -2100,8 +2100,8 @@ export default function MerchantAdminPage() {
                 >
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="font-mono text-sm text-gold font-bold">
-                        BATCH: {guide.original?.batchCode || batchKey}
+                      <span className="font-mono text-xs text-gold font-bold">
+                        المستحضر: {guide.productTitle || batchKey}
                       </span>
                       <span className="text-xs px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-300 border border-emerald-500/30 font-bold">
                         أصلي موثق
@@ -2121,7 +2121,7 @@ export default function MerchantAdminPage() {
                       onClick={() => handleDeleteBatch(batchKey)}
                       className="min-h-[40px] px-3 py-1 rounded-lg bg-white/5 hover:bg-rose-950/40 text-xs text-rose-400 border border-white/10"
                     >
-                      حذف التشغيلة
+                      حذف المستحضر
                     </button>
                   </div>
                 </div>
@@ -2631,7 +2631,7 @@ export default function MerchantAdminPage() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs text-muted-lux block">رقم التشغيلة (Batch):</label>
+                    <label className="text-xs text-muted-lux block">كود الاعتماد أو الرمز التعريفي:</label>
                     <input
                       type="text"
                       value={formBatchCode}
@@ -3081,14 +3081,14 @@ export default function MerchantAdminPage() {
       )}
 
       {/* ================================================================== */}
-      {/* MODAL 5: ADD AUTHENTICITY BATCH CODE                                */}
+      {/* MODAL 5: ADD AUTHENTICITY PRODUCT GUIDE                           */}
       {/* ================================================================== */}
       {showAddBatchModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
           <div className="relative w-full max-w-md bg-[#0E0E12] rounded-3xl p-6 border border-[#C9A84C]/20 shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 className="text-base font-serif font-bold text-champagne">
-                إضافة كود تشغيلة جديد لمختبر الفحص
+                إضافة مستحضر معتمد جديد لمختبر الفحص
               </h3>
               <button
                 type="button"
@@ -3101,7 +3101,7 @@ export default function MerchantAdminPage() {
 
             <form onSubmit={handleAddBatch} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-xs text-gold font-bold block">رقم التشغيلة (Batch Code):</label>
+                <label className="text-xs text-gold font-bold block">كود أو معرف المستحضر المعتمد:</label>
                 <input
                   type="text"
                   value={newBatchCode}
@@ -3141,7 +3141,7 @@ export default function MerchantAdminPage() {
                   type="text"
                   value={batchPackagingNotes}
                   onChange={(e) => setBatchPackagingNotes(e.target.value)}
-                  placeholder="زجاج داكن عازل للضوء وكود محفور بالليزر بقاع القارورة"
+                  placeholder="زجاج داكن عازل للضوء وختم أصالة محفور بالليزر بقاع القارورة"
                   className="w-full min-h-[44px] px-3 rounded-xl bg-white/5 border border-white/10 text-ivory text-xs outline-none"
                 />
               </div>
@@ -3158,7 +3158,7 @@ export default function MerchantAdminPage() {
                   type="submit"
                   className="min-h-[44px] px-5 rounded-xl bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-bold text-xs"
                 >
-                  حفظ التشغيلة
+                  حفظ المستحضر
                 </button>
               </div>
             </form>
