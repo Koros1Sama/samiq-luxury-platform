@@ -48,7 +48,13 @@ export default async function StorefrontHomePage(props: PageProps) {
     homeSections: isDemoRestaurant ? tenantContext.tenant.homeSections : (db.tenant?.homeSections || tenantContext.tenant.homeSections),
   };
 
-  const products = isDemoRestaurant ? DEMO_RESTAURANT_PRODUCTS : db.products;
+  const rawProducts = isDemoRestaurant ? DEMO_RESTAURANT_PRODUCTS : db.products;
+  const products = rawProducts.filter(
+    (p) =>
+      p.visibilityStatus !== 'warehouse_only' &&
+      p.visibilityStatus !== 'archived' &&
+      p.isPublished !== false
+  );
   const categories = isDemoRestaurant ? DEMO_RESTAURANT_CATEGORIES : db.categories;
 
   return (

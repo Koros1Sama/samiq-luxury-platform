@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { MOCK_STOREFRONT_DATA } from '../store/mockData';
-import { ProductCardData, ThemeCurrencyCode, TenantBrandInfo, PlatformMeta } from '@/themes/contract';
+import { ProductCardData, ThemeCurrencyCode, TenantBrandInfo, PlatformMeta, CategoryItem } from '@/themes/contract';
 import { AuthenticityComparisonData } from '@/modules/blocks/types';
 
 export interface CouponRecord {
@@ -774,6 +774,16 @@ export function getAllProducts(): ProductCardData[] {
   return db.products;
 }
 
+export function getPublishedProducts(): ProductCardData[] {
+  const db = getDb();
+  return db.products.filter(
+    (p) =>
+      p.visibilityStatus !== 'warehouse_only' &&
+      p.visibilityStatus !== 'archived' &&
+      p.isPublished !== false
+  );
+}
+
 export function getProductBySlugOrId(slugOrId: string): ProductCardData | undefined {
   const db = getDb();
   return db.products.find(
@@ -823,6 +833,17 @@ export function createOrder(order: Omit<OrderRecord, 'id' | 'orderNumber' | 'cre
   };
   db.orders.unshift(newOrder);
 
+  // If created as confirmed, automatically decrement stock
+  if (order.status === 'confirmed' && Array.isArray(order.items)) {
+    order.items.forEach((item) => {
+      const prod = db.products.find((p) => p.id === item.productId);
+      if (prod && typeof prod.stockQuantity === 'number') {
+        prod.stockQuantity = Math.max(0, prod.stockQuantity - (item.quantity || 1));
+        prod.inStock = prod.stockQuantity > 0;
+      }
+    });
+  }
+
   // If coupon used, increment count
   if (order.appliedCoupon) {
     const coupon = db.coupons.find((c) => c.code.toUpperCase() === order.appliedCoupon?.toUpperCase());
@@ -837,14 +858,66 @@ export function updateOrderStatus(orderId: string, status: OrderRecord['status']
   const db = getDb();
   const order = db.orders.find((o) => o.id === orderId || o.orderNumber === orderId);
   if (order) {
+    const prevStatus = order.status;
     order.status = status;
     order.updatedAt = new Date().toISOString();
+
+    // If transitioning to confirmed, decrement product stock
+    if (status === 'confirmed' && prevStatus !== 'confirmed' && Array.isArray(order.items)) {
+      order.items.forEach((item) => {
+        const prod = db.products.find((p) => p.id === item.productId);
+        if (prod && typeof prod.stockQuantity === 'number') {
+          prod.stockQuantity = Math.max(0, prod.stockQuantity - (item.quantity || 1));
+          prod.inStock = prod.stockQuantity > 0;
+        }
+      });
+    }
+
     saveDb(db);
   }
   return order;
 }
 
+export function deleteOrder(orderId: string): boolean {
+  const db = getDb();
+  const initialLen = db.orders.length;
+  db.orders = db.orders.filter((o) => o.id !== orderId && o.orderNumber !== orderId);
+  if (db.orders.length !== initialLen) {
+    saveDb(db);
+    return true;
+  }
+  return false;
+}
+
 // 3. Coupons
+export function getAllCoupons(): CouponRecord[] {
+  const db = getDb();
+  return db.coupons;
+}
+
+export function saveCoupon(coupon: CouponRecord): CouponRecord {
+  const db = getDb();
+  const existingIdx = db.coupons.findIndex((c) => c.code.toUpperCase() === coupon.code.toUpperCase());
+  if (existingIdx >= 0) {
+    db.coupons[existingIdx] = coupon;
+  } else {
+    db.coupons.unshift(coupon);
+  }
+  saveDb(db);
+  return coupon;
+}
+
+export function deleteCoupon(code: string): boolean {
+  const db = getDb();
+  const initialLen = db.coupons.length;
+  db.coupons = db.coupons.filter((c) => c.code.toUpperCase() !== code.toUpperCase());
+  if (db.coupons.length !== initialLen) {
+    saveDb(db);
+    return true;
+  }
+  return false;
+}
+
 export function validateCoupon(code: string, subtotalYer: number): { isValid: boolean; discountAmountYer: number; message: string } {
   const db = getDb();
   const coupon = db.coupons.find((c) => c.code.toUpperCase() === code.trim().toUpperCase() && c.isActive);
@@ -965,10 +1038,52 @@ export function verifyBatchCode(batchCode: string): {
   };
 }
 
+export function getAllAuthenticityGuides(): Record<string, AuthenticityComparisonData> {
+  const db = getDb();
+  return db.authenticityGuides;
+}
+
+export function saveAuthenticityGuide(key: string, guide: AuthenticityComparisonData): void {
+  const db = getDb();
+  db.authenticityGuides[key] = guide;
+  saveDb(db);
+}
+
+export function deleteAuthenticityGuide(key: string): boolean {
+  const db = getDb();
+  if (db.authenticityGuides[key]) {
+    delete db.authenticityGuides[key];
+    saveDb(db);
+    return true;
+  }
+  return false;
+}
+
 // 6. Bookings
 export function getAllBookings(): BookingRecord[] {
   const db = getDb();
   return db.bookings;
+}
+
+export function updateBookingStatus(bookingId: string, status: BookingRecord['status']): BookingRecord | undefined {
+  const db = getDb();
+  const booking = db.bookings.find((b) => b.id === bookingId);
+  if (booking) {
+    booking.status = status;
+    saveDb(db);
+  }
+  return booking;
+}
+
+export function deleteBooking(bookingId: string): boolean {
+  const db = getDb();
+  const initialLen = db.bookings.length;
+  db.bookings = db.bookings.filter((b) => b.id !== bookingId);
+  if (db.bookings.length !== initialLen) {
+    saveDb(db);
+    return true;
+  }
+  return false;
 }
 
 export function createBooking(booking: Omit<BookingRecord, 'id' | 'createdAt' | 'status'>): BookingRecord {
@@ -993,6 +1108,64 @@ export function getAllBlogPosts(): BlogPostRecord[] {
 export function getBlogPostBySlug(slug: string): BlogPostRecord | undefined {
   const db = getDb();
   return db.blogPosts.find((p) => p.slug === slug);
+}
+
+export function saveBlogPost(post: BlogPostRecord): BlogPostRecord {
+  const db = getDb();
+  const existingIdx = db.blogPosts.findIndex((p) => p.id === post.id || p.slug === post.slug);
+  if (existingIdx >= 0) {
+    db.blogPosts[existingIdx] = post;
+  } else {
+    db.blogPosts.unshift(post);
+  }
+  saveDb(db);
+  return post;
+}
+
+export function deleteBlogPost(idOrSlug: string): boolean {
+  const db = getDb();
+  const initialLen = db.blogPosts.length;
+  db.blogPosts = db.blogPosts.filter((p) => p.id !== idOrSlug && p.slug !== idOrSlug);
+  if (db.blogPosts.length !== initialLen) {
+    saveDb(db);
+    return true;
+  }
+  return false;
+}
+
+// Categories & Storefront Layout
+export function getAllCategories(): CategoryItem[] {
+  const db = getDb();
+  return db.categories;
+}
+
+export function saveCategory(category: CategoryItem): CategoryItem {
+  const db = getDb();
+  const existingIdx = db.categories.findIndex((c) => c.id === category.id);
+  if (existingIdx >= 0) {
+    db.categories[existingIdx] = category;
+  } else {
+    db.categories.push(category);
+  }
+  saveDb(db);
+  return category;
+}
+
+export function deleteCategory(categoryId: string): boolean {
+  const db = getDb();
+  const initialLen = db.categories.length;
+  db.categories = db.categories.filter((c) => c.id !== categoryId);
+  if (db.categories.length !== initialLen) {
+    saveDb(db);
+    return true;
+  }
+  return false;
+}
+
+export function updateHomeSections(sections: any[]): void {
+  const db = getDb();
+  db.tenant.homeSections = sections;
+  saveDb(db);
 }
 
 // 8. Reviews

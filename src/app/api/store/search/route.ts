@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import { getAllProducts } from '@/core/db/store';
+import { getPublishedProducts } from '@/core/db/store';
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const q = (searchParams.get('q') || '').trim().toLowerCase();
 
-  const products = getAllProducts();
+  const products = getPublishedProducts();
   if (!q) {
     return NextResponse.json({ success: true, count: products.length, results: products });
   }

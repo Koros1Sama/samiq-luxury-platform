@@ -189,6 +189,7 @@ export interface ProductCardData {
   brand: string;
   categorySlug: string;
   image: string;
+  images?: string[];
   prices: Record<ThemeCurrencyCode, number>;
   comparePrices?: Record<ThemeCurrencyCode, number>;
   isAuthenticGuaranteed?: boolean;
@@ -199,6 +200,17 @@ export interface ProductCardData {
   tags?: string[];
   skinTypes?: ('oily' | 'dry' | 'combination' | 'sensitive' | 'all')[];
   aiCategoryConfidence?: number;
+  visibilityStatus?: 'published' | 'warehouse_only' | 'coming_soon' | 'archived';
+  isPublished?: boolean;
+  stockQuantity?: number;
+  lowStockThreshold?: number;
+  inStock?: boolean;
+  sku?: string;
+  costPriceYer?: number;
+  batchCode?: string;
+  concentration?: string;
+  keyIngredients?: string[];
+  usageInstructions?: string;
 }
 
 export interface CartItem {

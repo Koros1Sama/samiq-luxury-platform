@@ -25,6 +25,7 @@ export default function ProductDetailPage() {
   const router = useRouter();
 
   const [product, setProduct] = useState<ProductCardData | null>(null);
+  const [activeImage, setActiveImage] = useState<string>('');
   const [reviews, setReviews] = useState<any[]>([]);
   const [authenticityGuide, setAuthenticityGuide] = useState<any>(null);
   const [currentCurrency, setCurrentCurrency] = useState<ThemeCurrencyCode>('YER');
@@ -49,6 +50,7 @@ export default function ProductDetailPage() {
             (p: ProductCardData) => p.id === slug || p.categorySlug === slug
           ) || data.products[0];
           setProduct(found);
+          setActiveImage(found.image || (found.images && found.images[0]) || '');
           if (found.variants && found.variants.length > 0) {
             setSelectedVariantId(found.variants[0].id);
           }
@@ -190,7 +192,7 @@ export default function ProductDetailPage() {
             <div className="p-2 rounded-[2rem] bg-white/[0.03] border border-white/[0.08] shadow-2xl">
               <div className="relative rounded-[calc(2rem-0.5rem)] overflow-hidden aspect-[4/3] bg-surface">
                 <SmartImage
-                  src={product.image}
+                  src={activeImage || product.image}
                   alt={product.title}
                   fill
                   priority={true}
@@ -203,6 +205,35 @@ export default function ProductDetailPage() {
                 </div>
               </div>
             </div>
+
+            {/* Multi-Image Gallery Switcher Thumbnails */}
+            {product.images && product.images.length > 1 && (
+              <div className="flex items-center gap-3 overflow-x-auto pb-2 pt-1">
+                {product.images.map((imgUrl, imgIdx) => {
+                  const isCurrent = (activeImage || product.image) === imgUrl;
+                  return (
+                    <button
+                      key={imgIdx}
+                      type="button"
+                      onClick={() => setActiveImage(imgUrl)}
+                      className={`relative min-w-[56px] min-h-[56px] w-14 h-14 rounded-xl overflow-hidden border-2 transition-all p-0.5 bg-surface ${
+                        isCurrent
+                          ? 'border-gold shadow-[0_0_12px_rgba(201,168,76,0.4)] scale-105'
+                          : 'border-white/10 opacity-70 hover:opacity-100 hover:border-white/30'
+                      }`}
+                      aria-label={`عرض صورة المنتج ${imgIdx + 1}`}
+                    >
+                      <SmartImage
+                        src={imgUrl}
+                        alt={`${product.title} ${imgIdx + 1}`}
+                        fill
+                        className="object-cover rounded-lg"
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Product Details & Action (6 cols) */}
@@ -219,19 +250,36 @@ export default function ProductDetailPage() {
               )}
             </div>
 
-            {/* Price Row */}
-            <div className="flex items-baseline gap-3 pb-4 border-b border-white/10">
-              <span className="text-3xl font-serif font-bold text-champagne">
-                {formatCurrency(price, currentCurrency)}
-              </span>
-              {comparePrice && (
-                <span className="text-sm text-muted-lux line-through font-sans">
-                  {formatCurrency(comparePrice, currentCurrency)}
+            {/* Price Row & Warehouse Stock Badge */}
+            <div className="flex items-center justify-between flex-wrap gap-3 pb-4 border-b border-white/10">
+              <div className="flex items-baseline gap-3">
+                <span className="text-3xl font-serif font-bold text-champagne">
+                  {formatCurrency(price, currentCurrency)}
                 </span>
-              )}
-              <span className="px-2.5 py-1 rounded text-xs font-sans font-bold bg-emerald-950/60 text-emerald-300 border border-emerald-500/30">
-                تسليم فوري بصنعاء
-              </span>
+                {comparePrice && (
+                  <span className="text-sm text-muted-lux line-through font-sans">
+                    {formatCurrency(comparePrice, currentCurrency)}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="px-2.5 py-1 rounded text-xs font-sans font-bold bg-emerald-950/60 text-emerald-300 border border-emerald-500/30">
+                  تسليم فوري بصنعاء
+                </span>
+                {typeof product.stockQuantity === 'number' && (
+                  <span
+                    className={`px-2.5 py-1 rounded text-xs font-sans font-bold border ${
+                      product.stockQuantity > 0
+                        ? 'bg-emerald-950/60 text-emerald-300 border-emerald-500/30'
+                        : 'bg-rose-950/60 text-rose-300 border-rose-500/30'
+                    }`}
+                  >
+                    {product.stockQuantity > 0
+                      ? `متوفر في المخزن (${product.stockQuantity} قطعة)`
+                      : 'نفدت الكمية حالياً'}
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* Variants Selector */}

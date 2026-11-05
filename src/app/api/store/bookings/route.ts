@@ -1,5 +1,12 @@
 import { NextResponse } from 'next/server';
-import { getAllBookings, createBooking, getAllBranches } from '@/core/db/store';
+import {
+  getAllBookings,
+  createBooking,
+  updateBookingStatus,
+  deleteBooking,
+  getAllBranches,
+  BookingRecord,
+} from '@/core/db/store';
 
 export async function GET() {
   const bookings = getAllBookings();
@@ -31,5 +38,56 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true, booking });
   } catch (error) {
     return NextResponse.json({ success: false, message: 'فشل إتمام الحجز' }, { status: 500 });
+  }
+}
+
+export async function PUT(req: Request) {
+  try {
+    const body = await req.json();
+    const id = body.id || body.bookingId;
+    const status = body.status as BookingRecord['status'];
+
+    if (!id || !status) {
+      return NextResponse.json(
+        { success: false, message: 'معرف الحجز والحالة مطلوبان' },
+        { status: 400 }
+      );
+    }
+
+    const updated = updateBookingStatus(id, status);
+    if (!updated) {
+      return NextResponse.json(
+        { success: false, message: 'الحجز غير موجود' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ success: true, booking: updated });
+  } catch (error) {
+    return NextResponse.json(
+      { success: false, message: 'فشل تعديل حالة الحجز' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+    if (!id) {
+      return NextResponse.json(
+        { success: false, message: 'معرف الحجز مطلوب' },
+        { status: 400 }
+      );
+    }
+
+    const deleted = deleteBooking(id);
+    return NextResponse.json({ success: deleted });
+  } catch (error) {
+    return NextResponse.json(
+      { success: false, message: 'فشل حذف الحجز' },
+      { status: 500 }
+    );
   }
 }

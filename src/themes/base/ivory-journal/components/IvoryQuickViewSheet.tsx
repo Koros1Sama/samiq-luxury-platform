@@ -25,6 +25,7 @@ export function IvoryQuickViewSheet({ product, onClose }: IvoryQuickViewSheetPro
     product?.variants?.[0]?.id
   );
   const [quantity, setQuantity] = useState(1);
+  const [activeImage, setActiveImage] = useState<string>(product?.image || '');
 
   if (!product) return null;
 
@@ -67,21 +68,52 @@ export function IvoryQuickViewSheet({ product, onClose }: IvoryQuickViewSheetPro
 
         {/* Content Body */}
         <div className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 gap-6 items-start">
-          {/* Image Showcase with Greige Backdrop */}
-          <div className="relative w-full aspect-square bg-[#EFEAE1] rounded-lg overflow-hidden border border-[#E8E2D8]">
-            <SmartImage
-              src={product.image}
-              alt={product.title}
-              priority={false}
-              sizes="(max-width: 640px) 100vw, 400px"
-              className="object-cover object-center w-full h-full mix-blend-multiply"
-            />
-            {info.isAuthenticGuaranteed && (
-              <div className="absolute top-3 start-3 px-3 py-1 rounded-full bg-[#FAF7F2]/95 border border-[#5E6B5A]/40 flex items-center gap-1.5 shadow-sm">
-                <VerifiedStampIcon size={14} color="#5E6B5A" />
-                <span className="text-xs font-sans font-bold text-[#5E6B5A]">
-                  أصلي مضمون
-                </span>
+          {/* Image Showcase with Greige Backdrop & Multi-Image Gallery */}
+          <div className="space-y-3">
+            <div className="relative w-full aspect-square bg-[#EFEAE1] rounded-lg overflow-hidden border border-[#E8E2D8]">
+              <SmartImage
+                src={activeImage || product.image}
+                alt={product.title}
+                priority={false}
+                sizes="(max-width: 640px) 100vw, 400px"
+                className="object-cover object-center w-full h-full mix-blend-multiply"
+              />
+              {info.isAuthenticGuaranteed && (
+                <div className="absolute top-3 start-3 px-3 py-1 rounded-full bg-[#FAF7F2]/95 border border-[#5E6B5A]/40 flex items-center gap-1.5 shadow-sm">
+                  <VerifiedStampIcon size={14} color="#5E6B5A" />
+                  <span className="text-xs font-sans font-bold text-[#5E6B5A]">
+                    أصلي مضمون
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Thumbnails row */}
+            {product.images && product.images.length > 1 && (
+              <div className="flex items-center gap-2 overflow-x-auto pb-1">
+                {product.images.map((imgUrl, idx) => {
+                  const isCurrent = (activeImage || product.image) === imgUrl;
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setActiveImage(imgUrl)}
+                      className={`relative min-w-[48px] min-h-[48px] w-12 h-12 rounded-lg overflow-hidden border transition-all bg-[#EFEAE1] ${
+                        isCurrent
+                          ? 'border-[#1B1612] shadow-sm scale-105'
+                          : 'border-[#E8E2D8] opacity-70 hover:opacity-100'
+                      }`}
+                      aria-label={`معاينة الصورة ${idx + 1}`}
+                    >
+                      <SmartImage
+                        src={imgUrl}
+                        alt={`${product.title} ${idx + 1}`}
+                        fill
+                        className="object-cover rounded-md mix-blend-multiply"
+                      />
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -118,8 +150,8 @@ export function IvoryQuickViewSheet({ product, onClose }: IvoryQuickViewSheetPro
               </div>
             )}
 
-            {/* Price Display */}
-            <div className="pt-2 border-t border-[#E8E2D8]">
+            {/* Price Display & Stock Badge */}
+            <div className="pt-2 border-t border-[#E8E2D8] flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-baseline gap-3">
                 <span className="font-sans font-bold text-xl sm:text-2xl text-[#1B1612]">
                   {info.formattedPrice}
@@ -130,6 +162,19 @@ export function IvoryQuickViewSheet({ product, onClose }: IvoryQuickViewSheetPro
                   </span>
                 )}
               </div>
+              {typeof product.stockQuantity === 'number' && (
+                <span
+                  className={`px-2.5 py-1 rounded text-xs font-sans font-bold border ${
+                    product.stockQuantity > 0
+                      ? 'bg-[#EFEAE1] text-[#5E6B5A] border-[#5E6B5A]/30'
+                      : 'bg-red-50 text-red-700 border-red-200'
+                  }`}
+                >
+                  {product.stockQuantity > 0
+                    ? `متوفر في المخزن (${product.stockQuantity} قطعة)`
+                    : 'نفدت الكمية حالياً'}
+                </span>
+              )}
             </div>
 
             {/* Variants Selector if present */}

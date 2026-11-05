@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getAllOrders, createOrder, OrderRecord } from '@/core/db/store';
+import { getAllOrders, createOrder, updateOrderStatus, deleteOrder, OrderRecord } from '@/core/db/store';
 
 export async function GET() {
   const orders = getAllOrders();
@@ -17,6 +17,8 @@ export async function POST(req: Request) {
       );
     }
 
+    const initialStatus = body.status || 'pending';
+
     const newOrder = createOrder({
       tenantId: '11111111-1111-1111-1111-111111111111',
       customerName: body.customerName,
@@ -33,7 +35,7 @@ export async function POST(req: Request) {
       appliedCoupon: body.appliedCoupon,
       paymentMethod: body.paymentMethod || 'whatsapp',
       paymentReference: body.paymentReference,
-      status: 'pending',
+      status: initialStatus,
       notes: body.notes,
     });
 
@@ -59,6 +61,57 @@ export async function POST(req: Request) {
   } catch (error) {
     return NextResponse.json(
       { success: false, message: 'حدث خطأ أثناء حفظ الطلب' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(req: Request) {
+  try {
+    const body = await req.json();
+    const orderId = body.id || body.orderId;
+    const status = body.status as OrderRecord['status'];
+
+    if (!orderId || !status) {
+      return NextResponse.json(
+        { success: false, message: 'معرف الطلب والحالة مطلوبان' },
+        { status: 400 }
+      );
+    }
+
+    const updated = updateOrderStatus(orderId, status);
+    if (!updated) {
+      return NextResponse.json(
+        { success: false, message: 'الطلب غير موجود' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({ success: true, order: updated });
+  } catch (error) {
+    return NextResponse.json(
+      { success: false, message: 'فشل تحديث حالة الطلب' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+    if (!id) {
+      return NextResponse.json(
+        { success: false, message: 'معرف الطلب مطلوب' },
+        { status: 400 }
+      );
+    }
+
+    const deleted = deleteOrder(id);
+    return NextResponse.json({ success: deleted });
+  } catch (error) {
+    return NextResponse.json(
+      { success: false, message: 'فشل حذف الطلب' },
       { status: 500 }
     );
   }

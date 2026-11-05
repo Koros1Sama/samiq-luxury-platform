@@ -99,9 +99,22 @@
       "brand": "سيرومات نقية",
       "categorySlug": "serums",
       "image": "/media/products/serum-vitamin-c.jpg",
+      "images": [
+        "/media/products/serum-vitamin-c.jpg",
+        "/media/hero/hero-noir.jpg",
+        "/media/hero/hero-clinic.jpg"
+      ],
       "isAuthenticGuaranteed": true,
       "isFeatured": true,
       "badge": "أصلي معتمد BATCH: 54U700",
+      "visibilityStatus": "published",
+      "isPublished": true,
+      "stockQuantity": 18,
+      "lowStockThreshold": 5,
+      "inStock": true,
+      "sku": "MFT-VC10-01",
+      "costPriceYer": 19000,
+      "batchCode": "54U700",
       "prices": {
         "YER": 28500,
         "SAR": 195,
@@ -140,9 +153,22 @@
       "brand": "عناية يومية",
       "categorySlug": "cleansers-moisturizers",
       "image": "/media/products/cleanser-hydrating.jpg",
+      "images": [
+        "/media/products/cleanser-hydrating.jpg",
+        "/media/products/cream-moisturizing.jpg",
+        "/media/hero/hero-clinic.jpg"
+      ],
       "isAuthenticGuaranteed": true,
       "isFeatured": true,
       "badge": "تركيبة السيراميد المعتمدة",
+      "visibilityStatus": "published",
+      "isPublished": true,
+      "stockQuantity": 32,
+      "lowStockThreshold": 5,
+      "inStock": true,
+      "sku": "MFT-CLN-02",
+      "costPriceYer": 9500,
+      "batchCode": "20T900",
       "prices": {
         "YER": 14500,
         "SAR": 98,
@@ -181,9 +207,22 @@
       "brand": "سيرومات نقية",
       "categorySlug": "serums",
       "image": "/media/products/serum-niacinamide.jpg",
+      "images": [
+        "/media/products/serum-niacinamide.jpg",
+        "/media/products/serum-vitamin-c.jpg",
+        "/media/hero/hero-noir.jpg"
+      ],
       "isAuthenticGuaranteed": true,
       "isFeatured": true,
       "badge": "أصلي معتمد BATCH: 1A02",
+      "visibilityStatus": "published",
+      "isPublished": true,
+      "stockQuantity": 25,
+      "lowStockThreshold": 5,
+      "inStock": true,
+      "sku": "MFT-NIA-03",
+      "costPriceYer": 6000,
+      "batchCode": "1A02",
       "prices": {
         "YER": 9500,
         "SAR": 65,
@@ -216,9 +255,22 @@
       "brand": "مكياج مخملي",
       "categorySlug": "makeup",
       "image": "/media/products/lipstick-couture.jpg",
+      "images": [
+        "/media/products/lipstick-couture.jpg",
+        "/media/products/eyeshadow-palette.jpg",
+        "/media/hero/hero-ivory.jpg"
+      ],
       "isAuthenticGuaranteed": true,
       "isFeatured": false,
       "badge": "ألوان غنية ثبات مخملي",
+      "visibilityStatus": "published",
+      "isPublished": true,
+      "stockQuantity": 14,
+      "lowStockThreshold": 5,
+      "inStock": true,
+      "sku": "MFT-LIP-04",
+      "costPriceYer": 16000,
+      "batchCode": "62K104",
       "prices": {
         "YER": 24000,
         "SAR": 165,
@@ -255,9 +307,22 @@
       "brand": "مكياج مخملي",
       "categorySlug": "makeup",
       "image": "/media/products/eyeshadow-palette.jpg",
+      "images": [
+        "/media/products/eyeshadow-palette.jpg",
+        "/media/products/lipstick-couture.jpg",
+        "/media/hero/hero-ivory.jpg"
+      ],
       "isAuthenticGuaranteed": true,
       "isFeatured": false,
       "badge": "ألوان غنية متباينة",
+      "visibilityStatus": "published",
+      "isPublished": true,
+      "stockQuantity": 9,
+      "lowStockThreshold": 5,
+      "inStock": true,
+      "sku": "MFT-PAL-05",
+      "costPriceYer": 14500,
+      "batchCode": "88M301",
       "prices": {
         "YER": 22000,
         "SAR": 150,
@@ -289,9 +354,22 @@
       "brand": "عناية يومية",
       "categorySlug": "cleansers-moisturizers",
       "image": "/media/products/cream-moisturizing.jpg",
+      "images": [
+        "/media/products/cream-moisturizing.jpg",
+        "/media/products/cleanser-hydrating.jpg",
+        "/media/hero/hero-clinic.jpg"
+      ],
       "isAuthenticGuaranteed": true,
       "isFeatured": true,
       "badge": "ترطيب يدوم 24 ساعة",
+      "visibilityStatus": "published",
+      "isPublished": true,
+      "stockQuantity": 22,
+      "lowStockThreshold": 5,
+      "inStock": true,
+      "sku": "MFT-CRM-06",
+      "costPriceYer": 11000,
+      "batchCode": "31B400",
       "prices": {
         "YER": 16500,
         "SAR": 110,
@@ -316,6 +394,42 @@
         "sensitive"
       ],
       "aiCategoryConfidence": 99
+    },
+    {
+      "id": "prod-7",
+      "title": "تونر الأحماض المقشر اللطيف لتجديد الخلايا 7%",
+      "subtitle": "تركيبة مخبرية لتنقية المسام وتوحيد ملمس البشرة المسائي",
+      "brand": "سيرومات نقية",
+      "categorySlug": "skincare",
+      "image": "/media/products/serum-niacinamide.jpg",
+      "images": [
+        "/media/products/serum-niacinamide.jpg",
+        "/media/products/cleanser-hydrating.jpg"
+      ],
+      "visibilityStatus": "warehouse_only",
+      "isPublished": false,
+      "stockQuantity": 40,
+      "lowStockThreshold": 5,
+      "inStock": true,
+      "sku": "MFT-TNR-07",
+      "costPriceYer": 8000,
+      "prices": {
+        "YER": 12500,
+        "SAR": 88,
+        "USD": 24
+      },
+      "batchCode": "91X500",
+      "tags": [
+        "تقشير لطيف",
+        "تجديد الخلايا",
+        "بشرة دهنية",
+        "استخدام مسائي"
+      ],
+      "skinTypes": [
+        "oily",
+        "combination"
+      ],
+      "aiCategoryConfidence": 97
     }
   ],
   "categories": [
