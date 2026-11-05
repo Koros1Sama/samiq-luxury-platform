@@ -62,6 +62,18 @@ export async function POST(req: Request) {
       // Never allow overriding system passcode via update_tenant
       delete tenantData.passcode;
       delete tenantData.adminPasscode;
+
+      if (tenantData.notificationConfig) {
+        const isMasked = (s?: string) => !s || s.startsWith('•') || s.startsWith('*');
+        const existingNc = getDb().tenant.notificationConfig || {};
+        if (isMasked(tenantData.notificationConfig.geminiApiKey)) {
+          tenantData.notificationConfig.geminiApiKey = existingNc.geminiApiKey;
+        }
+        if (isMasked(tenantData.notificationConfig.telegramBotToken)) {
+          tenantData.notificationConfig.telegramBotToken = existingNc.telegramBotToken;
+        }
+      }
+
       const updated = updateTenant(tenantData);
       return NextResponse.json({
         success: true,

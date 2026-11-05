@@ -77,13 +77,20 @@ export function SkinRoutineAndIngredients(props: SkinRoutineAndIngredientsProps)
                 <p className="text-sm text-muted-lux font-sans leading-relaxed max-w-sm">
                   {currentRoutine.routineDescription}
                 </p>
-                <div className="pt-2">
+                <div className="pt-2 flex items-center gap-2 flex-wrap">
                   <a
                     href="#products-catalog"
                     onClick={() => onExploreProducts?.(currentRoutine.id)}
                     className="min-h-[44px] inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-obsidian-dark font-sans font-bold text-xs shadow-[0_4px_20px_rgba(201,168,76,0.35)] hover:brightness-110 transition"
                   >
                     <span>اكتشفي الروتين المثالي</span>
+                    <span className="rtl:-scale-x-100">←</span>
+                  </a>
+                  <a
+                    href="/blog?post=how-to-verify-vitamin-c-serum"
+                    className="min-h-[44px] inline-flex items-center gap-1.5 px-4 py-3 rounded-full bg-white/5 hover:bg-gold/15 border border-white/10 hover:border-gold/40 text-ivory text-xs font-sans transition"
+                  >
+                    <span>دليل المجلة العلمية</span>
                     <span className="rtl:-scale-x-100">←</span>
                   </a>
                 </div>

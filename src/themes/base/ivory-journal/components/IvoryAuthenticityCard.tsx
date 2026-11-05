@@ -111,6 +111,16 @@ export function IvoryAuthenticityCard(_props: Partial<SectionComponentProps>) {
                     {c}
                   </button>
                 ))}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBatchCode('منتج مقلد غير معتمد');
+                    verify('منتج مقلد غير معتمد');
+                  }}
+                  className="min-h-[40px] px-2.5 py-1 text-xs font-sans font-medium rounded border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors inline-flex items-center"
+                >
+                  اختبار منتج مقلد غير مسجل
+                </button>
               </div>
             </form>
 

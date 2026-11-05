@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { SmartImage } from '@/core/ui/SmartImage';
 import { useStorefront } from '@/core/storefront/StorefrontProvider';
 import { getProductQuickInfo } from '@/core/storefront/productQuickInfo';
@@ -249,6 +250,16 @@ export function IvoryQuickViewSheet({ product, onClose }: IvoryQuickViewSheetPro
                 <WhatsAppIcon size={16} color="#5E6B5A" />
                 <span>طلب استشارة أو تأكيد توفر عبر واتساب</span>
               </a>
+
+              {/* Direct Full Product Detail Page Link */}
+              <Link
+                href={`/product/${product.slug || product.id}`}
+                onClick={onClose}
+                className="w-full min-h-[44px] px-4 py-2 rounded-md border border-[#E8E2D8] text-center font-sans font-semibold text-xs text-[#1B1612] hover:bg-[#FAF7F2] transition flex items-center justify-center gap-1.5"
+              >
+                <span>عرض صفحة المستحضر وتفاصيل الأصالة كاملة</span>
+                <span className="rtl:-scale-x-100 font-serif">←</span>
+              </Link>
             </div>
           </div>
         </div>

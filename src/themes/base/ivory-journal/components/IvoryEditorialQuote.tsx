@@ -33,6 +33,26 @@ export function IvoryEditorialQuote({ section }: Partial<SectionComponentProps>)
           </span>
         </div>
 
+        {/* Featured Journal Articles Link Pills */}
+        <div className="pt-4 flex items-center justify-center gap-3 flex-wrap text-xs font-sans">
+          <a
+            href="/blog?post=how-to-verify-vitamin-c-serum"
+            className="px-4 py-2 rounded-full border border-[#E8E2D8] bg-[#FAF7F2] hover:bg-[#F4EFE6] text-[#1B1612] font-medium transition inline-flex items-center gap-2 shadow-xs"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-[#B89B5E]" />
+            <span>مقال: أسرار فحص سيروم فيتامين سي الأصلي</span>
+            <span className="text-[#5E6B5A] rtl:-scale-x-100">←</span>
+          </a>
+          <a
+            href="/blog?post=hydrating-cleanser-original-guide"
+            className="px-4 py-2 rounded-full border border-[#E8E2D8] bg-[#FAF7F2] hover:bg-[#F4EFE6] text-[#1B1612] font-medium transition inline-flex items-center gap-2 shadow-xs"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-[#B89B5E]" />
+            <span>مقال: دليل الغسول المرطب الأصلي وحماية السيراميدات</span>
+            <span className="text-[#5E6B5A] rtl:-scale-x-100">←</span>
+          </a>
+        </div>
+
         {/* Bottom Hairline */}
         <div className="w-16 h-px bg-[#B89B5E]/40 mx-auto" />
       </div>

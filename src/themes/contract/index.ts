@@ -202,6 +202,7 @@ export interface ProductVariantData {
 
 export interface ProductCardData {
   id: string;
+  slug?: string;
   title: string;
   subtitle?: string;
   brand: string;

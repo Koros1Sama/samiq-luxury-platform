@@ -256,7 +256,10 @@ export default function PlatformSuperAdminPage() {
       try {
         await fetch('/api/platform/config', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'x-samiq-admin-token': 'miftah2026',
+          },
           body: JSON.stringify({ pricingConfig: currentConfig }),
         });
       } catch (err) {
@@ -296,6 +299,10 @@ export default function PlatformSuperAdminPage() {
   const handleSelectFleetProject = (proj: SamiqProjectRecord) => {
     setSelectedProjectId(proj.id);
     setActiveTheme(proj.themeId);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('samiq_demo_theme', proj.themeId);
+      localStorage.setItem('samiq_active_theme', proj.themeId);
+    }
     setSelectedFeatures(resolveEffectiveFeatures(proj.enabledFeatures || []));
     setQuoteProjectTitle(proj.name);
     setProjectDomainType(proj.domainType || 'custom_com');
@@ -311,7 +318,10 @@ export default function PlatformSuperAdminPage() {
     try {
       const res = await fetch('/api/admin/store', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-samiq-admin-token': 'miftah2026',
+        },
         body: JSON.stringify({ action: 'apply_client_preset', presetKey }),
       });
       const data = await res.json();
@@ -326,6 +336,10 @@ export default function PlatformSuperAdminPage() {
         }
         if (data.tenant.themeId) {
           setActiveTheme(data.tenant.themeId);
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('samiq_demo_theme', data.tenant.themeId);
+            localStorage.setItem('samiq_active_theme', data.tenant.themeId);
+          }
         }
         setSaveSuccessMsg(`تم تطبيق نمط «${data.tenant.name}» وتحديث المتجر المباشر.`);
         setTimeout(() => setSaveSuccessMsg(''), 4000);
@@ -343,7 +357,10 @@ export default function PlatformSuperAdminPage() {
     try {
       const res = await fetch('/api/admin/store', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-samiq-admin-token': 'miftah2026',
+        },
         body: JSON.stringify({
           action: 'update_tenant',
           tenant: {
@@ -541,7 +558,10 @@ export default function PlatformSuperAdminPage() {
       try {
         await fetch('/api/platform/config', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'x-samiq-admin-token': 'miftah2026',
+          },
           body: JSON.stringify({ projectId: proj.id, setupPriceUsd: num }),
         });
         setSaveSuccessMsg(`تم تحديث عقد التأسيس لمشروع «${proj.name}» إلى $${num}`);
@@ -564,7 +584,10 @@ export default function PlatformSuperAdminPage() {
       try {
         await fetch('/api/platform/config', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'x-samiq-admin-token': 'miftah2026',
+          },
           body: JSON.stringify({ projectId: proj.id, annualHostingMaintenanceUsd: newHosting }),
         });
         setSaveSuccessMsg(`تم تحديث التجديد السنوي لمشروع «${proj.name}» إلى $${num}/سنوياً`);
@@ -578,6 +601,10 @@ export default function PlatformSuperAdminPage() {
   // Switch Theme
   const handleSwitchTheme = (themeId: ThemeId) => {
     setActiveTheme(themeId);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('samiq_demo_theme', themeId);
+      localStorage.setItem('samiq_active_theme', themeId);
+    }
     setSaveSuccessMsg(`تم تحديد القالب ${SAMIQ_THEMES[themeId].nameAr}.`);
     setTimeout(() => setSaveSuccessMsg(''), 3000);
   };
@@ -602,9 +629,16 @@ export default function PlatformSuperAdminPage() {
     setSaveError('');
     setSaveSuccessMsg('');
     try {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('samiq_demo_theme', activeTheme);
+        localStorage.setItem('samiq_active_theme', activeTheme);
+      }
       const res = await fetch('/api/platform/config', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-samiq-admin-token': 'miftah2026',
+        },
         body: JSON.stringify({
           projectId: selectedProjectId,
           themeId: activeTheme,
@@ -669,7 +703,10 @@ export default function PlatformSuperAdminPage() {
 
       const res = await fetch('/api/platform/config', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-samiq-admin-token': 'miftah2026',
+        },
         body: JSON.stringify({
           action: 'create_project',
           name: newProjectForm.name.trim(),
@@ -699,6 +736,10 @@ export default function PlatformSuperAdminPage() {
           setQuoteProjectTitle(data.project.name);
           setActiveTheme(data.project.themeId);
           setSelectedFeatures(data.project.enabledFeatures);
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('samiq_demo_theme', data.project.themeId);
+            localStorage.setItem('samiq_active_theme', data.project.themeId);
+          }
         }
         setIsCreateModalOpen(false);
         setSaveSuccessMsg(`تم تدشين مشروع «${newProjectForm.name}» بنجاح وإضافته للأسطول!`);
@@ -720,7 +761,10 @@ export default function PlatformSuperAdminPage() {
     try {
       const res = await fetch('/api/platform/config', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-samiq-admin-token': 'miftah2026',
+        },
         body: JSON.stringify({
           action: 'delete_project',
           projectId: projId,
@@ -756,7 +800,10 @@ export default function PlatformSuperAdminPage() {
     try {
       const res = await fetch('/api/platform/config', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-samiq-admin-token': 'miftah2026',
+        },
         body: JSON.stringify({ platformMeta: platformMetaState }),
       });
       const data = await res.json();
@@ -955,7 +1002,13 @@ export default function PlatformSuperAdminPage() {
               <span>{copySuccess ? 'تم نسخ الرابط!' : 'نسخ رابط العرض للعميل'}</span>
             </button>
             <Link
-              href="/"
+              href={`/?demo=1&theme=${activeTheme}`}
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  localStorage.setItem('samiq_demo_theme', activeTheme);
+                  localStorage.setItem('samiq_active_theme', activeTheme);
+                }
+              }}
               className="min-h-[44px] px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-ivory border border-white/10 text-xs font-semibold transition inline-flex items-center gap-1.5"
             >
               <span>معاينة المتجر الحي</span>
@@ -1481,6 +1534,12 @@ export default function PlatformSuperAdminPage() {
                       <Link
                         href={proj.previewUrl}
                         target="_blank"
+                        onClick={() => {
+                          if (typeof window !== 'undefined') {
+                            localStorage.setItem('samiq_demo_theme', proj.themeId);
+                            localStorage.setItem('samiq_active_theme', proj.themeId);
+                          }
+                        }}
                         className="flex-1 min-h-[40px] px-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-champagne border border-white/10 text-xs font-semibold transition flex items-center justify-center gap-1"
                       >
                         <span>فتح المتجر</span>

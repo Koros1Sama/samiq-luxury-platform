@@ -138,7 +138,7 @@ export function ClinicLabTheme(_props: ThemeLayoutProps) {
       )}
 
       {/* PWA App Install Button */}
-      <PwaInstallPrompt className="fixed bottom-6 end-4 z-40" />
+      <PwaInstallPrompt className="fixed bottom-20 end-4 z-40" />
     </div>
   );
 }

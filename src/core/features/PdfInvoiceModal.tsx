@@ -142,11 +142,16 @@ export function PdfInvoiceModal({
       role="dialog"
       aria-modal="true"
       aria-label="معاينة عرض السعر والفاتورة الرسمية لمنصة سامق"
-      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto print:static print:p-0 print:m-0 print:bg-white print:overflow-visible print:block"
     >
       {/* Print-specific style block strictly scoping prints to this invoice container */}
       <style>{`
         @media print {
+          html, body {
+            overflow: visible !important;
+            height: auto !important;
+            background: #ffffff !important;
+          }
           body * {
             visibility: hidden !important;
           }
@@ -161,11 +166,12 @@ export function PdfInvoiceModal({
             width: 100% !important;
             max-width: 100% !important;
             margin: 0 !important;
-            padding: 18mm 16mm !important;
+            padding: 10mm 12mm !important;
             background: #ffffff !important;
             color: #0b0b0f !important;
             box-shadow: none !important;
             border: none !important;
+            overflow: visible !important;
           }
           .no-print {
             display: none !important;
@@ -177,7 +183,7 @@ export function PdfInvoiceModal({
         }
       `}</style>
 
-      <div className="w-full max-w-4xl bg-[#0a0a0d] border border-gold/40 rounded-3xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden my-auto animate-fadeIn">
+      <div className="w-full max-w-4xl bg-[#0a0a0d] border border-gold/40 rounded-3xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden my-auto animate-fadeIn print:static print:max-h-none print:overflow-visible print:border-none print:shadow-none print:m-0 print:p-0 print:w-full print:bg-white">
         {/* Top Modal Toolbar (Hidden on print) */}
         <div className="no-print p-4 sm:px-6 bg-[#111016] border-b border-white/10 flex items-center justify-between gap-3 shrink-0">
           <div className="flex items-center gap-3">
@@ -220,7 +226,7 @@ export function PdfInvoiceModal({
         </div>
 
         {/* Scrollable Printable Document Container */}
-        <div className="overflow-y-auto p-3 sm:p-6 lg:p-8 bg-[#070709] font-sans">
+        <div className="overflow-y-auto p-3 sm:p-6 lg:p-8 bg-[#070709] font-sans print:static print:overflow-visible print:p-0 print:m-0 print:bg-white">
           <div
             id="samiq-official-invoice"
             className="w-full bg-[#0d0c11] text-ivory border border-gold/30 rounded-2xl p-6 sm:p-8 lg:p-10 space-y-7 shadow-xl print:text-black print:bg-white print:border-none"

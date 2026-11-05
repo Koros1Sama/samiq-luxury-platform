@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { ProductCardData } from '@/themes/contract';
 import { useStorefront } from '@/core/storefront/StorefrontProvider';
 import { getProductQuickInfo } from '@/core/storefront/productQuickInfo';
@@ -41,7 +42,10 @@ export function ClinicProductList({ products }: ClinicProductListProps) {
             className="w-full bg-white rounded-xl border border-[#E2ECE9] hover:border-[#0F4C4A]/40 transition-all shadow-xs p-2.5 sm:p-3 flex items-center justify-between gap-3 text-start"
           >
             {/* Start Side: 88px Clinical Image Box */}
-            <div className="relative w-[88px] h-[88px] min-w-[88px] rounded-lg overflow-hidden border border-[#E2ECE9] bg-[#F2F7F5] shrink-0">
+            <Link
+              href={`/product/${product.slug || product.id}`}
+              className="relative w-[88px] h-[88px] min-w-[88px] rounded-lg overflow-hidden border border-[#E2ECE9] bg-[#F2F7F5] shrink-0 block group hover:opacity-95 transition"
+            >
               <SmartImage
                 src={product.image}
                 alt={product.title}
@@ -55,18 +59,20 @@ export function ClinicProductList({ products }: ClinicProductListProps) {
                   -{info.discountPercentage}%
                 </div>
               )}
-            </div>
+            </Link>
 
             {/* Center Info: Name, Ingredients Chips, Verification Badge */}
             <div className="flex-1 min-w-0 flex flex-col justify-center gap-1">
               {/* Product Title */}
-              <h3
-                data-product-title
-                className="font-bold text-xs sm:text-sm md:text-base text-[#0F4C4A] line-clamp-1 leading-tight"
-                title={product.title}
-              >
-                {product.title.replace(/\s*\([^)]*\)\s*$/, '')}
-              </h3>
+              <Link href={`/product/${product.slug || product.id}`}>
+                <h3
+                  data-product-title
+                  className="font-bold text-xs sm:text-sm md:text-base text-[#0F4C4A] hover:underline line-clamp-1 leading-tight"
+                  title={product.title}
+                >
+                  {product.title.replace(/\s*\([^)]*\)\s*$/, '')}
+                </h3>
+              </Link>
 
               {/* Clinical Ingredients / Concentration Chips */}
               <div className="flex flex-wrap items-center gap-1.5">

@@ -1331,9 +1331,32 @@ export function updateBranches(branches: BranchRecord[]): void {
 
 export function updateTenant(partialTenant: Partial<TenantConfig>): TenantConfig {
   const db = getDb();
+  const existingTenant = db.tenant || ({} as TenantConfig);
+
+  // Guard against overwriting secrets with masked values (e.g. •••• or ***)
+  const incomingNc = partialTenant.notificationConfig;
+  const existingNc = existingTenant.notificationConfig || {};
+  let mergedNc = existingNc;
+
+  if (incomingNc) {
+    const isMasked = (str?: string) => !str || str.startsWith('•') || str.startsWith('*');
+    mergedNc = {
+      ...existingNc,
+      ...incomingNc,
+      geminiApiKey: isMasked(incomingNc.geminiApiKey)
+        ? existingNc.geminiApiKey
+        : incomingNc.geminiApiKey,
+      telegramBotToken: isMasked(incomingNc.telegramBotToken)
+        ? existingNc.telegramBotToken
+        : incomingNc.telegramBotToken,
+    };
+  }
+
   db.tenant = {
-    ...db.tenant,
+    ...existingTenant,
     ...partialTenant,
+    id: existingTenant.id || '11111111-1111-1111-1111-111111111111',
+    notificationConfig: mergedNc,
   };
   saveDb(db);
   return db.tenant;

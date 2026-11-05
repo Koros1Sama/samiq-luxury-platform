@@ -18,6 +18,7 @@ interface ClinicHeaderProps {
 
 export function ClinicHeader({ onOpenAdvisor, onOpenCart }: ClinicHeaderProps) {
   const { tenant, cart, currency, setCurrency, search, features, locale, setLocale } = useStorefront();
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const isEn = locale === 'en';
 
   const handleCurrencyChange = (newCurr: ThemeCurrencyCode) => {
@@ -64,23 +65,23 @@ export function ClinicHeader({ onOpenAdvisor, onOpenCart }: ClinicHeaderProps) {
             </button>
           )}
 
-          {/* AI Clinical Advisor Button */}
+          {/* AI Clinical Advisor Button (hidden on narrow screens, available in mobile menu) */}
           <button
             type="button"
             data-testid="advisor-btn"
             onClick={onOpenAdvisor}
-            className="min-w-[44px] min-h-[44px] px-2.5 py-1.5 rounded-lg border border-[#D4E5E0] bg-[#F2F7F5] text-[#0F4C4A] hover:bg-[#CFE8E1]/50 inline-flex items-center gap-1.5 text-xs font-semibold focus:outline-hidden focus:ring-2 focus:ring-[#0F4C4A] transition-colors"
+            className="hidden sm:inline-flex min-w-[44px] min-h-[44px] px-2.5 py-1.5 rounded-lg border border-[#D4E5E0] bg-[#F2F7F5] text-[#0F4C4A] hover:bg-[#CFE8E1]/50 items-center gap-1.5 text-xs font-semibold focus:outline-hidden focus:ring-2 focus:ring-[#0F4C4A] transition-colors"
             title={isEn ? 'Smart Consultation' : 'استشارة مخبرية ذكية'}
             aria-label={isEn ? 'Smart Consultation' : 'استشارة مخبرية ذكية'}
           >
             <StethoscopeIcon size={18} />
-            <span className="hidden sm:inline">{isEn ? 'Consult' : 'استشارة'}</span>
+            <span className="hidden md:inline">{isEn ? 'Consult' : 'استشارة'}</span>
           </button>
 
-          {/* Account & Medical Profile Link */}
+          {/* Account & Medical Profile Link (hidden on narrow screens, available in mobile menu) */}
           <a
             href="/account"
-            className="min-w-[44px] min-h-[44px] px-2.5 py-1.5 rounded-lg border border-[#D4E5E0] bg-[#F2F7F5] text-[#0F4C4A] hover:bg-[#CFE8E1]/50 inline-flex items-center justify-center gap-1.5 text-xs font-semibold focus:outline-hidden focus:ring-2 focus:ring-[#0F4C4A] transition-colors"
+            className="hidden sm:inline-flex min-w-[44px] min-h-[44px] px-2.5 py-1.5 rounded-lg border border-[#D4E5E0] bg-[#F2F7F5] text-[#0F4C4A] hover:bg-[#CFE8E1]/50 items-center justify-center gap-1.5 text-xs font-semibold focus:outline-hidden focus:ring-2 focus:ring-[#0F4C4A] transition-colors"
             title={isEn ? 'My Profile' : 'حسابي والملف الطبي'}
             aria-label={isEn ? 'My Profile' : 'حسابي والملف الطبي'}
           >
@@ -96,7 +97,7 @@ export function ClinicHeader({ onOpenAdvisor, onOpenCart }: ClinicHeaderProps) {
               aria-label="اختيار العملة"
               value={currency}
               onChange={(e) => handleCurrencyChange(e.target.value as ThemeCurrencyCode)}
-              className="min-h-[44px] min-w-[44px] px-2 py-1.5 bg-[#F2F7F5] border border-[#D4E5E0] rounded-lg text-xs font-bold text-[#0F4C4A] focus:outline-hidden focus:ring-2 focus:ring-[#0F4C4A] cursor-pointer"
+              className="min-h-[40px] px-1.5 py-1 bg-[#F2F7F5] border border-[#D4E5E0] rounded-lg text-xs font-bold text-[#0F4C4A] focus:outline-hidden focus:ring-2 focus:ring-[#0F4C4A] cursor-pointer"
             >
               <option value="YER">YER</option>
               <option value="SAR">SAR</option>
@@ -109,19 +110,82 @@ export function ClinicHeader({ onOpenAdvisor, onOpenCart }: ClinicHeaderProps) {
             type="button"
             data-testid="cart-btn"
             onClick={() => (onOpenCart ? onOpenCart() : cart.open())}
-            className="relative min-w-[44px] min-h-[44px] rounded-lg bg-[#0F4C4A] text-white hover:bg-[#0B3A38] inline-flex items-center justify-center p-2.5 focus:outline-hidden focus:ring-2 focus:ring-[#0F4C4A] transition-colors"
+            className="relative min-w-[40px] min-h-[40px] rounded-lg bg-[#0F4C4A] text-white hover:bg-[#0B3A38] inline-flex items-center justify-center p-2 focus:outline-hidden focus:ring-2 focus:ring-[#0F4C4A] transition-colors"
             title="سلة المشتريات"
             aria-label={`سلة المشتريات: ${cart.count} منتجات`}
           >
-            <BagIcon size={20} />
+            <BagIcon size={18} />
             {cart.count > 0 && (
-              <span className="absolute -top-1 -end-1 min-w-[20px] h-[20px] px-1 bg-[#D9534F] text-white text-xs font-bold rounded-full flex items-center justify-center leading-none">
+              <span className="absolute -top-1 -end-1 min-w-[18px] h-[18px] px-1 bg-[#D9534F] text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
                 {cart.count}
               </span>
             )}
           </button>
+
+          {/* Mobile Menu Hamburger (Visible on small screens) */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="sm:hidden min-w-[40px] min-h-[40px] rounded-lg border border-[#D4E5E0] bg-[#F2F7F5] text-[#0F4C4A] flex items-center justify-center transition"
+            aria-label="القائمة"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {mobileMenuOpen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
         </div>
       </div>
+
+      {/* Mobile Slide-down Navigation Panel */}
+      {mobileMenuOpen && (
+        <div className="sm:hidden border-t border-[#E2ECE9] bg-white px-4 py-3 space-y-2 animate-fadeIn shadow-lg">
+          <div className="flex flex-col space-y-1 text-xs font-semibold text-[#0F4C4A]">
+            <a
+              href="/authenticity-hub"
+              className="min-h-[42px] px-3 rounded-lg hover:bg-[#F2F7F5] flex items-center justify-between"
+            >
+              <span>{isEn ? 'Authenticity Hub' : 'فحص الأصالة والمطابقة'}</span>
+              <span className="text-[#0F4C4A]/40 font-mono">↗</span>
+            </a>
+            <a
+              href="/bookings"
+              className="min-h-[42px] px-3 rounded-lg hover:bg-[#F2F7F5] flex items-center justify-between"
+            >
+              <span>{isEn ? 'Book Clinical Consultation' : 'حجز استشارة سريرية'}</span>
+              <span className="text-[#0F4C4A]/40 font-mono">↗</span>
+            </a>
+            <a
+              href="/blog"
+              className="min-h-[42px] px-3 rounded-lg hover:bg-[#F2F7F5] flex items-center justify-between"
+            >
+              <span>{isEn ? 'Scientific Journal' : 'المجلة السريرية'}</span>
+              <span className="text-[#0F4C4A]/40 font-mono">↗</span>
+            </a>
+            <a
+              href="/account"
+              className="min-h-[42px] px-3 rounded-lg hover:bg-[#F2F7F5] flex items-center justify-between"
+            >
+              <span>{isEn ? 'My Medical Profile & Club' : 'الملف الطبي وحسابي'}</span>
+              <span className="text-[#0F4C4A]/40 font-mono">↗</span>
+            </a>
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onOpenAdvisor();
+              }}
+              className="min-h-[42px] px-3 rounded-lg bg-[#CFE8E1]/40 text-[#0F4C4A] flex items-center justify-between font-bold"
+            >
+              <span>{isEn ? 'AI Clinical Advisor' : 'المستشار السريري الذكي'}</span>
+              <StethoscopeIcon size={16} />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Row 2: Always-Visible Clinical Search Bar (Shown when catalog tier 3 is active) */}
       {features.tier_3_catalog && (

@@ -50,7 +50,7 @@ export async function POST(req: Request) {
     }
 
     // 2. Admin agent reply requires admin
-    if (action === 'reply') {
+    if (action === 'reply' || action === 'send_reply') {
       const auth = verifyAdminAuth(req);
       if (!auth.authorized) {
         return NextResponse.json({ success: false, error: 'غير مصرح لك بإرسال رد الموظف' }, { status: 401 });

@@ -19,6 +19,9 @@ import {
   DEFAULT_STOREFRONT_FEATURES,
 } from './StorefrontProvider';
 import { FeatureTierSimulator } from '@/themes/base/luxury-noir/components/FeatureTierSimulator';
+import { WhatsAppCartDrawer } from '@/themes/base/luxury-noir/components/WhatsAppCartDrawer';
+import { IvoryCartDrawer } from '@/themes/base/ivory-journal/components/IvoryCartDrawer';
+import { ClinicCartDrawer } from '@/themes/base/clinic-lab/components/ClinicCartDrawer';
 
 export interface SubpageThemeContextValue {
   activeTheme: ThemeId;
@@ -26,6 +29,7 @@ export interface SubpageThemeContextValue {
   palette: ResolvedThemePalette;
   isLight: boolean;
   locale: 'ar' | 'en';
+  isEn: boolean;
   setLocale: (locale: 'ar' | 'en') => void;
   currency: ThemeCurrencyCode;
   setCurrency: (c: ThemeCurrencyCode) => void;
@@ -43,6 +47,7 @@ export function useSubpageTheme(): SubpageThemeContextValue {
       palette: pal,
       isLight: false,
       locale: 'ar',
+      isEn: false,
       setLocale: () => {},
       currency: 'YER',
       setCurrency: () => {},
@@ -159,6 +164,7 @@ function SubpageThemeInner({
         palette,
         isLight,
         locale,
+        isEn: locale === 'en',
         setLocale,
         currency,
         setCurrency,
@@ -192,39 +198,38 @@ function SubpageThemeInner({
             .samiq-subpage-container.is-light .bg-obsidian,
             .samiq-subpage-container.is-light .bg-\[\#070709\],
             .samiq-subpage-container.is-light .bg-\[\#0B0B0C\],
-            .samiq-subpage-container.is-light .bg-\[\#111016\] {
+            .samiq-subpage-container.is-light .bg-\[\#111016\],
+            .samiq-subpage-container.is-light .bg-\[\#15151B\] {
               background-color: var(--samiq-bg) !important;
             }
             .samiq-subpage-container.is-light .bg-surface,
+            .samiq-subpage-container.is-light .bg-surface-elevated,
+            .samiq-subpage-container.is-light .bg-elevated,
             .samiq-subpage-container.is-light .bg-\[\#0E0E12\],
             .samiq-subpage-container.is-light .bg-\[\#121214\],
-            .samiq-subpage-container.is-light .bg-white\/\[0\.02\],
-            .samiq-subpage-container.is-light .bg-white\/\[0\.03\],
-            .samiq-subpage-container.is-light .bg-white\/5 {
+            .samiq-subpage-container.is-light [class*="bg-white\/"] {
               background-color: var(--samiq-surface) !important;
               border-color: var(--samiq-border) !important;
               color: var(--samiq-text) !important;
             }
             .samiq-subpage-container.is-light .text-ivory,
-            .samiq-subpage-container.is-light .text-white {
+            .samiq-subpage-container.is-light .text-white,
+            .samiq-subpage-container.is-light [class*="text-ivory"] {
               color: var(--samiq-text) !important;
             }
             .samiq-subpage-container.is-light .text-muted-lux,
-            .samiq-subpage-container.is-light .text-ivory\/70,
-            .samiq-subpage-container.is-light .text-ivory\/80,
-            .samiq-subpage-container.is-light .text-ivory\/90 {
+            .samiq-subpage-container.is-light [class*="text-muted"] {
               color: var(--samiq-muted) !important;
             }
             .samiq-subpage-container.is-light .text-champagne {
               color: var(--samiq-accent) !important;
             }
-            .samiq-subpage-container.is-light .border-white\/10,
-            .samiq-subpage-container.is-light .border-white\/5,
-            .samiq-subpage-container.is-light .border-white\/\[0\.08\] {
+            .samiq-subpage-container.is-light [class*="border-white\/"] {
               border-color: var(--samiq-border) !important;
             }
             .samiq-subpage-container.is-light .border-gold\/30,
-            .samiq-subpage-container.is-light .border-gold\/40 {
+            .samiq-subpage-container.is-light .border-gold\/40,
+            .samiq-subpage-container.is-light .border-gold {
               border-color: var(--samiq-accent) !important;
             }
             .samiq-subpage-container.is-light input,
@@ -751,7 +756,18 @@ function SubpageThemeInner({
           </footer>
         )}
 
-        {/* 4. Feature Tier Simulator Bar (Bottom Live Bar) */}
+        {/* 4. Active Theme Cart Drawer */}
+        {sf.cart?.isOpen && (
+          activeTheme === 'ivory-journal' ? (
+            <IvoryCartDrawer />
+          ) : activeTheme === 'clinic-lab' ? (
+            <ClinicCartDrawer />
+          ) : (
+            <WhatsAppCartDrawer />
+          )
+        )}
+
+        {/* 5. Feature Tier Simulator Bar (Bottom Live Bar) */}
         {showSimulator && <FeatureTierSimulator />}
       </div>
     </SubpageThemeContext.Provider>

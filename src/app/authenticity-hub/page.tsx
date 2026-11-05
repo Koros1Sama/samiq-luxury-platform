@@ -19,16 +19,21 @@ export default function AuthenticityHubPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [activeBrandFilter, setActiveBrandFilter] = useState('all');
 
-  const handleVerify = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!batchCodeInput.trim()) return;
+  const handleVerify = async (e?: React.FormEvent, customCode?: string) => {
+    if (e) e.preventDefault();
+    const query = (customCode || batchCodeInput).trim();
+    if (!query) return;
+
+    if (customCode) {
+      setBatchCodeInput(customCode);
+    }
 
     setIsLoading(true);
     try {
       const res = await fetch('/api/store/authenticity', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ batchCode: batchCodeInput.trim() }),
+        body: JSON.stringify({ batchCode: query }),
       });
       const data = await res.json();
       if (data.success) {
@@ -172,27 +177,34 @@ export default function AuthenticityHubPage() {
 
             {/* Quick Test Presets */}
             <div className="flex items-center gap-2 flex-wrap text-xs font-sans text-muted-lux">
-              <span>مستحضرات سريعة للاختيار:</span>
+              <span className="font-semibold text-ivory">مستحضرات سريعة للاختيار:</span>
               <button
                 type="button"
-                onClick={() => setBatchCodeInput('سيروم فيتامين سي 10%')}
-                className="min-h-[44px] px-3 py-2 inline-flex items-center rounded-lg bg-white/5 hover:bg-gold/15 text-champagne border border-white/10"
+                onClick={() => handleVerify(undefined, 'سيروم فيتامين سي 10%')}
+                className="min-h-[40px] px-3 py-1.5 inline-flex items-center rounded-xl bg-white/5 hover:bg-gold/15 text-champagne border border-white/10 font-bold transition active:scale-95"
               >
                 سيروم فيتامين سي 10%
               </button>
               <button
                 type="button"
-                onClick={() => setBatchCodeInput('الغسول المرطب للبشرة')}
-                className="min-h-[44px] px-3 py-2 inline-flex items-center rounded-lg bg-white/5 hover:bg-gold/15 text-champagne border border-white/10"
+                onClick={() => handleVerify(undefined, 'الغسول المرطب للبشرة')}
+                className="min-h-[40px] px-3 py-1.5 inline-flex items-center rounded-xl bg-white/5 hover:bg-gold/15 text-champagne border border-white/10 font-bold transition active:scale-95"
               >
                 الغسول المرطب للبشرة
               </button>
               <button
                 type="button"
-                onClick={() => setBatchCodeInput('سيروم نياسيناميد 10%')}
-                className="min-h-[44px] px-3 py-2 inline-flex items-center rounded-lg bg-white/5 hover:bg-gold/15 text-champagne border border-white/10"
+                onClick={() => handleVerify(undefined, 'سيروم نياسيناميد 10%')}
+                className="min-h-[40px] px-3 py-1.5 inline-flex items-center rounded-xl bg-white/5 hover:bg-gold/15 text-champagne border border-white/10 font-bold transition active:scale-95"
               >
                 سيروم نياسيناميد 10%
+              </button>
+              <button
+                type="button"
+                onClick={() => handleVerify(undefined, 'منتج مجهول المصدر غير مصرح')}
+                className="min-h-[40px] px-3 py-1.5 inline-flex items-center rounded-xl bg-rose-950/40 hover:bg-rose-950/70 text-rose-300 border border-rose-500/30 font-bold transition active:scale-95"
+              >
+                اختبار منتج مقلد غير مسجل
               </button>
             </div>
 

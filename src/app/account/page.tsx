@@ -14,7 +14,8 @@ import {
 } from '@/themes/base/luxury-noir/components/LuxuryIcons';
 import { formatCurrency } from '@/core/currency/formatter';
 import { ProductCardData } from '@/themes/contract';
-import { SubpageThemeWrapper } from '@/core/storefront/SubpageThemeWrapper';
+import { SubpageThemeWrapper, useSubpageTheme } from '@/core/storefront/SubpageThemeWrapper';
+import { useOptionalStorefront } from '@/core/storefront/StorefrontProvider';
 
 const CONCERN_OPTIONS = [
   'تفتيح التصبغات',
@@ -27,6 +28,17 @@ const CONCERN_OPTIONS = [
 ];
 
 export default function CustomerAccountPage() {
+  return (
+    <SubpageThemeWrapper activeNav="account" showNavHeader={true}>
+      <CustomerAccountContent />
+    </SubpageThemeWrapper>
+  );
+}
+
+function CustomerAccountContent() {
+  const { palette, isLight, isEn, activeTheme } = useSubpageTheme();
+  const sf = useOptionalStorefront();
+
   // Session & Role State
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
@@ -320,8 +332,7 @@ export default function CustomerAccountPage() {
   });
 
   return (
-    <SubpageThemeWrapper activeNav="account" showNavHeader={true}>
-      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-6 sm:pt-10 space-y-8 pb-16">
+    <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-6 sm:pt-10 space-y-8 pb-16">
         {/* ==================================================================== */}
         {/* CASE A: LOGGED IN AS ADMIN / STAFF LAUNCHPAD                        */}
         {/* ==================================================================== */}
@@ -434,13 +445,15 @@ export default function CustomerAccountPage() {
             <div className="text-center space-y-2">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-sans font-bold bg-gold/15 text-gold border border-gold/30">
                 <SparkleStarIcon size={14} color="#C9A84C" />
-                <span>نادي نخبة مفتاح الجمال الأصلي</span>
+                <span>{isEn ? 'Miftah Elite Authenticity Club' : 'نادي نخبة مفتاح الجمال الأصلي'}</span>
               </span>
               <h1 className="text-2xl sm:text-3xl font-serif font-bold text-ivory">
-                بوابة حساب العميلة ونقاط الولاء
+                {isEn ? 'Customer Portal & Loyalty Rewards' : 'بوابة حساب العميلة ونقاط الولاء'}
               </h1>
               <p className="text-xs sm:text-sm text-muted-lux font-sans leading-relaxed">
-                سجّلي عضويتك لتتبّع طلباتك، حفظ ملف بشرتك الذكي، وجمع نقاط الولاء لكل عملية شراء
+                {isEn
+                  ? 'Sign in to track orders, save your smart skin profile, and redeem reward points on every verified purchase.'
+                  : 'سجّلي عضويتك لتتبّع طلباتك، حفظ ملف بشرتك الذكي، وجمع نقاط الولاء لكل عملية شراء'}
               </p>
             </div>
 
@@ -455,7 +468,7 @@ export default function CustomerAccountPage() {
                     : 'text-ivory/70 hover:text-ivory'
                 }`}
               >
-                تسجيل الدخول
+                {isEn ? 'Sign In' : 'تسجيل الدخول'}
               </button>
               <button
                 type="button"
@@ -466,7 +479,7 @@ export default function CustomerAccountPage() {
                     : 'text-ivory/70 hover:text-ivory'
                 }`}
               >
-                إنشاء حساب جديد
+                {isEn ? 'Create Account' : 'إنشاء حساب جديد'}
               </button>
               <button
                 type="button"
@@ -477,7 +490,7 @@ export default function CustomerAccountPage() {
                     : 'text-ivory/70 hover:text-ivory'
                 }`}
               >
-                دخول الإدارة
+                {isEn ? 'Admin Access' : 'دخول الإدارة'}
               </button>
             </div>
 
@@ -755,9 +768,9 @@ export default function CustomerAccountPage() {
 
               <div className="flex items-center gap-3 flex-wrap">
                 <div className="px-4 py-2.5 rounded-2xl bg-white/5 border border-white/10 text-center">
-                  <span className="text-xs text-muted-lux block">رصيد نقاط الولاء:</span>
+                  <span className="text-xs text-muted-lux block">{isEn ? 'Loyalty Points:' : 'رصيد نقاط الولاء:'}</span>
                   <span className="text-xl font-serif font-bold text-champagne">
-                    {customer.loyaltyPoints} نقطة
+                    {customer.loyaltyPoints} {isEn ? 'Pts' : 'نقطة'}
                   </span>
                 </div>
                 <button
@@ -765,7 +778,7 @@ export default function CustomerAccountPage() {
                   onClick={handleLogout}
                   className="min-h-[44px] px-4 py-2.5 rounded-xl bg-white/5 hover:bg-rose-950/40 text-muted-lux hover:text-rose-300 border border-white/10 hover:border-rose-500/30 text-xs font-sans font-semibold transition"
                 >
-                  تسجيل الخروج
+                  {isEn ? 'Sign Out' : 'تسجيل الخروج'}
                 </button>
               </div>
             </div>
@@ -781,7 +794,7 @@ export default function CustomerAccountPage() {
                     : 'text-ivory/70 hover:text-ivory hover:bg-white/5'
                 }`}
               >
-                <span>ملخص العضوية ونقاط الولاء</span>
+                <span>{isEn ? 'Loyalty & Rewards' : 'ملخص العضوية ونقاط الولاء'}</span>
                 <span className="px-1.5 py-0.5 rounded-full bg-black/30 text-xs">
                   {customer.loyaltyPoints}
                 </span>
@@ -795,7 +808,7 @@ export default function CustomerAccountPage() {
                     : 'text-ivory/70 hover:text-ivory hover:bg-white/5'
                 }`}
               >
-                <span>طلباتي وتتبع الشحنات</span>
+                <span>{isEn ? 'My Orders' : 'طلباتي وتتبع الشحنات'}</span>
                 <span className="px-1.5 py-0.5 rounded-full bg-black/30 text-xs">
                   {orders.length}
                 </span>
@@ -809,7 +822,7 @@ export default function CustomerAccountPage() {
                     : 'text-ivory/70 hover:text-ivory hover:bg-white/5'
                 }`}
               >
-                ملف البشرة والروتين المخصص
+                {isEn ? 'Skin Profile & Routine' : 'ملف البشرة والروتين المخصص'}
               </button>
               <button
                 type="button"
@@ -820,7 +833,7 @@ export default function CustomerAccountPage() {
                     : 'text-ivory/70 hover:text-ivory hover:bg-white/5'
                 }`}
               >
-                قائمة المفضلة ({wishlistProducts.length})
+                {isEn ? `Wishlist (${wishlistProducts.length})` : `قائمة المفضلة (${wishlistProducts.length})`}
               </button>
             </div>
 
@@ -1126,10 +1139,10 @@ export default function CustomerAccountPage() {
                             {formatCurrency(p.prices.YER, 'YER')}
                           </span>
                           <Link
-                            href={`/product/${p.id}`}
+                            href={`/product/${p.slug || p.id}`}
                             className="text-gold hover:underline text-xs font-semibold"
                           >
-                            عرض التفاصيل ←
+                            {isEn ? 'View Details' : 'عرض التفاصيل'} {isEn ? '→' : '←'}
                           </Link>
                         </div>
                       </div>
@@ -1176,17 +1189,26 @@ export default function CustomerAccountPage() {
 
                       <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/5">
                         <Link
-                          href={`/product/${p.id}`}
+                          href={`/product/${p.slug || p.id}`}
                           className="min-h-[44px] px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-ivory text-xs font-semibold flex items-center justify-center transition"
                         >
-                          تفاصيل المستحضر
+                          {isEn ? 'Details' : 'تفاصيل المستحضر'}
                         </Link>
                         <button
                           type="button"
-                          onClick={() => alert(`تمت إضافة ${p.title} إلى سلة المشتريات!`)}
-                          className="min-h-[44px] px-3 py-2 rounded-xl bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark text-xs font-bold flex items-center justify-center transition"
+                          onClick={() => {
+                            if (sf) {
+                              sf.cart.add(p);
+                              sf.cart.open();
+                            }
+                          }}
+                          style={{
+                            backgroundColor: palette.accent,
+                            color: activeTheme === 'luxury-noir' ? '#0B0B0C' : '#FFFFFF',
+                          }}
+                          className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-center transition hover:brightness-110 shadow-sm"
                         >
-                          إضافة للسلة
+                          {isEn ? 'Add to Cart' : 'إضافة للسلة'}
                         </button>
                       </div>
                     </div>
@@ -1197,6 +1219,5 @@ export default function CustomerAccountPage() {
           </div>
         )}
       </main>
-    </SubpageThemeWrapper>
   );
 }

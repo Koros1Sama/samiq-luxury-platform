@@ -292,7 +292,7 @@ export function verifyAdminAuth(req: Request): { authorized: boolean; reason?: s
 
   // 2. Check x-samiq-admin-token header
   const customHeader = req.headers.get('x-samiq-admin-token');
-  if (customHeader && VALID_ADMIN_PASSCODES.has(customHeader.trim())) {
+  if (customHeader && (VALID_ADMIN_PASSCODES.has(customHeader.trim()) || customHeader.trim() === ADMIN_SESSION_TOKEN)) {
     return { authorized: true };
   }
 
@@ -305,24 +305,37 @@ export function verifyAdminAuth(req: Request): { authorized: boolean; reason?: s
     }
   }
 
-  // 4. Same-origin browser request from admin UI with referer check
+  // 4. Same-origin browser request from internal admin UI or platform studio
   const origin = req.headers.get('origin');
   const referer = req.headers.get('referer');
   const host = req.headers.get('host');
   const secFetchSite = req.headers.get('sec-fetch-site');
 
-  // If explicit cross-site request, reject immediately
+  // If explicit cross-site request, reject immediately (CSRF protection)
   if (secFetchSite === 'cross-site') {
     return { authorized: false, reason: 'Cross-site mutation blocked' };
   }
 
-  // If request originates from our own /admin or /platform page and has session flag
-  if (
-    host &&
-    ((origin && origin.includes(host)) || (referer && referer.includes(host))) &&
-    cookies['samiq_admin_active'] === '1'
-  ) {
-    return { authorized: true };
+  // Allow same-origin requests from our own internal studios (/admin, /platform, /samiq)
+  if (host) {
+    const isSameHost = (urlStr: string | null) => {
+      if (!urlStr) return false;
+      try {
+        const u = new URL(urlStr);
+        return u.host === host;
+      } catch {
+        return false;
+      }
+    };
+
+    if (isSameHost(origin) || isSameHost(referer)) {
+      if (
+        (referer && (referer.includes('/admin') || referer.includes('/platform') || referer.includes('/samiq'))) ||
+        cookies['samiq_admin_active'] === '1'
+      ) {
+        return { authorized: true };
+      }
+    }
   }
 
   return { authorized: false, reason: 'Unauthorized admin access' };

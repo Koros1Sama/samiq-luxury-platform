@@ -111,6 +111,51 @@ export function AuthenticityCompareSlider(props: AuthenticityCompareSliderProps)
             </button>
           </form>
 
+          {/* Quick-Test Presets */}
+          <div className="flex items-center gap-1.5 flex-wrap text-xs font-sans text-muted-lux pt-1">
+            <span className="text-gold font-semibold">منتجات سريعة:</span>
+            <button
+              type="button"
+              onClick={() => {
+                setBatchCode('سيروم فيتامين سي 10%');
+                verify('سيروم فيتامين سي 10%');
+              }}
+              className="min-h-[38px] px-2.5 py-1 rounded-xl bg-white/5 hover:bg-gold/15 text-champagne border border-white/10 text-xs font-bold transition active:scale-95"
+            >
+              سيروم فيتامين سي 10%
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setBatchCode('الغسول المرطب للبشرة');
+                verify('الغسول المرطب للبشرة');
+              }}
+              className="min-h-[38px] px-2.5 py-1 rounded-xl bg-white/5 hover:bg-gold/15 text-champagne border border-white/10 text-xs font-bold transition active:scale-95"
+            >
+              الغسول المرطب
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setBatchCode('سيروم نياسيناميد 10%');
+                verify('سيروم نياسيناميد 10%');
+              }}
+              className="min-h-[38px] px-2.5 py-1 rounded-xl bg-white/5 hover:bg-gold/15 text-champagne border border-white/10 text-xs font-bold transition active:scale-95"
+            >
+              سيروم نياسيناميد
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setBatchCode('منتج غير مصرح ومقلد');
+                verify('منتج غير مصرح ومقلد');
+              }}
+              className="min-h-[38px] px-2.5 py-1 rounded-xl bg-rose-950/40 hover:bg-rose-950/70 text-rose-300 border border-rose-500/30 text-xs font-bold transition active:scale-95"
+            >
+              منتج مقلد غير مسجل
+            </button>
+          </div>
+
           {error && (
             <div className="p-3 rounded-xl bg-rose-950/40 border border-rose-500/30 text-rose-300 text-xs font-sans">
               {error}

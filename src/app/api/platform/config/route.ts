@@ -162,8 +162,12 @@ export async function POST(req: Request) {
           previewUrl: curProj.slug === 'miftah' ? `/?demo=1&theme=${nextTheme}` : `/?demo=1&tenant=${curProj.slug}&theme=${nextTheme}`,
         };
 
-        if (projId === 'proj-miftah') {
+        // Synchronize live store theme with the project template being saved
+        if (nextTheme) {
           db.tenant.themeId = nextTheme;
+        }
+
+        if (projId === 'proj-miftah') {
           const activeSet = new Set<string>(nextFeatures);
           db.features = {
             tier_1_static: activeSet.has('tier_1_static'),

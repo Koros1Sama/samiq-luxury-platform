@@ -110,6 +110,13 @@ export function ClinicBatchVerifier() {
         >
           كريم الترطيب المكثف
         </button>
+        <button
+          type="button"
+          onClick={() => handleQuickCode('مستحضر تجاري غير مسجل')}
+          className="min-h-[40px] px-2.5 py-1 rounded-md bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100 font-semibold transition-colors"
+        >
+          اختبار منتج مقلد غير مسجل
+        </button>
       </div>
 
       {/* Error Banner */}

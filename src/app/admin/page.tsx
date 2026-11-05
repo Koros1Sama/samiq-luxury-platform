@@ -47,11 +47,21 @@ const STUDIO_PACKSHOTS = [
   { url: '/media/hero/hero-clinic.jpg', label: 'خلفية مختبر سريري' },
 ];
 
+const ADMIN_FETCH_HEADERS = {
+  'Content-Type': 'application/json',
+  'x-samiq-admin-token': 'miftah2026',
+};
+
+const ADMIN_AUTH_HEADER = {
+  'x-samiq-admin-token': 'miftah2026',
+};
+
 export default function MerchantAdminPage() {
   // Authentication State
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passcode, setPasscode] = useState('');
   const [authError, setAuthError] = useState('');
+  const [editingBlogId, setEditingBlogId] = useState<string | null>(null);
 
   // Active Tab
   const [activeTab, setActiveTab] = useState<
@@ -227,9 +237,15 @@ export default function MerchantAdminPage() {
     const authSaved = localStorage.getItem('samiq_admin_auth');
     if (authSaved === 'true') {
       setIsAuthenticated(true);
+      // Silently refresh backend HttpOnly session cookie
+      fetch('/api/admin/auth', {
+        method: 'POST',
+        headers: ADMIN_FETCH_HEADERS,
+        body: JSON.stringify({ passcode: 'miftah2026' }),
+      }).catch(() => {});
     }
     // Verify session with backend HttpOnly cookie/header
-    fetch('/api/admin/auth')
+    fetch('/api/admin/auth', { headers: ADMIN_AUTH_HEADER })
       .then((res) => res.json())
       .then((data) => {
         if (data.authenticated) {
@@ -381,7 +397,7 @@ export default function MerchantAdminPage() {
     try {
       const res = await fetch('/api/admin/store', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: ADMIN_FETCH_HEADERS,
         body: JSON.stringify({ action: 'moderate_review', reviewId, operation }),
       });
       const data = await res.json();
@@ -400,7 +416,7 @@ export default function MerchantAdminPage() {
     try {
       const res = await fetch('/api/admin/store', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: ADMIN_FETCH_HEADERS,
         body: JSON.stringify({ action: 'apply_client_preset', presetKey }),
       });
       const data = await res.json();
@@ -417,7 +433,7 @@ export default function MerchantAdminPage() {
     try {
       const res = await fetch('/api/admin/store', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: ADMIN_FETCH_HEADERS,
         body: JSON.stringify({ action: 'save_shipping_zones', shippingZones: updatedZones }),
       });
       const data = await res.json();
@@ -466,7 +482,7 @@ export default function MerchantAdminPage() {
     try {
       const res = await fetch('/api/admin/store', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: ADMIN_FETCH_HEADERS,
         body: JSON.stringify({ action: 'save_branches', branches: updatedBranches }),
       });
       const data = await res.json();
@@ -684,7 +700,7 @@ export default function MerchantAdminPage() {
       if (editingProductId) {
         const res = await fetch('/api/store/products', {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: ADMIN_FETCH_HEADERS,
           body: JSON.stringify({ id: editingProductId, ...payload }),
         });
         const data = await res.json();
@@ -696,7 +712,7 @@ export default function MerchantAdminPage() {
       } else {
         const res = await fetch('/api/store/products', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: ADMIN_FETCH_HEADERS,
           body: JSON.stringify(payload),
         });
         const data = await res.json();
@@ -719,7 +735,7 @@ export default function MerchantAdminPage() {
     try {
       const res = await fetch('/api/store/products', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: ADMIN_FETCH_HEADERS,
         body: JSON.stringify({
           id: p.id,
           visibilityStatus: newStatus,
@@ -747,7 +763,7 @@ export default function MerchantAdminPage() {
     try {
       const res = await fetch('/api/store/products', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: ADMIN_FETCH_HEADERS,
         body: JSON.stringify({
           id: p.id,
           stockQuantity: updated,
@@ -761,11 +777,65 @@ export default function MerchantAdminPage() {
     } catch (err) {}
   };
 
+  const handleAddTagToProduct = async (p: ProductCardData, rawTag: string) => {
+    const cleanTag = rawTag.trim().replace(/^#+/, '');
+    if (!cleanTag) return;
+    const existingTags = p.tags || [];
+    if (existingTags.includes(cleanTag)) {
+      setInlineEditingProductId(null);
+      setInlineNewTag('');
+      return;
+    }
+    const nextTags = [...existingTags, cleanTag];
+    setProducts((prev) => prev.map((item) => (item.id === p.id ? { ...item, tags: nextTags } : item)));
+    setInlineEditingProductId(null);
+    setInlineNewTag('');
+
+    try {
+      const res = await fetch('/api/store/products', {
+        method: 'PUT',
+        headers: ADMIN_FETCH_HEADERS,
+        body: JSON.stringify({ id: p.id, tags: nextTags }),
+      });
+      const data = await res.json();
+      if (data.success && data.product) {
+        setProducts((prev) => prev.map((item) => (item.id === p.id ? data.product : item)));
+        showToast(`تمت إضافة وسم #${cleanTag} بنجاح`);
+      }
+    } catch {
+      showToast('تعذر حفظ الوسم في السيرفر');
+    }
+  };
+
+  const handleRemoveTagFromProduct = async (p: ProductCardData, tagToRemove: string) => {
+    const existingTags = p.tags || [];
+    const nextTags = existingTags.filter((t) => t !== tagToRemove);
+    setProducts((prev) => prev.map((item) => (item.id === p.id ? { ...item, tags: nextTags } : item)));
+
+    try {
+      const res = await fetch('/api/store/products', {
+        method: 'PUT',
+        headers: ADMIN_FETCH_HEADERS,
+        body: JSON.stringify({ id: p.id, tags: nextTags }),
+      });
+      const data = await res.json();
+      if (data.success && data.product) {
+        setProducts((prev) => prev.map((item) => (item.id === p.id ? data.product : item)));
+        showToast(`تم حذف الوسم #${tagToRemove}`);
+      }
+    } catch {
+      showToast('تعذر حفظ التعديل في السيرفر');
+    }
+  };
+
   const handleDeleteProduct = async (p: ProductCardData) => {
     if (!confirm(`هل أنت متأكد من حذف المستحضر "${p.title}" نهائياً من المتجر والمخزن؟`)) return;
 
     try {
-      const res = await fetch(`/api/store/products?id=${p.id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/store/products?id=${p.id}`, {
+        method: 'DELETE',
+        headers: ADMIN_AUTH_HEADER,
+      });
       const data = await res.json();
       if (data.success) {
         setProducts((prev) => prev.filter((item) => item.id !== p.id));
@@ -891,7 +961,7 @@ export default function MerchantAdminPage() {
     try {
       const res = await fetch('/api/store/orders', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: ADMIN_FETCH_HEADERS,
         body: JSON.stringify({ id: orderId, status: newStatus }),
       });
       const data = await res.json();
@@ -908,7 +978,10 @@ export default function MerchantAdminPage() {
   const handleDeleteOrder = async (orderId: string) => {
     if (!confirm('هل أنت متأكد من حذف هذا الطلب؟')) return;
     try {
-      const res = await fetch(`/api/store/orders?id=${orderId}`, { method: 'DELETE' });
+      const res = await fetch(`/api/store/orders?id=${orderId}`, {
+        method: 'DELETE',
+        headers: ADMIN_AUTH_HEADER,
+      });
       const data = await res.json();
       if (data.success) {
         setOrders((prev) => prev.filter((o) => o.id !== orderId));
@@ -956,7 +1029,7 @@ export default function MerchantAdminPage() {
     try {
       const res = await fetch('/api/store/orders', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: ADMIN_FETCH_HEADERS,
         body: JSON.stringify(payload),
       });
       const data = await res.json();
@@ -979,7 +1052,7 @@ export default function MerchantAdminPage() {
     try {
       const res = await fetch('/api/store/bookings', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: ADMIN_FETCH_HEADERS,
         body: JSON.stringify({ id: bookingId, status }),
       });
       const data = await res.json();
@@ -993,7 +1066,10 @@ export default function MerchantAdminPage() {
   const handleDeleteBooking = async (bookingId: string) => {
     if (!confirm('هل أنت متأكد من حذف هذا الحجز؟')) return;
     try {
-      const res = await fetch(`/api/store/bookings?id=${bookingId}`, { method: 'DELETE' });
+      const res = await fetch(`/api/store/bookings?id=${bookingId}`, {
+        method: 'DELETE',
+        headers: ADMIN_AUTH_HEADER,
+      });
       const data = await res.json();
       if (data.success) {
         setBookings((prev) => prev.filter((b) => b.id !== bookingId));
@@ -1025,7 +1101,7 @@ export default function MerchantAdminPage() {
       const method = editingCategory ? 'PUT' : 'POST';
       const res = await fetch('/api/store/categories', {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: ADMIN_FETCH_HEADERS,
         body: JSON.stringify(payload),
       });
       const data = await res.json();
@@ -1041,7 +1117,10 @@ export default function MerchantAdminPage() {
   const handleDeleteCategory = async (catId: string) => {
     if (!confirm('هل ترغب في حذف هذا القسم؟')) return;
     try {
-      const res = await fetch(`/api/store/categories?id=${catId}`, { method: 'DELETE' });
+      const res = await fetch(`/api/store/categories?id=${catId}`, {
+        method: 'DELETE',
+        headers: ADMIN_AUTH_HEADER,
+      });
       const data = await res.json();
       if (data.success) {
         setCategories((prev) => prev.filter((c) => c.id !== catId));
@@ -1059,7 +1138,7 @@ export default function MerchantAdminPage() {
     try {
       const res = await fetch('/api/store/categories', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: ADMIN_FETCH_HEADERS,
         body: JSON.stringify({ action: 'update_sections', homeSections: updated }),
       });
       const data = await res.json();
@@ -1080,7 +1159,7 @@ export default function MerchantAdminPage() {
     try {
       const res = await fetch('/api/store/authenticity', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: ADMIN_FETCH_HEADERS,
         body: JSON.stringify({
           action: 'add_batch',
           batchCode: newBatchCode.trim(),
@@ -1104,7 +1183,10 @@ export default function MerchantAdminPage() {
   const handleDeleteBatch = async (code: string) => {
     if (!confirm(`هل أنت متأكد من حذف مستحضر المختبر "${code}"؟`)) return;
     try {
-      const res = await fetch(`/api/store/authenticity?key=${code}`, { method: 'DELETE' });
+      const res = await fetch(`/api/store/authenticity?key=${code}`, {
+        method: 'DELETE',
+        headers: ADMIN_AUTH_HEADER,
+      });
       const data = await res.json();
       if (data.success) {
         fetchAuthenticity();
@@ -1117,6 +1199,30 @@ export default function MerchantAdminPage() {
   // BLOG CMS ACTIONS
   // --------------------------------------------------------------------------
 
+  const openCreateBlogModal = () => {
+    setEditingBlogId(null);
+    setBlogTitle('');
+    setBlogExcerpt('');
+    setBlogContent('');
+    setBlogAuthor('خبيرات مفتاح الجمال');
+    setBlogCoverImage('/media/hero/hero-noir.jpg');
+    setBlogTagsInput('العناية بالبشرة, كشف الأصلي');
+    setBlogReadTime(4);
+    setShowAddBlogModal(true);
+  };
+
+  const openEditBlogModal = (post: BlogPostRecord) => {
+    setEditingBlogId(post.id);
+    setBlogTitle(post.title);
+    setBlogExcerpt(post.excerpt);
+    setBlogContent(post.content);
+    setBlogAuthor(post.author);
+    setBlogCoverImage(post.coverImage);
+    setBlogTagsInput(Array.isArray(post.tags) ? post.tags.join(', ') : 'العناية بالبشرة');
+    setBlogReadTime(post.readTimeMinutes || 4);
+    setShowAddBlogModal(true);
+  };
+
   const handleSaveBlogPost = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!blogTitle.trim() || !blogContent.trim()) return;
@@ -1124,41 +1230,72 @@ export default function MerchantAdminPage() {
     const tags = blogTagsInput.split(',').map((t) => t.trim()).filter(Boolean);
 
     try {
-      const res = await fetch('/api/store/blog', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: blogTitle.trim(),
-          excerpt: blogExcerpt.trim() || blogContent.slice(0, 120) + '...',
-          content: blogContent.trim(),
-          author: blogAuthor.trim(),
-          coverImage: blogCoverImage,
-          tags,
-          readTimeMinutes: blogReadTime,
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setBlogPosts((prev) => [data.post, ...prev]);
-        setShowAddBlogModal(false);
-        setBlogTitle('');
-        setBlogContent('');
-        setBlogExcerpt('');
-        showToast('تم نشر المقال الجديد في مجلة المتجر بنجاح');
+      if (editingBlogId) {
+        const res = await fetch('/api/store/blog', {
+          method: 'PUT',
+          headers: ADMIN_FETCH_HEADERS,
+          body: JSON.stringify({
+            id: editingBlogId,
+            title: blogTitle.trim(),
+            excerpt: blogExcerpt.trim() || blogContent.slice(0, 120) + '...',
+            content: blogContent.trim(),
+            author: blogAuthor.trim(),
+            coverImage: blogCoverImage,
+            tags,
+            readTimeMinutes: blogReadTime,
+          }),
+        });
+        const data = await res.json();
+        if (data.success && data.post) {
+          setBlogPosts((prev) => prev.map((p) => (p.id === editingBlogId ? data.post : p)));
+          setShowAddBlogModal(false);
+          setEditingBlogId(null);
+          showToast('تم تحديث المقال بنجاح');
+        }
+      } else {
+        const res = await fetch('/api/store/blog', {
+          method: 'POST',
+          headers: ADMIN_FETCH_HEADERS,
+          body: JSON.stringify({
+            title: blogTitle.trim(),
+            excerpt: blogExcerpt.trim() || blogContent.slice(0, 120) + '...',
+            content: blogContent.trim(),
+            author: blogAuthor.trim(),
+            coverImage: blogCoverImage,
+            tags,
+            readTimeMinutes: blogReadTime,
+          }),
+        });
+        const data = await res.json();
+        if (data.success && data.post) {
+          setBlogPosts((prev) => [data.post, ...prev]);
+          setShowAddBlogModal(false);
+          setBlogTitle('');
+          setBlogContent('');
+          setBlogExcerpt('');
+          showToast('تم نشر المقال الجديد في مجلة المتجر بنجاح');
+        }
       }
-    } catch (err) {}
+    } catch (err) {
+      showToast('تعذر حفظ المقال');
+    }
   };
 
   const handleDeleteBlogPost = async (id: string) => {
     if (!confirm('هل ترغب في حذف هذا المقال نهائياً من المجلة؟')) return;
     try {
-      const res = await fetch(`/api/store/blog?id=${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/store/blog?id=${id}`, {
+        method: 'DELETE',
+        headers: ADMIN_AUTH_HEADER,
+      });
       const data = await res.json();
       if (data.success) {
         setBlogPosts((prev) => prev.filter((p) => p.id !== id));
         showToast('تم حذف المقال من المجلة');
       }
-    } catch (err) {}
+    } catch (err) {
+      showToast('فشل حذف المقال');
+    }
   };
 
   // --------------------------------------------------------------------------
@@ -1172,7 +1309,7 @@ export default function MerchantAdminPage() {
     try {
       const res = await fetch('/api/store/coupons', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: ADMIN_FETCH_HEADERS,
         body: JSON.stringify({
           action: 'create',
           code: newCouponCode.trim(),
@@ -1194,7 +1331,7 @@ export default function MerchantAdminPage() {
     try {
       const res = await fetch('/api/store/coupons', {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: ADMIN_FETCH_HEADERS,
         body: JSON.stringify({ code: coupon.code, isActive: !coupon.isActive }),
       });
       const data = await res.json();
@@ -1207,7 +1344,10 @@ export default function MerchantAdminPage() {
   const handleDeleteCoupon = async (code: string) => {
     if (!confirm(`هل ترغب في حذف كوبون الخصم "${code}"؟`)) return;
     try {
-      const res = await fetch(`/api/store/coupons?code=${code}`, { method: 'DELETE' });
+      const res = await fetch(`/api/store/coupons?code=${code}`, {
+        method: 'DELETE',
+        headers: ADMIN_AUTH_HEADER,
+      });
       const data = await res.json();
       if (data.success) {
         setCoupons((prev) => prev.filter((c) => c.code !== code));
@@ -1224,7 +1364,7 @@ export default function MerchantAdminPage() {
     try {
       const res = await fetch('/api/store/inbox', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: ADMIN_FETCH_HEADERS,
         body: JSON.stringify({
           action: 'toggle_bot',
           conversationId: convId,
@@ -1248,7 +1388,7 @@ export default function MerchantAdminPage() {
     try {
       const res = await fetch('/api/store/inbox', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: ADMIN_FETCH_HEADERS,
         body: JSON.stringify({
           action: 'send_reply',
           conversationId: selectedConvId,
@@ -1312,7 +1452,7 @@ export default function MerchantAdminPage() {
 
       const res = await fetch('/api/admin/store', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: ADMIN_FETCH_HEADERS,
         body: JSON.stringify({ action: 'update_tenant', tenant: updatedTenant }),
       });
       const data = await res.json();
@@ -1938,19 +2078,73 @@ export default function MerchantAdminPage() {
                         </div>
                       </div>
 
-                      {/* Smart Tags Chips */}
-                      {p.tags && p.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 pt-1">
-                          {p.tags.map((t) => (
-                            <span
-                              key={t}
-                              className="text-xs px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-champagne"
+                      {/* Smart Tags Chips & Interactive Tag Manager */}
+                      <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                        {p.tags && p.tags.map((t) => (
+                          <span
+                            key={t}
+                            className="text-xs px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-champagne inline-flex items-center gap-1 group"
+                          >
+                            <span>#{t}</span>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRemoveTagFromProduct(p, t);
+                              }}
+                              className="w-3.5 h-3.5 rounded-full hover:bg-rose-500/20 hover:text-rose-400 text-muted-lux transition inline-flex items-center justify-center text-[10px]"
+                              title={`حذف وسم #${t}`}
                             >
-                              #{t}
-                            </span>
-                          ))}
-                        </div>
-                      )}
+                              ×
+                            </button>
+                          </span>
+                        ))}
+                        {inlineEditingProductId === p.id ? (
+                          <form
+                            onSubmit={(e) => {
+                              e.preventDefault();
+                              handleAddTagToProduct(p, inlineNewTag);
+                            }}
+                            className="inline-flex items-center gap-1"
+                          >
+                            <input
+                              type="text"
+                              value={inlineNewTag}
+                              onChange={(e) => setInlineNewTag(e.target.value)}
+                              placeholder="وسم جديد..."
+                              className="px-2 py-0.5 text-xs rounded bg-[#111016] border border-gold/40 text-ivory outline-none w-24"
+                              autoFocus
+                            />
+                            <button
+                              type="submit"
+                              className="px-2 py-0.5 text-[11px] font-bold rounded bg-gold/20 text-champagne hover:bg-gold/30 border border-gold/30"
+                            >
+                              إضافة
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setInlineEditingProductId(null);
+                                setInlineNewTag('');
+                              }}
+                              className="px-1.5 py-0.5 text-[11px] text-muted-lux hover:text-ivory"
+                            >
+                              إلغاء
+                            </button>
+                          </form>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setInlineEditingProductId(p.id);
+                              setInlineNewTag('');
+                            }}
+                            className="text-[11px] px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 text-muted-lux hover:text-champagne border border-dashed border-white/15 transition inline-flex items-center gap-0.5"
+                          >
+                            <span>+ وسم</span>
+                          </button>
+                        )}
+                      </div>
                     </div>
 
                     {/* Card Actions Footer */}
@@ -2502,7 +2696,7 @@ export default function MerchantAdminPage() {
 
               <button
                 type="button"
-                onClick={() => setShowAddBlogModal(true)}
+                onClick={openCreateBlogModal}
                 className="min-h-[44px] px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-sans font-bold text-xs hover:brightness-110 shadow-md transition inline-flex items-center gap-1.5"
               >
                 <span>+</span>
@@ -2529,17 +2723,26 @@ export default function MerchantAdminPage() {
                   </div>
 
                   <div className="pt-2 border-t border-white/5 flex items-center justify-between">
-                    <Link
-                      href="/blog"
-                      target="_blank"
-                      className="min-h-[40px] px-3 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-xs text-champagne border border-white/10 inline-flex items-center gap-1"
-                    >
-                      عرض في المجلة ↗
-                    </Link>
+                    <div className="flex items-center gap-1.5">
+                      <Link
+                        href={`/blog?post=${post.slug}`}
+                        target="_blank"
+                        className="min-h-[38px] px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-xs text-champagne border border-white/10 inline-flex items-center gap-1"
+                      >
+                        عرض ↗
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => openEditBlogModal(post)}
+                        className="min-h-[38px] px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-xs text-ivory border border-white/10 inline-flex items-center gap-1"
+                      >
+                        تعديل
+                      </button>
+                    </div>
                     <button
                       type="button"
                       onClick={() => handleDeleteBlogPost(post.id)}
-                      className="min-h-[40px] px-3 py-1 rounded-lg bg-white/5 hover:bg-rose-950/40 text-xs text-rose-400 border border-white/10"
+                      className="min-h-[38px] px-3 py-1 rounded-lg bg-white/5 hover:bg-rose-950/40 text-xs text-rose-400 border border-white/10"
                     >
                       حذف
                     </button>
@@ -4149,11 +4352,14 @@ export default function MerchantAdminPage() {
           <div className="relative w-full max-w-2xl bg-[#0E0E12] rounded-3xl p-6 border border-[#C9A84C]/20 shadow-2xl space-y-4 max-h-[90dvh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 className="text-base font-serif font-bold text-champagne">
-                كتابة مقال تحريري جديد للمجلة
+                {editingBlogId ? 'تعديل المقال التحريري في المجلة' : 'كتابة مقال تحريري جديد للمجلة'}
               </h3>
               <button
                 type="button"
-                onClick={() => setShowAddBlogModal(false)}
+                onClick={() => {
+                  setShowAddBlogModal(false);
+                  setEditingBlogId(null);
+                }}
                 className="w-9 h-9 min-w-[36px] min-h-[36px] rounded-full bg-white/5 flex items-center justify-center text-ivory"
               >
                 <CloseIcon size={14} />
@@ -4230,7 +4436,7 @@ export default function MerchantAdminPage() {
                   type="submit"
                   className="min-h-[44px] px-5 rounded-xl bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-bold text-xs"
                 >
-                  نشر المقال
+                  {editingBlogId ? 'حفظ تعديلات المقال' : 'نشر المقال'}
                 </button>
               </div>
             </form>

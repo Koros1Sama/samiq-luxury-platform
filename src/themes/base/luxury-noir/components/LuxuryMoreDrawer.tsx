@@ -33,7 +33,7 @@ interface LuxuryMoreDrawerProps {
       label: string;
     };
   };
-  navLinks: Array<{ label: string; href: string }>;
+  navLinks: Array<{ label?: string; labelAr?: string; labelEn?: string; href: string }>;
 }
 
 export function LuxuryMoreDrawer({
@@ -161,16 +161,22 @@ export function LuxuryMoreDrawer({
 
         {/* 5. Navigation Links in Drawer */}
         <div className="pt-2 border-t border-white/10 space-y-1">
-          {navLinks.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              onClick={onClose}
-              className="min-h-[44px] flex items-center py-2.5 text-xs font-sans text-ivory/80 hover:text-champagne border-b border-white/5"
-            >
-              {link.label}
-            </a>
-          ))}
+          {navLinks.map((link, idx) => {
+            const isEn = typeof document !== 'undefined' && document.documentElement.lang === 'en';
+            const labelText = isEn
+              ? link.labelEn || link.label || link.labelAr
+              : link.labelAr || link.label || link.labelEn;
+            return (
+              <a
+                key={link.href + idx}
+                href={link.href}
+                onClick={onClose}
+                className="min-h-[44px] flex items-center py-2.5 text-xs font-sans text-ivory/80 hover:text-champagne border-b border-white/5"
+              >
+                {labelText}
+              </a>
+            );
+          })}
           <Link
             href="/account"
             onClick={onClose}
