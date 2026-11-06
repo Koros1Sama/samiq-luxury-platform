@@ -140,6 +140,25 @@ export function PdfInvoiceModal({
     return new Set(selectedFeatureIds);
   }, [selectedFeatureIds]);
 
+  // Dynamic price calculator matching /samiq and /platform multipliers and discounts
+  const getDynamicPrice = (featureId: string, basePriceUsd: number) => {
+    const isOverridden = priceOverrides?.[featureId] !== undefined;
+    const raw = priceOverrides?.[featureId] ?? basePriceUsd;
+    const multiplied = isOverridden ? raw : Math.round(raw * (priceMultiplier || 1.0));
+
+    let net = multiplied;
+    if (isDiscountEnabled && discountPercent > 0) {
+      net = Math.max(0, Math.round(multiplied * (1 - discountPercent / 100)));
+    }
+    const hasDiscount = isDiscountEnabled && discountPercent > 0 && net < multiplied;
+    return {
+      raw,
+      multiplied,
+      net,
+      hasDiscount,
+    };
+  };
+
   // Annual recurring calculation
   const aiAnnualCost =
     annualAiUsd !== undefined
@@ -626,6 +645,7 @@ export function PdfInvoiceModal({
                       <tbody className="divide-y divide-white/5 print:divide-neutral-200">
                         {allTiers.map((tier) => {
                           const isCurrentlySelected = pricing.selectedTier === tier.id;
+                          const tierPrice = getDynamicPrice(tier.id, tier.basePriceUsd);
                           return (
                             <tr
                               key={tier.id}
@@ -658,8 +678,24 @@ export function PdfInvoiceModal({
                               <td className="py-3 px-3 text-muted-dim print:text-neutral-500 font-mono text-xs whitespace-nowrap">
                                 {tier.requires.length > 0 ? tier.requires.join(', ') : 'بدون متطلب'}
                               </td>
-                              <td className="py-3 px-3 text-end font-mono font-bold text-base text-gold print:text-neutral-950 whitespace-nowrap">
-                                ${tier.basePriceUsd}
+                              <td className="py-3 px-3 text-end font-mono whitespace-nowrap">
+                                {tierPrice.hasDiscount ? (
+                                  <div className="space-y-0.5">
+                                    <span className="line-through text-muted-dim print:text-neutral-500 text-xs block">
+                                      ${tierPrice.multiplied}
+                                    </span>
+                                    <span className="font-bold text-base text-gold print:text-neutral-950 block">
+                                      ${tierPrice.net}
+                                    </span>
+                                    <span className="text-[10px] text-emerald-400 print:text-emerald-700 font-sans block">
+                                      خصم {discountPercent}%
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <span className="font-bold text-base text-gold print:text-neutral-950">
+                                    ${tierPrice.multiplied}
+                                  </span>
+                                )}
                               </td>
                             </tr>
                           );
@@ -696,6 +732,7 @@ export function PdfInvoiceModal({
                       <tbody className="divide-y divide-white/5 print:divide-neutral-200">
                         {allAddons.map((addon, idx) => {
                           const isSelected = selectedSet.has(addon.id);
+                          const addonPrice = getDynamicPrice(addon.id, addon.basePriceUsd);
                           const catLabel =
                             addon.category === 'intelligence'
                               ? 'ذكاء اصطناعي'
@@ -727,8 +764,21 @@ export function PdfInvoiceModal({
                               <td className="py-2.5 px-3 text-muted-dim print:text-neutral-500 font-mono text-[11px] whitespace-nowrap">
                                 {addon.requires.length > 0 ? addon.requires.join(', ') : '—'}
                               </td>
-                              <td className="py-2.5 px-3 text-end font-mono font-bold text-gold print:text-neutral-900 whitespace-nowrap">
-                                +${addon.basePriceUsd}
+                              <td className="py-2.5 px-3 text-end font-mono whitespace-nowrap">
+                                {addonPrice.hasDiscount ? (
+                                  <div className="space-y-0.5">
+                                    <span className="line-through text-muted-dim print:text-neutral-500 text-[11px] block">
+                                      +${addonPrice.multiplied}
+                                    </span>
+                                    <span className="font-bold text-xs text-gold print:text-neutral-900 block">
+                                      +${addonPrice.net}
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <span className="font-bold text-xs text-gold print:text-neutral-900">
+                                    +${addonPrice.multiplied}
+                                  </span>
+                                )}
                               </td>
                               <td className="py-2.5 px-3 text-center whitespace-nowrap">
                                 {isSelected ? (

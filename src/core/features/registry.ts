@@ -49,7 +49,7 @@ export const FEATURES_REGISTRY: Record<string, FeatureDefinition> = {
     nameEn: 'Interactive Product Catalog & Admin',
     nameAr: 'الدرجة 3: باقة كتالوج المنتجات والأقسام والوسوم (Interactive Catalog)',
     descriptionAr:
-      'إضافة قسم المنتجات، الأقسام، الوسوم، الفلترة الفورية، صفحات تفاصيل المنتجات، 3 أنماط عملات، وإدارة الكتالوج بالكامل من لوحة المدير السرية.',
+      'إضافة قسم المنتجات، الأقسام، الوسوم، الفلترة الفورية، صفحات تفاصيل المنتجات، محول عملة المتجر وأسعار الصرف الشامل (يمني، سعودي، دولار)، وإدارة الكتالوج بالكامل من لوحة المدير السرية.',
     category: 'tier',
     basePriceUsd: 200, // Cumulative: $130 + $70 = $200
     requires: ['tier_2_editable'],
