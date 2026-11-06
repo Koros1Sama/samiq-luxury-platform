@@ -42,8 +42,8 @@ export function HeroShowcase({ onCtaClick, section }: HeroShowcaseProps) {
           className="object-cover object-center brightness-[0.7] contrast-105"
         />
         {/* Directional Gradient: Solid obsidian on start side, fading towards end side */}
-        <div className="absolute inset-0 bg-gradient-to-e from-[#070709] via-[#070709]/85 to-[#070709]/30 pointer-events-none" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#070709] via-transparent to-black/20 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r rtl:bg-gradient-to-l from-[#070709] via-[#070709]/95 to-[#070709]/40 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#070709] via-[#070709]/80 to-[#070709]/30 pointer-events-none" />
       </div>
 
       {/* Content Container: Exactly ONE headline, ONE subline, ONE primary button */}

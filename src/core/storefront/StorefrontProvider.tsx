@@ -150,6 +150,26 @@ export function StorefrontProvider({
   // 2. Cart State
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [mobileTab, setMobileTabState] = useState<'home' | 'catalog' | 'authenticity' | 'routine'>('home');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const qTab = params.get('tab');
+        if (qTab === 'catalog' || qTab === 'authenticity' || qTab === 'routine' || qTab === 'home') {
+          setMobileTabState(qTab);
+        }
+      } catch {}
+    }
+  }, []);
+
+  const setMobileTab = useCallback((tab: 'home' | 'catalog' | 'authenticity' | 'routine') => {
+    setMobileTabState(tab);
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, []);
 
   // 3. Wishlist State
   const [wishlistIds, setWishlistIds] = useState<string[]>([]);
@@ -483,6 +503,8 @@ export function StorefrontProvider({
       setCustomPalette,
       branches,
       shippingZones,
+      mobileTab,
+      setMobileTab,
     }),
     [
       tenant,
@@ -522,6 +544,8 @@ export function StorefrontProvider({
       setCustomPalette,
       branches,
       shippingZones,
+      mobileTab,
+      setMobileTab,
     ]
   );
 

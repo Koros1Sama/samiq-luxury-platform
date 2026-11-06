@@ -24,6 +24,7 @@ import {
   IvorySkinRoutineBlock,
 } from './components/IvoryGenericSections';
 import { PwaInstallPrompt } from '../luxury-noir/components/PwaInstallPrompt';
+import { MobileAppTabBar } from '@/core/storefront/MobileAppTabBar';
 
 // Interactive Overlays & Modals ONLY (loaded on demand / user interaction)
 const IvoryQuickViewSheet = dynamic(
@@ -83,7 +84,7 @@ export function IvoryJournalTheme(_props: ThemeLayoutProps) {
   const renderers = createIvoryRenderers((product) => setSelectedProduct(product));
 
   return (
-    <div className="min-h-[100dvh] bg-[#FAF7F2] text-[#1B1612] font-sans selection:bg-[#B89B5E]/30 selection:text-[#1B1612] antialiased overflow-x-hidden flex flex-col justify-between">
+    <div className="min-h-[100dvh] bg-[#FAF7F2] text-[#1B1612] font-sans selection:bg-[#B89B5E]/30 selection:text-[#1B1612] antialiased overflow-x-hidden flex flex-col justify-between pb-14 md:pb-0">
       {/* 1. Sticky Editorial Header (52px, Hamburger, Wordmark, Bag) */}
       <IvoryHeader
         onOpenSearch={() => setIsSearchOpen(true)}
@@ -95,8 +96,15 @@ export function IvoryJournalTheme(_props: ThemeLayoutProps) {
         <SectionsOutlet renderers={renderers} />
       </main>
 
-      {/* 3. Navigation Pattern: Slim Bottom Cart Pill (the ONLY fixed bottom element, NO bottom tab bar) */}
-      {features.cart_whatsapp && <IvoryCartPill />}
+      {/* 3. Navigation Pattern: Slim Bottom Cart Pill on Desktop, Mobile App Tab Bar on Mobile */}
+      {features.cart_whatsapp && (
+        <div className="hidden md:block">
+          <IvoryCartPill />
+        </div>
+      )}
+
+      {/* Mobile App Bottom Bar */}
+      <MobileAppTabBar />
 
       {/* PWA App Install Button */}
       <PwaInstallPrompt className="fixed bottom-20 end-4 z-40" />

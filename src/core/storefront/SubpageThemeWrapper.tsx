@@ -22,6 +22,7 @@ import { FeatureTierSimulator } from '@/themes/base/luxury-noir/components/Featu
 import { WhatsAppCartDrawer } from '@/themes/base/luxury-noir/components/WhatsAppCartDrawer';
 import { IvoryCartDrawer } from '@/themes/base/ivory-journal/components/IvoryCartDrawer';
 import { ClinicCartDrawer } from '@/themes/base/clinic-lab/components/ClinicCartDrawer';
+import { MobileAppTabBar } from './MobileAppTabBar';
 
 export interface SubpageThemeContextValue {
   activeTheme: ThemeId;
@@ -185,7 +186,7 @@ function SubpageThemeInner({
       }}
     >
       <div
-        className={`samiq-subpage-container min-h-screen transition-colors duration-300 font-sans ${
+        className={`samiq-subpage-container min-h-screen transition-colors duration-300 font-sans pb-14 md:pb-0 ${
           isLight ? 'is-light' : 'is-dark'
         }`}
         data-theme={activeTheme}
@@ -441,9 +442,9 @@ function SubpageThemeInner({
                   </button>
                 </div>
 
-                {/* Currency Switcher */}
+                {/* Currency Switcher (Desktop / Tablet) */}
                 <div
-                  className="inline-flex items-center border rounded-lg text-xs font-bold overflow-hidden"
+                  className="hidden sm:inline-flex items-center border rounded-lg text-xs font-bold overflow-hidden"
                   style={{
                     borderColor: palette.border,
                     backgroundColor: isLight ? '#00000008' : '#FFFFFF0A',
@@ -813,6 +814,9 @@ function SubpageThemeInner({
 
         {/* 5. Feature Tier Simulator Bar (Bottom Live Bar) */}
         {showSimulator && <FeatureTierSimulator />}
+
+        {/* 6. Mobile App Tab Bar across all subpages */}
+        <MobileAppTabBar />
       </div>
     </SubpageThemeContext.Provider>
   );

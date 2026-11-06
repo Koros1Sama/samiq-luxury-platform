@@ -15,6 +15,7 @@ import { ClinicRoutineSteps } from './components/ClinicRoutineSteps';
 import { ClinicContactSection } from './components/ClinicContactSection';
 import { ClinicAdvisorModalProps } from './components/ClinicAdvisorModal';
 import { PwaInstallPrompt } from '../luxury-noir/components/PwaInstallPrompt';
+import { MobileAppTabBar } from '@/core/storefront/MobileAppTabBar';
 import {
   ClinicFeatureStrip,
   ClinicRichText,
@@ -98,15 +99,17 @@ export function ClinicLabTheme(_props: ThemeLayoutProps) {
   const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
 
   return (
-    <div className="min-h-[100dvh] bg-white text-[#0F4C4A] font-sans selection:bg-[#CFE8E1] selection:text-[#0F4C4A] antialiased">
+    <div className="min-h-[100dvh] bg-white text-[#0F4C4A] font-sans selection:bg-[#CFE8E1] selection:text-[#0F4C4A] antialiased pb-14 md:pb-0">
       {/* 1. Clinical Header (Sticky: Logo row + Always-Visible Search Field, Total ~104px) */}
       <ClinicHeader
         onOpenAdvisor={() => setIsAdvisorOpen(true)}
         onOpenCart={cart.open}
       />
 
-      {/* 2. Scrollable Section Tabs Under Header ("المتجر | روتيني | فحص المنتج وكشف المقلد | تواصل") */}
-      <ClinicNavTabs />
+      {/* 2. Scrollable Section Tabs Under Header (Desktop) */}
+      <div className="hidden md:block">
+        <ClinicNavTabs />
+      </div>
 
       {/* 3. Sections Dynamic Outlet */}
       <main>
@@ -139,6 +142,9 @@ export function ClinicLabTheme(_props: ThemeLayoutProps) {
 
       {/* PWA App Install Button */}
       <PwaInstallPrompt className="fixed bottom-20 end-4 z-40" />
+
+      {/* Mobile App Bottom Bar */}
+      <MobileAppTabBar />
     </div>
   );
 }

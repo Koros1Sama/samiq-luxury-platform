@@ -57,11 +57,11 @@ export function MiftahLogoSvg({
 
       {/* Brand Name & Authenticity Slogan */}
       {showText && (
-        <div className="flex flex-col text-start whitespace-nowrap min-w-0 leading-tight">
-          <span className="font-serif text-base sm:text-2xl font-bold bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] bg-clip-text text-transparent drop-shadow-[0_2px_10px_rgba(201,168,76,0.3)] whitespace-nowrap">
+        <div className="flex flex-col text-start min-w-0 leading-tight">
+          <span className="font-serif text-sm sm:text-2xl font-bold bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] bg-clip-text text-transparent drop-shadow-[0_2px_10px_rgba(201,168,76,0.3)] truncate max-w-[125px] sm:max-w-none">
             مفتاح الجمال
           </span>
-          <span className="text-xs text-champagne font-sans font-medium whitespace-nowrap mt-0.5">
+          <span className="hidden sm:block text-xs text-champagne font-sans font-medium truncate max-w-[125px] sm:max-w-none mt-0.5">
             لكشف المقلد
           </span>
         </div>

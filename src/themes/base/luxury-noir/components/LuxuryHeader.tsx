@@ -120,13 +120,13 @@ export function LuxuryHeader(props: LuxuryHeaderProps) {
           </nav>
 
           {/* End: Action Buttons */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             {/* Bilingual AR | EN Toggle (Gated by second_language feature) */}
             {features?.second_language !== false && (
               <button
                 type="button"
                 onClick={() => sf.setLocale?.(isEn ? 'ar' : 'en')}
-                className="min-h-[38px] px-2.5 rounded-full border border-gold/30 bg-gold/10 hover:bg-gold/20 text-champagne text-xs font-mono font-bold transition flex items-center gap-1"
+                className="h-8 sm:min-h-[38px] px-2 sm:px-2.5 rounded-full border border-gold/30 bg-gold/10 hover:bg-gold/20 text-champagne text-[11px] sm:text-xs font-mono font-bold transition flex items-center gap-1"
                 title={isEn ? 'التبديل إلى العربية' : 'Switch to English'}
                 aria-label="تبديل اللغة"
               >
@@ -152,10 +152,10 @@ export function LuxuryHeader(props: LuxuryHeaderProps) {
                   if (props.onOpenSearch) props.onOpenSearch();
                   else setSearchModalOpen(true);
                 }}
-                className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center text-ivory/80 hover:text-champagne hover:bg-white/5 transition"
+                className="w-8 h-8 sm:w-11 sm:h-11 rounded-full flex items-center justify-center text-ivory/80 hover:text-champagne hover:bg-white/5 transition"
                 aria-label="بحث في المنتجات"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -166,10 +166,10 @@ export function LuxuryHeader(props: LuxuryHeaderProps) {
               </button>
             )}
 
-            {/* Account Portal Link */}
+            {/* Account Portal Link (hidden on mobile, accessible via More drawer / bottom bar) */}
             <Link
               href="/account"
-              className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center text-ivory/80 hover:text-champagne hover:bg-white/5 transition"
+              className="hidden sm:flex w-11 h-11 min-w-[44px] min-h-[44px] rounded-full items-center justify-center text-ivory/80 hover:text-champagne hover:bg-white/5 transition"
               aria-label="حسابي ونقاط الولاء"
               title="حسابي ونقاط الولاء"
             >
@@ -202,12 +202,12 @@ export function LuxuryHeader(props: LuxuryHeaderProps) {
                 type="button"
                 data-testid="cart-button"
                 onClick={onOpenCart}
-                className="relative w-11 h-11 min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center bg-white/5 hover:bg-gold/15 border border-white/10 hover:border-gold/30 text-ivory hover:text-champagne transition shadow-[0_2px_10px_rgba(0,0,0,0.5)]"
+                className="relative w-8 h-8 sm:w-11 sm:h-11 rounded-full flex items-center justify-center bg-white/5 hover:bg-gold/15 border border-white/10 hover:border-gold/30 text-ivory hover:text-champagne transition shadow-md"
                 aria-label="سلة المشتريات"
               >
-                <BagCartIcon size={20} color="currentColor" strokeWidth={1.5} />
+                <BagCartIcon size={17} color="currentColor" strokeWidth={1.5} />
                 {cartCount > 0 && (
-                  <span className="absolute -top-1 -end-1 w-5 h-5 rounded-full bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-sans font-bold text-xs flex items-center justify-center shadow-md animate-pulse">
+                  <span className="absolute -top-1 -end-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-sans font-bold text-[10px] sm:text-xs flex items-center justify-center shadow-md animate-pulse">
                     {cartCount}
                   </span>
                 )}
@@ -219,10 +219,10 @@ export function LuxuryHeader(props: LuxuryHeaderProps) {
               type="button"
               data-testid="menu-button"
               onClick={() => setMoreDrawerOpen(true)}
-              className="lg:hidden w-11 h-11 rounded-full flex items-center justify-center text-ivory/80 hover:text-champagne hover:bg-white/5 transition"
+              className="lg:hidden w-8 h-8 sm:w-11 sm:h-11 rounded-full flex items-center justify-center text-ivory/80 hover:text-champagne hover:bg-white/5 transition"
               aria-label="المزيد من الخيارات"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>

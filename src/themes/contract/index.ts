@@ -315,6 +315,8 @@ export interface StorefrontContextValue {
   setCustomPalette?: (palette: any) => void;
   branches?: any[];
   shippingZones?: any[];
+  mobileTab?: 'home' | 'catalog' | 'authenticity' | 'routine';
+  setMobileTab?: (tab: 'home' | 'catalog' | 'authenticity' | 'routine') => void;
 }
 
 export interface ThemeLayoutProps {

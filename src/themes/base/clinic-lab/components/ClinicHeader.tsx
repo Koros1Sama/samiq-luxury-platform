@@ -91,8 +91,8 @@ export function ClinicHeader({ onOpenAdvisor, onOpenCart }: ClinicHeaderProps) {
             <span className="hidden md:inline">{isEn ? 'Profile' : 'الملف الطبي'}</span>
           </a>
 
-          {/* Currency Switcher */}
-          <div className="relative inline-flex items-center">
+          {/* Currency Switcher (Desktop / Tablet) */}
+          <div className="relative hidden sm:inline-flex items-center">
             <select
               aria-label="اختيار العملة"
               value={currency}
