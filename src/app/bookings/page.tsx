@@ -1,12 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   ConciergeHeadsetIcon,
   VerifiedCheckIcon,
 } from '@/themes/base/luxury-noir/components/LuxuryIcons';
 import { SubpageThemeWrapper, useSubpageTheme } from '@/core/storefront/SubpageThemeWrapper';
+import { useStorefront } from '@/core/storefront/StorefrontProvider';
+import { isValidThemeId, ThemeId } from '@/themes/contract';
+import { resolveThemePalette } from '@/core/storefront/themePalette';
 
 const SERVICES = [
   {
@@ -56,8 +59,27 @@ const SERVICES = [
 ];
 
 function BookingsContent() {
-  const { palette, isLight, locale } = useSubpageTheme();
-  const isEn = locale === 'en';
+  const subCtx = useSubpageTheme();
+  const sf = useStorefront();
+  const [urlTheme, setUrlTheme] = useState<ThemeId | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const q = new URLSearchParams(window.location.search).get('theme');
+        if (q && isValidThemeId(q)) {
+          setUrlTheme(q as ThemeId);
+        }
+      } catch {
+        // fallback
+      }
+    }
+  }, []);
+
+  const activeTheme = urlTheme || subCtx.activeTheme;
+  const palette = resolveThemePalette(activeTheme, sf.customPalette);
+  const isLight = palette.isLight;
+  const isEn = subCtx.locale === 'en';
 
   const [selectedService, setSelectedService] = useState('skin_consultation');
   const [selectedBranch, setSelectedBranch] = useState('branch-sanaa');

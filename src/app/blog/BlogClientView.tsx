@@ -374,7 +374,14 @@ export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[
                       className="object-cover object-center group-hover:scale-105 transition-transform duration-700"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                    <div className="absolute top-3 start-3 px-3 py-1 rounded-full text-[11px] font-sans font-bold bg-black/60 text-white backdrop-blur-md border border-white/20">
+                    <div
+                      className="image-overlay-badge absolute top-3 start-3 px-3 py-1 rounded-full text-[11px] font-sans font-bold backdrop-blur-md border shadow-md"
+                      style={{
+                        backgroundColor: 'rgba(11, 11, 12, 0.82)',
+                        color: '#F4EFE6',
+                        borderColor: 'rgba(255, 255, 255, 0.25)',
+                      }}
+                    >
                       {post.readTimeMinutes} {isEn ? 'min read' : 'دقائق قراءة'}
                     </div>
                   </div>
@@ -501,8 +508,8 @@ export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[
 
             {/* Modal Body Container */}
             <div className="px-5 sm:px-10 pb-10 space-y-8">
-              {/* Cover Hero */}
-              <div className="relative h-64 sm:h-96 w-full rounded-2xl overflow-hidden bg-black/10">
+              {/* Cover Hero Photo */}
+              <div className="relative h-64 sm:h-96 w-full rounded-2xl overflow-hidden bg-black/10 border" style={{ borderColor: palette.borderHex || palette.border }}>
                 <SmartImage
                   src={activeArticle.coverImage}
                   alt={activeArticle.title}
@@ -511,15 +518,31 @@ export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[
                   sizes="(max-width: 1024px) 100vw, 900px"
                   className="object-cover object-center"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                <div className="absolute bottom-6 inset-x-6 space-y-2 text-white">
-                  <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-black/50 backdrop-blur-xs">
-                    {activeArticle.author} — {activeArticle.publishedAt}
+              </div>
+
+              {/* Article Header (Editorial Surface Layout) */}
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span
+                    className="text-xs font-sans font-bold px-3 py-1 rounded-full border"
+                    style={{
+                      backgroundColor: `${palette.accent}15`,
+                      color: palette.accentHex || palette.accent,
+                      borderColor: `${palette.accent}35`,
+                    }}
+                  >
+                    {activeArticle.author}
                   </span>
-                  <h1 className="text-xl sm:text-3xl font-serif font-bold leading-[1.45] md:leading-[1.4]">
-                    {activeArticle.title}
-                  </h1>
+                  <span className="text-xs font-sans" style={{ color: palette.mutedHex || palette.muted }}>
+                    {activeArticle.publishedAt}
+                  </span>
                 </div>
+                <h1
+                  className="text-2xl sm:text-4xl font-serif font-bold leading-[1.45] md:leading-[1.4]"
+                  style={{ color: palette.textHex || palette.text }}
+                >
+                  {activeArticle.title}
+                </h1>
               </div>
 
               {/* Core Thesis / Excerpt Lead */}

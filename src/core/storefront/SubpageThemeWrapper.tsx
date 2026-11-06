@@ -244,6 +244,9 @@ function SubpageThemeInner({
               background-image: none !important;
               background-color: var(--samiq-surface) !important;
             }
+            .samiq-subpage-container.is-light .image-overlay-badge {
+              color: #F4EFE6 !important;
+            }
             .samiq-subpage-container.is-light .text-ivory,
             .samiq-subpage-container.is-light .text-white,
             .samiq-subpage-container.is-light [class*="text-ivory"],

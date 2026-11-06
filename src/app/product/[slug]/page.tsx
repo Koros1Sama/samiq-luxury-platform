@@ -15,13 +15,34 @@ import {
 } from '@/themes/base/luxury-noir/components/LuxuryIcons';
 import { SubpageThemeWrapper, useSubpageTheme } from '@/core/storefront/SubpageThemeWrapper';
 import { useStorefront } from '@/core/storefront/StorefrontProvider';
+import { isValidThemeId, ThemeId } from '@/themes/contract';
+import { resolveThemePalette } from '@/core/storefront/themePalette';
 
 function ProductDetailContent() {
   const params = useParams();
   const slug = (params?.slug as string) || '';
   const router = useRouter();
   const sf = useStorefront();
-  const { palette, isLight, locale } = useSubpageTheme();
+  const subCtx = useSubpageTheme();
+  const [urlTheme, setUrlTheme] = useState<ThemeId | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const q = new URLSearchParams(window.location.search).get('theme');
+        if (q && isValidThemeId(q)) {
+          setUrlTheme(q as ThemeId);
+        }
+      } catch {
+        // fallback
+      }
+    }
+  }, []);
+
+  const activeTheme = urlTheme || subCtx.activeTheme;
+  const palette = resolveThemePalette(activeTheme, sf.customPalette);
+  const isLight = palette.isLight;
+  const locale = subCtx.locale || 'ar';
   const isEn = locale === 'en';
   const currentCurrency = sf.currency || 'YER';
 
