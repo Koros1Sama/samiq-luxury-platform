@@ -159,6 +159,7 @@ export default function SamiqShowcasePage() {
   const [clientStoreTitle, setClientStoreTitle] = useState<string>('مفتاح الجمال');
   const [clientContactName, setClientContactName] = useState<string>('');
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
+  const [pdfModalMode, setPdfModalMode] = useState<'selected' | 'all' | 'both'>('all');
 
   const [customFeatures, setCustomFeatures] = useState<string[]>([
     'tier_1_static',
@@ -397,6 +398,7 @@ export default function SamiqShowcasePage() {
       <PdfInvoiceModal
         isOpen={isPdfModalOpen}
         onClose={() => setIsPdfModalOpen(false)}
+        initialMode={pdfModalMode}
         projectName={effectiveStoreName}
         clientName={clientContactName}
         selectedTemplate={selectedTemplate}
@@ -438,7 +440,10 @@ export default function SamiqShowcasePage() {
           <div className="flex items-center gap-2.5 flex-wrap">
             <button
               type="button"
-              onClick={() => setIsPdfModalOpen(true)}
+              onClick={() => {
+                setPdfModalMode('all');
+                setIsPdfModalOpen(true);
+              }}
               className="min-h-[44px] px-4 py-2 rounded-xl bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-obsidian-dark font-bold text-xs hover:brightness-110 shadow-lg transition flex items-center gap-1.5"
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -446,22 +451,24 @@ export default function SamiqShowcasePage() {
                 <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
                 <rect x="6" y="14" width="12" height="8" />
               </svg>
-              <span>تحميل عرض السعر (PDF)</span>
+              <span>كتالوج كافة الأسعار (PDF)</span>
             </button>
-            <Link
-              href="/platform"
+            <button
+              type="button"
+              onClick={() => {
+                setPdfModalMode('selected');
+                setIsPdfModalOpen(true);
+              }}
               className="min-h-[44px] px-3.5 py-2 rounded-xl bg-gold/15 hover:bg-gold/25 text-champagne border border-gold/30 text-xs font-bold transition inline-flex items-center gap-1.5"
             >
-              <span>استوديو المنصة</span>
-              <span>↗</span>
-            </Link>
-            <Link
-              href="/admin"
-              className="min-h-[44px] px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-[#FAF7F2] border border-white/10 text-xs font-semibold transition inline-flex items-center gap-1.5"
-            >
-              <span>لوحة التاجر ERP</span>
-              <span>↗</span>
-            </Link>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+              </svg>
+              <span>فاتورة العرض المخصص</span>
+            </button>
             <Link
               href="/"
               className="min-h-[44px] px-4 rounded-xl bg-white/5 hover:bg-white/10 text-[#FAF7F2] border border-white/10 text-xs font-semibold transition inline-flex items-center gap-1.5"

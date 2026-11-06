@@ -1729,21 +1729,6 @@ export default function MerchantAdminPage() {
 
           <div className="flex items-center gap-2 flex-wrap">
             <Link
-              href="/platform"
-              className="min-h-[44px] px-3 py-2 rounded-xl bg-gold/15 hover:bg-gold/25 text-xs font-bold text-champagne border border-gold/30 transition inline-flex items-center gap-1"
-            >
-              <span>استوديو المنصة والأسطول</span>
-              <span>↗</span>
-            </Link>
-            <Link
-              href="/samiq"
-              target="_blank"
-              className="min-h-[44px] px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold text-ivory border border-white/10 transition inline-flex items-center gap-1"
-            >
-              <span>معرض سَامِق العام</span>
-              <span>↗</span>
-            </Link>
-            <Link
               href="/"
               target="_blank"
               className="min-h-[44px] px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold text-ivory border border-white/10 transition inline-flex items-center gap-1.5"

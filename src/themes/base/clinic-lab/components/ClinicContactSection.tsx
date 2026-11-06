@@ -167,34 +167,6 @@ export function ClinicContactSection() {
           </div>
         )}
 
-        {/* Dedicated SAMIQ Engine Developer Signature Bar */}
-        <div className="mt-8 p-4 rounded-2xl bg-[#E8F3F0] border border-[#C5DFD8] flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-sans">
-          <div className="text-center md:text-start space-y-1">
-            <p className="font-bold text-[#0F4C4A] text-sm">
-              يعمل بمحرك سَامِق (SAMIQ) للمتاجر الفاخرة — هل ترغب بمتجر مماثل لعلامتك التجارية؟
-            </p>
-            <p className="text-[#4A5568] text-xs">
-              منصة هندسة المتاجر الرقمية الفاخرة وتصنيف الكتالوجات السريرية بالذكاء الاصطناعي
-            </p>
-          </div>
-          <div className="flex items-center gap-3 flex-wrap justify-center">
-            <a
-              href={platformMeta?.showcasePath || '/samiq'}
-              className="min-h-[44px] px-4 rounded-xl bg-[#0F4C4A] hover:bg-[#0B3A38] text-white text-xs font-bold transition inline-flex items-center"
-            >
-              استعراض المزايا وقائمة الأسعار
-            </a>
-            <a
-              href={platformMeta?.developerTelegramUrl || 'https://t.me/KorosSenpai'}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="min-h-[44px] px-4 rounded-xl bg-white hover:bg-[#D4E5E0] text-[#0F4C4A] border border-[#C5DFD8] text-xs font-bold transition inline-flex items-center gap-1.5"
-            >
-              <span>تواصل مع المطور عبر تيليجرام (@{platformMeta?.developerTelegramHandle || 'KorosSenpai'})</span>
-            </a>
-          </div>
-        </div>
-
         {/* Bottom Micro Legal / Identity Strip */}
         <div className="mt-6 pt-4 border-t border-[#E2ECE9] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#64748B]">
           <span>© 2026 {tenant.legalName || tenant.name}. جميع الحقوق محفوظة.</span>
@@ -203,21 +175,7 @@ export function ClinicContactSection() {
               href="/account"
               className="min-h-[44px] px-2.5 rounded text-xs text-[#0F4C4A] hover:underline inline-flex items-center"
             >
-              حسابي والولاء
-            </a>
-            <span className="text-[#D4E5E0]">|</span>
-            <a
-              href="/admin"
-              className="min-h-[44px] px-2.5 rounded text-xs text-[#0F4C4A] hover:underline inline-flex items-center"
-            >
-              دخول الإدارة (Staff)
-            </a>
-            <span className="text-[#D4E5E0]">|</span>
-            <a
-              href="/platform"
-              className="min-h-[44px] px-2.5 rounded text-xs text-[#0F4C4A] hover:underline inline-flex items-center"
-            >
-              هندسة المنصة (SAMIQ)
+              بوابة الحساب والولاء
             </a>
             <span className="text-[#D4E5E0]">|</span>
             <span className="text-[#0F4C4A] font-semibold">

@@ -384,22 +384,22 @@ function CustomerAccountContent() {
               </Link>
 
               <Link
-                href="/platform"
+                href="/"
                 className="p-5 rounded-2xl bg-white/[0.03] hover:bg-gold/10 border border-white/10 hover:border-gold/40 transition flex flex-col justify-between gap-3 group"
               >
                 <div className="space-y-1">
-                  <span className="text-xs font-sans font-bold text-gold block">
-                    استوديو هندسة منصة سامق (Platform Architecture)
+                  <span className="text-xs font-sans font-bold text-champagne block">
+                    معاينة واجهة المتجر الحية (Live Storefront)
                   </span>
                   <h3 className="text-sm sm:text-base font-serif font-bold text-ivory group-hover:text-champagne">
-                    المخطط الشجري التفاعلي للترابطات وتفعيل الميزات
+                    تصفح تجربة العميل كما تظهر للجمهور
                   </h3>
                   <p className="text-xs text-muted-lux leading-relaxed">
-                    حاسبة التسعير، إدارة المستأجرين، وحفظ التكوينات في قاعدة البيانات
+                    معاينة السلة، الفئات، البحث السريع وتفاعل الزوار على كافة الأجهزة
                   </p>
                 </div>
                 <span className="text-xs text-champagne font-bold flex items-center gap-1">
-                  فتح استوديو المنصة الشجري ←
+                  فتح واجهة المتجر ←
                 </span>
               </Link>
 
@@ -695,9 +695,9 @@ function CustomerAccountContent() {
             {authMode === 'admin' && (
               <form onSubmit={handleAdminLogin} className="space-y-4 text-xs font-sans">
                 <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 text-center space-y-1">
-                  <span className="text-xs text-gold font-bold block">دخول مشرفي وملاك المنصة</span>
+                  <span className="text-xs text-gold font-bold block">دخول إدارة المتجر (Store Manager)</span>
                   <p className="text-xs text-muted-lux">
-                    يتيح للمشرف فتح لوحة المتجر (/admin) ولوحة المنصة (/platform)
+                    يتيح لمدير المتجر الدخول الآمن للوحة التحكم بالمنتجات، الطلبات، المخزون والأسعار (/admin)
                   </p>
                 </div>
 
@@ -1218,6 +1218,123 @@ function CustomerAccountContent() {
             )}
           </div>
         )}
+
+        {/* ==================================================================== */}
+        {/* STORE SERVICES & EXPLORATION HUB                                    */}
+        {/* ==================================================================== */}
+        <div className="pt-6 border-t border-white/10 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <span className="text-xs font-sans font-bold text-gold block">
+                خدمات وأقسام المتجر المعتمدة
+              </span>
+              <h3 className="text-base sm:text-lg font-serif font-bold text-ivory">
+                بوابات الفحص والمحتوى الطبي والاستشارات
+              </h3>
+            </div>
+            <span className="text-xs text-muted-lux font-sans hidden sm:block">
+              وصول سريع لكافة أدوات المتجر
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <Link
+              href="/authenticity-hub"
+              className="p-4 rounded-2xl bg-white/[0.03] hover:bg-gold/10 border border-white/10 hover:border-gold/30 transition flex flex-col justify-between gap-3 group"
+            >
+              <div className="space-y-1.5">
+                <div className="w-8 h-8 rounded-xl bg-gold/15 flex items-center justify-center text-champagne">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    <polyline points="9 12 11 14 15 10" />
+                  </svg>
+                </div>
+                <h4 className="text-sm font-serif font-bold text-ivory group-hover:text-champagne transition-colors">
+                  مركز فحص الأصالة
+                </h4>
+                <p className="text-xs text-muted-lux leading-relaxed">
+                  فحص الباركود والكود المرجعي للتحقق من أصل المستحضر
+                </p>
+              </div>
+              <span className="text-xs text-champagne font-bold flex items-center gap-1 pt-1">
+                دخول المركز ←
+              </span>
+            </Link>
+
+            <Link
+              href="/blog"
+              className="p-4 rounded-2xl bg-white/[0.03] hover:bg-gold/10 border border-white/10 hover:border-gold/30 transition flex flex-col justify-between gap-3 group"
+            >
+              <div className="space-y-1.5">
+                <div className="w-8 h-8 rounded-xl bg-gold/15 flex items-center justify-center text-champagne">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                  </svg>
+                </div>
+                <h4 className="text-sm font-serif font-bold text-ivory group-hover:text-champagne transition-colors">
+                  المدونة التحريرية
+                </h4>
+                <p className="text-xs text-muted-lux leading-relaxed">
+                  أسرار العناية ودليل حماية البشرة في مناخ اليمن
+                </p>
+              </div>
+              <span className="text-xs text-champagne font-bold flex items-center gap-1 pt-1">
+                تصفح المقالات ←
+              </span>
+            </Link>
+
+            <Link
+              href="/bookings"
+              className="p-4 rounded-2xl bg-white/[0.03] hover:bg-gold/10 border border-white/10 hover:border-gold/30 transition flex flex-col justify-between gap-3 group"
+            >
+              <div className="space-y-1.5">
+                <div className="w-8 h-8 rounded-xl bg-gold/15 flex items-center justify-center text-champagne">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
+                  </svg>
+                </div>
+                <h4 className="text-sm font-serif font-bold text-ivory group-hover:text-champagne transition-colors">
+                  حجز استشارة جلدية
+                </h4>
+                <p className="text-xs text-muted-lux leading-relaxed">
+                  موعد فحص سريري مباشر في فرع صنعاء الرئيسي (حدة)
+                </p>
+              </div>
+              <span className="text-xs text-champagne font-bold flex items-center gap-1 pt-1">
+                حجز موعد ←
+              </span>
+            </Link>
+
+            <Link
+              href="/?tab=catalog"
+              className="p-4 rounded-2xl bg-white/[0.03] hover:bg-gold/10 border border-white/10 hover:border-gold/30 transition flex flex-col justify-between gap-3 group"
+            >
+              <div className="space-y-1.5">
+                <div className="w-8 h-8 rounded-xl bg-gold/15 flex items-center justify-center text-champagne">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="7" height="7" rx="1" />
+                    <rect x="14" y="3" width="7" height="7" rx="1" />
+                    <rect x="14" y="14" width="7" height="7" rx="1" />
+                    <rect x="3" y="14" width="7" height="7" rx="1" />
+                  </svg>
+                </div>
+                <h4 className="text-sm font-serif font-bold text-ivory group-hover:text-champagne transition-colors">
+                  كتالوج المنتجات
+                </h4>
+                <p className="text-xs text-muted-lux leading-relaxed">
+                  تصفح كافة المستحضرات الموثقة مع الفلترة الذكية
+                </p>
+              </div>
+              <span className="text-xs text-champagne font-bold flex items-center gap-1 pt-1">
+                تصفح الكتالوج ←
+              </span>
+            </Link>
+          </div>
+        </div>
       </main>
   );
 }

@@ -167,29 +167,13 @@ export function LuxuryMoreDrawer({
           <Link
             href="/account"
             onClick={onClose}
-            className="min-h-[44px] flex items-center justify-between py-2.5 text-xs font-sans text-champagne border-b border-white/5 font-bold hover:text-gold"
+            className="min-h-[44px] flex items-center justify-between py-2.5 text-xs font-sans text-champagne font-bold hover:text-gold"
           >
             <span>حسابي وتسجيل الدخول ونقاط الولاء</span>
             <span className="text-xs px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/30">
-              بوابة العملاء
+              بوابة الحساب
             </span>
           </Link>
-          <div className="grid grid-cols-2 gap-2 pt-2">
-            <Link
-              href="/admin"
-              onClick={onClose}
-              className="min-h-[44px] px-3 py-2 rounded-xl bg-white/5 hover:bg-gold/15 border border-white/10 hover:border-gold/30 text-xs font-sans text-ivory/90 hover:text-champagne flex items-center justify-center text-center transition"
-            >
-              لوحة إدارة المتجر (Admin)
-            </Link>
-            <Link
-              href="/platform"
-              onClick={onClose}
-              className="min-h-[44px] px-3 py-2 rounded-xl bg-white/5 hover:bg-gold/15 border border-white/10 hover:border-gold/30 text-xs font-sans text-ivory/90 hover:text-champagne flex items-center justify-center text-center transition"
-            >
-              لوحة منصة سامق (Platform)
-            </Link>
-          </div>
         </div>
 
         {/* 6. Quick Direct Call Button */}

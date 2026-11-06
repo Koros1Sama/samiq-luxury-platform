@@ -27,11 +27,7 @@ export function MobileAppTabBar() {
     (isHomeRoute && (mobileTab === 'authenticity' || mobileTab === 'routine')) ||
     pathname.startsWith('/authenticity-hub');
   const isCartActive = cart.isOpen;
-  const isMoreActive =
-    isMoreOpen ||
-    pathname.startsWith('/blog') ||
-    pathname.startsWith('/bookings') ||
-    pathname.startsWith('/account');
+  const isProfileActive = pathname.startsWith('/account');
 
   // Dynamic Theme Colors
   const bgStyle = isLight
@@ -258,28 +254,26 @@ export function MobileAppTabBar() {
           </span>
         </button>
 
-        {/* 5. المزيد */}
-        <button
-          type="button"
-          onClick={() => setIsMoreOpen(true)}
+        {/* 5. حسابي */}
+        <Link
+          href="/account"
           className="w-full h-full flex flex-col items-center justify-center gap-0.5 min-w-0 relative py-1 transition-colors"
-          style={{ color: isMoreActive ? activeColor : inactiveColor }}
+          style={{ color: isProfileActive ? activeColor : inactiveColor }}
         >
-          {isMoreActive && (
+          {isProfileActive && (
             <span
               className="absolute top-0 inset-x-2 h-[2.5px] rounded-full shadow-sm"
               style={{ backgroundColor: activeColor }}
             />
           )}
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={isMoreActive ? '2' : '1.5'} strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="1.5" />
-            <circle cx="12" cy="5" r="1.5" />
-            <circle cx="12" cy="19" r="1.5" />
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={isProfileActive ? '2' : '1.5'} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
           </svg>
-          <span className={`text-[11px] whitespace-nowrap leading-tight ${isMoreActive ? 'font-bold' : 'font-medium'}`}>
-            المزيد
+          <span className={`text-[11px] whitespace-nowrap leading-tight ${isProfileActive ? 'font-bold' : 'font-medium'}`}>
+            حسابي
           </span>
-        </button>
+        </Link>
       </nav>
 
       {/* Unified Mobile More Drawer */}

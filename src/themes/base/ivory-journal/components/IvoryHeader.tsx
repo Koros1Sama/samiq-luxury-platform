@@ -308,16 +308,10 @@ export function IvoryHeader({ onOpenSearch, onOpenAdvisor }: IvoryHeaderProps) {
 
             <div className="pt-4 flex items-center gap-3">
               <a
-                href="/admin"
+                href="/account"
                 className="min-h-[44px] px-4 py-2 rounded-sm bg-[#1B1612] text-[#FAF7F2] text-xs font-sans font-semibold inline-flex items-center"
               >
-                لوحة إدارة المتجر (Admin)
-              </a>
-              <a
-                href="/platform"
-                className="min-h-[44px] px-4 py-2 rounded-sm bg-[#FAF7F2] border border-[#1B1612]/30 text-[#1B1612] text-xs font-sans font-semibold inline-flex items-center"
-              >
-                لوحة منصة سامق (Platform)
+                بوابة الحساب والولاء
               </a>
             </div>
           </div>
