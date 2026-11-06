@@ -392,7 +392,7 @@ export default function SamiqShowcasePage() {
   ]);
 
   return (
-    <div className="min-h-screen bg-[#070709] text-[#FAF7F2] font-sans selection:bg-[#C9A84C]/30 selection:text-[#E8D390]">
+    <div className="min-h-screen bg-[#070709] text-[#FAF7F2] font-sans selection:bg-[#C9A84C]/30 selection:text-[#E8D390] overflow-x-hidden w-full max-w-full">
       {/* Official PDF Invoice Modal */}
       <PdfInvoiceModal
         isOpen={isPdfModalOpen}
@@ -415,7 +415,7 @@ export default function SamiqShowcasePage() {
 
       {/* Top Luxury Navigation Header */}
       <header className="sticky top-0 z-40 w-full bg-[#070709]/95 backdrop-blur-md border-b border-white/[0.08] shadow-2xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-auto min-h-[56px] sm:h-20 py-2.5 sm:py-0 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#BF953F] to-[#B38728] flex items-center justify-center text-[#070709] font-serif font-bold text-xl shadow-[0_0_15px_rgba(201,168,76,0.3)]">
               سـ

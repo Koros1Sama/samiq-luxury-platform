@@ -64,6 +64,12 @@ export default function PlatformSuperAdminPage() {
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
   const [isHudCollapsed, setIsHudCollapsed] = useState(false);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 640) {
+      setIsHudCollapsed(true);
+    }
+  }, []);
+
   // Anchoring & Multiplier Pricing Engine State
   const [priceMultiplier, setPriceMultiplier] = useState<number>(1.5);
   const [isDiscountEnabled, setIsDiscountEnabled] = useState<boolean>(true);
@@ -923,7 +929,7 @@ export default function PlatformSuperAdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-obsidian text-ivory font-sans pb-20">
+    <div className="min-h-screen bg-obsidian text-ivory font-sans pb-20 overflow-x-hidden w-full max-w-full">
       {/* Official PDF Invoice Modal */}
       <PdfInvoiceModal
         isOpen={isInvoiceModalOpen}
@@ -948,8 +954,8 @@ export default function PlatformSuperAdminPage() {
 
       {/* Top Header */}
       <header className="sticky top-0 z-30 w-full bg-[#070709]/95 backdrop-blur-md border-b border-white/[0.08] shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-auto min-h-[56px] sm:h-20 py-2.5 sm:py-0 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
             <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-[#BF953F] to-[#B38728] flex items-center justify-center text-obsidian-dark font-serif font-bold text-xl shadow-[0_0_15px_rgba(201,168,76,0.3)]">
               سـ
             </div>
@@ -3004,7 +3010,7 @@ export default function PlatformSuperAdminPage() {
         {isHudCollapsed ? (
           <aside
             aria-label="الشارة الطافية الذكية للتسعير الحي"
-            className="fixed bottom-4 left-6 z-40 bg-[#0e0d13]/95 backdrop-blur-xl border border-gold/50 shadow-[0_10px_35px_rgba(0,0,0,0.7),0_0_20px_rgba(201,168,76,0.25)] rounded-full px-3.5 py-1.5 flex items-center gap-2.5 transition-all duration-300 animate-fadeIn"
+            className="fixed bottom-3 left-3 sm:bottom-4 sm:left-6 z-40 max-w-[calc(100vw-24px)] bg-[#0e0d13]/95 backdrop-blur-xl border border-gold/50 shadow-[0_10px_35px_rgba(0,0,0,0.7),0_0_20px_rgba(201,168,76,0.25)] rounded-full px-3 py-1.5 flex items-center gap-2 transition-all duration-300 animate-fadeIn"
             dir="rtl"
           >
             <span className="w-2 h-2 rounded-full bg-gold animate-pulse shrink-0" />
@@ -3013,7 +3019,7 @@ export default function PlatformSuperAdminPage() {
             <span className="text-[11px] font-mono font-bold text-emerald-400 border-x border-white/10 px-2">
               ${selectedProjectAnnualTotal}/سنة
             </span>
-            <span className="text-[10px] font-sans font-bold text-muted-lux">
+            <span className="text-[10px] font-sans font-bold text-muted-lux hidden xs:inline">
               {selectedFeatures.length} ميزة
             </span>
             <button
@@ -3028,7 +3034,7 @@ export default function PlatformSuperAdminPage() {
         ) : (
           <aside
             aria-label="الشارة الطافية الذكية للتسعير الحي"
-            className="fixed bottom-4 left-6 z-40 max-w-[95vw] bg-[#0e0d13]/95 backdrop-blur-xl border border-gold/50 shadow-[0_10px_35px_rgba(0,0,0,0.7),0_0_20px_rgba(201,168,76,0.25)] rounded-2xl sm:rounded-full px-3.5 py-2 flex flex-wrap items-center gap-3 transition-all duration-300 animate-fadeIn"
+            className="fixed bottom-3 left-3 right-3 sm:right-auto sm:bottom-4 sm:left-6 z-40 max-w-[calc(100vw-24px)] sm:max-w-[95vw] bg-[#0e0d13]/95 backdrop-blur-xl border border-gold/50 shadow-[0_10px_35px_rgba(0,0,0,0.7),0_0_20px_rgba(201,168,76,0.25)] rounded-2xl sm:rounded-full px-3 py-2 flex flex-wrap items-center justify-between sm:justify-start gap-2 sm:gap-3 transition-all duration-300 animate-fadeIn"
             dir="rtl"
           >
             {/* Live Indicator & Multiplier */}

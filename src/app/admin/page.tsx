@@ -1606,7 +1606,7 @@ export default function MerchantAdminPage() {
   // --------------------------------------------------------------------------
 
   return (
-    <div className="min-h-screen bg-[#070709] text-ivory font-sans">
+    <div className="min-h-screen bg-[#070709] text-ivory font-sans overflow-x-hidden w-full max-w-full">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-5 start-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl bg-emerald-950/95 border border-emerald-500/40 text-emerald-300 text-xs font-sans font-bold shadow-2xl flex items-center gap-2 animate-fade-in">
@@ -1627,8 +1627,8 @@ export default function MerchantAdminPage() {
 
       {/* Top Header */}
       <header className="sticky top-0 z-30 w-full bg-[#070709]/95 backdrop-blur-md border-b border-white/[0.08]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-auto min-h-[56px] sm:h-20 py-2.5 sm:py-0 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
             <Link href="/" className="min-h-[44px] inline-flex items-center">
               <span className="text-xl font-serif font-bold text-champagne">
                 {storeName} — لكشف المقلد
@@ -1923,7 +1923,7 @@ export default function MerchantAdminPage() {
                 </div>
 
                 {/* Search & Category Filter */}
-                <div className="flex items-center gap-3 flex-1 lg:max-w-md">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 flex-1 lg:max-w-md">
                   <select
                     value={inventoryCategoryFilter}
                     onChange={(e) => setInventoryCategoryFilter(e.target.value)}
