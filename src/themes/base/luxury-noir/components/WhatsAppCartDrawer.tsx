@@ -304,9 +304,8 @@ export function WhatsAppCartDrawer(props: WhatsAppCartDrawerProps) {
                 </div>
               </div>
 
-              {/* Payment Method Selector (Gated by payment_gateways feature) */}
-              {features?.payment_gateways !== false && (
-                <div className="pt-2 space-y-2">
+              {/* Payment Method Selector */}
+              <div className="pt-2 space-y-2">
                   <label className="text-xs font-semibold text-champagne block">
                     طريقة الدفع والتأكيد:
                   </label>
@@ -357,41 +356,57 @@ export function WhatsAppCartDrawer(props: WhatsAppCartDrawerProps) {
                     </button>
                   </div>
 
-                  {/* Merchant Wallet Information Box */}
+                  {/* Merchant Wallet Information & Mutual-Trust Handshake Box */}
                   {paymentMethod !== 'cod' && paymentMethod !== 'whatsapp' && (
-                    <div className="p-3.5 rounded-2xl bg-gold/10 border border-gold/30 text-xs font-sans space-y-1.5 animate-fadeIn">
-                      <div className="flex items-center justify-between text-champagne font-bold">
-                        <span>
-                          {paymentMethod === 'kuraimi'
-                            ? 'بيانات التحويل — بنك الكريمي (ام فلوس):'
-                            : paymentMethod === 'floosak'
-                            ? 'بيانات التحويل — محفظة فلوسك:'
-                            : 'بيانات التحويل — محفظة جيب / جوالي:'}
-                        </span>
-                        <span className="font-mono text-gold text-sm font-extrabold">
-                          {paymentMethod === 'kuraimi'
-                            ? kuraimiAccount
-                            : paymentMethod === 'floosak'
-                            ? floosakAccount
-                            : jeebAccount}
-                        </span>
+                    <div className="p-3.5 rounded-2xl bg-gold/10 border border-gold/30 text-xs font-sans space-y-2 animate-fadeIn">
+                      <div className="flex items-center gap-1.5 text-champagne font-bold text-xs">
+                        <span className="w-2 h-2 rounded-full bg-gold" />
+                        <span>ضمان الثقة المتبادلة — الدفع بعد الاتفاق عبر واتساب</span>
                       </div>
-                      <p className="text-ivory/80 text-[11px]">
-                        اسم صاحب الحساب: <span className="font-semibold text-ivory">{accountHolder}</span>
-                      </p>
-                      <div className="pt-1">
-                        <input
-                          type="text"
-                          value={transferRef}
-                          onChange={(e) => setTransferRef(e.target.value)}
-                          placeholder="رقم إشعار الحوالة (اختياري)"
-                          className="w-full min-h-[38px] px-3 rounded-lg bg-white/5 border border-white/10 text-xs text-ivory outline-none focus:border-gold/50 font-mono"
-                        />
+
+                      <div className="p-2.5 rounded-xl bg-black/40 border border-white/5 space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-muted-lux">
+                            {paymentMethod === 'kuraimi'
+                              ? 'حساب بنك الكريمي (ام فلوس):'
+                              : paymentMethod === 'floosak'
+                              ? 'حساب محفظة فلوسك:'
+                              : 'حساب محفظة جيب / جوالي:'}
+                          </span>
+                          <span className="font-mono text-gold text-sm font-extrabold dir-ltr">
+                            {paymentMethod === 'kuraimi'
+                              ? kuraimiAccount
+                              : paymentMethod === 'floosak'
+                              ? floosakAccount
+                              : jeebAccount}
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-ivory/80">
+                          اسم المستفيد: <span className="font-semibold text-ivory">{accountHolder}</span>
+                        </div>
                       </div>
+
+                      <div className="p-2 rounded-lg bg-emerald-950/40 border border-emerald-500/25 text-[11px] text-emerald-300 leading-relaxed">
+                        لا يُشترط التحويل الآن قبل المحادثة — أرسل طلبك أولاً عبر واتساب لتأكيد توفر المستحضرات وموعد المندوب، ثم حوّل المبلغ وأرسل الإشعار في المحادثة بعد الاتفاق.
+                      </div>
+
+                      <details className="text-[11px] pt-1">
+                        <summary className="cursor-pointer text-gold hover:underline font-medium select-none">
+                          + هل قمت بالتحويل مسبقاً؟ أدخل رقم الإشعار (اختياري)
+                        </summary>
+                        <div className="pt-2">
+                          <input
+                            type="text"
+                            value={transferRef}
+                            onChange={(e) => setTransferRef(e.target.value)}
+                            placeholder="أدخل رقم إشعار الحوالة (اختياري)..."
+                            className="w-full min-h-[38px] px-3 rounded-lg bg-white/5 border border-white/10 text-xs text-ivory outline-none focus:border-gold/50 font-mono"
+                          />
+                        </div>
+                      </details>
                     </div>
                   )}
                 </div>
-              )}
             </>
           )}
         </div>

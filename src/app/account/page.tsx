@@ -38,6 +38,7 @@ export default function CustomerAccountPage() {
 function CustomerAccountContent() {
   const { palette, isLight, isEn, activeTheme } = useSubpageTheme();
   const sf = useOptionalStorefront();
+  const isDemoMode = sf?.isDemoMode ?? false;
 
   // Session & Role State
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -674,18 +675,20 @@ function CustomerAccountContent() {
                   {isSubmitting ? 'جارٍ التحقق...' : 'تسجيل الدخول إلى حسابي'}
                 </button>
 
-                {/* 1-Click Demo Customer Quick Login */}
-                <div className="pt-3 border-t border-white/10 text-center space-y-2">
-                  <span className="text-xs text-muted-lux block">للتجربة السريعة بنقرة واحدة:</span>
-                  <button
-                    type="button"
-                    onClick={handleQuickDemoCustomer}
-                    className="w-full min-h-[44px] py-2.5 rounded-xl bg-white/5 hover:bg-gold/15 text-champagne border border-gold/30 text-xs font-semibold transition inline-flex items-center justify-center gap-1.5"
-                  >
-                    <span>دخول سريع كعميلة مسجلة — ريم العنسي (350 نقطة)</span>
-                    <span>←</span>
-                  </button>
-                </div>
+                {/* 1-Click Demo Customer Quick Login (Only visible in Demo Mode ?demo=1) */}
+                {isDemoMode && (
+                  <div className="pt-3 border-t border-white/10 text-center space-y-2">
+                    <span className="text-xs text-muted-lux block">للتجربة السريعة بنقرة واحدة (وضع تجريبي):</span>
+                    <button
+                      type="button"
+                      onClick={handleQuickDemoCustomer}
+                      className="w-full min-h-[44px] py-2.5 rounded-xl bg-white/5 hover:bg-gold/15 text-champagne border border-gold/30 text-xs font-semibold transition inline-flex items-center justify-center gap-1.5"
+                    >
+                      <span>دخول سريع كعميلة مسجلة — ريم العنسي (350 نقطة)</span>
+                      <span>←</span>
+                    </button>
+                  </div>
+                )}
               </form>
             )}
 
@@ -721,19 +724,21 @@ function CustomerAccountContent() {
                   {isSubmitting ? 'جارٍ التحقق...' : 'دخول لوحة الإدارة المشتركة'}
                 </button>
 
-                <div className="pt-2 text-center">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAdminPasscode('miftah2026');
-                      setIsAdminLoggedIn(true);
-                      localStorage.setItem('samiq_admin_auth', 'true');
-                    }}
-                    className="text-xs text-gold hover:underline inline-flex items-center min-h-[40px] px-3"
-                  >
-                    استخدام الرمز الافتراضي السريع (miftah2026)
-                  </button>
-                </div>
+                {isDemoMode && (
+                  <div className="pt-2 text-center">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAdminPasscode('miftah2026');
+                        setIsAdminLoggedIn(true);
+                        localStorage.setItem('samiq_admin_auth', 'true');
+                      }}
+                      className="text-xs text-gold hover:underline inline-flex items-center min-h-[40px] px-3"
+                    >
+                      استخدام الرمز الافتراضي السريع (miftah2026)
+                    </button>
+                  </div>
+                )}
               </form>
             )}
           </div>

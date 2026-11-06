@@ -3,6 +3,9 @@ import {
   getAllOrders,
   createOrder,
   updateOrderStatus,
+  deductOrderStock,
+  restoreOrderStock,
+  togglePaymentVerified,
   deleteOrder,
   OrderRecord,
   getDb,
@@ -153,19 +156,36 @@ export async function PUT(req: Request) {
     const raw = await req.json();
     const body = sanitizeObjectDeep(raw);
     const orderId = sanitizeText(body.id || body.orderId || '', 100);
+    const action = sanitizeText(body.action || '', 50);
     const status = body.status as OrderRecord['status'];
 
-    if (!orderId || !status) {
+    if (!orderId) {
       return NextResponse.json(
-        { success: false, message: 'معرف الطلب والحالة مطلوبان' },
+        { success: false, message: 'معرف الطلب مطلوب' },
         { status: 400 }
       );
     }
 
-    const updated = updateOrderStatus(orderId, status);
+    let updated: OrderRecord | undefined;
+
+    if (action === 'deduct_order_stock') {
+      updated = deductOrderStock(orderId);
+    } else if (action === 'restore_order_stock') {
+      updated = restoreOrderStock(orderId);
+    } else if (action === 'toggle_payment_verified') {
+      updated = togglePaymentVerified(orderId);
+    } else if (status) {
+      updated = updateOrderStatus(orderId, status);
+    } else {
+      return NextResponse.json(
+        { success: false, message: 'الإجراء أو الحالة غير صالحة' },
+        { status: 400 }
+      );
+    }
+
     if (!updated) {
       return NextResponse.json(
-        { success: false, message: 'الطلب غير موجود' },
+        { success: false, message: 'الطلب غير موجود أو تعذر تحديثه' },
         { status: 404 }
       );
     }

@@ -8,6 +8,7 @@ import {
   getAllReviews,
   getAllBranches,
   convertStoreCurrency,
+  applyIndustryPreset,
   ShippingZoneRecord,
   BranchRecord,
 } from '@/core/db/store';
@@ -84,15 +85,16 @@ export async function POST(req: Request) {
 
     if (action === 'apply_client_preset') {
       const presetKey = sanitizeText(body.presetKey || '', 100);
-      const presetData = CLIENT_INDUSTRY_PRESETS[presetKey];
-      if (!presetData) {
+      const result = applyIndustryPreset(presetKey);
+      if (!result) {
         return NextResponse.json({ success: false, message: 'النمط المختار غير معروف' }, { status: 400 });
       }
 
-      const updated = updateTenant(presetData);
       return NextResponse.json({
         success: true,
-        tenant: maskSensitiveTenantSecrets(updated, true),
+        tenant: maskSensitiveTenantSecrets(result.tenant, true),
+        categories: result.categories,
+        products: result.products,
         preset: presetKey,
       });
     }

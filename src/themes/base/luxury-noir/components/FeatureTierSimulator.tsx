@@ -225,6 +225,11 @@ export function FeatureTierSimulator(props: FeatureTierSimulatorProps) {
     onFeaturesUpdate(updatedFlags);
   };
 
+  // Only render simulator when user is explicitly in Demo Mode (?demo=1 or session active)
+  if (!sf.isDemoMode) {
+    return null;
+  }
+
   return (
     <div className="w-full bg-[#111016] border-b border-gold/40 text-ivory transition-all z-20">
       <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between gap-3 flex-wrap">
@@ -304,6 +309,16 @@ export function FeatureTierSimulator(props: FeatureTierSimulatorProps) {
             className="min-h-[44px] px-3.5 py-1.5 rounded-full bg-white/5 hover:bg-gold/15 border border-gold/30 text-xs font-semibold text-champagne transition flex items-center justify-center"
           >
             {isExpanded ? 'إخفاء الباقات ▲' : 'تبديل المزايا والباقات ▼'}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => sf.exitDemoMode?.()}
+            className="min-h-[44px] px-3 py-1.5 rounded-full bg-rose-950/40 hover:bg-rose-900/60 border border-rose-500/30 text-rose-300 text-xs font-semibold transition inline-flex items-center gap-1"
+            title="إغلاق وضع العرض التجريبي والعودة للوضع الطبيعي"
+          >
+            <span>إغلاق العرض التجريبي</span>
+            <span>×</span>
           </button>
         </div>
       </div>

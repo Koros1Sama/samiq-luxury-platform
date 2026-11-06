@@ -231,9 +231,8 @@ export function IvoryCartDrawer() {
                 </div>
               )}
 
-              {/* Payment Method Selector (Gated by payment_gateways feature) */}
-              {features?.payment_gateways !== false && (
-                <div className="space-y-2 pt-2">
+              {/* Payment Method Selector */}
+              <div className="space-y-2 pt-2">
                   <label className="text-xs font-sans font-bold text-[#1B1612] block">
                     طريقة الدفع:
                   </label>
@@ -254,41 +253,57 @@ export function IvoryCartDrawer() {
                     ))}
                   </div>
 
-                  {/* Merchant Wallet Information Box */}
+                  {/* Merchant Wallet Information & Mutual-Trust Handshake Box */}
                   {checkout.paymentMethod !== 'cod' && (
-                    <div className="p-3.5 rounded-lg bg-[#FAF5EC] border border-[#E8E2D8] text-xs font-sans space-y-1.5 animate-fade-in">
-                      <div className="flex items-center justify-between text-[#1B1612] font-bold">
-                        <span>
-                          {checkout.paymentMethod === 'kuraimi'
-                            ? 'بيانات التحويل — بنك الكريمي (ام فلوس):'
-                            : checkout.paymentMethod === 'floosak'
-                            ? 'بيانات التحويل — محفظة فلوسك:'
-                            : 'بيانات التحويل — محفظة جيب / جوالي:'}
-                        </span>
-                        <span className="font-mono text-[#8C5E3C] text-sm font-extrabold">
-                          {checkout.paymentMethod === 'kuraimi'
-                            ? checkout.kuraimiAccount
-                            : checkout.paymentMethod === 'floosak'
-                            ? checkout.floosakAccount
-                            : checkout.jeebAccount}
-                        </span>
+                    <div className="p-3.5 rounded-lg bg-[#FAF5EC] border border-[#E8E2D8] text-xs font-sans space-y-2 animate-fade-in">
+                      <div className="flex items-center gap-1.5 text-[#1B1612] font-bold text-xs">
+                        <span className="w-2 h-2 rounded-full bg-[#8C5E3C]" />
+                        <span>ضمان الثقة المتبادلة — الدفع بعد الاتفاق عبر واتساب</span>
                       </div>
-                      <p className="text-[#554D46] text-[11px]">
-                        اسم صاحب الحساب: <span className="font-semibold text-[#1B1612]">{checkout.accountHolder}</span>
-                      </p>
-                      <div className="pt-1">
-                        <input
-                          type="text"
-                          value={checkout.transferRef}
-                          onChange={(e) => checkout.setTransferRef(e.target.value)}
-                          placeholder="رقم إشعار الحوالة (اختياري)"
-                          className="w-full h-9 px-3 rounded border border-[#E8E2D8] bg-white text-xs text-[#1B1612] outline-none font-mono"
-                        />
+
+                      <div className="p-2.5 rounded bg-white border border-[#E8E2D8] space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-[#554D46]">
+                            {checkout.paymentMethod === 'kuraimi'
+                              ? 'حساب بنك الكريمي (ام فلوس):'
+                              : checkout.paymentMethod === 'floosak'
+                              ? 'حساب محفظة فلوسك:'
+                              : 'حساب محفظة جيب / جوالي:'}
+                          </span>
+                          <span className="font-mono text-[#8C5E3C] text-sm font-extrabold dir-ltr">
+                            {checkout.paymentMethod === 'kuraimi'
+                              ? checkout.kuraimiAccount
+                              : checkout.paymentMethod === 'floosak'
+                              ? checkout.floosakAccount
+                              : checkout.jeebAccount}
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-[#554D46]">
+                          اسم المستفيد: <span className="font-semibold text-[#1B1612]">{checkout.accountHolder}</span>
+                        </div>
                       </div>
+
+                      <div className="p-2 rounded bg-[#EBF3EF] border border-[#C5DFD8] text-[11px] text-[#0F4C4A] leading-relaxed">
+                        لا يُشترط التحويل الآن قبل المحادثة — أرسل طلبك أولاً عبر واتساب لتأكيد توفر المستحضرات وموعد المندوب، ثم حوّل المبلغ وأرسل الإشعار في المحادثة بعد الاتفاق.
+                      </div>
+
+                      <details className="text-[11px] pt-1">
+                        <summary className="cursor-pointer text-[#8C5E3C] hover:underline font-medium select-none">
+                          + هل قمت بالتحويل مسبقاً؟ أدخل رقم الإشعار (اختياري)
+                        </summary>
+                        <div className="pt-2">
+                          <input
+                            type="text"
+                            value={checkout.transferRef}
+                            onChange={(e) => checkout.setTransferRef(e.target.value)}
+                            placeholder="أدخل رقم إشعار الحوالة (اختياري)..."
+                            className="w-full h-9 px-3 rounded border border-[#E8E2D8] bg-white text-xs text-[#1B1612] outline-none font-mono"
+                          />
+                        </div>
+                      </details>
                     </div>
                   )}
                 </div>
-              )}
             </>
           )}
         </div>

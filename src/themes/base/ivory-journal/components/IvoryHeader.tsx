@@ -170,13 +170,13 @@ export function IvoryHeader({ onOpenSearch, onOpenAdvisor }: IvoryHeaderProps) {
             </svg>
           </a>
 
-          {/* Bag Trigger */}
+          {/* Bag Trigger (Hidden on mobile < md where bottom MobileAppTabBar already provides the cart) */}
           <button
             type="button"
             data-testid="cart-button"
             aria-label="حقيبة المشتريات"
             onClick={() => cart.open()}
-            className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center text-[#1B1612] hover:text-[#5E6B5A] transition-colors relative rounded-sm"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] hidden md:flex items-center justify-center text-[#1B1612] hover:text-[#5E6B5A] transition-colors relative rounded-sm"
           >
             <BagIcon size={21} color="#1B1612" />
             {cart.count > 0 && (

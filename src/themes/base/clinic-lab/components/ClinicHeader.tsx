@@ -87,12 +87,12 @@ export function ClinicHeader({ onOpenAdvisor, onOpenCart }: ClinicHeaderProps) {
             <span className="hidden md:inline">{isEn ? 'Profile' : 'الملف الطبي'}</span>
           </a>
 
-          {/* Cart Drawer Trigger */}
+          {/* Cart Drawer Trigger (Hidden on mobile < md where bottom MobileAppTabBar already provides the cart) */}
           <button
             type="button"
             data-testid="cart-btn"
             onClick={() => (onOpenCart ? onOpenCart() : cart.open())}
-            className="relative min-w-[40px] min-h-[40px] rounded-lg bg-[#0F4C4A] text-white hover:bg-[#0B3A38] inline-flex items-center justify-center p-2 focus:outline-hidden focus:ring-2 focus:ring-[#0F4C4A] transition-colors"
+            className="relative min-w-[40px] min-h-[40px] rounded-lg bg-[#0F4C4A] text-white hover:bg-[#0B3A38] hidden md:inline-flex items-center justify-center p-2 focus:outline-hidden focus:ring-2 focus:ring-[#0F4C4A] transition-colors"
             title="سلة المشتريات"
             aria-label={`سلة المشتريات: ${cart.count} منتجات`}
           >

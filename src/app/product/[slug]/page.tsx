@@ -303,9 +303,9 @@ function ProductDetailContent() {
                   <span
                     className="px-2.5 py-1 rounded text-xs font-sans font-bold border"
                     style={{
-                      backgroundColor: product.stockQuantity > 0 ? '#052e16' : '#4c0519',
-                      borderColor: product.stockQuantity > 0 ? '#22c55e' : '#f43f5e',
-                      color: product.stockQuantity > 0 ? '#86efac' : '#fecdd3',
+                      backgroundColor: product.stockQuantity > 0 ? '#052e16' : '#451a03',
+                      borderColor: product.stockQuantity > 0 ? '#22c55e' : '#f59e0b',
+                      color: product.stockQuantity > 0 ? '#86efac' : '#fde68a',
                     }}
                   >
                     {product.stockQuantity > 0
@@ -313,8 +313,8 @@ function ProductDetailContent() {
                         ? `In Stock (${product.stockQuantity} units)`
                         : `متوفر في المخزن (${product.stockQuantity} قطعة)`
                       : isEn
-                      ? 'Out of Stock'
-                      : 'نفدت الكمية حالياً'}
+                      ? 'Pre-order / Inquiry'
+                      : 'يُوفَّر بالحجز المسبق'}
                   </span>
                 )}
               </div>
@@ -361,7 +361,15 @@ function ProductDetailContent() {
                 }}
               >
                 <BagCartIcon size={18} color="currentColor" />
-                <span>{isEn ? 'Add to Shopping Bag' : 'إضافة إلى حقيبة المشتريات'}</span>
+                <span>
+                  {typeof product.stockQuantity === 'number' && product.stockQuantity <= 0
+                    ? isEn
+                      ? 'Pre-Order / Inquire via Bag'
+                      : 'احجز / استفسر عن التوفر'
+                    : isEn
+                    ? 'Add to Shopping Bag'
+                    : 'إضافة إلى حقيبة المشتريات'}
+                </span>
               </button>
               <button
                 type="button"
@@ -373,8 +381,16 @@ function ProductDetailContent() {
                   color: palette.text,
                 }}
               >
-                <WhatsAppIcon size={18} color="currentColor" />
-                <span>{isEn ? 'Direct WhatsApp Order' : 'طلب مباشر عبر واتساب'}</span>
+                <WhatsAppIcon size={18} color="#25D366" />
+                <span>
+                  {typeof product.stockQuantity === 'number' && product.stockQuantity <= 0
+                    ? isEn
+                      ? 'Inquire on WhatsApp'
+                      : 'استفسار وتأكيد الحجز عبر واتساب'
+                    : isEn
+                    ? 'Order via WhatsApp'
+                    : 'طلب فوري عبر واتساب'}
+                </span>
               </button>
             </div>
 

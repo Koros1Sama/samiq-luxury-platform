@@ -51,6 +51,43 @@ function CloseIcon({ className = 'w-2.5 h-2.5' }: { className?: string }) {
 }
 
 export default function PlatformSuperAdminPage() {
+  // Master Owner Passcode Auth State
+  const [isOwnerAuthenticated, setIsOwnerAuthenticated] = useState<boolean>(false);
+  const [passcodeAttempt, setPasscodeAttempt] = useState<string>('');
+  const [passcodeError, setPasscodeError] = useState<string>('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const isAuth = localStorage.getItem('samiq_platform_owner_auth') === 'true';
+      const urlParams = new URLSearchParams(window.location.search);
+      const keyParam = urlParams.get('key') || urlParams.get('passcode');
+      if (isAuth || keyParam === 'samiq2026' || keyParam === 'miftah2026') {
+        setIsOwnerAuthenticated(true);
+        localStorage.setItem('samiq_platform_owner_auth', 'true');
+      }
+    }
+  }, []);
+
+  const handleUnlockStudio = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passcodeAttempt === 'samiq2026' || passcodeAttempt === 'miftah2026') {
+      setIsOwnerAuthenticated(true);
+      setPasscodeError('');
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('samiq_platform_owner_auth', 'true');
+      }
+    } else {
+      setPasscodeError('رمز المرور غير صحيح. يرجى إدخال الرمز المعتمد للمؤسس.');
+    }
+  };
+
+  const handleLockStudio = () => {
+    setIsOwnerAuthenticated(false);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('samiq_platform_owner_auth');
+    }
+  };
+
   // Fleet of Projects State
   const [projects, setProjects] = useState<SamiqProjectRecord[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string>('proj-miftah');
@@ -928,6 +965,72 @@ export default function PlatformSuperAdminPage() {
     );
   };
 
+  if (!isOwnerAuthenticated) {
+    return (
+      <main
+        dir="rtl"
+        className="min-h-screen bg-[#070709] text-[#FAF7F2] font-sans flex items-center justify-center p-4 relative overflow-hidden"
+      >
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(201,168,76,0.08)_0%,transparent_70%)] pointer-events-none" />
+
+        <div className="w-full max-w-md p-8 rounded-3xl bg-[#0E0E12] border border-[#C9A84C]/30 shadow-[0_12px_40px_rgba(0,0,0,0.8)] relative z-10 space-y-6 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#BF953F] to-[#B38728] mx-auto flex items-center justify-center text-obsidian-dark font-serif font-bold text-2xl shadow-[0_0_25px_rgba(201,168,76,0.4)]">
+            سـ
+          </div>
+
+          <div className="space-y-2">
+            <h1 className="text-xl font-serif font-bold text-ivory">
+              استوديو سَامِق — منصة الأسطول والتسعير الفاخر
+            </h1>
+            <p className="text-xs text-muted-lux leading-relaxed">
+              هذه المنطقة مغلقة ومخصصة حصرياً للمؤسس والمطور الرئيسي لإدارة أسعار المنصة، حاسبة PDF، وتكوين الأسطول.
+            </p>
+          </div>
+
+          <form onSubmit={handleUnlockStudio} className="space-y-4 text-start">
+            <div className="space-y-1.5">
+              <label className="text-xs text-gold font-bold block">
+                رمز مرور المؤسس (Master Passcode):
+              </label>
+              <input
+                type="password"
+                value={passcodeAttempt}
+                onChange={(e) => {
+                  setPasscodeAttempt(e.target.value);
+                  if (passcodeError) setPasscodeError('');
+                }}
+                placeholder="أدخل رمز المرور السري..."
+                className="w-full min-h-[46px] px-4 rounded-xl bg-white/5 border border-white/10 focus:border-gold text-ivory text-sm outline-none transition"
+                autoFocus
+              />
+            </div>
+
+            {passcodeError && (
+              <p className="text-xs text-rose-400 font-semibold">{passcodeError}</p>
+            )}
+
+            <button
+              type="submit"
+              className="w-full min-h-[46px] rounded-xl bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-obsidian-dark font-bold text-sm hover:brightness-110 shadow-lg transition"
+            >
+              فتح استوديو سَامِق
+            </button>
+          </form>
+
+          <div className="pt-2 border-t border-white/5">
+            <Link
+              href="/"
+              className="text-xs text-muted-lux hover:text-champagne transition inline-flex items-center gap-1"
+            >
+              <span>←</span>
+              <span>العودة إلى متجر مفتاح الجمال</span>
+            </Link>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-obsidian text-ivory font-sans pb-20 overflow-x-hidden w-full max-w-full">
       {/* Official PDF Invoice Modal */}
@@ -1021,6 +1124,18 @@ export default function PlatformSuperAdminPage() {
               <span>معاينة المتجر الحي</span>
               <span>←</span>
             </Link>
+            <button
+              type="button"
+              onClick={handleLockStudio}
+              className="min-h-[44px] px-3 py-2 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-500/30 text-xs font-bold transition inline-flex items-center gap-1.5"
+              title="قفل الاستوديو والعودة لشاشة رمز المرور"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+              <span>قفل الاستوديو</span>
+            </button>
           </div>
         </div>
       </header>

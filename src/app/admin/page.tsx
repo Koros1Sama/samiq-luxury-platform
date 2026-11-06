@@ -62,6 +62,14 @@ export default function MerchantAdminPage() {
   const [passcode, setPasscode] = useState('');
   const [authError, setAuthError] = useState('');
   const [editingBlogId, setEditingBlogId] = useState<string | null>(null);
+  const [isDemoMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        return window.location.search.includes('demo=1') || sessionStorage.getItem('samiq_demo_mode') === 'true';
+      } catch {}
+    }
+    return false;
+  });
 
   // Active Tab
   const [activeTab, setActiveTab] = useState<
@@ -510,6 +518,8 @@ export default function MerchantAdminPage() {
       if (data.success && data.tenant) {
         showToast(`تم تطبيق نمط العلامة: ${data.tenant.name}`);
         fetchAdminStoreData();
+        fetchProducts();
+        fetchCategories();
       }
     } catch (err) {
       showToast('فشل تطبيق النمط المختار');
@@ -1043,6 +1053,49 @@ export default function MerchantAdminPage() {
   // --------------------------------------------------------------------------
   // ORDERS & POS SALES
   // --------------------------------------------------------------------------
+
+  const getPaymentMethodLabelAr = (method?: string) => {
+    switch (method) {
+      case 'kuraimi': return 'حساب الكريمي المميز';
+      case 'jawali': return 'محفظة جوالي';
+      case 'floosak': return 'محفظة فلوسك';
+      case 'cod': return 'الدفع عند الاستلام (COD)';
+      case 'mada': return 'مدى / بطاقة مصرفية';
+      case 'apple_pay': return 'Apple Pay';
+      case 'whatsapp':
+      default:
+        return 'اتفاق واتساب المباشر';
+    }
+  };
+
+  const handleOrderAction = async (
+    orderId: string,
+    action: 'deduct_order_stock' | 'restore_order_stock' | 'toggle_payment_verified'
+  ) => {
+    try {
+      const res = await fetch('/api/store/orders', {
+        method: 'PUT',
+        headers: ADMIN_FETCH_HEADERS,
+        body: JSON.stringify({ id: orderId, action }),
+      });
+      const data = await res.json();
+      if (data.success && data.order) {
+        setOrders((prev) => prev.map((o) => (o.id === orderId ? data.order : o)));
+        fetchProducts();
+        if (action === 'deduct_order_stock') {
+          showToast('تم خصم كميات الطلب من المخزون بنجاح');
+        } else if (action === 'restore_order_stock') {
+          showToast('تم إرجاع كميات الطلب إلى المخزون');
+        } else if (action === 'toggle_payment_verified') {
+          showToast(data.order.paymentVerified ? 'تم تأكيد استلام الدفع والاتفاق' : 'تم إلغاء تأكيد الدفع');
+        }
+      } else {
+        showToast(data.message || 'فشل تحديث الطلب');
+      }
+    } catch (err) {
+      showToast('حدث خطأ أثناء تحديث الطلب');
+    }
+  };
 
   const handleOrderStatusChange = async (orderId: string, newStatus: OrderRecord['status']) => {
     try {
@@ -1675,15 +1728,17 @@ export default function MerchantAdminPage() {
             </button>
           </form>
 
-          <div className="pt-2 border-t border-white/10 text-center">
-            <button
-              type="button"
-              onClick={handleQuickDemoLogin}
-              className="min-h-[44px] text-xs text-champagne hover:underline inline-flex items-center"
-            >
-              دخول سريع لتجربة لوحة التحكم (عرض تجريبي)
-            </button>
-          </div>
+          {isDemoMode && (
+            <div className="pt-2 border-t border-white/10 text-center">
+              <button
+                type="button"
+                onClick={handleQuickDemoLogin}
+                className="min-h-[44px] text-xs text-champagne hover:underline inline-flex items-center"
+              >
+                دخول سريع لتجربة لوحة التحكم (عرض تجريبي)
+              </button>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -2665,6 +2720,79 @@ export default function MerchantAdminPage() {
                           <span>({formatCurrency(item.unitPrice?.YER || 0, 'YER')})</span>
                         </div>
                       ))}
+                    </div>
+
+                    {/* Method & Reference Badges */}
+                    <div className="flex items-center gap-2 flex-wrap pt-1">
+                      <span className="text-[11px] px-2 py-0.5 rounded bg-white/5 text-muted-lux border border-white/10 font-sans">
+                        طريقة الدفع: {getPaymentMethodLabelAr(o.paymentMethod)}
+                      </span>
+                      {o.paymentReference && (
+                        <span className="text-[11px] px-2 py-0.5 rounded bg-gold/10 text-gold border border-gold/30 font-mono font-bold">
+                          رقم إشعار الحوالة: {o.paymentReference}
+                        </span>
+                      )}
+                      {o.items?.some((it) => it.title.includes('حجز')) && (
+                        <span className="text-[11px] px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30 font-bold">
+                          طلب حجز مسبق
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Mutual-Trust Handshake Controls */}
+                    <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-white/5">
+                      {/* Payment Verification Handshake */}
+                      {o.paymentVerified ? (
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs px-2.5 py-1 rounded-xl bg-emerald-950/70 text-emerald-300 border border-emerald-500/40 font-bold flex items-center gap-1.5">
+                            <svg className="w-3.5 h-3.5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            <span>تم تأكيد الاتفاق واستلام الدفع</span>
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleOrderAction(o.id, 'toggle_payment_verified')}
+                            className="text-[11px] px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-muted-lux transition"
+                            title="إلغاء تأكيد الدفع"
+                          >
+                            تراجع ↺
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleOrderAction(o.id, 'toggle_payment_verified')}
+                          className="min-h-[36px] px-3 py-1 rounded-xl bg-gradient-to-r from-cyan-950/50 to-blue-950/50 hover:from-cyan-900/60 hover:to-blue-900/60 text-cyan-300 border border-cyan-500/30 hover:border-cyan-400 text-xs font-bold transition flex items-center gap-1.5"
+                        >
+                          <svg className="w-3.5 h-3.5 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                          <span>تأكيد الاتفاق واستلام الدفع</span>
+                        </button>
+                      )}
+
+                      {/* Stock Deduction Handshake */}
+                      {o.stockDeducted ? (
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs px-2.5 py-1 rounded-xl bg-emerald-950/60 text-emerald-400 border border-emerald-500/30 font-bold flex items-center gap-1.5">
+                            <svg className="w-3.5 h-3.5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            <span>تم خصم كميات الطلب من المخزون</span>
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleOrderAction(o.id, 'restore_order_stock')}
+                            className="text-[11px] px-2.5 py-1 rounded-xl bg-amber-950/40 hover:bg-amber-900/50 text-amber-300 border border-amber-500/30 font-semibold transition flex items-center gap-1"
+                          >
+                            <span>↺</span>
+                            <span>إرجاع الكمية للمخزون</span>
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleOrderAction(o.id, 'deduct_order_stock')}
+                          className="min-h-[36px] px-3 py-1 rounded-xl bg-gradient-to-r from-[#BF953F]/20 to-[#B38728]/20 hover:from-[#BF953F]/35 hover:to-[#B38728]/35 text-champagne border border-gold/40 hover:border-gold text-xs font-bold transition flex items-center gap-1.5"
+                        >
+                          <span>خصم كميات الطلب من المخزون الآن (بعد الاتفاق)</span>
+                        </button>
+                      )}
                     </div>
 
                     {o.notes && (

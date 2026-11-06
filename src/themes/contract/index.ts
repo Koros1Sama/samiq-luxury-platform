@@ -323,6 +323,8 @@ export interface StorefrontContextValue {
   shippingZones?: any[];
   mobileTab?: 'home' | 'catalog' | 'authenticity' | 'routine';
   setMobileTab?: (tab: 'home' | 'catalog' | 'authenticity' | 'routine') => void;
+  isDemoMode?: boolean;
+  exitDemoMode?: () => void;
 }
 
 export interface ThemeLayoutProps {

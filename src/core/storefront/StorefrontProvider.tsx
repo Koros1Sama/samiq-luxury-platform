@@ -185,6 +185,36 @@ export function StorefrontProvider({
     }
   }, []);
 
+  // Demo Mode State (?demo=1 or sessionStorage 'samiq_demo_mode')
+  const [isDemoMode, setIsDemoMode] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const hasParam = window.location.search.includes('demo=1');
+        const sessionActive = sessionStorage.getItem('samiq_demo_mode') === 'true';
+        if (hasParam) {
+          sessionStorage.setItem('samiq_demo_mode', 'true');
+          return true;
+        }
+        return sessionActive;
+      } catch {}
+    }
+    return false;
+  });
+
+  const exitDemoMode = useCallback(() => {
+    setIsDemoMode(false);
+    if (typeof window !== 'undefined') {
+      try {
+        sessionStorage.removeItem('samiq_demo_mode');
+        const url = new URL(window.location.href);
+        if (url.searchParams.has('demo')) {
+          url.searchParams.delete('demo');
+          window.history.replaceState({}, '', url.toString());
+        }
+      } catch {}
+    }
+  }, []);
+
   // 3. Wishlist State
   const [wishlistIds, setWishlistIds] = useState<string[]>([]);
 
@@ -516,8 +546,12 @@ export function StorefrontProvider({
       shippingZones,
       mobileTab,
       setMobileTab,
+      isDemoMode,
+      exitDemoMode,
     }),
     [
+      isDemoMode,
+      exitDemoMode,
       tenant,
       platformMeta,
       featuresState,

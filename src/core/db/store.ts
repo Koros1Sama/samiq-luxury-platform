@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { MOCK_STOREFRONT_DATA } from '../store/mockData';
+import { CLIENT_INDUSTRY_PRESETS } from '@/core/tenant/presets';
 import { ProductCardData, ThemeCurrencyCode, TenantBrandInfo, PlatformMeta, CategoryItem } from '@/themes/contract';
 import { AuthenticityComparisonData } from '@/modules/blocks/types';
 import { PlatformPricingConfig, DEFAULT_PRICING_CONFIG } from '@/core/features/registry';
@@ -90,6 +91,8 @@ export interface OrderRecord {
   appliedCoupon?: string;
   paymentMethod: 'whatsapp' | 'cod' | 'kuraimi' | 'jawali' | 'floosak' | 'mada' | 'apple_pay';
   paymentReference?: string;
+  paymentVerified?: boolean;
+  stockDeducted?: boolean;
   status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   notes?: string;
   createdAt: string;
@@ -869,17 +872,20 @@ export function createOrder(order: Omit<OrderRecord, 'id' | 'orderNumber' | 'cre
   const db = getDb();
   const randomSuffix = Math.floor(1000 + Math.random() * 9000);
   const now = new Date().toISOString();
+  const isConfirmed = order.status === 'confirmed';
   const newOrder: OrderRecord = {
     ...order,
     id: `ord-${Date.now()}`,
     orderNumber: `MIFTAH-${randomSuffix}`,
+    paymentVerified: order.paymentVerified ?? false,
+    stockDeducted: order.stockDeducted ?? isConfirmed,
     createdAt: now,
     updatedAt: now,
   };
   db.orders.unshift(newOrder);
 
-  // If created as confirmed, automatically decrement stock
-  if (order.status === 'confirmed' && Array.isArray(order.items)) {
+  // If created as confirmed (e.g. from POS), automatically decrement stock
+  if (isConfirmed && Array.isArray(order.items)) {
     order.items.forEach((item) => {
       const prod = db.products.find((p) => p.id === item.productId);
       if (prod && typeof prod.stockQuantity === 'number') {
@@ -907,8 +913,8 @@ export function updateOrderStatus(orderId: string, status: OrderRecord['status']
     order.status = status;
     order.updatedAt = new Date().toISOString();
 
-    // If transitioning to confirmed, decrement product stock
-    if (status === 'confirmed' && prevStatus !== 'confirmed' && Array.isArray(order.items)) {
+    // If transitioning to confirmed and not yet deducted, decrement product stock
+    if (status === 'confirmed' && prevStatus !== 'confirmed' && !order.stockDeducted && Array.isArray(order.items)) {
       order.items.forEach((item) => {
         const prod = db.products.find((p) => p.id === item.productId);
         if (prod && typeof prod.stockQuantity === 'number') {
@@ -916,11 +922,101 @@ export function updateOrderStatus(orderId: string, status: OrderRecord['status']
           prod.inStock = prod.stockQuantity > 0;
         }
       });
+      order.stockDeducted = true;
     }
 
     saveDb(db);
   }
   return order;
+}
+
+export function deductOrderStock(orderId: string): OrderRecord | undefined {
+  const db = getDb();
+  const order = db.orders.find((o) => o.id === orderId || o.orderNumber === orderId);
+  if (order && !order.stockDeducted && Array.isArray(order.items)) {
+    order.items.forEach((item) => {
+      const prod = db.products.find((p) => p.id === item.productId);
+      if (prod && typeof prod.stockQuantity === 'number') {
+        prod.stockQuantity = Math.max(0, prod.stockQuantity - (item.quantity || 1));
+        prod.inStock = prod.stockQuantity > 0;
+      }
+    });
+    order.stockDeducted = true;
+    order.status = 'confirmed';
+    order.updatedAt = new Date().toISOString();
+    saveDb(db);
+  }
+  return order;
+}
+
+export function restoreOrderStock(orderId: string): OrderRecord | undefined {
+  const db = getDb();
+  const order = db.orders.find((o) => o.id === orderId || o.orderNumber === orderId);
+  if (order && order.stockDeducted && Array.isArray(order.items)) {
+    order.items.forEach((item) => {
+      const prod = db.products.find((p) => p.id === item.productId);
+      if (prod && typeof prod.stockQuantity === 'number') {
+        prod.stockQuantity = prod.stockQuantity + (item.quantity || 1);
+        prod.inStock = prod.stockQuantity > 0;
+      }
+    });
+    order.stockDeducted = false;
+    order.updatedAt = new Date().toISOString();
+    saveDb(db);
+  }
+  return order;
+}
+
+export function togglePaymentVerified(orderId: string): OrderRecord | undefined {
+  const db = getDb();
+  const order = db.orders.find((o) => o.id === orderId || o.orderNumber === orderId);
+  if (order) {
+    order.paymentVerified = !order.paymentVerified;
+    order.updatedAt = new Date().toISOString();
+    saveDb(db);
+  }
+  return order;
+}
+
+export function applyIndustryPreset(presetKey: string): {
+  tenant: TenantConfig;
+  categories: CategoryItem[];
+  products: ProductCardData[];
+} | null {
+  const preset = CLIENT_INDUSTRY_PRESETS[presetKey];
+  if (!preset) return null;
+
+  const db = getDb();
+  db.tenant = {
+    ...db.tenant,
+    name: preset.name,
+    legalName: preset.legalName,
+    tagline: preset.tagline,
+    heroTitle: preset.heroTitle,
+    heroSubtitle: preset.heroSubtitle,
+    announcementText: preset.announcementText,
+    heroBadge: preset.heroBadge,
+    themeId: preset.themeId,
+    industryPreset: presetKey,
+    brandPalette: {
+      ...db.tenant.brandPalette,
+      ...preset.brandPalette,
+    },
+  };
+
+  if (Array.isArray(preset.categories) && preset.categories.length > 0) {
+    db.categories = JSON.parse(JSON.stringify(preset.categories));
+  }
+  if (Array.isArray(preset.products) && preset.products.length > 0) {
+    db.products = JSON.parse(JSON.stringify(preset.products));
+  }
+
+  saveDb(db);
+  return {
+    tenant: db.tenant,
+    categories: db.categories,
+    products: db.products,
+  };
 }
 
 export function deleteOrder(orderId: string): boolean {

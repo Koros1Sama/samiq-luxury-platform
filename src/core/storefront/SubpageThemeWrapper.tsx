@@ -384,57 +384,59 @@ function SubpageThemeInner({
 
               {/* Action Controls: Template Switcher + Currency + Language + Cart */}
               <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                {/* Interactive Template Switcher Pill */}
-                <div
-                  className="hidden sm:inline-flex items-center p-0.5 rounded-full border text-[11px] font-medium"
-                  style={{
-                    borderColor: palette.border,
-                    backgroundColor: isLight ? '#00000008' : '#FFFFFF0A',
-                  }}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setActiveTheme('luxury-noir')}
-                    className={`min-h-[32px] px-2.5 rounded-full transition-all ${
-                      activeTheme === 'luxury-noir' ? 'font-bold shadow-xs' : 'opacity-60 hover:opacity-100'
-                    }`}
+                {/* Interactive Template Switcher Pill (Gated by Demo Mode) */}
+                {sf.isDemoMode && (
+                  <div
+                    className="hidden sm:inline-flex items-center p-0.5 rounded-full border text-[11px] font-medium"
                     style={{
-                      backgroundColor: activeTheme === 'luxury-noir' ? palette.accent : 'transparent',
-                      color: activeTheme === 'luxury-noir' ? '#0B0B0C' : palette.text,
+                      borderColor: palette.border,
+                      backgroundColor: isLight ? '#00000008' : '#FFFFFF0A',
                     }}
-                    title="قالب الفخامة الداكنة"
                   >
-                    Noir
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTheme('ivory-journal')}
-                    className={`min-h-[32px] px-2.5 rounded-full transition-all ${
-                      activeTheme === 'ivory-journal' ? 'font-bold shadow-xs' : 'opacity-60 hover:opacity-100'
-                    }`}
-                    style={{
-                      backgroundColor: activeTheme === 'ivory-journal' ? palette.accent : 'transparent',
-                      color: activeTheme === 'ivory-journal' ? '#FFFFFF' : palette.text,
-                    }}
-                    title="قالب المجلة العاجية"
-                  >
-                    Ivory
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTheme('clinic-lab')}
-                    className={`min-h-[32px] px-2.5 rounded-full transition-all ${
-                      activeTheme === 'clinic-lab' ? 'font-bold shadow-xs' : 'opacity-60 hover:opacity-100'
-                    }`}
-                    style={{
-                      backgroundColor: activeTheme === 'clinic-lab' ? palette.accent : 'transparent',
-                      color: activeTheme === 'clinic-lab' ? '#FFFFFF' : palette.text,
-                    }}
-                    title="قالب المختبر السريري"
-                  >
-                    Clinic
-                  </button>
-                </div>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTheme('luxury-noir')}
+                      className={`min-h-[32px] px-2.5 rounded-full transition-all ${
+                        activeTheme === 'luxury-noir' ? 'font-bold shadow-xs' : 'opacity-60 hover:opacity-100'
+                      }`}
+                      style={{
+                        backgroundColor: activeTheme === 'luxury-noir' ? palette.accent : 'transparent',
+                        color: activeTheme === 'luxury-noir' ? '#0B0B0C' : palette.text,
+                      }}
+                      title="قالب الفخامة الداكنة"
+                    >
+                      Noir
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTheme('ivory-journal')}
+                      className={`min-h-[32px] px-2.5 rounded-full transition-all ${
+                        activeTheme === 'ivory-journal' ? 'font-bold shadow-xs' : 'opacity-60 hover:opacity-100'
+                      }`}
+                      style={{
+                        backgroundColor: activeTheme === 'ivory-journal' ? palette.accent : 'transparent',
+                        color: activeTheme === 'ivory-journal' ? '#FFFFFF' : palette.text,
+                      }}
+                      title="قالب المجلة العاجية"
+                    >
+                      Ivory
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTheme('clinic-lab')}
+                      className={`min-h-[32px] px-2.5 rounded-full transition-all ${
+                        activeTheme === 'clinic-lab' ? 'font-bold shadow-xs' : 'opacity-60 hover:opacity-100'
+                      }`}
+                      style={{
+                        backgroundColor: activeTheme === 'clinic-lab' ? palette.accent : 'transparent',
+                        color: activeTheme === 'clinic-lab' ? '#FFFFFF' : palette.text,
+                      }}
+                      title="قالب المختبر السريري"
+                    >
+                      Clinic
+                    </button>
+                  </div>
+                )}
 
                 {/* Bilingual AR | EN Toggle */}
                 {features?.second_language !== false && (
@@ -456,11 +458,11 @@ function SubpageThemeInner({
                   </button>
                 )}
 
-                {/* Cart Button */}
+                {/* Cart Button (Hidden on mobile < md where bottom MobileAppTabBar already provides the cart) */}
                 <button
                   type="button"
                   onClick={() => sf.cart?.open?.()}
-                  className="relative min-w-[42px] min-h-[42px] rounded-lg border flex items-center justify-center transition-all"
+                  className="relative min-w-[42px] min-h-[42px] rounded-lg border hidden md:flex items-center justify-center transition-all"
                   style={{
                     borderColor: palette.border,
                     backgroundColor: `${palette.accent}15`,

@@ -213,8 +213,12 @@ export function useCheckout(options?: UseCheckoutOptions) {
       } else if (paymentMethod === 'jeeb' || paymentMethod === 'jawali') {
         paymentDesc = `محفظة جيب / جوالي - حساب: ${jeebAccount} باسم: ${accountHolder}`;
       }
-      if (transferRef.trim()) {
-        paymentDesc += ` (رقم الحوالة: ${transferRef.trim()})`;
+      if (paymentMethod !== 'cod') {
+        if (transferRef.trim()) {
+          paymentDesc += ` (رقم إشعار الحوالة المرفق: ${transferRef.trim()})`;
+        } else {
+          paymentDesc += ` (سيتم التحويل وإرسال الإشعار بعد تأكيد الطلب والموعد عبر واتساب)`;
+        }
       }
 
       let message = `*طلب موثق جديد: ${orderNumber}*\n`;
@@ -227,7 +231,9 @@ export function useCheckout(options?: UseCheckoutOptions) {
 
       items.forEach((item, index) => {
         const itemPrice = item.unitPrice[currentCurrency] || item.unitPrice.YER;
-        message += `${index + 1}. ${item.title}${item.variantTitle ? ` (${item.variantTitle})` : ''} × ${item.quantity} = ${formatCurrency(itemPrice * item.quantity, currentCurrency)}\n`;
+        const isPreorder = Boolean((item as any).isPreorder || ((item as any).stockQuantity !== undefined && (item as any).stockQuantity <= 0));
+        const preorderNote = isPreorder ? ' [حجز/تأكيد توفر]' : '';
+        message += `${index + 1}. ${item.title}${item.variantTitle ? ` (${item.variantTitle})` : ''}${preorderNote} × ${item.quantity} = ${formatCurrency(itemPrice * item.quantity, currentCurrency)}\n`;
       });
 
       message += `\nرسوم التوصيل: ${formatCurrency(shippingFeeCurrent, currentCurrency)}\n`;

@@ -115,6 +115,11 @@ export function ProductShowcase(props: ProductShowcaseProps) {
                     <span className="text-xs font-sans font-bold text-champagne">
                       {formattedPrice}
                     </span>
+                    {typeof product.stockQuantity === 'number' && product.stockQuantity <= 0 && (
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-950/70 text-amber-300 border border-amber-500/30">
+                        حجز مسبق
+                      </span>
+                    )}
                   </div>
 
                   {/* 44px Add Button */}
@@ -125,7 +130,11 @@ export function ProductShowcase(props: ProductShowcaseProps) {
                       className="w-full min-h-[44px] h-11 rounded-xl bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-sans font-bold text-xs hover:brightness-110 active:scale-[0.98] transition flex items-center justify-center gap-1.5 shadow-sm"
                     >
                       <BagCartIcon size={14} color="#070709" />
-                      <span>إضافة للسلة</span>
+                      <span>
+                        {typeof product.stockQuantity === 'number' && product.stockQuantity <= 0
+                          ? 'احجز / استفسر'
+                          : 'إضافة للسلة'}
+                      </span>
                     </button>
                   </div>
                 </div>
@@ -283,10 +292,15 @@ export function ProductShowcase(props: ProductShowcaseProps) {
 
                   {/* Pricing & Actions */}
                   <div className="pt-2 mt-2 border-t border-white/5 space-y-2">
-                    <div className="flex items-baseline justify-between gap-1">
+                    <div className="flex items-baseline justify-between gap-1 flex-wrap">
                       <span className="text-xs sm:text-base font-sans font-bold text-champagne">
                         {formattedPrice}
                       </span>
+                      {typeof product.stockQuantity === 'number' && product.stockQuantity <= 0 && (
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-950/70 text-amber-300 border border-amber-500/30">
+                          حجز مسبق
+                        </span>
+                      )}
                       {hasDiscount && formattedComparePrice && (
                         <span className="text-xs text-muted-dim line-through">
                           {formattedComparePrice}
@@ -302,7 +316,11 @@ export function ProductShowcase(props: ProductShowcaseProps) {
                         className="w-full min-h-[44px] py-2 rounded-xl bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-sans font-bold text-xs hover:brightness-110 active:scale-[0.98] transition flex items-center justify-center gap-1 shadow-sm"
                       >
                         <BagCartIcon size={14} color="#070709" />
-                        <span>السلة</span>
+                        <span>
+                          {typeof product.stockQuantity === 'number' && product.stockQuantity <= 0
+                            ? 'احجز / استفسر'
+                            : 'السلة'}
+                        </span>
                       </button>
                       <button
                         type="button"

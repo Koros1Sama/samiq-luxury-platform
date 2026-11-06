@@ -188,13 +188,13 @@ export function LuxuryHeader(props: LuxuryHeaderProps) {
               </button>
             )}
 
-            {/* Cart Button */}
+            {/* Cart Button (Hidden on mobile < md where bottom MobileAppTabBar already provides the cart) */}
             {features.cart_whatsapp && (
               <button
                 type="button"
                 data-testid="cart-button"
                 onClick={onOpenCart}
-                className="relative w-8 h-8 sm:w-11 sm:h-11 rounded-full flex items-center justify-center bg-white/5 hover:bg-gold/15 border border-white/10 hover:border-gold/30 text-ivory hover:text-champagne transition shadow-md"
+                className="relative hidden md:flex w-8 h-8 sm:w-11 sm:h-11 rounded-full items-center justify-center bg-white/5 hover:bg-gold/15 border border-white/10 hover:border-gold/30 text-ivory hover:text-champagne transition shadow-md"
                 aria-label="سلة المشتريات"
               >
                 <BagCartIcon size={17} color="currentColor" strokeWidth={1.5} />
