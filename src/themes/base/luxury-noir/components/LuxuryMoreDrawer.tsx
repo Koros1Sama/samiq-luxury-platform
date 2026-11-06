@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { CurrencySwitcher } from './CurrencySwitcher';
 import { PwaInstallPrompt } from './PwaInstallPrompt';
 import {
   MapPinIcon,
@@ -70,19 +69,7 @@ export function LuxuryMoreDrawer({
           </button>
         </div>
 
-        {/* 1. Currency Switcher */}
-        <div className="space-y-2">
-          <span className="text-xs font-sans text-muted-lux block font-medium">
-            عملة العرض والتسعير:
-          </span>
-          <CurrencySwitcher
-            currentCurrency={currentCurrency}
-            onCurrencyChange={onCurrencyChange}
-            className="w-full justify-around py-1.5"
-          />
-        </div>
-
-        {/* 2. Branches & Location */}
+        {/* 1. Branches & Location */}
         <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2">
           <span className="text-xs font-sans text-champagne font-bold block">
             مقر الفرع الرئيسي:

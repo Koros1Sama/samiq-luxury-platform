@@ -17,13 +17,9 @@ interface ClinicHeaderProps {
 }
 
 export function ClinicHeader({ onOpenAdvisor, onOpenCart }: ClinicHeaderProps) {
-  const { tenant, cart, currency, setCurrency, search, features, locale, setLocale } = useStorefront();
+  const { tenant, cart, search, features, locale, setLocale } = useStorefront();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const isEn = locale === 'en';
-
-  const handleCurrencyChange = (newCurr: ThemeCurrencyCode) => {
-    setCurrency(newCurr);
-  };
 
   return (
     <header className="sticky top-0 z-30 w-full bg-white border-b border-[#E2ECE9] shadow-[0_1px_3px_rgba(15,76,74,0.05)]">
@@ -90,20 +86,6 @@ export function ClinicHeader({ onOpenAdvisor, onOpenCart }: ClinicHeaderProps) {
             </svg>
             <span className="hidden md:inline">{isEn ? 'Profile' : 'الملف الطبي'}</span>
           </a>
-
-          {/* Currency Switcher (Desktop / Tablet) */}
-          <div className="relative hidden sm:inline-flex items-center">
-            <select
-              aria-label="اختيار العملة"
-              value={currency}
-              onChange={(e) => handleCurrencyChange(e.target.value as ThemeCurrencyCode)}
-              className="min-h-[40px] px-1.5 py-1 bg-[#F2F7F5] border border-[#D4E5E0] rounded-lg text-xs font-bold text-[#0F4C4A] focus:outline-hidden focus:ring-2 focus:ring-[#0F4C4A] cursor-pointer"
-            >
-              <option value="YER">YER</option>
-              <option value="SAR">SAR</option>
-              <option value="USD">USD</option>
-            </select>
-          </div>
 
           {/* Cart Drawer Trigger */}
           <button

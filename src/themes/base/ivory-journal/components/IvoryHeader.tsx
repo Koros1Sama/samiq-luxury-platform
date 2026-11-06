@@ -23,7 +23,7 @@ interface IvoryHeaderProps {
 }
 
 export function IvoryHeader({ onOpenSearch, onOpenAdvisor }: IvoryHeaderProps) {
-  const { tenant, cart, currency, setCurrency, features, locale, setLocale } = useStorefront();
+  const { tenant, cart, features, locale, setLocale } = useStorefront();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isEn = locale === 'en';
 
@@ -34,12 +34,6 @@ export function IvoryHeader({ onOpenSearch, onOpenAdvisor }: IvoryHeaderProps) {
       el.scrollIntoView({ behavior: 'smooth' });
     }
   };
-
-  const currencies: { code: ThemeCurrencyCode; label: string }[] = [
-    { code: 'YER', label: 'ر.ي' },
-    { code: 'SAR', label: 'ر.س' },
-    { code: 'USD', label: '$' },
-  ];
 
   return (
     <>
@@ -135,24 +129,6 @@ export function IvoryHeader({ onOpenSearch, onOpenAdvisor }: IvoryHeaderProps) {
               <span className={isEn ? 'font-bold text-[#1B1612]' : 'opacity-50'}>EN</span>
             </button>
           )}
-
-          {/* Desktop Currency Switcher */}
-          <div className="hidden lg:flex items-center border border-[#E8E2D8] rounded-full p-0.5 bg-[#F4EFE6]/70">
-            {currencies.map((c) => (
-              <button
-                key={c.code}
-                type="button"
-                onClick={() => setCurrency(c.code)}
-                className={`min-w-[40px] min-h-[40px] px-3 rounded-full text-xs font-sans font-semibold transition-all ${
-                  currency === c.code
-                    ? 'bg-[#1B1612] text-[#FAF7F2] shadow-sm'
-                    : 'text-[#554D46] hover:text-[#1B1612]'
-                }`}
-              >
-                {c.label}
-              </button>
-            ))}
-          </div>
 
           {/* Search Trigger (Shown when catalog tier 3 is active) */}
           {features.tier_3_catalog && (
@@ -346,28 +322,11 @@ export function IvoryHeader({ onOpenSearch, onOpenAdvisor }: IvoryHeaderProps) {
             </div>
           </div>
 
-          {/* Bottom Bar: Currency & Social Channels */}
+          {/* Bottom Bar: Social Channels */}
           <div className="w-full max-w-4xl mx-auto pt-6 border-t border-[#E8E2D8] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-            {/* Currency Choice */}
-            <div className="flex items-center gap-3">
-              <span className="text-xs font-sans text-[#554D46]">العملة المعروضة:</span>
-              <div className="flex items-center gap-1.5 border border-[#E8E2D8] rounded-full p-1 bg-[#F4EFE6]">
-                {currencies.map((c) => (
-                  <button
-                    key={c.code}
-                    type="button"
-                    onClick={() => setCurrency(c.code)}
-                    className={`min-w-[40px] min-h-[40px] px-3 rounded-full text-xs font-sans font-bold transition-all ${
-                      currency === c.code
-                        ? 'bg-[#1B1612] text-[#FAF7F2] shadow-sm'
-                        : 'text-[#554D46] hover:text-[#1B1612]'
-                    }`}
-                  >
-                    {c.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <span className="text-xs font-sans text-[#554D46]">
+              {tenant.name} — أصالة معتمدة ومطابقة للمعايير
+            </span>
 
             {/* Social channels */}
             <div className="flex items-center gap-2">

@@ -39,6 +39,12 @@ export const DEFAULT_STOREFRONT_TENANT: TenantBrandInfo = {
   deliveryCoverage: 'كافة محافظات الجمهورية اليمنية',
   themeId: 'luxury-noir',
   activeTheme: 'luxury-noir',
+  currency: 'YER',
+  exchangeRates: {
+    usdToYer: 550,
+    sarToYer: 145,
+    usdToSar: 3.75,
+  },
   whatsapp: '775234989',
   phone: '775234989',
   googleMaps: 'https://maps.app.goo.gl/DxsZTHrv2r386bXa9',
@@ -144,8 +150,16 @@ export function StorefrontProvider({
     }
   }, [shippingZones]);
 
-  // 1. Currency State (hydrated safely in useEffect)
-  const [currency, setCurrencyState] = useState<ThemeCurrencyCode>(initialCurrency);
+  // 1. Currency State: Strictly merchant-driven by tenant.currency (defaulting to 'YER')
+  const storeCurrency = (tenant.currency || initialCurrency || 'YER') as ThemeCurrencyCode;
+  const [currency, setCurrencyState] = useState<ThemeCurrencyCode>(storeCurrency);
+
+  // Synchronize store currency whenever tenant configuration updates
+  useEffect(() => {
+    if (tenant.currency && ['YER', 'SAR', 'USD'].includes(tenant.currency)) {
+      setCurrencyState(tenant.currency as ThemeCurrencyCode);
+    }
+  }, [tenant.currency]);
 
   // 2. Cart State
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -216,10 +230,11 @@ export function StorefrontProvider({
         setLocaleState(savedLocale);
       }
 
-      const savedCurrency = localStorage.getItem(STORAGE_KEYS.currency) as ThemeCurrencyCode;
-      if (savedCurrency && ['YER', 'SAR', 'USD'].includes(savedCurrency)) {
-        setCurrencyState(savedCurrency);
-      }
+      // Clear any legacy customer-selected currency overrides
+      try {
+        localStorage.removeItem(STORAGE_KEYS.currency);
+        localStorage.removeItem('samiq_currency');
+      } catch {}
 
       const savedCart = localStorage.getItem(STORAGE_KEYS.cart);
       if (savedCart) {
@@ -283,11 +298,7 @@ export function StorefrontProvider({
 
   const setCurrency = useCallback((newCurrency: ThemeCurrencyCode) => {
     setCurrencyState(newCurrency);
-    try {
-      localStorage.setItem(STORAGE_KEYS.currency, newCurrency);
-    } catch (e) {
-      console.warn('Could not save currency to localStorage:', e);
-    }
+    // Currency is strictly merchant-authoritative; no customer override in localStorage
   }, []);
 
   // Sync cart to localStorage
@@ -403,10 +414,10 @@ export function StorefrontProvider({
     });
   }, [products, searchQuery]);
 
-  // Price Formatter
+  // Price Formatter (formats according to merchant store currency)
   const formatPrice = useCallback(
     (prices: Record<ThemeCurrencyCode, number> | number) => {
-      const amount = typeof prices === 'number' ? prices : prices[currency] || 0;
+      const amount = typeof prices === 'number' ? prices : (prices[currency] ?? prices.YER ?? 0);
       const formatted = new Intl.NumberFormat('en-US').format(amount);
       const labels: Record<ThemeCurrencyCode, string> = {
         YER: 'ر.ي',

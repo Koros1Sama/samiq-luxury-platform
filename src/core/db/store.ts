@@ -1362,6 +1362,143 @@ export function updateTenant(partialTenant: Partial<TenantConfig>): TenantConfig
   return db.tenant;
 }
 
+export interface ConvertCurrencyOptions {
+  fromCurrency: ThemeCurrencyCode;
+  toCurrency: ThemeCurrencyCode;
+  rate?: number;
+  operation?: 'divide' | 'multiply';
+  mode: 'rate_convert' | 'change_symbol_only';
+  rounding?: 'round' | 'ceil' | 'floor' | 'decimals';
+}
+
+export function convertStoreCurrency(options: ConvertCurrencyOptions): {
+  success: boolean;
+  message: string;
+  affectedProducts: number;
+  newCurrency: ThemeCurrencyCode;
+} {
+  const db = getDb();
+  const from = options.fromCurrency || db.tenant.currency || 'YER';
+  const to = options.toCurrency || 'YER';
+
+  if (!db.products || !Array.isArray(db.products)) {
+    db.products = [];
+  }
+
+  if (options.mode === 'change_symbol_only') {
+    db.products.forEach((p) => {
+      if (!p.prices) {
+        p.prices = { YER: 0, SAR: 0, USD: 0 };
+      }
+      const existingBase = p.prices[from] ?? p.prices.YER ?? 0;
+      p.prices[to] = existingBase;
+
+      if (p.comparePrices) {
+        const existingCompare = p.comparePrices[from] ?? p.comparePrices.YER;
+        if (existingCompare !== undefined) {
+          p.comparePrices[to] = existingCompare;
+        }
+      }
+    });
+
+    db.tenant.currency = to;
+    saveDb(db);
+
+    return {
+      success: true,
+      message: `تم تغيير عملة المتجر الرسمية إلى (${to}) بنجاح دون المساس بالقيم العددية`,
+      affectedProducts: db.products.length,
+      newCurrency: to,
+    };
+  }
+
+  // Rate Convert mode
+  const rate = Number(options.rate) || 1;
+  if (rate <= 0) {
+    return {
+      success: false,
+      message: 'سعر الصرف يجب أن يكون قيمة رقمية أكبر من الصفر',
+      affectedProducts: 0,
+      newCurrency: from,
+    };
+  }
+
+  const op = options.operation || (from === 'YER' ? 'divide' : 'multiply');
+  const rounding = options.rounding || (to === 'USD' ? 'decimals' : 'round');
+
+  const calculateNewPrice = (val: number): number => {
+    if (val <= 0) return 0;
+    const raw = op === 'divide' ? val / rate : val * rate;
+    if (rounding === 'decimals') {
+      return Number(raw.toFixed(2));
+    }
+    if (rounding === 'ceil') {
+      return Math.ceil(raw);
+    }
+    if (rounding === 'floor') {
+      return Math.floor(raw);
+    }
+    return Math.round(raw);
+  };
+
+  db.products.forEach((p) => {
+    if (!p.prices) {
+      p.prices = { YER: 0, SAR: 0, USD: 0 };
+    }
+    const oldBasePrice = p.prices[from] ?? p.prices.YER ?? 0;
+    const newBasePrice = calculateNewPrice(oldBasePrice);
+
+    p.prices[to] = newBasePrice;
+    p.prices[from] = oldBasePrice;
+
+    if (p.comparePrices) {
+      const oldCompare = p.comparePrices[from] ?? p.comparePrices.YER ?? 0;
+      if (oldCompare > 0) {
+        p.comparePrices[to] = calculateNewPrice(oldCompare);
+      }
+    }
+  });
+
+  // Scale shipping zones
+  if (db.shippingZones && Array.isArray(db.shippingZones)) {
+    db.shippingZones.forEach((zone) => {
+      if (from === 'YER' && to === 'SAR') {
+        zone.feeSar = calculateNewPrice(zone.feeYer || 0);
+      } else if (from === 'YER' && to === 'USD') {
+        zone.feeUsd = calculateNewPrice(zone.feeYer || 0);
+      } else if (from === 'SAR' && to === 'YER') {
+        zone.feeYer = calculateNewPrice(zone.feeSar || 0);
+      } else if (from === 'USD' && to === 'YER') {
+        zone.feeYer = calculateNewPrice(zone.feeUsd || 0);
+      }
+    });
+  }
+
+  db.tenant.currency = to;
+  if (!db.tenant.exchangeRates) {
+    db.tenant.exchangeRates = { usdToYer: 550, sarToYer: 145, usdToSar: 3.75 };
+  }
+  if ((from === 'YER' && to === 'SAR') || (from === 'SAR' && to === 'YER')) {
+    db.tenant.exchangeRates.sarToYer = rate;
+  }
+  if ((from === 'YER' && to === 'USD') || (from === 'USD' && to === 'YER')) {
+    db.tenant.exchangeRates.usdToYer = rate;
+  }
+  if ((from === 'SAR' && to === 'USD') || (from === 'USD' && to === 'SAR')) {
+    db.tenant.exchangeRates.usdToSar = rate;
+  }
+
+  saveDb(db);
+
+  const opLabel = op === 'divide' ? '÷' : '×';
+  return {
+    success: true,
+    message: `تم تحويل أسعار ${db.products.length} مستحضر بنجاح من (${from}) إلى (${to}) بعملية (${opLabel} ${rate}) وتحديث عملة المتجر`,
+    affectedProducts: db.products.length,
+    newCurrency: to,
+  };
+}
+
 // 9. Customers & Wishlist
 export function getCustomerByEmailOrPhone(identifier: string): CustomerRecord | undefined {
   const db = getDb();

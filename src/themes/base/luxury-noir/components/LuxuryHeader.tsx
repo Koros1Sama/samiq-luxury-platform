@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { MiftahLogoSvg } from './MiftahLogoSvg';
-import { CurrencySwitcher } from './CurrencySwitcher';
 import { BagCartIcon, SparkleStarIcon } from './LuxuryIcons';
 import { useStorefront } from '@/core/storefront/StorefrontProvider';
 import { ThemeCurrencyCode, FeatureFlags } from '../../../contract';
@@ -135,13 +134,6 @@ export function LuxuryHeader(props: LuxuryHeaderProps) {
                 <span className={isEn ? 'font-bold text-gold' : 'opacity-50'}>EN</span>
               </button>
             )}
-
-            <div className="hidden lg:block">
-              <CurrencySwitcher
-                currentCurrency={currentCurrency}
-                onCurrencyChange={onCurrencyChange}
-              />
-            </div>
 
             {/* Search Button (Only shown when catalog tier 3 is active) */}
             {features.tier_3_catalog && (

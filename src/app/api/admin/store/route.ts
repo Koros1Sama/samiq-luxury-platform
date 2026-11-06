@@ -7,6 +7,7 @@ import {
   moderateReview,
   getAllReviews,
   getAllBranches,
+  convertStoreCurrency,
   ShippingZoneRecord,
   BranchRecord,
 } from '@/core/db/store';
@@ -112,6 +113,25 @@ export async function POST(req: Request) {
       }
       updateBranches(branches);
       return NextResponse.json({ success: true, branches });
+    }
+
+    if (action === 'convert_store_currency') {
+      const fromCurrency = body.fromCurrency || getDb().tenant.currency || 'YER';
+      const toCurrency = body.toCurrency;
+      if (!toCurrency || !['YER', 'SAR', 'USD'].includes(toCurrency)) {
+        return NextResponse.json({ success: false, message: 'العملة المستهدفة غير صالحة' }, { status: 400 });
+      }
+
+      const result = convertStoreCurrency({
+        fromCurrency,
+        toCurrency,
+        rate: Number(body.rate) || 1,
+        operation: body.operation === 'multiply' ? 'multiply' : 'divide',
+        mode: body.mode === 'change_symbol_only' ? 'change_symbol_only' : 'rate_convert',
+        rounding: body.rounding,
+      });
+
+      return NextResponse.json(result);
     }
 
     if (action === 'moderate_review') {

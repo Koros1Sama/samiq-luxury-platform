@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { SmartImage } from '@/core/ui/SmartImage';
 import { formatCurrency } from '@/core/currency/formatter';
@@ -228,6 +228,92 @@ export default function MerchantAdminPage() {
   const cardFileInputRef = useRef<HTMLInputElement>(null);
   const [cardUploadTargetProductId, setCardUploadTargetProductId] = useState<string | null>(null);
 
+  // Store Currency & Real-time Bulk Converter Engine States
+  const [storeCurrency, setStoreCurrency] = useState<'YER' | 'SAR' | 'USD'>('YER');
+  const [targetCurrency, setTargetCurrency] = useState<'YER' | 'SAR' | 'USD'>('SAR');
+  const [convertMode, setConvertMode] = useState<'rate_convert' | 'change_symbol_only'>('rate_convert');
+  const [exchangeRate, setExchangeRate] = useState<string>('145');
+  const [convertOp, setConvertOp] = useState<'divide' | 'multiply'>('divide');
+  const [roundingMode, setRoundingMode] = useState<'round' | 'ceil' | 'floor' | 'decimals'>('round');
+  const [isConvertingCurrency, setIsConvertingCurrency] = useState(false);
+  const [convertSuccessMsg, setConvertSuccessMsg] = useState<string | null>(null);
+  const [convertErrorMsg, setConvertErrorMsg] = useState<string | null>(null);
+
+  const CURRENCY_LABELS: Record<'YER' | 'SAR' | 'USD', string> = {
+    YER: 'ريال يمني (YER)',
+    SAR: 'ريال سعودي (SAR)',
+    USD: 'دولار أمريكي (USD)',
+  };
+
+  const CURRENCY_SYMBOLS: Record<'YER' | 'SAR' | 'USD', string> = {
+    YER: 'ر.ي',
+    SAR: 'ر.س',
+    USD: '$',
+  };
+
+  const sampleOldPrice = storeCurrency === 'YER' ? 28500 : (storeCurrency === 'SAR' ? 197 : 52);
+  const parsedRate = Math.max(0.0001, parseFloat(exchangeRate) || 1);
+  const sampleNewPrice = useMemo(() => {
+    if (convertMode === 'change_symbol_only') return sampleOldPrice;
+    const raw = convertOp === 'divide' ? sampleOldPrice / parsedRate : sampleOldPrice * parsedRate;
+    if (roundingMode === 'decimals') return Number(raw.toFixed(2));
+    if (roundingMode === 'ceil') return Math.ceil(raw);
+    if (roundingMode === 'floor') return Math.floor(raw);
+    return Math.round(raw);
+  }, [sampleOldPrice, parsedRate, convertOp, convertMode, roundingMode]);
+
+  const handleApplyCurrencyPreset = (preset: {
+    to: 'YER' | 'SAR' | 'USD';
+    rate: string;
+    op: 'divide' | 'multiply';
+    rounding: 'round' | 'ceil' | 'floor' | 'decimals';
+  }) => {
+    setTargetCurrency(preset.to);
+    setExchangeRate(preset.rate);
+    setConvertOp(preset.op);
+    setRoundingMode(preset.rounding);
+    setConvertMode('rate_convert');
+    setConvertSuccessMsg(null);
+    setConvertErrorMsg(null);
+  };
+
+  const handleExecuteCurrencyConversion = async () => {
+    setIsConvertingCurrency(true);
+    setConvertSuccessMsg(null);
+    setConvertErrorMsg(null);
+    try {
+      const res = await fetch('/api/admin/store', {
+        method: 'POST',
+        headers: ADMIN_FETCH_HEADERS,
+        body: JSON.stringify({
+          action: 'convert_store_currency',
+          fromCurrency: storeCurrency,
+          toCurrency: targetCurrency,
+          rate: parseFloat(exchangeRate) || 1,
+          operation: convertOp,
+          mode: convertMode,
+          rounding: roundingMode,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setConvertSuccessMsg(data.message);
+        setStoreCurrency(targetCurrency);
+        showToast(data.message);
+        fetchProducts();
+        fetchAdminStoreData();
+      } else {
+        setConvertErrorMsg(data.message || 'فشلت عملية التحويل');
+        showToast(data.message || 'فشلت عملية التحويل');
+      }
+    } catch (e) {
+      setConvertErrorMsg('حدث خطأ أثناء تنفيذ عملية التحويل');
+      showToast('حدث خطأ أثناء تنفيذ عملية التحويل');
+    } finally {
+      setIsConvertingCurrency(false);
+    }
+  };
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(''), 3500);
@@ -357,6 +443,7 @@ export default function MerchantAdminPage() {
           setStoreWhatsapp(t.whatsapp || '775234989');
           setStoreCity(t.city || 'صنعاء');
           if (t.themeId) setActiveTheme(t.themeId);
+          if (t.currency) setStoreCurrency(t.currency);
 
           setHeroTitle(t.heroTitle || 'مفتاح الجمال — لكشف المقلد والعناية الموثوقة');
           setHeroSubtitle(t.heroSubtitle || 'مستحضرات مصرحة ومطابقة لمعايير الهيئة العليا للأدوية والمستلزمات الطبية.');
@@ -1424,6 +1511,7 @@ export default function MerchantAdminPage() {
         whatsapp: storeWhatsapp,
         city: storeCity,
         themeId: activeTheme,
+        currency: storeCurrency,
         heroTitle,
         heroSubtitle,
         announcementText,
@@ -1473,13 +1561,13 @@ export default function MerchantAdminPage() {
   // --------------------------------------------------------------------------
 
   const totalUnits = products.reduce((acc, p) => acc + (p.stockQuantity || 0), 0);
-  const totalRetailValueYer = products.reduce(
-    (acc, p) => acc + (p.stockQuantity || 0) * (p.prices?.YER || 0),
+  const totalRetailValueCurrent = products.reduce(
+    (acc, p) => acc + (p.stockQuantity || 0) * (p.prices?.[storeCurrency] ?? p.prices?.YER ?? 0),
     0
   );
-  const expectedProfitYer = products.reduce(
+  const expectedProfitCurrent = products.reduce(
     (acc, p) =>
-      acc + (p.stockQuantity || 0) * ((p.prices?.YER || 0) - (p.costPriceYer || 0)),
+      acc + (p.stockQuantity || 0) * ((p.prices?.[storeCurrency] ?? p.prices?.YER ?? 0) - (p.costPriceYer || 0)),
     0
   );
 
@@ -1849,6 +1937,348 @@ export default function MerchantAdminPage() {
               </div>
             </div>
 
+            {/* ================================================================== */}
+            {/* DEDICATED STORE CURRENCY & BULK EXCHANGE RATE CONVERTER CARD       */}
+            {/* ================================================================== */}
+            <div className="p-5 sm:p-6 rounded-3xl bg-[#0E0E12] border border-gold/40 shadow-2xl space-y-5">
+              {/* Header with Title and Current Active Currency Badge */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-white/10 pb-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-gold shadow-[0_0_8px_#C9A84C]" />
+                    <h3 className="text-base sm:text-lg font-serif font-bold text-champagne">
+                      عملة المتجر الرسمية ومحوّل أسعار الصرف الشامل
+                    </h3>
+                  </div>
+                  <p className="text-xs text-muted-lux font-sans">
+                    حدد العملة المعتمدة للمبيعات، أو حوّل أسعار كافة المستحضرات والمناطق دفعة واحدة بسعر الصرف المباشر.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <div className="px-3.5 py-1.5 rounded-xl bg-gold/15 border border-gold/40 flex items-center gap-2">
+                    <span className="text-[11px] text-muted-lux font-sans">العملة النشطة للمتجر:</span>
+                    <span className="text-xs font-mono font-bold text-champagne">
+                      {CURRENCY_LABELS[storeCurrency]}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Mode Toggle: Rate Convert vs. Symbol-Only Switch */}
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-sans text-muted-lux ms-1">طريقة المعالجة:</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setConvertMode('rate_convert');
+                    setConvertSuccessMsg(null);
+                    setConvertErrorMsg(null);
+                  }}
+                  className={`min-h-[38px] px-3.5 rounded-xl text-xs font-sans font-bold transition flex items-center gap-1.5 ${
+                    convertMode === 'rate_convert'
+                      ? 'bg-gold text-obsidian-dark shadow-md'
+                      : 'bg-white/5 text-ivory/70 hover:text-ivory hover:bg-white/10 border border-white/10'
+                  }`}
+                >
+                  <span>تحويل القيم الحسابية بسعر الصرف (Recalculate Prices)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setConvertMode('change_symbol_only');
+                    setConvertSuccessMsg(null);
+                    setConvertErrorMsg(null);
+                  }}
+                  className={`min-h-[38px] px-3.5 rounded-xl text-xs font-sans font-bold transition flex items-center gap-1.5 ${
+                    convertMode === 'change_symbol_only'
+                      ? 'bg-gold text-obsidian-dark shadow-md'
+                      : 'bg-white/5 text-ivory/70 hover:text-ivory hover:bg-white/10 border border-white/10'
+                  }`}
+                >
+                  <span>تغيير رمز العملة فقط دون تعديل الأرقام (Symbol-Only Switch)</span>
+                </button>
+              </div>
+
+              {/* MODE 1: Rate Conversion Engine */}
+              {convertMode === 'rate_convert' && (
+                <div className="space-y-4 pt-1">
+                  {/* Quick Presets Row */}
+                  <div className="space-y-1.5">
+                    <span className="text-[11px] font-sans text-muted-lux block font-medium">
+                      نماذج أسعار الصرف الشائعة (صنعاء ومقارنات السوق):
+                    </span>
+                    <div className="flex items-center gap-2 flex-wrap text-xs">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleApplyCurrencyPreset({
+                            to: 'SAR',
+                            rate: '145',
+                            op: 'divide',
+                            rounding: 'round',
+                          })
+                        }
+                        className="px-2.5 py-1.5 rounded-lg border border-white/10 bg-white/5 hover:border-gold/50 text-ivory/80 hover:text-champagne transition font-sans text-[11px]"
+                      >
+                        صنعاء: YER &rarr; SAR (&divide; 145)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleApplyCurrencyPreset({
+                            to: 'YER',
+                            rate: '145',
+                            op: 'multiply',
+                            rounding: 'round',
+                          })
+                        }
+                        className="px-2.5 py-1.5 rounded-lg border border-white/10 bg-white/5 hover:border-gold/50 text-ivory/80 hover:text-champagne transition font-sans text-[11px]"
+                      >
+                        صنعاء: SAR &rarr; YER (&times; 145)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleApplyCurrencyPreset({
+                            to: 'USD',
+                            rate: '550',
+                            op: 'divide',
+                            rounding: 'decimals',
+                          })
+                        }
+                        className="px-2.5 py-1.5 rounded-lg border border-white/10 bg-white/5 hover:border-gold/50 text-ivory/80 hover:text-champagne transition font-sans text-[11px]"
+                      >
+                        صنعاء: YER &rarr; USD (&divide; 550)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleApplyCurrencyPreset({
+                            to: 'YER',
+                            rate: '550',
+                            op: 'multiply',
+                            rounding: 'round',
+                          })
+                        }
+                        className="px-2.5 py-1.5 rounded-lg border border-white/10 bg-white/5 hover:border-gold/50 text-ivory/80 hover:text-champagne transition font-sans text-[11px]"
+                      >
+                        صنعاء: USD &rarr; YER (&times; 550)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleApplyCurrencyPreset({
+                            to: 'USD',
+                            rate: '3.75',
+                            op: 'divide',
+                            rounding: 'decimals',
+                          })
+                        }
+                        className="px-2.5 py-1.5 rounded-lg border border-white/10 bg-white/5 hover:border-gold/50 text-ivory/80 hover:text-champagne transition font-sans text-[11px]"
+                      >
+                        SAR &rarr; USD (&divide; 3.75)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleApplyCurrencyPreset({
+                            to: 'SAR',
+                            rate: '3.75',
+                            op: 'multiply',
+                            rounding: 'round',
+                          })
+                        }
+                        className="px-2.5 py-1.5 rounded-lg border border-white/10 bg-white/5 hover:border-gold/50 text-ivory/80 hover:text-champagne transition font-sans text-[11px]"
+                      >
+                        USD &rarr; SAR (&times; 3.75)
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Core Settings Grid: Target Currency, Rate, Operation, Rounding */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
+                    {/* 1. Target Currency */}
+                    <div className="space-y-1">
+                      <label className="text-xs text-muted-lux block font-medium">العملة المستهدفة للمتجر:</label>
+                      <div className="grid grid-cols-3 gap-1.5">
+                        {(['YER', 'SAR', 'USD'] as const).map((code) => (
+                          <button
+                            key={code}
+                            type="button"
+                            onClick={() => {
+                              setTargetCurrency(code);
+                              if (code === 'USD') setRoundingMode('decimals');
+                              else setRoundingMode('round');
+                            }}
+                            className={`min-h-[42px] px-2 rounded-xl text-xs font-bold transition flex flex-col items-center justify-center ${
+                              targetCurrency === code
+                                ? 'bg-gold/20 border-2 border-gold text-champagne'
+                                : 'bg-white/5 border border-white/10 text-ivory/70 hover:text-ivory'
+                            }`}
+                          >
+                            <span className="font-mono">{code}</span>
+                            <span className="text-[10px] opacity-70">{CURRENCY_SYMBOLS[code]}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 2. Math Operation Toggle */}
+                    <div className="space-y-1">
+                      <label className="text-xs text-muted-lux block font-medium">العملية الحسابية:</label>
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setConvertOp('divide')}
+                          className={`min-h-[42px] px-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+                            convertOp === 'divide'
+                              ? 'bg-gold/20 border-2 border-gold text-champagne'
+                              : 'bg-white/5 border border-white/10 text-ivory/70 hover:text-ivory'
+                          }`}
+                        >
+                          <span className="text-base">&divide;</span>
+                          <span>قسمة على الصرف</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setConvertOp('multiply')}
+                          className={`min-h-[42px] px-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+                            convertOp === 'multiply'
+                              ? 'bg-gold/20 border-2 border-gold text-champagne'
+                              : 'bg-white/5 border border-white/10 text-ivory/70 hover:text-ivory'
+                          }`}
+                        >
+                          <span className="text-base">&times;</span>
+                          <span>ضرب في الصرف</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* 3. Exchange Rate Value */}
+                    <div className="space-y-1">
+                      <label className="text-xs text-muted-lux block font-medium">سعر الصرف المعتمد:</label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          step="any"
+                          min="0.001"
+                          value={exchangeRate}
+                          onChange={(e) => setExchangeRate(e.target.value)}
+                          placeholder="مثال: 145 أو 550"
+                          className="w-full min-h-[42px] px-3 pe-12 rounded-xl bg-white/5 border border-gold/40 text-champagne font-mono font-bold text-sm outline-none focus:border-gold"
+                        />
+                        <span className="absolute end-3 top-1/2 -translate-y-1/2 text-xs text-muted-lux font-mono pointer-events-none">
+                          Rate
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* 4. Rounding Mode */}
+                    <div className="space-y-1">
+                      <label className="text-xs text-muted-lux block font-medium">نمط التقريب النهائي:</label>
+                      <select
+                        value={roundingMode}
+                        onChange={(e) => setRoundingMode(e.target.value as any)}
+                        className="w-full min-h-[42px] px-3 rounded-xl bg-[#141418] border border-white/10 text-ivory text-xs font-sans outline-none focus:border-gold"
+                      >
+                        <option value="round">تقريب لأقرب عدد صحيح (Math.round)</option>
+                        <option value="decimals">منزلتين عشريتين (مناسب للدولار 0.00)</option>
+                        <option value="ceil">تقريب للأعلى دائماً (Math.ceil)</option>
+                        <option value="floor">تقريب للأدنى دائماً (Math.floor)</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* MODE 2: Symbol-Only Switch */}
+              {convertMode === 'change_symbol_only' && (
+                <div className="space-y-3 pt-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    {(['YER', 'SAR', 'USD'] as const).map((code) => (
+                      <button
+                        key={code}
+                        type="button"
+                        onClick={() => setTargetCurrency(code)}
+                        className={`min-h-[44px] px-4 rounded-xl text-xs font-bold transition flex items-center justify-between ${
+                          targetCurrency === code
+                            ? 'bg-gold/20 border-2 border-gold text-champagne'
+                            : 'bg-white/5 border border-white/10 text-ivory/70 hover:text-ivory'
+                        }`}
+                      >
+                        <span className="font-mono">{code} ({CURRENCY_SYMBOLS[code]})</span>
+                        <span className="text-[11px] opacity-70">{CURRENCY_LABELS[code]}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-lux bg-white/[0.03] p-3 rounded-xl border border-white/5">
+                    تنبيه: سيتم اعتماد رمز العملة الجديد كعملة العرض الرسمية في المتجر والفواتير، مع إبقاء قيم الأسعار العددية الحالية كما هي دون إجراء أي عمليات حسابية أو تغييرات للأرقام.
+                  </p>
+                </div>
+              )}
+
+              {/* Live Interactive Preview Box */}
+              <div className="p-4 rounded-2xl bg-white/[0.02] border border-gold/30 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div className="space-y-1">
+                  <span className="text-[11px] text-gold font-bold block">
+                    معاينة حية ومباشرة للأثر الحسابي قبل التطبيق:
+                  </span>
+                  <div className="flex items-center gap-2 text-xs sm:text-sm font-sans flex-wrap">
+                    <span className="text-ivory/70">مستحضر نموذجي بسعر:</span>
+                    <span className="font-mono font-bold text-champagne">
+                      {sampleOldPrice.toLocaleString('en-US')} {CURRENCY_SYMBOLS[storeCurrency]}
+                    </span>
+                    <span className="text-gold font-bold">&rarr;</span>
+                    <span className="text-ivory/70">سيصبح سعره:</span>
+                    <span className="font-mono font-bold text-emerald-400 text-sm sm:text-base">
+                      {sampleNewPrice.toLocaleString('en-US')} {CURRENCY_SYMBOLS[targetCurrency]}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="text-start md:text-end text-[11px] text-muted-lux font-mono shrink-0">
+                  {convertMode === 'change_symbol_only'
+                    ? 'الوضع: تعديل الرمز فقط دون ضرب/قسمة'
+                    : `العملية: ${sampleOldPrice.toLocaleString('en-US')} ${convertOp === 'divide' ? '÷' : '×'} ${parsedRate} (${roundingMode})`}
+                </div>
+              </div>
+
+              {/* Action Button & Feedback Alerts */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+                <div className="flex-1">
+                  {convertSuccessMsg && (
+                    <div className="p-3 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs font-sans font-bold flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                      <span>{convertSuccessMsg}</span>
+                    </div>
+                  )}
+                  {convertErrorMsg && (
+                    <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-500/40 text-rose-300 text-xs font-sans font-bold flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-rose-400" />
+                      <span>{convertErrorMsg}</span>
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleExecuteCurrencyConversion}
+                  disabled={isConvertingCurrency}
+                  className="min-h-[44px] px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-obsidian-dark font-sans font-bold text-xs hover:brightness-110 shadow-lg transition inline-flex items-center justify-center gap-2 shrink-0 disabled:opacity-50"
+                >
+                  {isConvertingCurrency ? (
+                    <span>جاري تطبيق التحويل على قاعدة البيانات...</span>
+                  ) : (
+                    <>
+                      <span>تطبيق التحويل على كافة المنتجات ({products.length} مستحضر)</span>
+                      <span className="font-mono">&rarr;</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
             {/* Warehouse Metrics Strip */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="p-4 rounded-2xl bg-[#0E0E12] border border-white/5 space-y-1">
@@ -1860,13 +2290,13 @@ export default function MerchantAdminPage() {
               <div className="p-4 rounded-2xl bg-[#0E0E12] border border-white/5 space-y-1">
                 <span className="text-xs text-muted-lux font-sans block">القيمة السوقية للمخزون</span>
                 <div className="text-2xl font-serif font-bold text-champagne tabular-nums">
-                  {formatCurrency(totalRetailValueYer, 'YER')}
+                  {formatCurrency(totalRetailValueCurrent, storeCurrency)}
                 </div>
               </div>
               <div className="p-4 rounded-2xl bg-[#0E0E12] border border-white/5 space-y-1">
                 <span className="text-xs text-muted-lux font-sans block">صافي الربح المتوقع</span>
                 <div className="text-2xl font-serif font-bold text-emerald-400 tabular-nums">
-                  {formatCurrency(expectedProfitYer, 'YER')}
+                  {formatCurrency(expectedProfitCurrent, storeCurrency)}
                 </div>
               </div>
             </div>
@@ -2062,10 +2492,14 @@ export default function MerchantAdminPage() {
                       <div className="space-y-1 text-xs font-sans">
                         <div className="flex items-center justify-between">
                           <span className="text-champagne font-bold text-sm">
-                            {formatCurrency(p.prices.YER, 'YER')}
+                            {formatCurrency(p.prices[storeCurrency] || p.prices.YER, storeCurrency)}
                           </span>
                           <span className="text-muted-dim font-mono">
-                            ({p.prices.SAR} SAR / {p.prices.USD} USD)
+                            {storeCurrency === 'YER'
+                              ? `(${p.prices.SAR} SAR / ${p.prices.USD} USD)`
+                              : storeCurrency === 'SAR'
+                              ? `(${p.prices.YER.toLocaleString()} YER / ${p.prices.USD} USD)`
+                              : `(${p.prices.YER.toLocaleString()} YER / ${p.prices.SAR} SAR)`}
                           </span>
                         </div>
                         <div className="flex items-center justify-between pt-0.5">
@@ -3251,6 +3685,41 @@ export default function MerchantAdminPage() {
                   </div>
                 </div>
 
+                <div className="p-4 rounded-2xl bg-white/[0.02] border border-gold/30 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-xs text-gold font-bold block">عملة المتجر الأساسية:</span>
+                      <p className="text-[11px] text-muted-lux font-sans mt-0.5">
+                        العملة التي تُعرض بها الأسعار في المتجر وسلة المشتريات ورسائل طلبات الواتساب.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('inventory')}
+                      className="text-xs text-champagne hover:underline font-bold"
+                    >
+                      فتح محوّل أسعار الصرف الشامل &larr;
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 pt-1">
+                    {(['YER', 'SAR', 'USD'] as const).map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => setStoreCurrency(c)}
+                        className={`min-h-[42px] px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+                          storeCurrency === c
+                            ? 'bg-gold/25 border-2 border-gold text-champagne'
+                            : 'bg-white/5 border border-white/10 text-ivory/70 hover:text-ivory'
+                        }`}
+                      >
+                        <span className="font-mono">{c}</span>
+                        <span className="text-[11px] opacity-75">({CURRENCY_SYMBOLS[c]})</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Hero Texts Customizer */}
                 <div className="pt-2 border-t border-white/10 space-y-3">
                   <span className="text-xs text-gold font-bold block">نصوص واجهة الهيرو وشريط الإعلان:</span>
@@ -4009,16 +4478,25 @@ export default function MerchantAdminPage() {
 
               {/* Pricing, Cost & Currencies */}
               <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-4">
-                <span className="text-xs text-gold font-bold block">التسعير وهامش الربح:</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gold font-bold block">التسعير وهامش الربح:</span>
+                  <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-gold/15 text-champagne border border-gold/30 font-sans">
+                    عملة المتجر الأساسية: {CURRENCY_LABELS[storeCurrency]}
+                  </span>
+                </div>
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                   <div className="space-y-1">
-                    <label className="text-xs text-champagne block font-bold">سعر البيع (YER):</label>
+                    <label className={`text-xs block font-bold ${storeCurrency === 'YER' ? 'text-champagne' : 'text-muted-lux'}`}>
+                      سعر البيع (YER){storeCurrency === 'YER' ? ' (النشط)' : ''}:
+                    </label>
                     <input
                       type="number"
                       min="0"
                       value={formPriceYer}
                       onChange={(e) => setFormPriceYer(Math.max(0, parseInt(e.target.value) || 0))}
-                      className="w-full min-h-[44px] px-3 rounded-xl bg-white/5 border border-gold/40 text-champagne font-bold text-xs outline-none"
+                      className={`w-full min-h-[44px] px-3 rounded-xl bg-white/5 text-xs outline-none ${
+                        storeCurrency === 'YER' ? 'border-2 border-gold text-champagne font-bold' : 'border border-white/10 text-ivory'
+                      }`}
                     />
                   </div>
                   <div className="space-y-1">
@@ -4042,23 +4520,31 @@ export default function MerchantAdminPage() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs text-muted-lux block">السعر بالسعودي (SAR):</label>
+                    <label className={`text-xs block font-bold ${storeCurrency === 'SAR' ? 'text-champagne' : 'text-muted-lux'}`}>
+                      السعر بالسعودي (SAR){storeCurrency === 'SAR' ? ' (النشط)' : ''}:
+                    </label>
                     <input
                       type="number"
                       min="0"
                       value={formPriceSar}
                       onChange={(e) => setFormPriceSar(Math.max(0, parseInt(e.target.value) || 0))}
-                      className="w-full min-h-[44px] px-3 rounded-xl bg-white/5 border border-white/10 text-ivory text-xs outline-none"
+                      className={`w-full min-h-[44px] px-3 rounded-xl bg-white/5 text-xs outline-none ${
+                        storeCurrency === 'SAR' ? 'border-2 border-gold text-champagne font-bold' : 'border border-white/10 text-ivory'
+                      }`}
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs text-muted-lux block">السعر بالدولار (USD):</label>
+                    <label className={`text-xs block font-bold ${storeCurrency === 'USD' ? 'text-champagne' : 'text-muted-lux'}`}>
+                      السعر بالدولار (USD){storeCurrency === 'USD' ? ' (النشط)' : ''}:
+                    </label>
                     <input
                       type="number"
                       min="0"
                       value={formPriceUsd}
                       onChange={(e) => setFormPriceUsd(Math.max(0, parseInt(e.target.value) || 0))}
-                      className="w-full min-h-[44px] px-3 rounded-xl bg-white/5 border border-white/10 text-ivory text-xs outline-none"
+                      className={`w-full min-h-[44px] px-3 rounded-xl bg-white/5 text-xs outline-none ${
+                        storeCurrency === 'USD' ? 'border-2 border-gold text-champagne font-bold' : 'border border-white/10 text-ivory'
+                      }`}
                     />
                   </div>
                 </div>

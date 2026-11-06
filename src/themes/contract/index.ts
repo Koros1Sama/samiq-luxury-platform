@@ -166,6 +166,12 @@ export interface TenantBrandInfo {
   heroSubtitle?: string;
   announcementText?: string;
   activeTheme?: ThemeId;
+  currency?: ThemeCurrencyCode;
+  exchangeRates?: {
+    usdToYer?: number;
+    sarToYer?: number;
+    usdToSar?: number;
+  };
   noindex?: boolean;
   contact: TenantContactInfo;
   homeSections: Section[];

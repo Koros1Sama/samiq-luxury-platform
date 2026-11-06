@@ -159,12 +159,6 @@ function SubpageThemeInner({
     [features]
   );
 
-  const currencies: { code: ThemeCurrencyCode; label: string }[] = [
-    { code: 'YER', label: 'ر.ي' },
-    { code: 'SAR', label: 'ر.س' },
-    { code: 'USD', label: '$' },
-  ];
-
   const announcement =
     tenant.announcementText ||
     (isEn
@@ -440,32 +434,6 @@ function SubpageThemeInner({
                   >
                     Clinic
                   </button>
-                </div>
-
-                {/* Currency Switcher (Desktop / Tablet) */}
-                <div
-                  className="hidden sm:inline-flex items-center border rounded-lg text-xs font-bold overflow-hidden"
-                  style={{
-                    borderColor: palette.border,
-                    backgroundColor: isLight ? '#00000008' : '#FFFFFF0A',
-                  }}
-                >
-                  {currencies.map((c) => (
-                    <button
-                      key={c.code}
-                      type="button"
-                      onClick={() => setCurrency(c.code)}
-                      className={`min-h-[36px] px-2 transition-all ${
-                        currency === c.code ? 'font-bold' : 'opacity-50 hover:opacity-100'
-                      }`}
-                      style={{
-                        backgroundColor: currency === c.code ? `${palette.accent}25` : 'transparent',
-                        color: currency === c.code ? palette.accent : palette.text,
-                      }}
-                    >
-                      {c.label}
-                    </button>
-                  ))}
                 </div>
 
                 {/* Bilingual AR | EN Toggle */}
