@@ -1674,7 +1674,7 @@ export default function MerchantAdminPage() {
         </div>
 
         {/* Horizontal Navigation Tabs */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center gap-2 pb-2">
           <button
             type="button"
             onClick={() => setActiveTab('inventory')}

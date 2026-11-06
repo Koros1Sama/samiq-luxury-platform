@@ -82,6 +82,20 @@ function SubpageThemeInner({
   const palette = sf.palette || resolveThemePalette(activeTheme, sf.customPalette);
   const isLight = palette.isLight;
   const locale = sf.locale || 'ar';
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const qTheme = params.get('theme');
+        if (qTheme && isValidThemeId(qTheme) && sf.activeTheme !== qTheme) {
+          sf.setActiveTheme?.(qTheme as ThemeId);
+        }
+      } catch {
+        // fallback
+      }
+    }
+  }, [sf]);
   const isEn = locale === 'en';
   const features = sf.features || DEFAULT_STOREFRONT_FEATURES;
   const tenant = sf.tenant || DEFAULT_STOREFRONT_TENANT;
@@ -183,6 +197,12 @@ function SubpageThemeInner({
             '--samiq-muted': palette.muted,
             '--samiq-accent': palette.accent,
             '--samiq-border': palette.border,
+            '--subpage-bg': palette.background,
+            '--subpage-surface': palette.surface,
+            '--subpage-text': palette.text,
+            '--subpage-muted': palette.muted,
+            '--subpage-accent': palette.accent,
+            '--subpage-border': palette.border,
             backgroundColor: palette.background,
             color: palette.text,
           } as React.CSSProperties
@@ -196,8 +216,10 @@ function SubpageThemeInner({
               color: var(--samiq-text) !important;
             }
             .samiq-subpage-container.is-light .bg-obsidian,
+            .samiq-subpage-container.is-light .bg-obsidian-dark,
             .samiq-subpage-container.is-light .bg-\[\#070709\],
             .samiq-subpage-container.is-light .bg-\[\#0B0B0C\],
+            .samiq-subpage-container.is-light .bg-\[\#0E0E0F\],
             .samiq-subpage-container.is-light .bg-\[\#111016\],
             .samiq-subpage-container.is-light .bg-\[\#15151B\] {
               background-color: var(--samiq-bg) !important;
@@ -207,14 +229,27 @@ function SubpageThemeInner({
             .samiq-subpage-container.is-light .bg-elevated,
             .samiq-subpage-container.is-light .bg-\[\#0E0E12\],
             .samiq-subpage-container.is-light .bg-\[\#121214\],
+            .samiq-subpage-container.is-light .bg-\[\#141416\],
+            .samiq-subpage-container.is-light .bg-\[\#161514\],
             .samiq-subpage-container.is-light [class*="bg-white\/"] {
               background-color: var(--samiq-surface) !important;
               border-color: var(--samiq-border) !important;
               color: var(--samiq-text) !important;
             }
+            .samiq-subpage-container.is-light [class*="bg-gradient-to-b"],
+            .samiq-subpage-container.is-light [class*="bg-gradient-to-br"],
+            .samiq-subpage-container.is-light [class*="from-\[\#161514\]"],
+            .samiq-subpage-container.is-light [class*="to-\[\#121110\]"],
+            .samiq-subpage-container.is-light [class*="to-\[\#0E0E0F\]"] {
+              background-image: none !important;
+              background-color: var(--samiq-surface) !important;
+            }
             .samiq-subpage-container.is-light .text-ivory,
             .samiq-subpage-container.is-light .text-white,
-            .samiq-subpage-container.is-light [class*="text-ivory"] {
+            .samiq-subpage-container.is-light [class*="text-ivory"],
+            .samiq-subpage-container.is-light .text-\[\#F4EFE6\],
+            .samiq-subpage-container.is-light .text-\[\#F5F2EB\],
+            .samiq-subpage-container.is-light .text-\[\#FFFFFF\] {
               color: var(--samiq-text) !important;
             }
             .samiq-subpage-container.is-light .text-muted-lux,
@@ -238,6 +273,12 @@ function SubpageThemeInner({
               background-color: var(--samiq-surface) !important;
               color: var(--samiq-text) !important;
               border-color: var(--samiq-border) !important;
+            }
+            .samiq-subpage-container.is-light input[class*="bg-transparent"],
+            .samiq-subpage-container.is-light textarea[class*="bg-transparent"],
+            .samiq-subpage-container.is-light input.bg-transparent,
+            .samiq-subpage-container.is-light textarea.bg-transparent {
+              background-color: transparent !important;
             }
             .samiq-subpage-container.is-light input::placeholder,
             .samiq-subpage-container.is-light textarea::placeholder {

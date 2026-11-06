@@ -17,6 +17,12 @@ export interface ResolvedThemePalette {
   accent: string;
   border: string;
   isLight: boolean;
+  backgroundHex?: string;
+  surfaceHex?: string;
+  textHex?: string;
+  mutedHex?: string;
+  accentHex?: string;
+  borderHex?: string;
 }
 
 export const THEME_DEFAULT_PALETTES: Record<ThemeId, ResolvedThemePalette> = {
@@ -29,6 +35,12 @@ export const THEME_DEFAULT_PALETTES: Record<ThemeId, ResolvedThemePalette> = {
     accent: '#D4AF37',
     border: 'rgba(212, 175, 55, 0.2)',
     isLight: false,
+    backgroundHex: '#0B0B0C',
+    surfaceHex: '#121214',
+    textHex: '#F4EFE6',
+    mutedHex: '#A39E93',
+    accentHex: '#D4AF37',
+    borderHex: 'rgba(212, 175, 55, 0.2)',
   },
   'ivory-journal': {
     themeId: 'ivory-journal',
@@ -39,6 +51,12 @@ export const THEME_DEFAULT_PALETTES: Record<ThemeId, ResolvedThemePalette> = {
     accent: '#8C5E3C',
     border: '#E8E2D8',
     isLight: true,
+    backgroundHex: '#FAF7F2',
+    surfaceHex: '#FFFFFF',
+    textHex: '#1C1917',
+    mutedHex: '#655E57',
+    accentHex: '#8C5E3C',
+    borderHex: '#E8E2D8',
   },
   'clinic-lab': {
     themeId: 'clinic-lab',
@@ -49,6 +67,12 @@ export const THEME_DEFAULT_PALETTES: Record<ThemeId, ResolvedThemePalette> = {
     accent: '#0F4C4A',
     border: '#E2ECE9',
     isLight: true,
+    backgroundHex: '#F4F8F7',
+    surfaceHex: '#FFFFFF',
+    textHex: '#0D2625',
+    mutedHex: '#4A6664',
+    accentHex: '#0F4C4A',
+    borderHex: '#E2ECE9',
   },
 };
 
@@ -83,15 +107,26 @@ export function resolveThemePalette(
   if (customPalette?.isCustomPalette) {
     const bg = customPalette.backgroundColor || base.background;
     const isLight = isColorLight(bg);
+    const surf = customPalette.surfaceColor || (isLight ? '#FFFFFF' : '#141418');
+    const txt = customPalette.textColor || (isLight ? '#1A1815' : '#F5F2EB');
+    const mut = isLight ? '#66615B' : '#A5A096';
+    const acc = customPalette.primaryColor || base.accent;
+    const bor = isLight ? '#E5DFD5' : 'rgba(255, 255, 255, 0.1)';
     return {
       themeId,
       background: bg,
-      surface: customPalette.surfaceColor || (isLight ? '#FFFFFF' : '#141418'),
-      text: customPalette.textColor || (isLight ? '#1A1815' : '#F5F2EB'),
-      muted: isLight ? '#66615B' : '#A5A096',
-      accent: customPalette.primaryColor || base.accent,
-      border: isLight ? '#E5DFD5' : 'rgba(255, 255, 255, 0.1)',
+      surface: surf,
+      text: txt,
+      muted: mut,
+      accent: acc,
+      border: bor,
       isLight,
+      backgroundHex: bg,
+      surfaceHex: surf,
+      textHex: txt,
+      mutedHex: mut,
+      accentHex: acc,
+      borderHex: bor,
     };
   }
 

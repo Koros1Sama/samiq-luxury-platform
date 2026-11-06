@@ -344,7 +344,7 @@ function CustomerAccountContent() {
                   <ShieldCheckIcon size={24} color="#C9A84C" />
                 </div>
                 <div>
-                  <h2 className="text-lg sm:text-xl font-serif font-bold text-ivory">
+                  <h2 className="text-lg sm:text-xl font-serif font-bold text-ivory leading-[1.45] md:leading-[1.4]">
                     منصة الإدارة والمشرفين التنفيذية (Executive Admin Launchpad)
                   </h2>
                   <p className="text-xs text-muted-lux">
@@ -447,7 +447,7 @@ function CustomerAccountContent() {
                 <SparkleStarIcon size={14} color="#C9A84C" />
                 <span>{isEn ? 'Miftah Elite Authenticity Club' : 'نادي نخبة مفتاح الجمال الأصلي'}</span>
               </span>
-              <h1 className="text-2xl sm:text-3xl font-serif font-bold text-ivory">
+              <h1 className="text-2xl sm:text-3xl font-serif font-bold text-ivory leading-[1.45] md:leading-[1.4]">
                 {isEn ? 'Customer Portal & Loyalty Rewards' : 'بوابة حساب العميلة ونقاط الولاء'}
               </h1>
               <p className="text-xs sm:text-sm text-muted-lux font-sans leading-relaxed">
@@ -752,7 +752,7 @@ function CustomerAccountContent() {
                 </div>
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <h1 className="text-xl sm:text-2xl font-serif font-bold text-ivory">
+                    <h1 className="text-xl sm:text-2xl font-serif font-bold text-ivory leading-[1.45] md:leading-[1.4]">
                       {customer.fullName}
                     </h1>
                     <span className="px-2.5 py-0.5 rounded-full text-xs font-sans font-bold bg-gold/15 text-gold border border-gold/30">

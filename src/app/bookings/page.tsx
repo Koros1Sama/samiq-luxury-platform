@@ -114,7 +114,7 @@ function BookingsContent() {
           <ConciergeHeadsetIcon size={16} color={palette.accent} />
           <span>{isEn ? 'Complimentary Beauty Consultation' : 'حجز موعد استشارة مجانية'}</span>
         </div>
-        <h1 className="text-2xl sm:text-4xl font-serif font-bold tracking-tight" style={{ color: palette.text }}>
+        <h1 className="text-2xl sm:text-4xl font-serif font-bold tracking-tight leading-[1.45] md:leading-[1.4]" style={{ color: palette.text }}>
           {isEn ? 'Personalized Skincare Consultation' : 'استشارة مخصصة لجمالكِ مع خبيراتنا'}
         </h1>
         <p className="text-xs sm:text-sm font-sans leading-relaxed" style={{ color: palette.muted }}>
@@ -139,7 +139,7 @@ function BookingsContent() {
           >
             <VerifiedCheckIcon size={28} color={palette.accent} />
           </div>
-          <h2 className="text-2xl font-serif font-bold" style={{ color: palette.text }}>
+          <h2 className="text-2xl font-serif font-bold leading-[1.45] md:leading-[1.4]" style={{ color: palette.text }}>
             {isEn ? 'Your Consultation is Confirmed!' : 'تم تأكيد حجز موعدكِ بنجاح'}
           </h2>
           <p className="text-xs sm:text-sm font-sans max-w-md mx-auto leading-relaxed" style={{ color: palette.muted }}>
@@ -182,7 +182,7 @@ function BookingsContent() {
                     }}
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <h3 className="text-sm font-serif font-bold" style={{ color: palette.text }}>
+                      <h3 className="text-sm font-serif font-bold leading-[1.45] md:leading-[1.4]" style={{ color: palette.text }}>
                         {isEn ? srv.titleEn : srv.titleAr}
                       </h3>
                       <span className="text-xs font-sans font-bold" style={{ color: palette.accent }}>

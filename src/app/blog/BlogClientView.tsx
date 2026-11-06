@@ -8,6 +8,8 @@ import { BlogPostRecord } from '@/core/db/store';
 import { useSubpageTheme } from '@/core/storefront/SubpageThemeWrapper';
 import { useStorefront } from '@/core/storefront/StorefrontProvider';
 import { formatCurrency } from '@/core/currency/formatter';
+import { isValidThemeId, ThemeId } from '@/themes/contract';
+import { resolveThemePalette } from '@/core/storefront/themePalette';
 
 interface LinkedProductMeta {
   productId: string;
@@ -70,10 +72,18 @@ const ARTICLE_ENRICHMENTS: Record<string, { category: string; linkedProduct: Lin
 };
 
 export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[] }) {
-  const { palette, isLight, locale } = useSubpageTheme();
+  const subCtx = useSubpageTheme();
   const sf = useStorefront();
   const searchParams = useSearchParams();
   const router = useRouter();
+
+  const themeParam = searchParams.get('theme');
+  const activeTheme = (themeParam && isValidThemeId(themeParam))
+    ? (themeParam as ThemeId)
+    : subCtx.activeTheme;
+  const palette = resolveThemePalette(activeTheme, sf.customPalette);
+  const isLight = palette.isLight;
+  const locale = subCtx.locale || 'ar';
 
   const isEn = locale === 'en';
   const currency = sf.currency || 'YER';
@@ -141,7 +151,35 @@ export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[
 
   const activeArticle = useMemo(() => {
     if (!selectedPostSlug) return null;
-    return initialPosts.find((p) => p.slug === selectedPostSlug) || null;
+    const target = selectedPostSlug.toLowerCase().trim();
+    if (!target) return null;
+
+    // 1. Direct match on slug or id
+    let matched = initialPosts.find(
+      (p) => p.slug.toLowerCase() === target || p.id.toLowerCase() === target
+    );
+    if (matched) return matched;
+
+    // 2. Numerical / index aliases (e.g. ?post=1, ?post=first, ?post=post-1)
+    if (target === '1' || target === 'first' || target === 'post-1' || target === '0') {
+      return initialPosts[0] || null;
+    }
+    if (target === '2' || target === 'second' || target === 'post-2') {
+      return initialPosts[1] || null;
+    }
+
+    // 3. Partial keywords in slug or title (e.g. 'vitamin-c', 'hydrating', 'cleanser', 'serum')
+    matched = initialPosts.find(
+      (p) =>
+        p.slug.toLowerCase().includes(target) ||
+        target.includes(p.slug.toLowerCase()) ||
+        (target.includes('vitamin') && p.slug.includes('vitamin')) ||
+        (target.includes('cleanse') && p.slug.includes('cleanse'))
+    );
+    if (matched) return matched;
+
+    // Fallback: if ?post= was passed with any non-empty value, open the first post
+    return initialPosts[0] || null;
   }, [initialPosts, selectedPostSlug]);
 
   const activeEnrichment = activeArticle ? ARTICLE_ENRICHMENTS[activeArticle.slug] : null;
@@ -176,10 +214,13 @@ export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[
           <span className="w-2 h-2 rounded-full" style={{ backgroundColor: palette.accent }} />
           <span>{isEn ? 'Scientific & Clinical Dermatology Journal' : 'مجلة التوثيق المخبري والعناية السريرية'}</span>
         </div>
-        <h1 className="text-2xl sm:text-4xl lg:text-5xl font-serif font-bold tracking-tight" style={{ color: palette.text }}>
+        <h1
+          className="text-2xl sm:text-4xl lg:text-5xl font-serif font-bold tracking-tight leading-[1.45] md:leading-[1.4]"
+          style={{ color: palette.textHex || palette.text }}
+        >
           {isEn ? 'Skincare Secrets & Verified Authenticity' : 'أسرار العناية ودليل حماية البشرة في اليمن'}
         </h1>
-        <p className="text-xs sm:text-sm font-sans leading-relaxed max-w-2xl mx-auto" style={{ color: palette.muted }}>
+        <p className="text-xs sm:text-sm font-sans leading-relaxed max-w-2xl mx-auto" style={{ color: palette.mutedHex || palette.muted }}>
           {isEn
             ? 'Peer-reviewed clinical guides, formulation breakdowns, and practical steps to ensure verified authenticity under Yemen climatic conditions.'
             : 'مقالات وأدلة عملية معتمدة لحماية بشرتكِ من التلف وتوثيق المطابقة وفق معايير الهيئة العليا للأدوية والمستلزمات الطبية.'}
@@ -192,15 +233,24 @@ export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[
         <div
           className="p-1 rounded-2xl border transition-all"
           style={{
-            backgroundColor: isLight ? '#00000005' : '#FFFFFF05',
-            borderColor: palette.border,
+            backgroundColor: isLight ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.04)',
+            borderColor: palette.borderHex || palette.border,
           }}
         >
           <div
             className="rounded-xl flex items-center px-4 py-2 gap-3"
-            style={{ backgroundColor: palette.surface }}
+            style={{
+              backgroundColor: palette.surfaceHex || palette.surface,
+              borderColor: palette.borderHex || palette.border,
+            }}
           >
-            <svg className="w-5 h-5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="w-5 h-5 opacity-60"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              style={{ color: palette.textHex || palette.text }}
+            >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
@@ -213,14 +263,17 @@ export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[
                   : 'ابحثي بعنوان المقال، المادة الفعالة (فيتامين سي، سيراميدات)، أو اسم الخبير...'
               }
               className="w-full bg-transparent text-xs sm:text-sm font-sans outline-hidden border-none"
-              style={{ color: palette.text }}
+              style={{
+                backgroundColor: 'transparent',
+                color: palette.textHex || palette.text,
+              }}
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
                 className="text-xs px-2 py-1 rounded opacity-60 hover:opacity-100"
-                style={{ color: palette.muted }}
+                style={{ color: palette.mutedHex || palette.muted }}
               >
                 {isEn ? 'Clear' : 'مسح'}
               </button>
@@ -238,12 +291,18 @@ export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[
                 type="button"
                 onClick={() => setSelectedCategory(cat.id as any)}
                 className={`min-h-[38px] px-4 rounded-full text-xs font-sans font-medium transition-all ${
-                  isSelected ? 'font-bold shadow-xs' : 'opacity-70 hover:opacity-100'
+                  isSelected ? 'font-bold shadow-xs' : 'opacity-85 hover:opacity-100'
                 }`}
                 style={{
-                  backgroundColor: isSelected ? palette.accent : isLight ? '#00000008' : '#FFFFFF0A',
-                  color: isSelected ? (isLight && palette.accent !== '#0F4C4A' ? '#FFFFFF' : '#0B0B0C') : palette.text,
-                  border: `1px solid ${isSelected ? palette.accent : palette.border}`,
+                  backgroundColor: isSelected
+                    ? (palette.accentHex || palette.accent)
+                    : isLight
+                    ? (palette.surfaceHex || '#FFFFFF')
+                    : 'rgba(255,255,255,0.06)',
+                  color: isSelected
+                    ? (isLight && palette.accent !== '#0F4C4A' ? '#FFFFFF' : '#0B0B0C')
+                    : (palette.textHex || palette.text),
+                  border: `1px solid ${isSelected ? (palette.accentHex || palette.accent) : (palette.borderHex || palette.border)}`,
                 }}
               >
                 {isEn ? cat.labelEn : cat.labelAr}
@@ -257,9 +316,9 @@ export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[
       {filteredPosts.length === 0 && (
         <div
           className="text-center py-16 px-4 rounded-3xl border space-y-4 max-w-xl mx-auto"
-          style={{ backgroundColor: palette.surface, borderColor: palette.border }}
+          style={{ backgroundColor: palette.surfaceHex || palette.surface, borderColor: palette.borderHex || palette.border }}
         >
-          <p className="text-sm font-sans" style={{ color: palette.muted }}>
+          <p className="text-sm font-sans" style={{ color: palette.mutedHex || palette.muted }}>
             {isEn ? 'No articles match your search criteria.' : 'لم يتم العثور على مقالات تطابق معايير البحث الحالية.'}
           </p>
           <button
@@ -269,7 +328,7 @@ export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[
               setSelectedCategory('all');
             }}
             className="px-5 py-2 rounded-xl text-xs font-bold"
-            style={{ backgroundColor: palette.accent, color: '#0B0B0C' }}
+            style={{ backgroundColor: palette.accentHex || palette.accent, color: '#0B0B0C' }}
           >
             {isEn ? 'Reset Filters' : 'إعادة ضبط التصفية'}
           </button>
@@ -283,15 +342,22 @@ export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[
           return (
             <article
               key={post.id}
-              className="group p-2 rounded-[2rem] border transition-all duration-300 hover:shadow-2xl flex flex-col justify-between"
+              data-testid="article-card"
+              data-article-slug={post.slug}
+              onClick={(e) => {
+                if ((e.target as HTMLElement).tagName !== 'A') {
+                  openArticle(post.slug);
+                }
+              }}
+              className="group p-2 rounded-[2rem] border transition-all duration-300 hover:shadow-2xl flex flex-col justify-between cursor-pointer"
               style={{
-                backgroundColor: isLight ? '#00000003' : '#FFFFFF04',
-                borderColor: palette.border,
+                backgroundColor: isLight ? (palette.surfaceHex || '#FFFFFF') : 'rgba(255,255,255,0.04)',
+                borderColor: palette.borderHex || palette.border,
               }}
             >
               <div
                 className="rounded-[calc(2rem-0.5rem)] p-5 sm:p-6 space-y-5 flex flex-col justify-between h-full"
-                style={{ backgroundColor: palette.surface }}
+                style={{ backgroundColor: palette.surfaceHex || palette.surface }}
               >
                 <div className="space-y-4">
                   {/* Article Thumbnail */}
@@ -314,8 +380,8 @@ export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[
                   </div>
 
                   {/* Meta: Author & Tags */}
-                  <div className="flex items-center justify-between text-xs font-sans" style={{ color: palette.muted }}>
-                    <span className="font-semibold" style={{ color: palette.accent }}>
+                  <div className="flex items-center justify-between text-xs font-sans" style={{ color: palette.mutedHex || palette.muted }}>
+                    <span className="font-semibold" style={{ color: palette.accentHex || palette.accent }}>
                       {post.author}
                     </span>
                     <span>{post.publishedAt}</span>
@@ -324,27 +390,27 @@ export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[
                   {/* Title */}
                   <h2
                     onClick={() => openArticle(post.slug)}
-                    className="cursor-pointer text-lg sm:text-xl font-serif font-bold leading-snug hover:underline"
-                    style={{ color: palette.text }}
+                    className="cursor-pointer text-lg sm:text-xl font-serif font-bold leading-[1.45] md:leading-[1.4] hover:underline"
+                    style={{ color: palette.textHex || palette.text }}
                   >
                     {post.title}
                   </h2>
 
                   {/* Excerpt */}
-                  <p className="text-xs sm:text-sm font-sans leading-relaxed line-clamp-3" style={{ color: palette.muted }}>
+                  <p className="text-xs sm:text-sm font-sans leading-relaxed line-clamp-3" style={{ color: palette.mutedHex || palette.muted }}>
                     {post.excerpt}
                   </p>
                 </div>
 
                 {/* Footer of Card: Linked Product Pill & Interactive Read Button */}
-                <div className="pt-4 border-t space-y-3" style={{ borderColor: palette.border }}>
+                <div className="pt-4 border-t space-y-3" style={{ borderColor: palette.borderHex || palette.border }}>
                   {enrichment && (
-                    <div className="text-[11px] font-sans flex items-center justify-between" style={{ color: palette.muted }}>
+                    <div className="text-[11px] font-sans flex items-center justify-between" style={{ color: palette.mutedHex || palette.muted }}>
                       <span className="truncate max-w-[200px]">
                         {isEn ? 'Linked Product: ' : 'المستحضر المرتبط: '}
-                        <strong style={{ color: palette.text }}>{enrichment.linkedProduct.brand}</strong>
+                        <strong style={{ color: palette.textHex || palette.text }}>{enrichment.linkedProduct.brand}</strong>
                       </span>
-                      <span className="font-mono font-bold" style={{ color: palette.accent }}>
+                      <span className="font-mono font-bold" style={{ color: palette.accentHex || palette.accent }}>
                         {formatCurrency(enrichment.linkedProduct.priceYer, currency)}
                       </span>
                     </div>
@@ -352,11 +418,14 @@ export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[
 
                   <button
                     type="button"
-                    onClick={() => openArticle(post.slug)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openArticle(post.slug);
+                    }}
                     className="w-full min-h-[44px] py-2.5 px-4 rounded-xl text-xs font-sans font-bold flex items-center justify-between transition-all group-hover:brightness-105"
                     style={{
                       backgroundColor: `${palette.accent}20`,
-                      color: palette.accent,
+                      color: palette.accentHex || palette.accent,
                       border: `1px solid ${palette.accent}40`,
                     }}
                   >
@@ -374,31 +443,34 @@ export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[
       {/* 5. FULL ARTICLE READER MODAL / VIEW (Rich Clinical Skincare Engine) */}
       {/* ==================================================================== */}
       {activeArticle && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-6 animate-fadeIn">
+        <div
+          data-testid="article-reader-modal"
+          className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-6 animate-fadeIn"
+        >
           <div
             className="w-full max-w-4xl max-h-[92vh] overflow-y-auto rounded-3xl border shadow-2xl space-y-8 relative"
             style={{
-              backgroundColor: palette.background,
-              borderColor: palette.border,
-              color: palette.text,
+              backgroundColor: palette.backgroundHex || palette.background,
+              borderColor: palette.borderHex || palette.border,
+              color: palette.textHex || palette.text,
             }}
           >
             {/* Top Modal Controls Sticky Bar */}
             <div
               className="sticky top-0 z-20 px-6 py-4 border-b flex items-center justify-between backdrop-blur-md"
               style={{
-                backgroundColor: isLight ? `${palette.surface}F5` : `${palette.surface}E6`,
-                borderColor: palette.border,
+                backgroundColor: isLight ? `${palette.surfaceHex || palette.surface}F5` : `${palette.surfaceHex || palette.surface}E6`,
+                borderColor: palette.borderHex || palette.border,
               }}
             >
               <div className="flex items-center gap-3">
                 <span
                   className="px-3 py-1 rounded-full text-xs font-bold"
-                  style={{ backgroundColor: `${palette.accent}20`, color: palette.accent }}
+                  style={{ backgroundColor: `${palette.accent}20`, color: palette.accentHex || palette.accent }}
                 >
                   {isEn ? 'Scientific Paper' : 'ورقة توثيق سريرية'}
                 </span>
-                <span className="text-xs font-sans" style={{ color: palette.muted }}>
+                <span className="text-xs font-sans" style={{ color: palette.mutedHex || palette.muted }}>
                   {activeArticle.readTimeMinutes} {isEn ? 'min read' : 'دقائق قراءة'}
                 </span>
               </div>
@@ -408,7 +480,7 @@ export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[
                   type="button"
                   onClick={handleCopyLink}
                   className="min-h-[38px] px-3 rounded-lg border text-xs font-sans font-medium transition flex items-center gap-1.5"
-                  style={{ borderColor: palette.border, color: palette.text }}
+                  style={{ borderColor: palette.borderHex || palette.border, color: palette.textHex || palette.text }}
                   title={isEn ? 'Copy link to article' : 'نسخ رابط المقال'}
                 >
                   <span>{copyFeedback ? (isEn ? 'Copied' : 'تم النسخ') : isEn ? 'Share Link' : 'مشاركة الرابط'}</span>
@@ -417,7 +489,7 @@ export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[
                   type="button"
                   onClick={closeArticle}
                   className="min-w-[38px] min-h-[38px] rounded-lg border flex items-center justify-center font-bold hover:opacity-80 transition"
-                  style={{ borderColor: palette.border, color: palette.text }}
+                  style={{ borderColor: palette.borderHex || palette.border, color: palette.textHex || palette.text }}
                   aria-label="إغلاق المقال"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -444,7 +516,7 @@ export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[
                   <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-black/50 backdrop-blur-xs">
                     {activeArticle.author} — {activeArticle.publishedAt}
                   </span>
-                  <h1 className="text-xl sm:text-3xl font-serif font-bold leading-tight">
+                  <h1 className="text-xl sm:text-3xl font-serif font-bold leading-[1.45] md:leading-[1.4]">
                     {activeArticle.title}
                   </h1>
                 </div>

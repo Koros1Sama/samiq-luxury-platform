@@ -245,7 +245,7 @@ function ProductDetailContent() {
               <span className="text-xs font-sans font-bold block" style={{ color: palette.accent }}>
                 {product.brand}
               </span>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold leading-snug" style={{ color: palette.text }}>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold leading-[1.45] md:leading-[1.4]" style={{ color: palette.text }}>
                 {product.title}
               </h1>
               {product.subtitle && (
@@ -392,7 +392,7 @@ function ProductDetailContent() {
               <span className="text-xs font-bold uppercase tracking-wider" style={{ color: palette.accent }}>
                 {isEn ? 'Authenticity Protocol' : 'بروتوكول التحقق والمطابقة المعتمد'}
               </span>
-              <h2 className="text-xl sm:text-2xl font-serif font-bold" style={{ color: palette.text }}>
+              <h2 className="text-xl sm:text-2xl font-serif font-bold leading-[1.45] md:leading-[1.4]" style={{ color: palette.text }}>
                 {isEn ? 'How to Verify This Authentic Product' : 'كيف تتأكدين من أصالة هذا المستحضر؟'}
               </h2>
             </div>
@@ -434,7 +434,7 @@ function ProductDetailContent() {
           <div className="space-y-8 pt-6 border-t" style={{ borderColor: palette.border }}>
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-xl font-serif font-bold" style={{ color: palette.text }}>
+                <h3 className="text-xl font-serif font-bold leading-[1.45] md:leading-[1.4]" style={{ color: palette.text }}>
                   {isEn ? 'Verified Customer Reviews' : 'تقييمات وتجارب العملاء الموثقة'}
                 </h3>
                 <p className="text-xs font-sans mt-0.5" style={{ color: palette.muted }}>

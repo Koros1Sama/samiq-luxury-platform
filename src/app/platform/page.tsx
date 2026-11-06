@@ -62,6 +62,7 @@ export default function PlatformSuperAdminPage() {
   const [customDiscountUsd, setCustomDiscountUsd] = useState<number>(0);
   const [priceOverrides, setPriceOverrides] = useState<Record<string, number>>({});
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
+  const [isHudCollapsed, setIsHudCollapsed] = useState(false);
 
   // Anchoring & Multiplier Pricing Engine State
   const [priceMultiplier, setPriceMultiplier] = useState<number>(1.5);
@@ -3000,100 +3001,114 @@ export default function PlatformSuperAdminPage() {
         </div>
 
         {/* Floating Live Total Badge on Left */}
-        <aside
-          aria-label="الشارة الطافية الذكية للتسعير الحي"
-          className="fixed bottom-6 left-6 z-40 max-w-[340px] w-[calc(100vw-3rem)] sm:w-80 bg-[#0e0d13]/95 backdrop-blur-xl border border-gold/50 shadow-[0_10px_35px_rgba(0,0,0,0.7),0_0_20px_rgba(201,168,76,0.25)] rounded-3xl p-4 space-y-3 transition-all duration-300 animate-fadeIn"
-          dir="rtl"
-        >
-          {/* Badge Header */}
-          <div className="flex items-center justify-between border-b border-white/10 pb-2">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-gold animate-pulse" />
-              <span className="text-xs font-serif font-bold text-ivory">سَامِق · التسعير الحي</span>
-            </div>
-            <div className="flex items-center gap-1.5">
+        {isHudCollapsed ? (
+          <aside
+            aria-label="الشارة الطافية الذكية للتسعير الحي"
+            className="fixed bottom-4 left-6 z-40 bg-[#0e0d13]/95 backdrop-blur-xl border border-gold/50 shadow-[0_10px_35px_rgba(0,0,0,0.7),0_0_20px_rgba(201,168,76,0.25)] rounded-full px-3.5 py-1.5 flex items-center gap-2.5 transition-all duration-300 animate-fadeIn"
+            dir="rtl"
+          >
+            <span className="w-2 h-2 rounded-full bg-gold animate-pulse shrink-0" />
+            <span className="text-xs font-serif font-bold text-ivory">سَامِق:</span>
+            <span className="text-xs font-serif font-bold text-champagne">${pricing.totalUsd}</span>
+            <span className="text-[11px] font-mono font-bold text-emerald-400 border-x border-white/10 px-2">
+              ${selectedProjectAnnualTotal}/سنة
+            </span>
+            <span className="text-[10px] font-sans font-bold text-muted-lux">
+              {selectedFeatures.length} ميزة
+            </span>
+            <button
+              type="button"
+              onClick={() => setIsHudCollapsed(false)}
+              className="p-1 rounded-full bg-gold/20 hover:bg-gold/30 text-gold text-xs font-bold transition cursor-pointer"
+              title="توسيع شارة التسعير الحي"
+            >
+              ＋
+            </button>
+          </aside>
+        ) : (
+          <aside
+            aria-label="الشارة الطافية الذكية للتسعير الحي"
+            className="fixed bottom-4 left-6 z-40 max-w-[95vw] bg-[#0e0d13]/95 backdrop-blur-xl border border-gold/50 shadow-[0_10px_35px_rgba(0,0,0,0.7),0_0_20px_rgba(201,168,76,0.25)] rounded-2xl sm:rounded-full px-3.5 py-2 flex flex-wrap items-center gap-3 transition-all duration-300 animate-fadeIn"
+            dir="rtl"
+          >
+            {/* Live Indicator & Multiplier */}
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="w-2 h-2 rounded-full bg-gold animate-pulse shrink-0" />
+              <span className="text-xs font-serif font-bold text-ivory">سَامِق</span>
               <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md bg-gold/20 text-champagne border border-gold/30">
                 ×{priceMultiplier}
               </span>
-              <span className="text-[11px] font-sans font-bold px-2 py-0.5 rounded-full bg-emerald-950/70 border border-emerald-500/40 text-emerald-300">
-                {selectedFeatures.length} ميزة نشطة
-              </span>
             </div>
-          </div>
 
-          {/* Live Figures */}
-          <div className="grid grid-cols-2 gap-2 text-xs font-sans">
+            <div className="h-4 w-px bg-white/15 hidden sm:block shrink-0" />
+
             {/* Setup Price */}
-            <div className="p-2.5 rounded-2xl bg-white/[0.03] border border-gold/20 flex flex-col justify-between">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] text-muted-lux font-medium">إجمالي التأسيس:</span>
-                <button
-                  type="button"
-                  onClick={handleSetTargetNetTotal}
-                  title="تعديل صافي التأسيس مباشرة"
-                  className="text-gold/70 hover:text-gold p-0.5 transition cursor-pointer"
-                >
-                  <PencilIcon className="w-2.5 h-2.5" />
-                </button>
-              </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span className="text-[10px] text-muted-lux font-medium">الصافي:</span>
               <button
                 type="button"
                 onClick={handleSetTargetNetTotal}
-                title="انقر لتعديل الصافي مقطوعاً"
-                className="text-start mt-1 group cursor-pointer"
+                title="تعديل الصافي مقطوعاً"
+                className="text-xs sm:text-sm font-serif font-bold text-champagne hover:text-gold transition cursor-pointer"
               >
-                {pricing.discountUsd > 0 && (
-                  <div className="flex items-center gap-1 text-[11px]">
-                    <span className="line-through text-muted-dim font-mono">${pricing.subtotalUsd}</span>
-                    <span className="text-emerald-400 font-bold text-[10px]">خصم {pricing.discountPercent}%</span>
-                  </div>
-                )}
-                <span className="text-lg sm:text-xl font-serif font-bold text-champagne block group-hover:text-gold transition">
-                  ${pricing.totalUsd}
-                </span>
-                <span className="text-[10px] text-muted-dim block">انقر للتعديل المباشر</span>
+                ${pricing.totalUsd}
               </button>
             </div>
 
+            <div className="h-4 w-px bg-white/15 hidden sm:block shrink-0" />
+
             {/* Annual Renewal */}
-            <div className="p-2.5 rounded-2xl bg-white/[0.03] border border-white/10 flex flex-col justify-between">
-              <span className="text-[11px] text-muted-lux font-medium">التجديد السنوي:</span>
-              <div className="mt-1">
-                <span className="text-base sm:text-lg font-mono font-bold text-emerald-400 block">
-                  ${selectedProjectAnnualTotal}
-                </span>
-                <span className="text-[10px] text-muted-dim block">ابتداءً من السنة 2</span>
-              </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span className="text-[10px] text-muted-lux font-medium">التجديد:</span>
+              <span className="text-xs sm:text-sm font-mono font-bold text-emerald-400">
+                ${selectedProjectAnnualTotal}/سنة
+              </span>
             </div>
-          </div>
 
-          {/* Quick Actions */}
-          <div className="flex items-center gap-2 pt-1">
-            <button
-              type="button"
-              onClick={() => setIsInvoiceModalOpen(true)}
-              className="flex-1 min-h-[38px] px-3 rounded-xl bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-obsidian-dark font-sans font-bold text-xs hover:brightness-110 shadow-md transition flex items-center justify-center gap-1.5"
-            >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="6 9 6 2 18 2 18 9" />
-                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
-                <rect x="6" y="14" width="12" height="8" />
-              </svg>
-              <span>فاتورة PDF</span>
-            </button>
+            <div className="h-4 w-px bg-white/15 hidden sm:block shrink-0" />
 
-            <button
-              type="button"
-              onClick={() => {
-                document.getElementById('pricing-summary-card')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="flex-1 min-h-[38px] px-3 rounded-xl bg-white/10 hover:bg-white/20 text-ivory border border-white/15 font-sans font-bold text-xs transition flex items-center justify-center gap-1"
-            >
-              <span>الملخص</span>
-              <span className="text-gold font-bold">↓</span>
-            </button>
-          </div>
-        </aside>
+            {/* Active Features Count */}
+            <span className="text-[10px] font-sans font-bold px-2 py-0.5 rounded-full bg-emerald-950/70 border border-emerald-500/40 text-emerald-300 shrink-0">
+              {selectedFeatures.length} ميزة
+            </span>
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsInvoiceModalOpen(true)}
+                className="min-h-[30px] px-2.5 rounded-lg bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] text-obsidian-dark font-sans font-bold text-[11px] hover:brightness-110 shadow-sm transition flex items-center justify-center gap-1 cursor-pointer"
+              >
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="6 9 6 2 18 2 18 9" />
+                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                  <rect x="6" y="14" width="12" height="8" />
+                </svg>
+                <span>فاتورة PDF</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  document.getElementById('pricing-summary-card')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="min-h-[30px] px-2.5 rounded-lg bg-white/10 hover:bg-white/20 text-ivory border border-white/15 font-sans font-bold text-[11px] transition flex items-center justify-center gap-1 cursor-pointer"
+              >
+                <span>الملخص</span>
+                <span className="text-gold font-bold">↓</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsHudCollapsed(true)}
+                className="w-6 h-6 flex items-center justify-center rounded-md bg-white/5 hover:bg-white/15 text-muted-lux hover:text-ivory text-xs font-bold transition cursor-pointer"
+                title="تصغير شريط التسعير"
+              >
+                −
+              </button>
+            </div>
+          </aside>
+        )}
 
         {/* Platform & Developer Identity Configuration Section */}
         <div className="p-6 rounded-3xl bg-surface border border-gold/30 shadow-xl space-y-5">
