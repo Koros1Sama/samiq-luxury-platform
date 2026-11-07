@@ -200,7 +200,7 @@ export function AuthenticityCompareSlider(props: AuthenticityCompareSliderProps)
           {/* Verification Result Area */}
           {result && (
             <div className="p-4 rounded-2xl bg-[#070709] border border-white/10 space-y-3 animate-fadeIn">
-              {result.success && result.verification ? (
+              {result.success && result.verification?.isVerified ? (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-emerald-400 font-sans font-bold text-xs sm:text-sm">
                     <VerifiedCheckIcon size={18} color="#34D399" />
@@ -235,12 +235,12 @@ export function AuthenticityCompareSlider(props: AuthenticityCompareSliderProps)
                 </div>
               ) : (
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-amber-400 font-sans font-bold text-xs sm:text-sm">
-                    <CrossWarningIcon size={18} color="#FBBF24" />
-                    <span>تنبيه: {result.message}</span>
+                  <div className="flex items-center gap-2 text-rose-400 font-sans font-bold text-xs sm:text-sm">
+                    <CrossWarningIcon size={18} color="#FB7185" />
+                    <span>تحذير: مستحضر غير مسجل أو يشتبه بكونه مقلداً ومغشوشاً</span>
                   </div>
-                  <p className="text-xs text-muted-lux font-sans leading-relaxed">
-                    إذا اشتريتِ هذا المنتج من متجر آخر وترغبين في فحصه مخبرياً، يسعدنا استقبالك في فرع حدة أو عبر واتساب.
+                  <p className="text-xs text-rose-200/90 font-sans leading-relaxed">
+                    {result.verification?.statusNotes || result.message || 'المستحضر المدخل غير مسجل في السجلات المعتمدة. نوصي بتجنب استخدامه والتواصل مع خبيراتنا في فرع حدة أو عبر واتساب.'}
                   </p>
                   <a
                     href="https://wa.me/967775234989"
@@ -249,7 +249,7 @@ export function AuthenticityCompareSlider(props: AuthenticityCompareSliderProps)
                     className="min-h-[44px] px-4 py-2 rounded-xl bg-[#25D366]/20 border border-[#25D366]/40 text-[#25D366] font-sans font-bold text-xs inline-flex items-center gap-2"
                   >
                     <WhatsAppIcon size={16} color="#25D366" />
-                    <span>إرسال صورة الباركود لخبير المتجر</span>
+                    <span>إرسال صورة العبوة لخبير المتجر</span>
                   </a>
                 </div>
               )}

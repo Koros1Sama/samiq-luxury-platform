@@ -38,7 +38,13 @@ export function BrandBentoGrid(props: BrandBentoGridProps) {
           {categories.map((cat) => (
             <div
               key={cat.id}
-              onClick={() => onSelectCategory?.(cat.id)}
+              onClick={() => {
+                onSelectCategory?.(cat.id);
+                const catalogEl = document.querySelector('#products-catalog');
+                if (catalogEl) {
+                  catalogEl.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
               className="group cursor-pointer p-1.5 rounded-[1.75rem] bg-white/[0.03] border border-white/[0.08] hover:border-gold/50 shadow-xl transition-all duration-300 flex flex-col"
             >
               <div className="h-full rounded-[calc(1.75rem-0.375rem)] bg-[#0E0E12] p-4 sm:p-5 flex flex-col justify-between overflow-hidden relative min-h-[320px] sm:min-h-[360px]">

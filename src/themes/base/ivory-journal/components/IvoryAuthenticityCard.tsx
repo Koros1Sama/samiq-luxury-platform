@@ -132,7 +132,7 @@ export function IvoryAuthenticityCard(_props: Partial<SectionComponentProps>) {
             )}
 
             {/* Verified Result Card */}
-            {result && result.success && result.verification && (
+            {result && result.success && result.verification?.isVerified && (
               <div className="p-5 rounded-md border border-[#5E6B5A]/40 bg-[#FAF7F2] space-y-3 animate-fade-in shadow-inner">
                 <div className="flex items-center gap-2 text-[#5E6B5A]">
                   <VerifiedStampIcon size={20} color="#5E6B5A" />
@@ -168,14 +168,14 @@ export function IvoryAuthenticityCard(_props: Partial<SectionComponentProps>) {
               </div>
             )}
 
-            {/* Unverified / Not Found */}
-            {result && !result.success && (
-              <div className="p-5 rounded-md border border-[#B89B5E]/40 bg-[#FFFDF9] space-y-2 text-xs font-sans text-[#554D46]">
-                <span className="font-serif font-bold text-sm text-[#1B1612] block">
-                  تنبيه تحريري: مستحضر غير مسجل تلقائياً
+            {/* Unverified / Counterfeit Alert */}
+            {result && (!result.success || !result.verification?.isVerified) && (
+              <div className="p-5 rounded-md border border-rose-300 bg-rose-50/90 space-y-2 text-xs font-sans text-rose-900">
+                <span className="font-serif font-bold text-sm text-rose-800 block">
+                  تحذير: مستحضر غير مسجل أو يشتبه بكونه مقلداً ومغشوشاً
                 </span>
                 <p className="font-sans text-sm leading-[1.75]">
-                  {result.message || 'المستحضر المدخل يتطلب مراجعة الفاتورة الجمركية المباشرة. يمكنكِ تصوير قاع العبوة وإرساله لخبيرتنا عبر واتساب للتحقق اليدوي.'}
+                  {result.verification?.statusNotes || result.message || 'المستحضر المدخل غير مدرج في قوائم المستحضرات المصرحة. نوصي بعدم استخدامه والتواصل مع خبيراتنا عبر واتساب للتحقق الفوري.'}
                 </p>
               </div>
             )}

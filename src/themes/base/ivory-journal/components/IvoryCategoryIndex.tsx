@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useStorefront } from '@/core/storefront/StorefrontProvider';
+import { matchesProductCategory } from '@/core/storefront/productQuickInfo';
 import { SectionComponentProps } from '@/themes/contract';
 import { ArrowIcon } from './IvoryIcons';
 
@@ -35,7 +36,7 @@ export function IvoryCategoryIndex(_props: Partial<SectionComponentProps>) {
         {/* Large-type Category Rows */}
         <div className="divide-y divide-[#E8E2D8] border-y border-[#E8E2D8]">
           {categories.map((cat, idx) => {
-            const count = products.filter((p) => p.categorySlug === cat.id).length;
+            const count = products.filter((p) => matchesProductCategory(p, cat.id, categories)).length;
             const indexStr = String(idx + 1).padStart(2, '0');
 
             return (

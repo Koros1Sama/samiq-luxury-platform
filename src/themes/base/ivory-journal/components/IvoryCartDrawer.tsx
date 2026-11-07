@@ -108,7 +108,7 @@ export function IvoryCartDrawer() {
                         <button
                           type="button"
                           aria-label="تقليل الكمية"
-                          onClick={() => cart.setQty(item.id, Math.max(1, item.quantity - 1))}
+                          onClick={() => cart.setQty(item.id, item.quantity - 1)}
                           className="w-8 h-8 min-w-[32px] min-h-[32px] flex items-center justify-center text-[#1B1612] hover:bg-[#E8E2D8]"
                         >
                           <MinusIcon size={14} />
@@ -184,6 +184,18 @@ export function IvoryCartDrawer() {
                     onChange={(e) => checkout.setCustomerPhone(e.target.value)}
                     placeholder="مثال: 775234989"
                     className="w-full h-11 min-h-[44px] px-3 rounded-md border border-[#E8E2D8] bg-[#FAF7F2] font-mono text-xs sm:text-sm text-[#1B1612] focus:outline-none focus:border-[#5E6B5A]"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-sans font-medium text-[#554D46] block mb-1">
+                    العنوان التفصيلي:
+                  </label>
+                  <input
+                    type="text"
+                    value={checkout.customerAddress}
+                    onChange={(e) => checkout.setCustomerAddress(e.target.value)}
+                    placeholder="الشارع، الحي، المعلم القريب"
+                    className="w-full h-11 min-h-[44px] px-3 rounded-md border border-[#E8E2D8] bg-[#FAF7F2] font-sans text-xs sm:text-sm text-[#1B1612] focus:outline-none focus:border-[#5E6B5A]"
                   />
                 </div>
               </div>

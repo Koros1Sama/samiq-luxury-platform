@@ -45,7 +45,8 @@ export function IvoryAdvisorChat({
   };
 
   const whatsappSupportUrl = () => {
-    const cleanNum = (tenant.whatsapp || '775234989').replace(/[^0-9]/g, '');
+    const rawNum = (tenant.contact?.whatsapp || tenant.whatsapp || '775234989').replace(/[^0-9]/g, '');
+    const cleanNum = rawNum.startsWith('967') ? rawNum : `967${rawNum.replace(/^0+/, '')}`;
     const msg = 'مرحباً، أود الحصول على استشارة مخصصة لروتين العناية بالبشرة';
     return `https://wa.me/${cleanNum}?text=${encodeURIComponent(msg)}`;
   };

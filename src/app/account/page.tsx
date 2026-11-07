@@ -562,7 +562,7 @@ function CustomerAccountContent() {
                       isActive
                         ? {
                             backgroundColor: palette.accent,
-                            color: isLight && palette.accent !== '#0F4C4A' ? '#FFFFFF' : (activeTheme === 'clinic-lab' ? '#FFFFFF' : '#0B0B0C'),
+                            color: isLight ? '#FFFFFF' : '#0B0B0C',
                             boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                           }
                         : {
@@ -709,7 +709,7 @@ function CustomerAccountContent() {
                           regSkinType === type.id
                             ? {
                                 backgroundColor: palette.accent,
-                                color: isLight && palette.accent !== '#0F4C4A' ? '#FFFFFF' : (activeTheme === 'clinic-lab' ? '#FFFFFF' : '#0B0B0C'),
+                                color: isLight ? '#FFFFFF' : '#0B0B0C',
                                 borderColor: palette.accent,
                                 fontWeight: 'bold',
                               }
@@ -773,7 +773,7 @@ function CustomerAccountContent() {
                   className="w-full min-h-[44px] py-3.5 rounded-2xl font-bold text-xs hover:brightness-110 shadow-md transition inline-flex items-center justify-center disabled:opacity-50"
                   style={{
                     backgroundColor: palette.accent,
-                    color: isLight && palette.accent !== '#0F4C4A' ? '#FFFFFF' : (activeTheme === 'clinic-lab' ? '#FFFFFF' : '#0B0B0C'),
+                    color: isLight ? '#FFFFFF' : '#0B0B0C',
                   }}
                 >
                   {isSubmitting ? 'جارٍ تسجيل العضوية...' : 'تأكيد إنشاء الحساب واستلام 150 نقطة'}
@@ -828,7 +828,7 @@ function CustomerAccountContent() {
                   className="w-full min-h-[44px] py-3.5 rounded-2xl font-bold text-xs hover:brightness-110 shadow-md transition inline-flex items-center justify-center disabled:opacity-50"
                   style={{
                     backgroundColor: palette.accent,
-                    color: isLight && palette.accent !== '#0F4C4A' ? '#FFFFFF' : (activeTheme === 'clinic-lab' ? '#FFFFFF' : '#0B0B0C'),
+                    color: isLight ? '#FFFFFF' : '#0B0B0C',
                   }}
                 >
                   {isSubmitting ? 'جارٍ التحقق...' : 'تسجيل الدخول إلى حسابي'}
@@ -903,7 +903,7 @@ function CustomerAccountContent() {
                   className="w-full min-h-[44px] py-3.5 rounded-2xl font-bold text-xs hover:brightness-110 shadow-md transition inline-flex items-center justify-center disabled:opacity-50"
                   style={{
                     backgroundColor: palette.accent,
-                    color: isLight && palette.accent !== '#0F4C4A' ? '#FFFFFF' : (activeTheme === 'clinic-lab' ? '#FFFFFF' : '#0B0B0C'),
+                    color: isLight ? '#FFFFFF' : '#0B0B0C',
                   }}
                 >
                   {isSubmitting ? 'جارٍ التحقق...' : 'دخول لوحة الإدارة المشتركة'}
@@ -948,7 +948,7 @@ function CustomerAccountContent() {
                   className="w-14 h-14 rounded-2xl flex items-center justify-center font-serif font-bold text-xl shadow-lg shrink-0"
                   style={{
                     backgroundColor: palette.accent,
-                    color: isLight && palette.accent !== '#0F4C4A' ? '#FFFFFF' : (activeTheme === 'clinic-lab' ? '#FFFFFF' : '#0B0B0C'),
+                    color: isLight ? '#FFFFFF' : '#0B0B0C',
                   }}
                 >
                   {customer.fullName ? customer.fullName.slice(0, 2) : 'عم'}
@@ -1029,7 +1029,7 @@ function CustomerAccountContent() {
                       isActive
                         ? {
                             backgroundColor: palette.accent,
-                            color: isLight && palette.accent !== '#0F4C4A' ? '#FFFFFF' : (activeTheme === 'clinic-lab' ? '#FFFFFF' : '#0B0B0C'),
+                            color: isLight ? '#FFFFFF' : '#0B0B0C',
                             boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                           }
                         : {
@@ -1130,7 +1130,7 @@ function CustomerAccountContent() {
                         className="min-h-[44px] px-5 py-2.5 rounded-xl font-bold text-xs hover:brightness-110 shadow-md transition disabled:opacity-40 inline-flex items-center justify-center shrink-0"
                         style={{
                           backgroundColor: palette.accent,
-                          color: isLight && palette.accent !== '#0F4C4A' ? '#FFFFFF' : (activeTheme === 'clinic-lab' ? '#FFFFFF' : '#0B0B0C'),
+                          color: isLight ? '#FFFFFF' : '#0B0B0C',
                         }}
                       >
                         {isSubmitting ? 'جارٍ الاستبدال...' : 'استبدال 100 نقطة'}
@@ -1312,7 +1312,7 @@ function CustomerAccountContent() {
                               regSkinType === type.id
                                 ? {
                                     backgroundColor: palette.accent,
-                                    color: isLight && palette.accent !== '#0F4C4A' ? '#FFFFFF' : (activeTheme === 'clinic-lab' ? '#FFFFFF' : '#0B0B0C'),
+                                    color: isLight ? '#FFFFFF' : '#0B0B0C',
                                     borderColor: palette.accent,
                                     fontWeight: 'bold',
                                   }
@@ -1376,7 +1376,7 @@ function CustomerAccountContent() {
                       className="w-full min-h-[44px] py-3.5 rounded-2xl font-bold text-xs hover:brightness-110 shadow-md transition inline-flex items-center justify-center disabled:opacity-50"
                       style={{
                         backgroundColor: palette.accent,
-                        color: isLight && palette.accent !== '#0F4C4A' ? '#FFFFFF' : (activeTheme === 'clinic-lab' ? '#FFFFFF' : '#0B0B0C'),
+                        color: isLight ? '#FFFFFF' : '#0B0B0C',
                       }}
                     >
                       {isSubmitting ? 'جارٍ الحفظ...' : 'حفظ التحديثات في ملف البشرة'}
@@ -1537,7 +1537,7 @@ function CustomerAccountContent() {
                           }}
                           style={{
                             backgroundColor: palette.accent,
-                            color: isLight && palette.accent !== '#0F4C4A' ? '#FFFFFF' : (activeTheme === 'clinic-lab' ? '#FFFFFF' : '#0B0B0C'),
+                            color: isLight ? '#FFFFFF' : '#0B0B0C',
                           }}
                           className="min-h-[44px] px-3 py-2 rounded-xl text-xs font-bold flex items-center justify-center transition hover:brightness-110 shadow-sm"
                         >

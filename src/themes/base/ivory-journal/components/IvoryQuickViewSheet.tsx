@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { SmartImage } from '@/core/ui/SmartImage';
 import { useStorefront } from '@/core/storefront/StorefrontProvider';
@@ -28,6 +28,14 @@ export function IvoryQuickViewSheet({ product, onClose }: IvoryQuickViewSheetPro
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState<string>(product?.image || '');
 
+  useEffect(() => {
+    if (product) {
+      setSelectedVariantId(product.variants?.[0]?.id);
+      setQuantity(1);
+      setActiveImage(product.image || '');
+    }
+  }, [product]);
+
   if (!product) return null;
 
   const info = getProductQuickInfo(product, currency);
@@ -40,8 +48,9 @@ export function IvoryQuickViewSheet({ product, onClose }: IvoryQuickViewSheetPro
   };
 
   const whatsappInquiryUrl = () => {
-    const cleanNum = (tenant.whatsapp || '775234989').replace(/[^0-9]/g, '');
-    const msg = `مرحباً، أود الاستفسار عن توفر وشهادة فحص: ${product.title}`;
+    const rawNum = (tenant.contact?.whatsapp || tenant.whatsapp || '775234989').replace(/[^0-9]/g, '');
+    const cleanNum = rawNum.startsWith('967') ? rawNum : `967${rawNum.replace(/^0+/, '')}`;
+    const msg = `مرحباً، أود الاستفسار عن توفر ومطابقة المستحضر المعتمد: ${product.title}`;
     return `https://wa.me/${cleanNum}?text=${encodeURIComponent(msg)}`;
   };
 
@@ -168,12 +177,12 @@ export function IvoryQuickViewSheet({ product, onClose }: IvoryQuickViewSheetPro
                   className={`px-2.5 py-1 rounded text-xs font-sans font-bold border ${
                     product.stockQuantity > 0
                       ? 'bg-[#EFEAE1] text-[#5E6B5A] border-[#5E6B5A]/30'
-                      : 'bg-red-50 text-red-700 border-red-200'
+                      : 'bg-amber-50 text-amber-800 border-amber-300'
                   }`}
                 >
                   {product.stockQuantity > 0
                     ? `متوفر في المخزن (${product.stockQuantity} قطعة)`
-                    : 'نفدت الكمية حالياً'}
+                    : 'يُوفَّر بالحجز المسبق'}
                 </span>
               )}
             </div>

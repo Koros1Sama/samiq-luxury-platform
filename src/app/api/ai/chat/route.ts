@@ -121,13 +121,17 @@ export async function POST(req: Request) {
 1. تنظيف عميق بالغسول الرغوي المعتمد صباحاً ومساءً.
 2. سيروم النياسيناميد 10% والزنك 1% لضبط إفراز الدهون وتضييق المسام.
 3. ترطيب مائي خفيف خال من الزيوت مع واقي شمس غير لامع.`;
-      recommendedProducts = products.filter((p) => p.categorySlug === 'serums' || p.categorySlug === 'cleansers-moisturizers');
+      recommendedProducts = products.filter(
+        (p) => p.categorySlug === 'serums' || p.categorySlug === 'cleansers' || p.categorySlug === 'cleansers-moisturizers'
+      );
       quickPills = ['إضافة روتين البشرة الدهنية', 'استشارة أخصائية بشرة', 'أسعار منتجات العناية'];
     } else if (queryLower.includes('جافة') || queryLower.includes('تقشر') || queryLower.includes('ترطيب')) {
       replyText = `للبشرة الجافة التي تعاني من الشد والتقشر، الروتين الأمثل يعتمد على السيراميدات وحمض الهيالورونيك:
 1. الغسول المرطب اللطيف بالسيراميدات الثلاث الأساسية.
 2. كريم الترطيب المكثف لحبس الرطوبة 24 ساعة.`;
-      recommendedProducts = products.filter((p) => p.categorySlug === 'cleansers-moisturizers');
+      recommendedProducts = products.filter(
+        (p) => p.categorySlug === 'cleansers' || p.categorySlug === 'creams' || p.categorySlug === 'cleansers-moisturizers'
+      );
       quickPills = ['كريم ترطيب مكثف', 'الغسول المرطب', 'شحن إلى محافظتي'];
     } else if (queryLower.includes('مكياج') || queryLower.includes('روج') || queryLower.includes('شفايف') || queryLower.includes('عيون')) {
       replyText = 'مجموعتنا من المكياج الفاخر تضم أرقى الدرجات الأصلية ذات الثبات المخملي والترطيب الحريري كأحمر الشفاه الكوتور وباليت ظلال العيون الملكي.';

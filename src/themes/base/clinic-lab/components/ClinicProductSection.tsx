@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useStorefront } from '@/core/storefront/StorefrontProvider';
+import { matchesProductCategory } from '@/core/storefront/productQuickInfo';
+import { formatCurrency } from '@/core/currency/formatter';
 import { ClinicSkinTypeSelector, SkinTypeId } from './ClinicSkinTypeSelector';
 import { ClinicProductList } from './ClinicProductList';
 import { SectionComponentProps } from '@/themes/contract';
@@ -14,10 +16,23 @@ import {
 } from './ClinicIcons';
 
 export function ClinicProductSection(_props?: SectionComponentProps) {
-  const { products, search, activeCategory, activeTag, setActiveTag, availableTags, cart, currency } = useStorefront();
+  const { products, categories, search, activeCategory, activeTag, setActiveTag, availableTags, cart, currency } = useStorefront();
   const [selectedSkinType, setSelectedSkinType] = useState<SkinTypeId>('all');
-  const [priceMax, setPriceMax] = useState<number>(30000);
-  const [inStockOnly, setInStockOnly] = useState<boolean>(false);
+
+  const maxProductPrice = useMemo(() => {
+    const highest = Math.max(
+      0,
+      ...products.map((p) => p.prices[currency] ?? p.prices.YER ?? 0)
+    );
+    const defaultCap = currency === 'USD' ? 200 : currency === 'SAR' ? 800 : 50000;
+    return Math.max(defaultCap, highest);
+  }, [products, currency]);
+
+  const [priceMax, setPriceMax] = useState<number>(maxProductPrice);
+
+  useEffect(() => {
+    setPriceMax(maxProductPrice);
+  }, [maxProductPrice]);
 
   // Routine-based recommended product ids
   const SKIN_RECOMMENDATIONS: Record<Exclude<SkinTypeId, 'all'>, string[]> = {
@@ -49,12 +64,7 @@ export function ClinicProductSection(_props?: SectionComponentProps) {
       }
 
       // 3. Category Filter
-      if (
-        activeCategory &&
-        activeCategory !== 'all' &&
-        activeCategory !== '' &&
-        p.categorySlug !== activeCategory
-      ) {
+      if (!matchesProductCategory(p, activeCategory, categories)) {
         return false;
       }
 
@@ -63,15 +73,15 @@ export function ClinicProductSection(_props?: SectionComponentProps) {
         return false;
       }
 
-      // 5. Price Filter (YER reference)
-      const yerPrice = p.prices.YER ?? 0;
-      if (yerPrice > priceMax) {
+      // 5. Price Filter (Active Currency)
+      const activePrice = p.prices[currency] ?? p.prices.YER ?? 0;
+      if (activePrice > priceMax) {
         return false;
       }
 
       return true;
     });
-  }, [products, search.query, selectedSkinType, activeCategory, activeTag, priceMax]);
+  }, [products, categories, search.query, selectedSkinType, activeCategory, activeTag, priceMax, currency]);
 
   return (
     <section id="products" className="w-full py-4 sm:py-8 bg-white">
@@ -172,17 +182,17 @@ export function ClinicProductSection(_props?: SectionComponentProps) {
             <div>
               <div className="flex items-center justify-between text-xs font-bold text-[#0F4C4A] mb-1.5">
                 <span>الحد الأقصى للسعر:</span>
-                <span>{priceMax.toLocaleString()} YER</span>
+                <span>{formatCurrency(priceMax, currency)}</span>
               </div>
               <input
                 type="range"
-                min={10000}
-                max={30000}
-                step={1000}
+                min={currency === 'USD' ? 5 : currency === 'SAR' ? 20 : 2000}
+                max={maxProductPrice}
+                step={currency === 'USD' ? 5 : currency === 'SAR' ? 10 : 1000}
                 value={priceMax}
                 onChange={(e) => setPriceMax(Number(e.target.value))}
                 className="w-full min-h-[40px] h-10 accent-[#0F4C4A] cursor-pointer py-2"
-                aria-label="الحد الأقصى للسعر بالريال اليمني"
+                aria-label="الحد الأقصى للسعر"
               />
             </div>
 

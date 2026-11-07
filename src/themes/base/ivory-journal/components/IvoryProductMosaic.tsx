@@ -3,7 +3,7 @@
 import React from 'react';
 import { SmartImage } from '@/core/ui/SmartImage';
 import { useStorefront } from '@/core/storefront/StorefrontProvider';
-import { getProductQuickInfo } from '@/core/storefront/productQuickInfo';
+import { getProductQuickInfo, matchesProductCategory } from '@/core/storefront/productQuickInfo';
 import { ProductCardData, SectionComponentProps } from '@/themes/contract';
 import { PlusIcon, VerifiedStampIcon } from './IvoryIcons';
 
@@ -27,7 +27,7 @@ export function IvoryProductMosaic({ onSelectProduct }: IvoryProductMosaicProps)
   // Filter products by active category and active tag
   const isAll = !activeCategory || activeCategory === 'all' || activeCategory === '';
   const filteredProducts = products.filter((p) => {
-    if (!isAll && p.categorySlug !== activeCategory) return false;
+    if (!matchesProductCategory(p, activeCategory, categories)) return false;
     if (activeTag && (!p.tags || !p.tags.includes(activeTag))) return false;
     return true;
   });

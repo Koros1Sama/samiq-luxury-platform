@@ -43,7 +43,15 @@ export function ClinicCategories() {
               <button
                 key={cat.id}
                 type="button"
-                onClick={() => setActiveCategory(isActive ? '' : cat.id)}
+                onClick={() => {
+                  setActiveCategory(isActive ? '' : cat.id);
+                  if (!isActive) {
+                    const prodEl = document.querySelector('#products');
+                    if (prodEl) {
+                      prodEl.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }
+                }}
                 className={`min-h-[140px] p-3.5 rounded-2xl border text-start flex flex-col justify-between transition-all focus:outline-hidden focus:ring-2 focus:ring-[#0F4C4A] group ${
                   isActive
                     ? 'bg-white border-[#0F4C4A] shadow-md ring-2 ring-[#0F4C4A]/20'

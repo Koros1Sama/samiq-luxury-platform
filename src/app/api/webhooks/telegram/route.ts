@@ -27,9 +27,9 @@ export async function POST(req: Request) {
       products.forEach((p, idx) => {
         responseText += `${idx + 1}. ${p.title} - ${p.prices.YER} ر.ي\n`;
       });
-      responseText += '\nللتسوق بالكامل ومقارنة الأصلي والتقليد:\nhttps://miftah.samiq.ye';
+      responseText += '\nللتسوق بالكامل وفحص الأصالة وكشف المقلد:\nhttps://samiq.shop';
     } else if (text === '/authenticity' || text.includes('أصلي')) {
-      responseText = 'دليل فحص الأصالة المعتمد:\n- فحص كود الباتش أسفل الزجاجة بواسطة الليزر.\n- التأكد من نقاء القوام وخلوه من الرغوة البيضاء.\n- مطابقة الباركود مع الوكالة الدولية.';
+      responseText = 'دليل فحص الأصالة المعتمد:\n- فحص ختم الأصالة وتاريخ الإنتاج المطبوعين بالليزر أسفل الزجاجة.\n- التأكد من نقاء القوام وخلوه من الرغوة البيضاء.\n- مطابقة معايير الهيئة العليا للأدوية والمستلزمات الطبية.';
     }
 
     if (botToken) {

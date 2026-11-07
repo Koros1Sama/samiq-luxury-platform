@@ -29,16 +29,20 @@ export function ClinicCartDrawer(_props?: Record<string, never>) {
     { id: 'jeeb' as const, label: 'محفظة جيب / جوالي' },
   ];
 
-  const handleWhatsAppCheckout = () => {
+  const [lastWhatsAppUrl, setLastWhatsAppUrl] = useState<string>('');
+
+  const handleWhatsAppCheckout = async () => {
     const orderNumber = `CLN-${Date.now().toString().slice(-6)}`;
     const url = checkout.buildWhatsAppOrderUrl(orderNumber);
-    if (typeof window !== 'undefined') {
-      window.open(url, '_blank');
-    }
+    setLastWhatsAppUrl(url);
+    await checkout.submitOrder({ redirectWhatsApp: true });
   };
 
   const handleDirectSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const orderNumber = `CLN-${Date.now().toString().slice(-6)}`;
+    const url = checkout.buildWhatsAppOrderUrl(orderNumber);
+    setLastWhatsAppUrl(url);
     const res = await checkout.submitOrder({ redirectWhatsApp: false });
     if (res?.success) {
       setStep('success');
@@ -105,13 +109,24 @@ export function ClinicCartDrawer(_props?: Record<string, never>) {
               <p className="text-sm text-[#4A5568] leading-[1.75]">
                 سيتم التواصل معك فوراً من قبل صيدلي مفتاح الجمال لتأكيد موعد التوصيل ومطابقة بيانات المستحضر المعتمد.
               </p>
+              {lastWhatsAppUrl && (
+                <a
+                  href={lastWhatsAppUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 w-full min-h-[44px] px-5 py-2.5 rounded-xl bg-[#0F4C4A] hover:bg-[#0B3A38] text-white text-xs sm:text-sm font-bold inline-flex items-center justify-center gap-2 transition"
+                >
+                  <WhatsAppIcon size={18} />
+                  <span>فتح محادثة واتساب لتأكيد الاتفاق والتوصيل</span>
+                </a>
+              )}
               <button
                 type="button"
                 onClick={() => {
                   setStep('items');
                   cart.close();
                 }}
-                className="mt-4 min-h-[44px] px-6 py-2 rounded-xl bg-[#0F4C4A] text-white text-sm font-bold"
+                className="mt-1 min-h-[44px] px-6 py-2 rounded-xl border border-[#D4E5E0] bg-white text-[#0F4C4A] text-sm font-bold"
               >
                 العودة للمتجر
               </button>
@@ -198,7 +213,7 @@ export function ClinicCartDrawer(_props?: Record<string, never>) {
                   >
                     {checkout.shippingZones.map((z) => (
                       <option key={z.id} value={z.id}>
-                        {z.nameAr} ({z.estimatedDeliveryHours})
+                        {z.nameAr} ({z.estimatedDeliveryHours}) — {formatCurrency(currency === 'SAR' ? z.feeSar : currency === 'USD' ? z.feeUsd : z.feeYer, currency)}
                       </option>
                     ))}
                   </select>

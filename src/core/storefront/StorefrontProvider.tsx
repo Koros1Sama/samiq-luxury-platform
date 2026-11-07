@@ -111,7 +111,7 @@ interface StorefrontProviderProps {
 export function StorefrontProvider({
   tenant = DEFAULT_STOREFRONT_TENANT,
   features = DEFAULT_STOREFRONT_FEATURES,
-  products = [],
+  products: initialProducts = [],
   categories = [],
   blocksData = {},
   initialCurrency = 'YER',
@@ -120,11 +120,17 @@ export function StorefrontProvider({
   shippingZones = [],
   children,
 }: StorefrontProviderProps) {
-  // 0. Features state with live reactive capability
+  // 0. Features & Live Products state
   const [featuresState, setFeaturesState] = useState<FeatureFlags>(features);
+  const [products, setProductsState] = useState<ProductCardData[]>(initialProducts);
   useEffect(() => {
     setFeaturesState(features);
   }, [features]);
+  useEffect(() => {
+    if (initialProducts && initialProducts.length > 0) {
+      setProductsState(initialProducts);
+    }
+  }, [initialProducts]);
 
   const updateFeatures = useCallback((newFeatures: FeatureFlags) => {
     setFeaturesState((prev) => ({
@@ -160,6 +166,41 @@ export function StorefrontProvider({
       setCurrencyState(tenant.currency as ThemeCurrencyCode);
     }
   }, [tenant.currency]);
+
+  // Hydrate live store currency, features, shippingZones, and products on client (especially for subpages)
+  useEffect(() => {
+    let active = true;
+    async function syncLiveStoreConfig() {
+      try {
+        const res = await fetch('/api/store/features');
+        const data = await res.json();
+        if (!active || !data?.success) return;
+        if (data.currency && ['YER', 'SAR', 'USD'].includes(data.currency)) {
+          setCurrencyState(data.currency as ThemeCurrencyCode);
+        }
+        if (data.features && typeof data.features === 'object') {
+          setFeaturesState((prev) => ({ ...prev, ...data.features }));
+        }
+        if (typeof window !== 'undefined' && Array.isArray(data.shippingZones) && data.shippingZones.length > 0) {
+          (window as any).__SAMIQ_SHIPPING_ZONES__ = data.shippingZones;
+        }
+      } catch {}
+
+      if (initialProducts.length === 0) {
+        try {
+          const pRes = await fetch('/api/store/products');
+          const pData = await pRes.json();
+          if (active && pData?.success && Array.isArray(pData.products)) {
+            setProductsState(pData.products);
+          }
+        } catch {}
+      }
+    }
+    syncLiveStoreConfig();
+    return () => {
+      active = false;
+    };
+  }, [initialProducts.length]);
 
   // 2. Cart State
   const [cartItems, setCartItems] = useState<CartItem[]>([]);

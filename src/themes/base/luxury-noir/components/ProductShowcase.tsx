@@ -14,6 +14,7 @@ import {
   ConciergeHeadsetIcon,
 } from './LuxuryIcons';
 import { useStorefront } from '@/core/storefront/StorefrontProvider';
+import { matchesProductCategory } from '@/core/storefront/productQuickInfo';
 
 interface ProductShowcaseProps extends Partial<SectionComponentProps> {
   products?: ProductCardData[];
@@ -38,7 +39,7 @@ export function ProductShowcase(props: ProductShowcaseProps) {
   const { activeTag, setActiveTag, availableTags } = sf;
 
   const filteredProducts = products.filter((p) => {
-    if (activeFilter && activeFilter !== 'all' && activeFilter !== p.categorySlug && activeFilter !== p.id) {
+    if (!matchesProductCategory(p, activeFilter, sf.categories)) {
       return false;
     }
     if (activeTag && (!p.tags || !p.tags.includes(activeTag))) {

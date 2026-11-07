@@ -217,7 +217,7 @@ function AuthenticityHubContent() {
               className="min-h-[44px] px-6 py-3 rounded-2xl font-sans font-bold text-sm shadow-md transition disabled:opacity-50 inline-flex items-center justify-center"
               style={{
                 backgroundColor: palette.accentHex || palette.accent,
-                color: isLight && palette.accent !== '#0F4C4A' ? '#FFFFFF' : '#0B0B0C',
+                color: isLight ? '#FFFFFF' : '#0B0B0C',
               }}
             >
               {isLoading ? 'جاري الفحص...' : 'فحص المستحضر ↵'}
@@ -422,7 +422,7 @@ function AuthenticityHubContent() {
                       ? (palette.surfaceHex || '#FFFFFF')
                       : 'rgba(255, 255, 255, 0.05)',
                     color: isSelected
-                      ? (isLight && palette.accent !== '#0F4C4A' ? '#FFFFFF' : '#0B0B0C')
+                      ? (isLight ? '#FFFFFF' : '#0B0B0C')
                       : (palette.textHex || palette.text),
                     border: `1px solid ${isSelected ? (palette.accentHex || palette.accent) : (palette.borderHex || palette.border)}`,
                   }}

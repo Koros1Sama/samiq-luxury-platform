@@ -61,7 +61,7 @@ export default function PlatformSuperAdminPage() {
       const isAuth = localStorage.getItem('samiq_platform_owner_auth') === 'true';
       const urlParams = new URLSearchParams(window.location.search);
       const keyParam = urlParams.get('key') || urlParams.get('passcode');
-      if (isAuth || keyParam === 'samiq2026' || keyParam === 'miftah2026') {
+      if (isAuth || keyParam === 'samiq2026') {
         setIsOwnerAuthenticated(true);
         localStorage.setItem('samiq_platform_owner_auth', 'true');
       }
@@ -70,14 +70,14 @@ export default function PlatformSuperAdminPage() {
 
   const handleUnlockStudio = (e: React.FormEvent) => {
     e.preventDefault();
-    if (passcodeAttempt === 'samiq2026' || passcodeAttempt === 'miftah2026') {
+    if (passcodeAttempt.trim() === 'samiq2026') {
       setIsOwnerAuthenticated(true);
       setPasscodeError('');
       if (typeof window !== 'undefined') {
         localStorage.setItem('samiq_platform_owner_auth', 'true');
       }
     } else {
-      setPasscodeError('رمز المرور غير صحيح. يرجى إدخال الرمز المعتمد للمؤسس.');
+      setPasscodeError('رمز المرور غير صحيح. هذه البوابة مخصصة حصرياً لمالك منصة سَامِق.');
     }
   };
 

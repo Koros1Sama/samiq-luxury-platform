@@ -19,7 +19,7 @@ export interface ClinicAdvisorModalProps {
 }
 
 export function ClinicAdvisorModal({ isOpen, onClose }: ClinicAdvisorModalProps) {
-  const { cart, tenant } = useStorefront();
+  const { cart, tenant, formatPrice } = useStorefront();
   const {
     messages,
     inputVal,
@@ -42,7 +42,8 @@ export function ClinicAdvisorModal({ isOpen, onClose }: ClinicAdvisorModalProps)
     sendMessage(pillText);
   };
 
-  const whatsapp = tenant.contact?.whatsapp || tenant.whatsapp || '775234989';
+  const rawWhatsapp = (tenant.contact?.whatsapp || tenant.whatsapp || '775234989').replace(/[^0-9]/g, '');
+  const cleanWhatsapp = rawWhatsapp.startsWith('967') ? rawWhatsapp : `967${rawWhatsapp.replace(/^0+/, '')}`;
 
   return (
     <div
@@ -144,7 +145,7 @@ export function ClinicAdvisorModal({ isOpen, onClose }: ClinicAdvisorModalProps)
                           {prod.title}
                         </span>
                         <span className="text-xs text-[#0F4C4A]/80 font-semibold block">
-                          {prod.prices.YER?.toLocaleString()} YER
+                          {prod.prices ? formatPrice(prod.prices) : ''}
                         </span>
                       </div>
                       <button
@@ -176,7 +177,7 @@ export function ClinicAdvisorModal({ isOpen, onClose }: ClinicAdvisorModalProps)
                 هل تحتاجين فحصاً مخبرياً خاصاً؟
               </span>
               <a
-                href={`https://wa.me/967${whatsapp}?text=${encodeURIComponent('مرحباً، أود استشارة صيدلي مفتاح الجمال بشأن فحص منتج')}`}
+                href={`https://wa.me/${cleanWhatsapp}?text=${encodeURIComponent('مرحباً، أود استشارة صيدلي مفتاح الجمال بشأن فحص منتج')}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="min-h-[44px] px-3 py-2 rounded-lg bg-[#0F4C4A] text-white inline-flex items-center justify-center gap-1.5 text-xs font-bold hover:bg-[#0B3A38] transition-colors mt-1"

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { SmartImage } from '@/core/ui/SmartImage';
 import { SparkleStarIcon, CloseIcon, WhatsAppIcon, VerifiedCheckIcon } from './LuxuryIcons';
 import { useAdvisorChat } from '@/core/storefront/useAdvisorChat';
+import { useStorefront } from '@/core/storefront/StorefrontProvider';
 
 interface AiBeautyAdvisorProps {
   isOpen?: boolean;
@@ -12,6 +13,7 @@ interface AiBeautyAdvisorProps {
 }
 
 export function AiBeautyAdvisor({ isOpen: externalIsOpen, onClose: externalOnClose }: AiBeautyAdvisorProps) {
+  const sf = useStorefront();
   const chat = useAdvisorChat();
 
   const isOpen = externalIsOpen !== undefined ? externalIsOpen : chat.isOpen;
@@ -114,7 +116,7 @@ export function AiBeautyAdvisor({ isOpen: externalIsOpen, onClose: externalOnClo
                               {p.title}
                             </h5>
                             <span className="text-xs text-champagne font-sans block mt-0.5">
-                              {p.prices?.YER ? `${p.prices.YER.toLocaleString()} ر.ي` : ''}
+                              {p.prices ? sf.formatPrice(p.prices) : ''}
                             </span>
                           </div>
                           <VerifiedCheckIcon size={14} color="#34D399" />

@@ -543,56 +543,58 @@ function SubpageThemeInner({
                   })}
                 </div>
 
-                {/* Mobile Template Selector */}
-                <div className="pt-2 border-t flex items-center justify-between gap-2" style={{ borderColor: palette.border }}>
-                  <span className="text-xs" style={{ color: palette.muted }}>
-                    {isEn ? 'Theme Template:' : 'قالب المتجر:'}
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setActiveTheme('luxury-noir');
-                        setMobileMenuOpen(false);
-                      }}
-                      className="px-2.5 py-1 rounded text-xs"
-                      style={{
-                        backgroundColor: activeTheme === 'luxury-noir' ? palette.accent : 'transparent',
-                        color: activeTheme === 'luxury-noir' ? '#0B0B0C' : palette.text,
-                      }}
-                    >
-                      Noir
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setActiveTheme('ivory-journal');
-                        setMobileMenuOpen(false);
-                      }}
-                      className="px-2.5 py-1 rounded text-xs"
-                      style={{
-                        backgroundColor: activeTheme === 'ivory-journal' ? palette.accent : 'transparent',
-                        color: activeTheme === 'ivory-journal' ? '#FFFFFF' : palette.text,
-                      }}
-                    >
-                      Ivory
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setActiveTheme('clinic-lab');
-                        setMobileMenuOpen(false);
-                      }}
-                      className="px-2.5 py-1 rounded text-xs"
-                      style={{
-                        backgroundColor: activeTheme === 'clinic-lab' ? palette.accent : 'transparent',
-                        color: activeTheme === 'clinic-lab' ? '#FFFFFF' : palette.text,
-                      }}
-                    >
-                      Clinic
-                    </button>
+                {/* Mobile Template Selector (Gated by Demo Mode) */}
+                {sf.isDemoMode && (
+                  <div className="pt-2 border-t flex items-center justify-between gap-2" style={{ borderColor: palette.border }}>
+                    <span className="text-xs" style={{ color: palette.muted }}>
+                      {isEn ? 'Theme Template:' : 'قالب المتجر:'}
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveTheme('luxury-noir');
+                          setMobileMenuOpen(false);
+                        }}
+                        className="px-2.5 py-1 rounded text-xs"
+                        style={{
+                          backgroundColor: activeTheme === 'luxury-noir' ? palette.accent : 'transparent',
+                          color: activeTheme === 'luxury-noir' ? '#0B0B0C' : palette.text,
+                        }}
+                      >
+                        Noir
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveTheme('ivory-journal');
+                          setMobileMenuOpen(false);
+                        }}
+                        className="px-2.5 py-1 rounded text-xs"
+                        style={{
+                          backgroundColor: activeTheme === 'ivory-journal' ? palette.accent : 'transparent',
+                          color: activeTheme === 'ivory-journal' ? '#FFFFFF' : palette.text,
+                        }}
+                      >
+                        Ivory
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveTheme('clinic-lab');
+                          setMobileMenuOpen(false);
+                        }}
+                        className="px-2.5 py-1 rounded text-xs"
+                        style={{
+                          backgroundColor: activeTheme === 'clinic-lab' ? palette.accent : 'transparent',
+                          color: activeTheme === 'clinic-lab' ? '#FFFFFF' : palette.text,
+                        }}
+                      >
+                        Clinic
+                      </button>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
           </header>

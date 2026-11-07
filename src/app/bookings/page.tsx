@@ -176,7 +176,7 @@ function BookingsContent() {
               className="inline-flex items-center min-h-[44px] px-6 py-2.5 rounded-full font-sans font-bold text-xs transition hover:brightness-110"
               style={{
                 backgroundColor: palette.accent,
-                color: isLight && palette.accent !== '#0F4C4A' ? '#FFFFFF' : '#0B0B0C',
+                color: isLight ? '#FFFFFF' : '#0B0B0C',
               }}
             >
               {isEn ? 'Return to Storefront' : 'العودة إلى المتجر'}

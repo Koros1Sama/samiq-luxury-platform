@@ -1,5 +1,37 @@
-import { ProductCardData, ThemeCurrencyCode } from '@/themes/contract';
+import { ProductCardData, ThemeCurrencyCode, CategoryBentoItem } from '@/themes/contract';
 import { formatCurrency } from '@/core/currency/formatter';
+
+export function matchesProductCategory(
+  product: ProductCardData,
+  activeCategory?: string | null,
+  categories?: CategoryBentoItem[]
+): boolean {
+  if (!activeCategory || activeCategory === 'all' || activeCategory === '') {
+    return true;
+  }
+  const prodCat = (product.categorySlug || '').trim().toLowerCase();
+  const target = activeCategory.trim().toLowerCase();
+  if (prodCat === target || product.id === activeCategory) {
+    return true;
+  }
+  if (categories && categories.length > 0) {
+    const matchedCat = categories.find(
+      (c) =>
+        c.id.toLowerCase() === target ||
+        c.title.trim().toLowerCase() === target ||
+        (c.href ? c.href.replace(/^#/, '').trim().toLowerCase() === target : false)
+    );
+    if (matchedCat) {
+      const catSlug = matchedCat.href ? matchedCat.href.replace(/^#/, '').trim().toLowerCase() : '';
+      return (
+        prodCat === matchedCat.id.toLowerCase() ||
+        prodCat === matchedCat.title.trim().toLowerCase() ||
+        (Boolean(catSlug) && prodCat === catSlug)
+      );
+    }
+  }
+  return false;
+}
 
 export interface ProductQuickInfo {
   id: string;
