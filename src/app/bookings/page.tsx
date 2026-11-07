@@ -352,7 +352,7 @@ function BookingsContent() {
             className="w-full min-h-[44px] py-4 rounded-2xl font-sans font-bold text-sm shadow-md hover:brightness-110 active:scale-[0.99] transition disabled:opacity-50 inline-flex items-center justify-center"
             style={{
               backgroundColor: palette.accent,
-              color: isLight && palette.accent !== '#0F4C4A' ? '#FFFFFF' : '#0B0B0C',
+              color: isLight ? '#FFFFFF' : '#0B0B0C',
             }}
           >
             {isLoading
