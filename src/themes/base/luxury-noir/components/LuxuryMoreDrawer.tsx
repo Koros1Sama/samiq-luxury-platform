@@ -13,6 +13,8 @@ import {
   PhoneCallIcon,
 } from './LuxuryIcons';
 import { ThemeCurrencyCode } from '../../../contract';
+import { useStorefront } from '@/core/storefront/StorefrontProvider';
+import { resolveThemePalette } from '@/core/storefront/themePalette';
 
 interface LuxuryMoreDrawerProps {
   isOpen: boolean;
@@ -43,51 +45,74 @@ export function LuxuryMoreDrawer({
   contact,
   navLinks,
 }: LuxuryMoreDrawerProps) {
+  const sf = useStorefront();
+  const activeTheme = sf.activeTheme || 'luxury-noir';
+  const palette = sf.palette || resolveThemePalette(activeTheme, sf.customPalette);
+  const isLight = palette.isLight;
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/85 backdrop-blur-md animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 backdrop-blur-md animate-fadeIn">
       {/* Backdrop */}
       <div className="absolute inset-0" onClick={onClose} />
 
-      <div className="relative w-full max-w-lg bg-[#0E0E12] border-t border-gold/30 rounded-t-[2rem] p-5 sm:p-6 space-y-5 max-h-[85vh] overflow-y-auto z-10 text-ivory shadow-2xl">
+      <div
+        className="relative w-full max-w-lg border-t rounded-t-[2rem] p-5 sm:p-6 space-y-5 max-h-[85vh] overflow-y-auto z-10 shadow-2xl transition-colors"
+        style={{
+          backgroundColor: palette.surface,
+          borderColor: `${palette.accent}40`,
+          color: palette.text,
+        }}
+      >
         {/* Sheet Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-white/10">
+        <div className="flex items-center justify-between pb-3 border-b" style={{ borderColor: palette.border }}>
           <div className="flex items-center gap-2.5">
-            <span className="w-2 h-2 rounded-full bg-gold" />
-            <h3 className="text-base font-serif font-bold text-ivory">
+            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: palette.accent }} />
+            <h3 className="text-base font-serif font-bold" style={{ color: palette.text }}>
               المزيد من الخدمات والخيارات
             </h3>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-muted-lux hover:text-ivory"
+            className="w-10 h-10 rounded-full flex items-center justify-center transition"
+            style={{
+              backgroundColor: isLight ? '#00000008' : 'rgba(255, 255, 255, 0.05)',
+              color: palette.muted,
+            }}
             aria-label="إغلاق"
           >
-            <CloseIcon size={18} color="#9A968E" />
+            <CloseIcon size={18} color={palette.muted} />
           </button>
         </div>
 
         {/* 1. Branches & Location */}
-        <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2">
-          <span className="text-xs font-sans text-champagne font-bold block">
+        <div
+          className="p-3.5 rounded-2xl border space-y-2"
+          style={{
+            backgroundColor: isLight ? (activeTheme === 'clinic-lab' ? '#F4F8F7' : '#F5EFE6') : 'rgba(255, 255, 255, 0.03)',
+            borderColor: palette.border,
+          }}
+        >
+          <span className="text-xs font-sans font-bold block" style={{ color: palette.accent }}>
             مقر الفرع الرئيسي:
           </span>
           <a
             href={contact.map.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="min-h-[44px] flex items-center gap-2.5 text-xs font-sans text-ivory/80 hover:text-champagne transition"
+            className="min-h-[44px] flex items-center gap-2.5 text-xs font-sans transition"
+            style={{ color: palette.text }}
           >
-            <MapPinIcon size={18} color="#C9A84C" />
+            <MapPinIcon size={18} color={palette.accent} />
             <span>{contact.map.label} — اضغط لفتح الموقع في خرائط Google</span>
           </a>
         </div>
 
         {/* 3. Official Social Channels */}
         <div className="space-y-2">
-          <span className="text-xs font-sans text-muted-lux block font-medium">
+          <span className="text-xs font-sans block font-medium" style={{ color: palette.muted }}>
             القنوات الرسمية المعتمدة:
           </span>
           <div className="grid grid-cols-4 gap-2">
@@ -96,10 +121,14 @@ export function LuxuryMoreDrawer({
                 href={contact.social.tiktok}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="min-h-[44px] rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-champagne hover:border-gold/40 transition"
+                className="min-h-[44px] rounded-xl border flex items-center justify-center transition"
+                style={{
+                  backgroundColor: isLight ? (activeTheme === 'clinic-lab' ? '#F4F8F7' : '#F5EFE6') : 'rgba(255, 255, 255, 0.05)',
+                  borderColor: palette.border,
+                }}
                 title="تيك توك"
               >
-                <TikTokIcon size={20} color="#C9A84C" />
+                <TikTokIcon size={20} color={palette.accent} />
               </a>
             )}
             {contact.social.instagram && (
@@ -107,10 +136,14 @@ export function LuxuryMoreDrawer({
                 href={contact.social.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="min-h-[44px] rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-champagne hover:border-gold/40 transition"
+                className="min-h-[44px] rounded-xl border flex items-center justify-center transition"
+                style={{
+                  backgroundColor: isLight ? (activeTheme === 'clinic-lab' ? '#F4F8F7' : '#F5EFE6') : 'rgba(255, 255, 255, 0.05)',
+                  borderColor: palette.border,
+                }}
                 title="إنستغرام"
               >
-                <InstagramIcon size={20} color="#C9A84C" />
+                <InstagramIcon size={20} color={palette.accent} />
               </a>
             )}
             {contact.whatsapp && (
@@ -118,10 +151,14 @@ export function LuxuryMoreDrawer({
                 href={`https://wa.me/${contact.whatsapp.startsWith('967') ? contact.whatsapp : `967${contact.whatsapp}`}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="min-h-[44px] rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-champagne hover:border-gold/40 transition"
+                className="min-h-[44px] rounded-xl border flex items-center justify-center transition"
+                style={{
+                  backgroundColor: isLight ? (activeTheme === 'clinic-lab' ? '#F4F8F7' : '#F5EFE6') : 'rgba(255, 255, 255, 0.05)',
+                  borderColor: palette.border,
+                }}
                 title="واتساب"
               >
-                <WhatsAppIcon size={20} color="#C9A84C" />
+                <WhatsAppIcon size={20} color={palette.accent} />
               </a>
             )}
             {contact.social.facebook && (
@@ -129,25 +166,36 @@ export function LuxuryMoreDrawer({
                 href={contact.social.facebook}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="min-h-[44px] rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-champagne hover:border-gold/40 transition"
+                className="min-h-[44px] rounded-xl border flex items-center justify-center transition"
+                style={{
+                  backgroundColor: isLight ? (activeTheme === 'clinic-lab' ? '#F4F8F7' : '#F5EFE6') : 'rgba(255, 255, 255, 0.05)',
+                  borderColor: palette.border,
+                }}
                 title="فيسبوك"
               >
-                <FacebookIcon size={20} color="#C9A84C" />
+                <FacebookIcon size={20} color={palette.accent} />
               </a>
             )}
           </div>
         </div>
 
         {/* 4. PWA Install & Language */}
-        <div className="pt-2 border-t border-white/10 flex items-center justify-between gap-3 flex-wrap">
+        <div className="pt-2 border-t flex items-center justify-between gap-3 flex-wrap" style={{ borderColor: palette.border }}>
           <PwaInstallPrompt isCompact={false} />
-          <div className="min-h-[40px] px-3.5 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-sans text-muted-lux flex items-center justify-center">
+          <div
+            className="min-h-[40px] px-3.5 py-2 rounded-full border text-xs font-sans flex items-center justify-center"
+            style={{
+              backgroundColor: isLight ? '#00000006' : 'rgba(255, 255, 255, 0.05)',
+              borderColor: palette.border,
+              color: palette.muted,
+            }}
+          >
             اللغة: العربية (الافتراضية)
           </div>
         </div>
 
         {/* 5. Navigation Links in Drawer */}
-        <div className="pt-2 border-t border-white/10 space-y-1">
+        <div className="pt-2 border-t space-y-1" style={{ borderColor: palette.border }}>
           {navLinks.map((link, idx) => {
             const isEn = typeof document !== 'undefined' && document.documentElement.lang === 'en';
             const labelText = isEn
@@ -158,7 +206,11 @@ export function LuxuryMoreDrawer({
                 key={link.href + idx}
                 href={link.href}
                 onClick={onClose}
-                className="min-h-[44px] flex items-center py-2.5 text-xs font-sans text-ivory/80 hover:text-champagne border-b border-white/5"
+                className="min-h-[44px] flex items-center py-2.5 text-xs font-sans border-b transition"
+                style={{
+                  borderColor: isLight ? '#00000008' : 'rgba(255, 255, 255, 0.05)',
+                  color: palette.text,
+                }}
               >
                 {labelText}
               </a>
@@ -167,10 +219,18 @@ export function LuxuryMoreDrawer({
           <Link
             href="/account"
             onClick={onClose}
-            className="min-h-[44px] flex items-center justify-between py-2.5 text-xs font-sans text-champagne font-bold hover:text-gold"
+            className="min-h-[44px] flex items-center justify-between py-2.5 text-xs font-sans font-bold"
+            style={{ color: palette.accent }}
           >
             <span>حسابي وتسجيل الدخول ونقاط الولاء</span>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/30">
+            <span
+              className="text-xs px-2 py-0.5 rounded-full border"
+              style={{
+                backgroundColor: `${palette.accent}18`,
+                borderColor: `${palette.accent}40`,
+                color: palette.accent,
+              }}
+            >
               بوابة الحساب
             </span>
           </Link>
@@ -180,9 +240,14 @@ export function LuxuryMoreDrawer({
         <div className="pt-1">
           <a
             href={`tel:${contact.phone}`}
-            className="w-full min-h-[44px] py-3 rounded-2xl bg-white/5 hover:bg-gold/15 border border-white/10 hover:border-gold/30 text-champagne font-sans font-bold text-xs flex items-center justify-center gap-2 transition"
+            className="w-full min-h-[44px] py-3 rounded-2xl border font-sans font-bold text-xs flex items-center justify-center gap-2 transition hover:brightness-105"
+            style={{
+              backgroundColor: isLight ? (activeTheme === 'clinic-lab' ? '#F4F8F7' : '#F5EFE6') : 'rgba(255, 255, 255, 0.05)',
+              borderColor: `${palette.accent}40`,
+              color: palette.accent,
+            }}
           >
-            <PhoneCallIcon size={16} color="#C9A84C" />
+            <PhoneCallIcon size={16} color={palette.accent} />
             <span>اتصال مباشر: +967 {contact.phone}</span>
           </a>
         </div>

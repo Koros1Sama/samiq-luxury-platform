@@ -27,7 +27,7 @@ export function ClinicHeader({ onOpenAdvisor, onOpenCart }: ClinicHeaderProps) {
       <div className="max-w-7xl mx-auto px-3 sm:px-6 h-14 flex items-center justify-between gap-2">
         {/* Brand / Logo */}
         <a
-          href="#"
+          href="/"
           className="flex items-center gap-2.5 min-h-[44px] min-w-[44px] text-[#0F4C4A] focus:outline-hidden focus:ring-2 focus:ring-[#0F4C4A] rounded-lg"
           aria-label={tenant.name || 'مفتاح الجمال'}
         >

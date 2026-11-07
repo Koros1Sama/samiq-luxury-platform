@@ -19,10 +19,14 @@ export function ClinicNavTabs() {
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     if (href.startsWith('#')) {
-      e.preventDefault();
       const target = document.querySelector(href);
       if (target) {
+        e.preventDefault();
         target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        // If target element is not on current page, allow browser navigation to /#id
+        e.preventDefault();
+        window.location.href = '/' + href;
       }
     }
   };

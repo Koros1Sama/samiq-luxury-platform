@@ -5,17 +5,36 @@ import { BlockDefinition } from './types';
 function DefaultAuthenticityRenderer({ data }: { data?: any }) {
   if (!data) return null;
   return (
-    <div className="my-8 p-6 rounded-2xl bg-neutral-900 border border-neutral-800 text-neutral-100 max-w-5xl mx-auto">
+    <div
+      className="my-8 p-6 rounded-2xl border max-w-5xl mx-auto shadow-sm transition-colors"
+      style={{
+        backgroundColor: 'var(--samiq-surface, #121214)',
+        borderColor: 'var(--samiq-border, rgba(255, 255, 255, 0.1))',
+        color: 'var(--samiq-text, #F4EFE6)',
+      }}
+    >
       <h3 className="text-xl font-bold mb-2">دليل المطابقة والتحقق ({data.productTitle || data.productId})</h3>
-      <p className="text-sm text-neutral-400 mb-4">{data.brand}</p>
+      <p className="text-sm mb-4 opacity-75">{data.brand}</p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="p-4 rounded-xl bg-neutral-800/50 border border-neutral-700">
+        <div
+          className="p-4 rounded-xl border"
+          style={{
+            backgroundColor: 'var(--samiq-bg, #0B0B0C)',
+            borderColor: 'var(--samiq-border, rgba(255, 255, 255, 0.1))',
+          }}
+        >
           <span className="text-xs font-semibold text-emerald-400 block mb-1">المنتج الأصلي</span>
-          <p className="text-xs text-neutral-300">{data.original?.packagingNotes || data.original?.title}</p>
+          <p className="text-xs opacity-90">{data.original?.packagingNotes || data.original?.title}</p>
         </div>
-        <div className="p-4 rounded-xl bg-neutral-800/50 border border-neutral-700">
+        <div
+          className="p-4 rounded-xl border"
+          style={{
+            backgroundColor: 'var(--samiq-bg, #0B0B0C)',
+            borderColor: 'var(--samiq-border, rgba(255, 255, 255, 0.1))',
+          }}
+        >
           <span className="text-xs font-semibold text-rose-400 block mb-1">المغشوش والمقلد</span>
-          <p className="text-xs text-neutral-300">{data.counterfeit?.packagingNotes || data.counterfeit?.title}</p>
+          <p className="text-xs opacity-90">{data.counterfeit?.packagingNotes || data.counterfeit?.title}</p>
         </div>
       </div>
     </div>
@@ -26,14 +45,28 @@ function DefaultAuthenticityRenderer({ data }: { data?: any }) {
 function DefaultSkinRoutineRenderer({ data }: { data?: any }) {
   if (!data) return null;
   return (
-    <div className="my-8 p-6 rounded-2xl bg-neutral-900 border border-neutral-800 text-neutral-100 max-w-5xl mx-auto">
+    <div
+      className="my-8 p-6 rounded-2xl border max-w-5xl mx-auto shadow-sm transition-colors"
+      style={{
+        backgroundColor: 'var(--samiq-surface, #121214)',
+        borderColor: 'var(--samiq-border, rgba(255, 255, 255, 0.1))',
+        color: 'var(--samiq-text, #F4EFE6)',
+      }}
+    >
       <h3 className="text-xl font-bold mb-1">{data.title || 'دليل الروتين والمكونات'}</h3>
-      <p className="text-sm text-neutral-400 mb-4">{data.subtitle}</p>
+      <p className="text-sm mb-4 opacity-75">{data.subtitle}</p>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {data.skinTypes?.map((t: any) => (
-          <div key={t.id} className="p-3.5 rounded-xl bg-neutral-800/60 border border-neutral-700">
-            <h4 className="text-sm font-semibold text-neutral-200">{t.label}</h4>
-            <p className="text-xs text-neutral-400 mt-1">{t.tagline}</p>
+          <div
+            key={t.id}
+            className="p-3.5 rounded-xl border"
+            style={{
+              backgroundColor: 'var(--samiq-bg, #0B0B0C)',
+              borderColor: 'var(--samiq-border, rgba(255, 255, 255, 0.1))',
+            }}
+          >
+            <h4 className="text-sm font-semibold opacity-90">{t.label}</h4>
+            <p className="text-xs opacity-70 mt-1">{t.tagline}</p>
           </div>
         ))}
       </div>

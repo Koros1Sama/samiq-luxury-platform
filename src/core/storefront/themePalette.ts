@@ -142,12 +142,24 @@ export function getClientActiveTheme(fallback: ThemeId = 'luxury-noir'): ThemeId
       try {
         localStorage.setItem('samiq_demo_theme', qTheme);
         localStorage.setItem('samiq_active_theme', qTheme);
+        document.cookie = `samiq_active_theme=${qTheme}; path=/; max-age=31536000; SameSite=Lax`;
+        document.cookie = `samiq_demo_theme=${qTheme}; path=/; max-age=31536000; SameSite=Lax`;
       } catch {}
-      return qTheme;
+      return qTheme as ThemeId;
     }
     const saved = localStorage.getItem('samiq_demo_theme') || localStorage.getItem('samiq_active_theme');
     if (saved && isValidThemeId(saved)) {
+      try {
+        document.cookie = `samiq_active_theme=${saved}; path=/; max-age=31536000; SameSite=Lax`;
+      } catch {}
       return saved as ThemeId;
+    }
+    // Check cookies as fallback
+    if (typeof document !== 'undefined') {
+      const match = document.cookie.match(/(?:^|;\s*)samiq_active_theme=([^;]+)/);
+      if (match && isValidThemeId(match[1])) {
+        return match[1] as ThemeId;
+      }
     }
   } catch {
     // fallback

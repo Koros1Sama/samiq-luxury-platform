@@ -43,8 +43,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ar" dir="rtl" className={`${amiri.variable} ${ibmPlexArabic.variable}`}>
-      <body className="bg-obsidian text-ivory font-sans min-h-[100dvh]">
+    <html lang="ar" dir="rtl" className={`${amiri.variable} ${ibmPlexArabic.variable}`} suppressHydrationWarning>
+      <body className="bg-obsidian text-ivory font-sans min-h-[100dvh]" suppressHydrationWarning>
         {children}
         <script
           dangerouslySetInnerHTML={{

@@ -20,7 +20,25 @@ const ClinicLabTheme = dynamic(
 
 export function ThemeHost({ themeId }: { themeId: ThemeId }) {
   const sf = useStorefront();
-  const effectiveTheme = sf.activeTheme || themeId;
+  const [currentTheme, setCurrentTheme] = React.useState<ThemeId>(sf.activeTheme || themeId);
+
+  React.useEffect(() => {
+    if (sf.activeTheme) {
+      setCurrentTheme(sf.activeTheme);
+    }
+  }, [sf.activeTheme]);
+
+  React.useEffect(() => {
+    const handleThemeChange = (e: any) => {
+      if (e.detail) {
+        setCurrentTheme(e.detail as ThemeId);
+      }
+    };
+    window.addEventListener('samiq_theme_changed', handleThemeChange);
+    return () => window.removeEventListener('samiq_theme_changed', handleThemeChange);
+  }, []);
+
+  const effectiveTheme = currentTheme;
 
   if (effectiveTheme === 'ivory-journal') {
     return <IvoryJournalTheme />;

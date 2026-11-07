@@ -12,7 +12,7 @@ export function IvoryCartPill() {
   }
 
   return (
-    <div className="fixed bottom-4 sm:bottom-6 start-0 end-0 z-40 flex justify-center px-4 pointer-events-none">
+    <div className="fixed bottom-20 sm:bottom-6 start-0 end-0 z-40 flex justify-center px-4 pointer-events-none">
       <button
         type="button"
         aria-label="عرض حقيبة المشتريات التحريرية"

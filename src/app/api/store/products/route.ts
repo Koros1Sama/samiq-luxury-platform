@@ -68,8 +68,18 @@ export async function POST(req: Request) {
     const priceSar = sanitizeNumber(body.prices?.SAR, Math.round(priceYer / 140), 0, 1_000_000);
     const priceUsd = sanitizeNumber(body.prices?.USD, Math.round(priceYer / 530), 0, 500_000);
 
+    const id = sanitizeText(body.id, 100) || `prod-${Date.now()}`;
+    const slug =
+      sanitizeText(body.slug, 120) ||
+      title
+        .toLowerCase()
+        .replace(/[^a-z0-9\u0600-\u06FF]+/g, '-')
+        .replace(/^-|-$/g, '') ||
+      id;
+
     const product: ProductCardData = {
-      id: sanitizeText(body.id, 100) || `prod-${Date.now()}`,
+      id,
+      slug,
       title,
       subtitle: sanitizeText(body.subtitle, 200),
       brand,
@@ -157,10 +167,19 @@ export async function PUT(req: Request) {
         ? body.inStock
         : stockQuantity > 0;
 
+    let slug = body.slug ? sanitizeText(body.slug, 120) : existing.slug;
+    if (!slug && (body.title || existing.title)) {
+      slug = (body.title || existing.title)
+        .toLowerCase()
+        .replace(/[^a-z0-9\u0600-\u06FF]+/g, '-')
+        .replace(/^-|-$/g, '') || existing.id;
+    }
+
     const updated: ProductCardData = {
       ...existing,
       ...body,
       id: existing.id,
+      slug: slug || existing.id,
       title: body.title ? sanitizeText(body.title, 150) : existing.title,
       brand: body.brand ? sanitizeText(body.brand, 100) : existing.brand,
       visibilityStatus,

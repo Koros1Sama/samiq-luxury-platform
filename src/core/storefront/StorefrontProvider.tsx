@@ -135,12 +135,10 @@ export function StorefrontProvider({
 
   // Theme & Chameleon Palette State
   const initialThemeId = (tenant.themeId || (tenant as any).activeTheme || 'luxury-noir') as ThemeId;
-  const [activeTheme, setActiveThemeState] = useState<ThemeId>(() => {
-    return getClientActiveTheme(initialThemeId);
-  });
-  const [customPalette, setCustomPaletteState] = useState<BrandPalette | null>(() => {
-    return getClientCustomPalette() || (tenant as any).brandPalette || null;
-  });
+  const [activeTheme, setActiveThemeState] = useState<ThemeId>(initialThemeId);
+  const [customPalette, setCustomPaletteState] = useState<BrandPalette | null>(
+    (tenant as any).brandPalette || null
+  );
 
   // Bilingual Locale State
   const [locale, setLocaleState] = useState<'ar' | 'en'>('ar');
@@ -188,20 +186,22 @@ export function StorefrontProvider({
   }, []);
 
   // Demo Mode State (?demo=1 or sessionStorage 'samiq_demo_mode')
-  const [isDemoMode, setIsDemoMode] = useState<boolean>(() => {
+  const [isDemoMode, setIsDemoMode] = useState<boolean>(false);
+
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
         const hasParam = window.location.search.includes('demo=1');
         const sessionActive = sessionStorage.getItem('samiq_demo_mode') === 'true';
         if (hasParam) {
           sessionStorage.setItem('samiq_demo_mode', 'true');
-          return true;
+          setIsDemoMode(true);
+        } else if (sessionActive) {
+          setIsDemoMode(true);
         }
-        return sessionActive;
       } catch {}
     }
-    return false;
-  });
+  }, []);
 
   const exitDemoMode = useCallback(() => {
     setIsDemoMode(false);
@@ -311,6 +311,10 @@ export function StorefrontProvider({
     try {
       localStorage.setItem('samiq_demo_theme', themeId);
       localStorage.setItem('samiq_active_theme', themeId);
+      if (typeof document !== 'undefined') {
+        document.cookie = `samiq_active_theme=${themeId}; path=/; max-age=31536000; SameSite=Lax`;
+        document.cookie = `samiq_demo_theme=${themeId}; path=/; max-age=31536000; SameSite=Lax`;
+      }
       window.dispatchEvent(new CustomEvent('samiq_theme_changed', { detail: themeId }));
     } catch (e) {
       console.warn('Could not save theme to localStorage:', e);

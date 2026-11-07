@@ -62,14 +62,14 @@ export default function MerchantAdminPage() {
   const [passcode, setPasscode] = useState('');
   const [authError, setAuthError] = useState('');
   const [editingBlogId, setEditingBlogId] = useState<string | null>(null);
-  const [isDemoMode] = useState(() => {
+  const [isDemoMode, setIsDemoMode] = useState(false);
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
-        return window.location.search.includes('demo=1') || sessionStorage.getItem('samiq_demo_mode') === 'true';
+        setIsDemoMode(window.location.search.includes('demo=1') || sessionStorage.getItem('samiq_demo_mode') === 'true');
       } catch {}
     }
-    return false;
-  });
+  }, []);
 
   // Active Tab
   const [activeTab, setActiveTab] = useState<
@@ -365,7 +365,7 @@ export default function MerchantAdminPage() {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch('/api/store/products?includeWarehouse=1');
+      const res = await fetch('/api/store/products?includeWarehouse=1', { headers: ADMIN_AUTH_HEADER });
       const data = await res.json();
       if (data.success) setProducts(data.products || []);
     } catch (e) {}
@@ -373,7 +373,7 @@ export default function MerchantAdminPage() {
 
   const fetchOrders = async () => {
     try {
-      const res = await fetch('/api/store/orders');
+      const res = await fetch('/api/store/orders', { headers: ADMIN_AUTH_HEADER });
       const data = await res.json();
       if (data.success) setOrders(data.orders || []);
     } catch (e) {}
@@ -381,7 +381,7 @@ export default function MerchantAdminPage() {
 
   const fetchBookings = async () => {
     try {
-      const res = await fetch('/api/store/bookings');
+      const res = await fetch('/api/store/bookings', { headers: ADMIN_AUTH_HEADER });
       const data = await res.json();
       if (data.success) setBookings(data.bookings || []);
     } catch (e) {}
@@ -389,7 +389,7 @@ export default function MerchantAdminPage() {
 
   const fetchCategories = async () => {
     try {
-      const res = await fetch('/api/store/categories');
+      const res = await fetch('/api/store/categories', { headers: ADMIN_AUTH_HEADER });
       const data = await res.json();
       if (data.success) {
         setCategories(data.categories || []);
@@ -400,7 +400,7 @@ export default function MerchantAdminPage() {
 
   const fetchBlogPosts = async () => {
     try {
-      const res = await fetch('/api/store/blog');
+      const res = await fetch('/api/store/blog', { headers: ADMIN_AUTH_HEADER });
       const data = await res.json();
       if (data.success) setBlogPosts(data.posts || []);
     } catch (e) {}
@@ -408,7 +408,7 @@ export default function MerchantAdminPage() {
 
   const fetchCoupons = async () => {
     try {
-      const res = await fetch('/api/store/coupons');
+      const res = await fetch('/api/store/coupons', { headers: ADMIN_AUTH_HEADER });
       const data = await res.json();
       if (data.success) setCoupons(data.coupons || []);
     } catch (e) {}
@@ -416,7 +416,7 @@ export default function MerchantAdminPage() {
 
   const fetchAuthenticity = async () => {
     try {
-      const res = await fetch('/api/store/authenticity');
+      const res = await fetch('/api/store/authenticity', { headers: ADMIN_AUTH_HEADER });
       const data = await res.json();
       if (data.success) setAuthenticityGuides(data.guides || {});
     } catch (e) {}
@@ -424,7 +424,7 @@ export default function MerchantAdminPage() {
 
   const fetchConversations = async () => {
     try {
-      const res = await fetch('/api/store/inbox');
+      const res = await fetch('/api/store/inbox', { headers: ADMIN_AUTH_HEADER });
       const data = await res.json();
       if (data.success && data.conversations) {
         setConversations(data.conversations);
@@ -437,7 +437,7 @@ export default function MerchantAdminPage() {
 
   const fetchAdminStoreData = async () => {
     try {
-      const res = await fetch('/api/admin/store');
+      const res = await fetch('/api/admin/store', { headers: ADMIN_AUTH_HEADER });
       const data = await res.json();
       if (data.success) {
         if (data.reviews) setReviews(data.reviews);
@@ -517,6 +517,23 @@ export default function MerchantAdminPage() {
       const data = await res.json();
       if (data.success && data.tenant) {
         showToast(`تم تطبيق نمط العلامة: ${data.tenant.name}`);
+        const targetTheme = data.tenant.themeId || activeTheme;
+        if (targetTheme) {
+          setActiveTheme(targetTheme);
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('samiq_demo_theme', targetTheme);
+            localStorage.setItem('samiq_active_theme', targetTheme);
+            document.cookie = `samiq_active_theme=${targetTheme}; path=/; max-age=31536000; SameSite=Lax`;
+          }
+        }
+        if (typeof window !== 'undefined') {
+          if (data.tenant.brandPalette?.isCustomPalette) {
+            localStorage.setItem('samiq_custom_palette', JSON.stringify(data.tenant.brandPalette));
+          } else {
+            localStorage.removeItem('samiq_custom_palette');
+          }
+          window.dispatchEvent(new Event('samiq_theme_changed'));
+        }
         fetchAdminStoreData();
         fetchProducts();
         fetchCategories();
@@ -758,8 +775,14 @@ export default function MerchantAdminPage() {
       return;
     }
 
+    const cleanSlug = (formTitle.trim() || 'prod')
+      .toLowerCase()
+      .replace(/[^a-z0-9\u0600-\u06FF]+/g, '-')
+      .replace(/^-|-$/g, '') || `prod-${Date.now()}`;
+
     const payload: Partial<ProductCardData> = {
       title: formTitle.trim(),
+      slug: cleanSlug,
       subtitle: formSubtitle.trim(),
       brand: formBrand.trim(),
       categorySlug: formCategorySlug,
@@ -956,6 +979,7 @@ export default function MerchantAdminPage() {
     try {
       const res = await fetch('/api/store/upload', {
         method: 'POST',
+        headers: ADMIN_AUTH_HEADER,
         body: formData,
       });
       const data = await res.json();
@@ -998,6 +1022,7 @@ export default function MerchantAdminPage() {
     try {
       const uploadRes = await fetch('/api/store/upload', {
         method: 'POST',
+        headers: ADMIN_AUTH_HEADER,
         body: formData,
       });
       const uploadData = await uploadRes.json();
@@ -1007,7 +1032,7 @@ export default function MerchantAdminPage() {
 
         const putRes = await fetch('/api/store/products', {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: ADMIN_FETCH_HEADERS,
           body: JSON.stringify({
             id: prodId,
             images: newImages,
@@ -1140,7 +1165,8 @@ export default function MerchantAdminPage() {
     const prod = products.find((p) => p.id === posSelectedProductId);
     if (!prod) return;
 
-    const unitPriceYer = prod.prices.YER || 20000;
+    const unitPrice = prod.prices?.[storeCurrency] ?? prod.prices?.YER ?? 20000;
+    const unitPriceYer = prod.prices?.YER ?? (storeCurrency === 'SAR' ? Math.round(unitPrice * 140) : storeCurrency === 'USD' ? Math.round(unitPrice * 530) : unitPrice);
     const totalYer = unitPriceYer * posQuantity;
 
     const payload = {
@@ -1160,7 +1186,7 @@ export default function MerchantAdminPage() {
       shippingFeeYer: 0,
       discountYer: 0,
       totalYer,
-      currency: 'YER' as const,
+      currency: storeCurrency,
       paymentMethod: posPaymentMethod,
       status: 'confirmed' as const, // auto-deducts stock!
       notes: posNotes,
@@ -1175,6 +1201,7 @@ export default function MerchantAdminPage() {
       const data = await res.json();
       if (data.success) {
         setOrders((prev) => [data.order, ...prev]);
+        fetchOrders();
         fetchProducts(); // Stock was decremented
         setShowPosOrderModal(false);
         showToast('تم تسجيل مبيعات الفرع وخصم الكمية من المخزن بنجاح');
@@ -1598,6 +1625,25 @@ export default function MerchantAdminPage() {
       });
       const data = await res.json();
       if (data.success) {
+        if (typeof window !== 'undefined') {
+          if (activeTheme) {
+            localStorage.setItem('samiq_demo_theme', activeTheme);
+            localStorage.setItem('samiq_active_theme', activeTheme);
+            document.cookie = `samiq_active_theme=${activeTheme}; path=/; max-age=31536000; SameSite=Lax`;
+          }
+          if (isCustomPalette) {
+            localStorage.setItem('samiq_custom_palette', JSON.stringify({
+              primaryColor,
+              backgroundColor,
+              surfaceColor,
+              textColor,
+              isCustomPalette: true,
+            }));
+          } else {
+            localStorage.removeItem('samiq_custom_palette');
+          }
+          window.dispatchEvent(new Event('samiq_theme_changed'));
+        }
         setSettingsSuccessMsg('تم حفظ وتطبيق كافة إعدادات وهوية المتجر بنجاح');
         showToast('تم حفظ وتطبيق الإعدادات بنجاح');
         setTimeout(() => setSettingsSuccessMsg(''), 4000);
@@ -1784,8 +1830,16 @@ export default function MerchantAdminPage() {
 
           <div className="flex items-center gap-2 flex-wrap">
             <Link
-              href="/"
+              href={`/?demo=1&theme=${activeTheme}`}
               target="_blank"
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  sessionStorage.setItem('samiq_demo_mode', 'true');
+                  localStorage.setItem('samiq_demo_theme', activeTheme);
+                  localStorage.setItem('samiq_active_theme', activeTheme);
+                  document.cookie = `samiq_active_theme=${activeTheme}; path=/; max-age=31536000; SameSite=Lax`;
+                }
+              }}
               className="min-h-[44px] px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold text-ivory border border-white/10 transition inline-flex items-center gap-1.5"
             >
               <span>معاينة المتجر المباشر</span>
@@ -1929,19 +1983,19 @@ export default function MerchantAdminPage() {
         {/* Quick Links to Live Storefront Subpages */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 border-t border-white/[0.04] flex items-center gap-2 overflow-x-auto text-[11px] text-muted-lux scrollbar-none">
           <span className="font-semibold text-gold/80 whitespace-nowrap">معاينة صفحات المتجر الحية:</span>
-          <Link href="/authenticity-hub" target="_blank" className="hover:text-champagne transition whitespace-nowrap px-2 py-0.5 rounded-md bg-white/5 border border-white/5">
+          <Link href={`/authenticity-hub?demo=1&theme=${activeTheme}`} target="_blank" className="hover:text-champagne transition whitespace-nowrap px-2 py-0.5 rounded-md bg-white/5 border border-white/5">
             مركز فحص الأصالة ↗
           </Link>
-          <Link href="/bookings" target="_blank" className="hover:text-champagne transition whitespace-nowrap px-2 py-0.5 rounded-md bg-white/5 border border-white/5">
+          <Link href={`/bookings?demo=1&theme=${activeTheme}`} target="_blank" className="hover:text-champagne transition whitespace-nowrap px-2 py-0.5 rounded-md bg-white/5 border border-white/5">
             حجز استشارة ↗
           </Link>
-          <Link href="/blog" target="_blank" className="hover:text-champagne transition whitespace-nowrap px-2 py-0.5 rounded-md bg-white/5 border border-white/5">
+          <Link href={`/blog?demo=1&theme=${activeTheme}`} target="_blank" className="hover:text-champagne transition whitespace-nowrap px-2 py-0.5 rounded-md bg-white/5 border border-white/5">
             المدونة الطبية ↗
           </Link>
-          <Link href="/account" target="_blank" className="hover:text-champagne transition whitespace-nowrap px-2 py-0.5 rounded-md bg-white/5 border border-white/5">
+          <Link href={`/account?demo=1&theme=${activeTheme}`} target="_blank" className="hover:text-champagne transition whitespace-nowrap px-2 py-0.5 rounded-md bg-white/5 border border-white/5">
             بوابة العميل ↗
           </Link>
-          <Link href="/" target="_blank" className="hover:text-champagne transition whitespace-nowrap px-2 py-0.5 rounded-md bg-white/5 border border-white/5">
+          <Link href={`/?demo=1&theme=${activeTheme}`} target="_blank" className="hover:text-champagne transition whitespace-nowrap px-2 py-0.5 rounded-md bg-white/5 border border-white/5">
             الواجهة الرئيسية ↗
           </Link>
         </div>
@@ -2646,7 +2700,7 @@ export default function MerchantAdminPage() {
                           تعديل وصور
                         </button>
                         <Link
-                          href={`/product/${p.id}`}
+                          href={`/product/${p.slug || p.id}?demo=1&theme=${activeTheme}`}
                           target="_blank"
                           className="min-h-[40px] px-2 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold text-ivory/80 hover:text-ivory border border-white/10 transition inline-flex items-center justify-center"
                         >
@@ -2804,7 +2858,7 @@ export default function MerchantAdminPage() {
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                     <div className="text-end space-y-1">
                       <div className="text-champagne font-bold text-base tabular-nums">
-                        {formatCurrency(o.totalYer, 'YER')}
+                        {formatCurrency(o.totalYer, o.currency || 'YER')}
                       </div>
                       <span className="text-xs px-2.5 py-1 rounded border inline-block font-bold bg-emerald-950/60 text-emerald-300 border-emerald-500/30">
                         {getStatusLabelAr(o.status)}
@@ -3971,7 +4025,15 @@ export default function MerchantAdminPage() {
                       <button
                         key={th.id}
                         type="button"
-                        onClick={() => setActiveTheme(th.id)}
+                        onClick={() => {
+                          setActiveTheme(th.id);
+                          if (typeof window !== 'undefined') {
+                            localStorage.setItem('samiq_demo_theme', th.id);
+                            localStorage.setItem('samiq_active_theme', th.id);
+                            document.cookie = `samiq_active_theme=${th.id}; path=/; max-age=31536000; SameSite=Lax`;
+                            window.dispatchEvent(new Event('samiq_theme_changed'));
+                          }
+                        }}
                         className={`min-h-[44px] p-3 rounded-2xl text-start border transition ${
                           activeTheme === th.id
                             ? 'border-gold bg-gold/15'

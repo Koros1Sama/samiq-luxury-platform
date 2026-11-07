@@ -1,4 +1,5 @@
 import React from 'react';
+import { cookies } from 'next/headers';
 import { resolveTenant } from '@/core/tenant/resolver';
 import { getDb } from '@/core/db/store';
 import { StorefrontProvider } from '@/core/storefront/StorefrontProvider';
@@ -29,8 +30,10 @@ export default async function StorefrontHomePage(props: PageProps) {
   const tenantContext = resolveTenant(tenantSlug);
   const db = getDb();
 
-  // 2. Select theme: searchParams.theme is honored if provided
-  const rawThemeId = searchParams.theme || db.tenant?.themeId || tenantContext.tenant.themeId;
+  // 2. Select theme: searchParams.theme is honored if provided, otherwise cookie, then tenant config
+  const cookieStore = await cookies();
+  const cookieTheme = cookieStore.get('samiq_active_theme')?.value || cookieStore.get('samiq_demo_theme')?.value;
+  const rawThemeId = searchParams.theme || cookieTheme || db.tenant?.themeId || tenantContext.tenant.themeId;
   const themeId: ThemeId = resolveThemeId(rawThemeId);
 
   // 3. Load modular blocks data from registry

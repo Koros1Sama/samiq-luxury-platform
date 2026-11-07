@@ -1304,7 +1304,7 @@ export function getAllBlogPosts(): BlogPostRecord[] {
 
 export function getBlogPostBySlug(slug: string): BlogPostRecord | undefined {
   const db = getDb();
-  return db.blogPosts.find((p) => p.slug === slug);
+  return db.blogPosts.find((p) => p.slug === slug || p.id === slug);
 }
 
 export function saveBlogPost(post: BlogPostRecord): BlogPostRecord {

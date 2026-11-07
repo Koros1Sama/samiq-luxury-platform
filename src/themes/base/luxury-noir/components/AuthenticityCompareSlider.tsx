@@ -26,6 +26,15 @@ interface AuthenticityCompareSliderProps {
 export function AuthenticityCompareSlider(props: AuthenticityCompareSliderProps) {
   const sf = useStorefront();
   const guideData = props.guideData || (sf.blocksData['authenticity-compare'] as AuthenticityComparisonData);
+  const palette = sf.palette;
+  const isLight = palette?.isLight ?? false;
+
+  const surfaceColor = isLight ? palette?.surfaceHex || '#FFFFFF' : '#0E0E12';
+  const surfaceElevated = isLight ? '#F5F2EB' : '#121218';
+  const borderColor = isLight ? palette?.borderHex || '#E8E2D8' : 'rgba(255, 255, 255, 0.08)';
+  const textColor = isLight ? palette?.textHex || '#1C1917' : '#F4EFE6';
+  const mutedColor = isLight ? palette?.mutedHex || '#78716C' : '#9A968E';
+  const accentColor = isLight ? palette?.accentHex || '#8C5E3C' : '#C9A84C';
 
   const [sliderPosition, setSliderPosition] = useState(50); // percentage 0 - 100
   const [isDragging, setIsDragging] = useState(false);
@@ -73,33 +82,59 @@ export function AuthenticityCompareSlider(props: AuthenticityCompareSliderProps)
   if (!guideData) return null;
 
   return (
-    <section id="authenticity-lab" className="py-8 sm:py-16 bg-[#0E0E12]/80 border-y border-white/[0.08] relative">
+    <section
+      id="authenticity-lab"
+      className="py-8 sm:py-16 relative transition-colors"
+      style={{
+        backgroundColor: isLight ? '#FAF7F2' : 'rgba(14, 14, 18, 0.8)',
+        borderTop: `1px solid ${borderColor}`,
+        borderBottom: `1px solid ${borderColor}`,
+      }}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
         {/* ==================================================================== */}
         {/* 1. Header & Product Authenticity Card                               */}
         {/* ==================================================================== */}
         <div className="text-center max-w-2xl mx-auto space-y-2.5">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gold/10 border border-gold/30 text-champagne text-xs font-sans font-semibold">
-            <ShieldCheckIcon size={16} color="#C9A84C" />
+          <div
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-sans font-semibold"
+            style={{
+              backgroundColor: `${accentColor}18`,
+              border: `1px solid ${accentColor}40`,
+              color: accentColor,
+            }}
+          >
+            <ShieldCheckIcon size={16} color={accentColor} />
             <span>مختبر مفتاح الجمال لكشف المقلد</span>
           </div>
-          <h2 className="text-xl sm:text-3xl lg:text-4xl font-serif font-bold text-ivory">
-            البحث باسم المنتج <span className="text-champagne">لكشف المقلد ومعرفة علامات الأصلي</span>
+          <h2 className="text-xl sm:text-3xl lg:text-4xl font-serif font-bold" style={{ color: textColor }}>
+            البحث باسم المنتج <span style={{ color: accentColor }}>لكشف المقلد ومعرفة علامات الأصلي</span>
           </h2>
-          <p className="text-xs sm:text-sm text-muted-lux font-sans leading-relaxed">
+          <p className="text-xs sm:text-sm font-sans leading-relaxed" style={{ color: mutedColor }}>
             مستحضرات مصرحة ومطابقة لمعايير الهيئة العليا للأدوية والمستلزمات الطبية. اكتبي اسم المستحضر للتحقق الفوري من علامات الأصلي وكشف المقلد.
           </p>
         </div>
 
         {/* Verifier Form Card */}
-        <div className="max-w-2xl mx-auto p-4 sm:p-6 rounded-3xl bg-[#121218] border border-gold/30 shadow-2xl space-y-4">
+        <div
+          className="max-w-2xl mx-auto p-4 sm:p-6 rounded-3xl shadow-2xl space-y-4 border"
+          style={{
+            backgroundColor: surfaceElevated,
+            borderColor: isLight ? borderColor : 'rgba(201, 168, 76, 0.3)',
+          }}
+        >
           <form onSubmit={onVerifySubmit} className="flex flex-col sm:flex-row gap-2.5 items-stretch">
             <input
               type="text"
               value={batchCode}
               onChange={(e) => setBatchCode(e.target.value)}
               placeholder="مثال: سيروم فيتامين سي، الغسول المرطب، نياسيناميد..."
-              className="flex-1 min-h-[44px] px-4 rounded-2xl bg-[#070709] border border-white/10 text-xs sm:text-sm text-ivory placeholder-muted-lux outline-none focus:border-gold transition font-sans"
+              className="flex-1 min-h-[44px] px-4 rounded-2xl text-xs sm:text-sm outline-none focus:border-gold transition font-sans border"
+              style={{
+                backgroundColor: isLight ? '#FFFFFF' : '#070709',
+                borderColor: isLight ? borderColor : 'rgba(255, 255, 255, 0.1)',
+                color: textColor,
+              }}
             />
             <button
               type="submit"
@@ -337,10 +372,10 @@ export function AuthenticityCompareSlider(props: AuthenticityCompareSliderProps)
           {/* Checklist of Authenticity Markers (5 cols) */}
           <div className="lg:col-span-5 space-y-4">
             <div className="space-y-1.5">
-              <span className="text-xs font-sans text-gold font-semibold block">
+              <span className="text-xs font-sans font-semibold block" style={{ color: accentColor }}>
                 معايير الفحص المعتمدة
               </span>
-              <h3 className="text-lg sm:text-2xl font-serif font-bold text-ivory">
+              <h3 className="text-lg sm:text-2xl font-serif font-bold" style={{ color: textColor }}>
                 كيف تكتشفين المنتج الأصلي في 10 ثوانٍ؟
               </h3>
             </div>
@@ -349,14 +384,25 @@ export function AuthenticityCompareSlider(props: AuthenticityCompareSliderProps)
               {guideData.checklist.map((item, index) => (
                 <div
                   key={index}
-                  className="p-3 sm:p-3.5 rounded-2xl bg-surface border border-white/5 hover:border-gold/30 transition-all"
+                  className="p-3 sm:p-3.5 rounded-2xl transition-all border"
+                  style={{
+                    backgroundColor: isLight ? surfaceElevated : '#121218',
+                    borderColor: isLight ? borderColor : 'rgba(255, 255, 255, 0.05)',
+                  }}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-gold/10 border border-gold/30 flex items-center justify-center text-gold text-xs font-bold shrink-0 mt-0.5">
+                    <div
+                      className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 border"
+                      style={{
+                        backgroundColor: `${accentColor}18`,
+                        borderColor: `${accentColor}40`,
+                        color: accentColor,
+                      }}
+                    >
                       {index + 1}
                     </div>
                     <div className="space-y-1">
-                      <h4 className="text-xs sm:text-sm font-semibold text-ivory">
+                      <h4 className="text-xs sm:text-sm font-semibold" style={{ color: textColor }}>
                         {item.title}
                       </h4>
                       <p className="text-xs text-emerald-400 font-sans flex items-center gap-1.5">
@@ -378,10 +424,18 @@ export function AuthenticityCompareSlider(props: AuthenticityCompareSliderProps)
               <button
                 type="button"
                 onClick={() => setShowVideoModal(true)}
-                className="w-full min-h-[44px] py-3 px-4 rounded-2xl bg-surface hover:bg-surface-elevated border border-gold/40 text-ivory font-sans font-bold text-xs sm:text-sm flex items-center justify-center gap-2.5 transition-all shadow-md group"
+                className="w-full min-h-[44px] py-3 px-4 rounded-2xl border font-sans font-bold text-xs sm:text-sm flex items-center justify-center gap-2.5 transition-all shadow-md group"
+                style={{
+                  backgroundColor: isLight ? surfaceElevated : '#121218',
+                  borderColor: isLight ? borderColor : 'rgba(201, 168, 76, 0.4)',
+                  color: textColor,
+                }}
               >
-                <div className="w-6 h-6 rounded-full bg-gold/20 flex items-center justify-center text-gold group-hover:scale-110 transition shrink-0">
-                  <PlayVideoIcon size={14} color="#C9A84C" />
+                <div
+                  className="w-6 h-6 rounded-full flex items-center justify-center group-hover:scale-110 transition shrink-0"
+                  style={{ backgroundColor: `${accentColor}25`, color: accentColor }}
+                >
+                  <PlayVideoIcon size={14} color={accentColor} />
                 </div>
                 <span>مشاهدة شروحات فحص القوام والعبوة</span>
               </button>

@@ -800,13 +800,10 @@ export function SubpageThemeWrapper(props: SubpageThemeWrapperProps) {
   }
 
   // Otherwise, wrap in StorefrontProvider reading the persisted client active theme
-  const clientTheme =
-    typeof window !== 'undefined'
-      ? getClientActiveTheme(props.tenant?.themeId || 'luxury-noir')
-      : (props.tenant?.themeId || 'luxury-noir');
+  const initialTheme = props.tenant?.themeId || 'luxury-noir';
   const tenantWithTheme = {
     ...(props.tenant || DEFAULT_STOREFRONT_TENANT),
-    themeId: clientTheme,
+    themeId: initialTheme,
   };
 
   return (

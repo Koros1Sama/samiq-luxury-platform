@@ -177,15 +177,17 @@ export default function SamiqShowcasePage() {
   const developerTelegramUrl = 'https://t.me/KorosSenpai';
 
   // Dynamic Real-Time Platform Pricing Configuration (Synced with /platform & Database)
-  const [pricingConfig, setPricingConfig] = useState<PlatformPricingConfig>(() => {
+  const [pricingConfig, setPricingConfig] = useState<PlatformPricingConfig>(DEFAULT_PRICING_CONFIG);
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
         const cached = localStorage.getItem('samiq_live_pricing_config');
-        if (cached) return { ...DEFAULT_PRICING_CONFIG, ...JSON.parse(cached) };
+        if (cached) {
+          setPricingConfig((prev) => ({ ...prev, ...JSON.parse(cached) }));
+        }
       } catch (e) {}
     }
-    return DEFAULT_PRICING_CONFIG;
-  });
+  }, []);
 
   const refreshPricingConfig = useCallback(async () => {
     // 1. Check local cache first for instant sync
@@ -290,6 +292,21 @@ export default function SamiqShowcasePage() {
   const handleSelectPackage = (pkg: typeof READY_PACKAGES[0]) => {
     setSelectedPackageId(pkg.id);
     setCustomFeatures(resolveEffectiveFeatures(pkg.features));
+  };
+
+  // Handle ready package selection and jump to custom calculator
+  const handleSelectPackageInCalculator = (pkg: typeof READY_PACKAGES[0]) => {
+    setSelectedPackageId(pkg.id);
+    setCustomFeatures(resolveEffectiveFeatures(pkg.features));
+    setActiveTab('custom');
+    if (typeof window !== 'undefined') {
+      setTimeout(() => {
+        const el = document.getElementById('custom-calculator');
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 80);
+    }
   };
 
   // Toggle custom feature with dependency handling
@@ -470,7 +487,15 @@ export default function SamiqShowcasePage() {
               <span>فاتورة العرض المخصص</span>
             </button>
             <Link
-              href="/"
+              href={`/?demo=1&theme=${selectedTemplate}`}
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  sessionStorage.setItem('samiq_demo_mode', 'true');
+                  localStorage.setItem('samiq_demo_theme', selectedTemplate);
+                  localStorage.setItem('samiq_active_theme', selectedTemplate);
+                  document.cookie = `samiq_active_theme=${selectedTemplate}; path=/; max-age=31536000; SameSite=Lax`;
+                }
+              }}
               className="min-h-[44px] px-4 rounded-xl bg-white/5 hover:bg-white/10 text-[#FAF7F2] border border-white/10 text-xs font-semibold transition inline-flex items-center gap-1.5"
             >
               <span>معاينة المتجر الحي</span>
@@ -664,14 +689,15 @@ export default function SamiqShowcasePage() {
                     <div className="space-y-2 pt-4 border-t border-white/10">
                       <button
                         type="button"
-                        onClick={() => handleSelectPackage(pkg)}
+                        onClick={() => handleSelectPackageInCalculator(pkg)}
                         className={`w-full min-h-[44px] rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${
                           isSelected
                             ? 'bg-[#C9A84C] text-[#070709] shadow-lg'
-                            : 'bg-white/5 hover:bg-white/10 text-[#FAF7F2] border border-white/10'
+                            : 'bg-white/10 hover:bg-[#C9A84C]/20 text-[#FAF7F2] border border-[#C9A84C]/30'
                         }`}
                       >
-                        <span>{isSelected ? 'الباقة المعتمدة للطلب' : 'اختيار هذه الباقة'}</span>
+                        <span>اختيار هذه الباقة في الحاسبة</span>
+                        <span>←</span>
                       </button>
 
                       <button
@@ -699,7 +725,7 @@ export default function SamiqShowcasePage() {
 
         {/* TAB 2: INTERACTIVE CUSTOM CONFIGURATOR & TREE */}
         {activeTab === 'custom' && (
-          <div className="space-y-8 animate-fadeIn">
+          <div id="custom-calculator" className="space-y-8 animate-fadeIn">
             <div className="text-center max-w-2xl mx-auto space-y-2">
               <h2 className="text-2xl sm:text-3xl font-serif font-bold text-[#FAF7F2]">
                 شجرة الترابطات الهندسية وحاسبة التخصيص الدقيق
@@ -1026,7 +1052,7 @@ export default function SamiqShowcasePage() {
                     <label className="text-xs font-bold text-[#FAF7F2] block">
                       خيار النطاق الرسمي (Domain Name):
                     </label>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
                       <button
                         type="button"
                         onClick={() => setSelectedDomainOption('free')}
@@ -1051,6 +1077,20 @@ export default function SamiqShowcasePage() {
                         <span>دومين رسمي .com</span>
                         <span className="font-mono text-[#E8D390] text-xs">
                           +${pricingConfig.domainTierPrices?.custom_com ?? 20} / سنوياً
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedDomainOption('ye')}
+                        className={`min-h-[44px] p-2 rounded-xl border text-center transition flex flex-col justify-center items-center ${
+                          selectedDomainOption === 'ye'
+                            ? 'bg-[#C9A84C]/20 border-[#C9A84C] text-[#FAF7F2] font-bold'
+                            : 'bg-white/5 border-white/10 text-[#8E8B85] hover:border-white/20'
+                        }`}
+                      >
+                        <span>دومين يمني .ye</span>
+                        <span className="font-mono text-[#E8D390] text-xs">
+                          +${pricingConfig.domainTierPrices?.custom_ye ?? 35} / سنوياً
                         </span>
                       </button>
                     </div>
@@ -1165,8 +1205,16 @@ export default function SamiqShowcasePage() {
 
                     <div className="flex items-center gap-3 pt-2">
                       <Link
-                        href={tpl.previewUrl}
+                        href={`/?demo=1&theme=${tpl.id}`}
                         target="_blank"
+                        onClick={() => {
+                          if (typeof window !== 'undefined') {
+                            sessionStorage.setItem('samiq_demo_mode', 'true');
+                            localStorage.setItem('samiq_demo_theme', tpl.id);
+                            localStorage.setItem('samiq_active_theme', tpl.id);
+                            document.cookie = `samiq_active_theme=${tpl.id}; path=/; max-age=31536000; SameSite=Lax`;
+                          }
+                        }}
                         className="flex-1 min-h-[44px] rounded-xl bg-white/10 hover:bg-white/15 text-[#FAF7F2] text-xs font-bold transition flex items-center justify-center gap-1.5"
                       >
                         <span>معاينة حية للقالب</span>

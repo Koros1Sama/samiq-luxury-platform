@@ -93,6 +93,7 @@ export async function POST(req: Request) {
     const totalYer = sanitizeNumber(body.totalYer, Math.max(0, subtotalYer + shippingFeeYer - discountYer), 0, 600_000_000);
 
     const initialStatus = (body.status === 'confirmed' ? 'confirmed' : 'pending') as OrderRecord['status'];
+    const currency = (body.currency && ['YER', 'SAR', 'USD'].includes(body.currency) ? body.currency : 'YER') as any;
 
     const newOrder = createOrder({
       tenantId: '11111111-1111-1111-1111-111111111111',
@@ -106,7 +107,7 @@ export async function POST(req: Request) {
       shippingFeeYer,
       discountYer,
       totalYer,
-      currency: 'YER',
+      currency,
       appliedCoupon: appliedCoupon || undefined,
       paymentMethod,
       paymentReference: paymentReference || undefined,

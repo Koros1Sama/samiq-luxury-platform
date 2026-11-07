@@ -220,7 +220,11 @@ export default function PlatformSuperAdminPage() {
       }
 
       try {
-        const res = await fetch('/api/platform/config');
+        const res = await fetch('/api/platform/config', {
+          headers: {
+            'x-samiq-admin-token': 'miftah2026',
+          },
+        });
         const data = await res.json();
         if (data.success) {
           if (data.pricingConfig) {
@@ -346,6 +350,8 @@ export default function PlatformSuperAdminPage() {
     if (typeof window !== 'undefined') {
       localStorage.setItem('samiq_demo_theme', proj.themeId);
       localStorage.setItem('samiq_active_theme', proj.themeId);
+      document.cookie = `samiq_active_theme=${proj.themeId}; path=/; max-age=31536000; SameSite=Lax`;
+      window.dispatchEvent(new Event('samiq_theme_changed'));
     }
     setSelectedFeatures(resolveEffectiveFeatures(proj.enabledFeatures || []));
     setQuoteProjectTitle(proj.name);
@@ -383,6 +389,13 @@ export default function PlatformSuperAdminPage() {
           if (typeof window !== 'undefined') {
             localStorage.setItem('samiq_demo_theme', data.tenant.themeId);
             localStorage.setItem('samiq_active_theme', data.tenant.themeId);
+            document.cookie = `samiq_active_theme=${data.tenant.themeId}; path=/; max-age=31536000; SameSite=Lax`;
+            if (data.tenant.brandPalette?.isCustomPalette) {
+              localStorage.setItem('samiq_custom_palette', JSON.stringify(data.tenant.brandPalette));
+            } else {
+              localStorage.removeItem('samiq_custom_palette');
+            }
+            window.dispatchEvent(new Event('samiq_theme_changed'));
           }
         }
         setSaveSuccessMsg(`تم تطبيق نمط «${data.tenant.name}» وتحديث المتجر المباشر.`);
@@ -648,6 +661,8 @@ export default function PlatformSuperAdminPage() {
     if (typeof window !== 'undefined') {
       localStorage.setItem('samiq_demo_theme', themeId);
       localStorage.setItem('samiq_active_theme', themeId);
+      document.cookie = `samiq_active_theme=${themeId}; path=/; max-age=31536000; SameSite=Lax`;
+      window.dispatchEvent(new Event('samiq_theme_changed'));
     }
     setSaveSuccessMsg(`تم تحديد القالب ${SAMIQ_THEMES[themeId].nameAr}.`);
     setTimeout(() => setSaveSuccessMsg(''), 3000);
@@ -1115,8 +1130,10 @@ export default function PlatformSuperAdminPage() {
               href={`/?demo=1&theme=${activeTheme}`}
               onClick={() => {
                 if (typeof window !== 'undefined') {
+                  sessionStorage.setItem('samiq_demo_mode', 'true');
                   localStorage.setItem('samiq_demo_theme', activeTheme);
                   localStorage.setItem('samiq_active_theme', activeTheme);
+                  document.cookie = `samiq_active_theme=${activeTheme}; path=/; max-age=31536000; SameSite=Lax`;
                 }
               }}
               className="min-h-[44px] px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-ivory border border-white/10 text-xs font-semibold transition inline-flex items-center gap-1.5"
@@ -1654,12 +1671,14 @@ export default function PlatformSuperAdminPage() {
 
                     <div className="flex items-center gap-2">
                       <Link
-                        href={proj.previewUrl}
+                        href={`/?demo=1&theme=${proj.themeId}`}
                         target="_blank"
                         onClick={() => {
                           if (typeof window !== 'undefined') {
+                            sessionStorage.setItem('samiq_demo_mode', 'true');
                             localStorage.setItem('samiq_demo_theme', proj.themeId);
                             localStorage.setItem('samiq_active_theme', proj.themeId);
+                            document.cookie = `samiq_active_theme=${proj.themeId}; path=/; max-age=31536000; SameSite=Lax`;
                           }
                         }}
                         className="flex-1 min-h-[40px] px-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-champagne border border-white/10 text-xs font-semibold transition flex items-center justify-center gap-1"

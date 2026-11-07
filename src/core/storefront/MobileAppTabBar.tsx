@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useStorefront } from './StorefrontProvider';
@@ -11,6 +11,17 @@ export function MobileAppTabBar() {
   const pathname = usePathname() || '/';
   const isHomeRoute = pathname === '/';
   const [isMoreOpen, setIsMoreOpen] = useState(false);
+
+  useEffect(() => {
+    const handleOpenMore = () => setIsMoreOpen(true);
+    const handleCloseMore = () => setIsMoreOpen(false);
+    window.addEventListener('samiq_open_more_drawer', handleOpenMore);
+    window.addEventListener('samiq_close_more_drawer', handleCloseMore);
+    return () => {
+      window.removeEventListener('samiq_open_more_drawer', handleOpenMore);
+      window.removeEventListener('samiq_close_more_drawer', handleCloseMore);
+    };
+  }, []);
 
   const activeTheme = sf.activeTheme || 'luxury-noir';
   const palette = sf.palette;

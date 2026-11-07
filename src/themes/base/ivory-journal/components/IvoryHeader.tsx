@@ -32,6 +32,8 @@ export function IvoryHeader({ onOpenSearch, onOpenAdvisor }: IvoryHeaderProps) {
     const el = document.querySelector(hash);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      window.location.href = '/' + hash;
     }
   };
 
