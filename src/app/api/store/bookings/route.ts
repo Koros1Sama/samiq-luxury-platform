@@ -15,10 +15,30 @@ import {
   sanitizeObjectDeep,
 } from '@/core/security/guard';
 
-export async function GET() {
-  const bookings = getAllBookings();
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const phone = sanitizeText(searchParams.get('phone') || '', 50);
+  const auth = verifyAdminAuth(req);
+  const allBookings = getAllBookings();
   const branches = getAllBranches();
-  return NextResponse.json({ success: true, bookings, branches });
+
+  if (auth.authorized) {
+    return NextResponse.json({ success: true, bookings: allBookings, branches, isAdmin: true });
+  }
+
+  if (phone) {
+    const cleanDigits = phone.replace(/\D/g, '');
+    if (cleanDigits.length >= 7) {
+      const customerBookings = allBookings.filter((b) => {
+        const bDigits = (b.customerPhone || '').replace(/\D/g, '');
+        return b.customerPhone === phone || (bDigits && bDigits.endsWith(cleanDigits.slice(-7)));
+      });
+      return NextResponse.json({ success: true, bookings: customerBookings, branches, isAdmin: false });
+    }
+  }
+
+  // Public visitors only receive active branches list, not private patient bookings
+  return NextResponse.json({ success: true, bookings: [], branches, isAdmin: false });
 }
 
 export async function POST(req: Request) {

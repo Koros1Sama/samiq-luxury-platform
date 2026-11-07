@@ -16,11 +16,17 @@ import {
 export async function GET(req: Request) {
   try {
     const auth = verifyAdminAuth(req);
+    if (!auth.authorized) {
+      return NextResponse.json(
+        { success: false, conversations: [], isAdmin: false, error: 'غير مصرح لك بعرض صندوق المحادثات' },
+        { status: 401 }
+      );
+    }
     const conversations = getAllConversations();
     return NextResponse.json({
       success: true,
       conversations,
-      isAdmin: auth.authorized,
+      isAdmin: true,
     });
   } catch (error) {
     return NextResponse.json({ success: false, error: 'فشل استرجاع المحادثات' }, { status: 500 });

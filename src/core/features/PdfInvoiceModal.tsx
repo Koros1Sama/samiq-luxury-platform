@@ -147,7 +147,9 @@ export function PdfInvoiceModal({
     const multiplied = isOverridden ? raw : Math.round(raw * (priceMultiplier || 1.0));
 
     let net = multiplied;
-    if (isDiscountEnabled && discountPercent > 0) {
+    if (isDiscountEnabled && matchOriginalPrice && !isOverridden) {
+      net = raw;
+    } else if (isDiscountEnabled && discountPercent > 0) {
       net = Math.max(0, Math.round(multiplied * (1 - discountPercent / 100)));
     }
     const hasDiscount = isDiscountEnabled && discountPercent > 0 && net < multiplied;
