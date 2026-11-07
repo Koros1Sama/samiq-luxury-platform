@@ -135,10 +135,12 @@ export function StorefrontProvider({
 
   // Theme & Chameleon Palette State
   const initialThemeId = (tenant.themeId || (tenant as any).activeTheme || 'luxury-noir') as ThemeId;
-  const [activeTheme, setActiveThemeState] = useState<ThemeId>(initialThemeId);
-  const [customPalette, setCustomPaletteState] = useState<BrandPalette | null>(
-    (tenant as any).brandPalette || null
-  );
+  const [activeTheme, setActiveThemeState] = useState<ThemeId>(() => {
+    return getClientActiveTheme(initialThemeId);
+  });
+  const [customPalette, setCustomPaletteState] = useState<BrandPalette | null>(() => {
+    return getClientCustomPalette() || (tenant as any).brandPalette || null;
+  });
 
   // Bilingual Locale State
   const [locale, setLocaleState] = useState<'ar' | 'en'>('ar');
@@ -248,11 +250,23 @@ export function StorefrontProvider({
         setActiveThemeState(clientTheme);
       }
 
+      const handleThemeChanged = (e: any) => {
+        if (e.detail && typeof e.detail === 'string') {
+          setActiveThemeState(e.detail as ThemeId);
+        }
+      };
+      window.addEventListener('samiq_theme_changed', handleThemeChanged);
+
       // 2. Custom Palette
       const clientPalette = getClientCustomPalette();
       if (clientPalette) {
         setCustomPaletteState(clientPalette);
       }
+
+      const handlePaletteChanged = (e: any) => {
+        setCustomPaletteState(e.detail || null);
+      };
+      window.addEventListener('samiq_custom_palette_changed', handlePaletteChanged);
 
       // 3. Locale
       const savedLocale = localStorage.getItem('samiq_locale') as 'ar' | 'en';
@@ -275,6 +289,11 @@ export function StorefrontProvider({
       if (savedWishlist) {
         setWishlistIds(JSON.parse(savedWishlist));
       }
+
+      return () => {
+        window.removeEventListener('samiq_theme_changed', handleThemeChanged);
+        window.removeEventListener('samiq_custom_palette_changed', handlePaletteChanged);
+      };
     } catch (e) {
       console.warn('Could not read from localStorage:', e);
     }
@@ -291,6 +310,7 @@ export function StorefrontProvider({
     setActiveThemeState(themeId);
     try {
       localStorage.setItem('samiq_demo_theme', themeId);
+      localStorage.setItem('samiq_active_theme', themeId);
       window.dispatchEvent(new CustomEvent('samiq_theme_changed', { detail: themeId }));
     } catch (e) {
       console.warn('Could not save theme to localStorage:', e);

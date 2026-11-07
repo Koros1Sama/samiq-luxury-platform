@@ -29,10 +29,8 @@ export default async function StorefrontHomePage(props: PageProps) {
   const tenantContext = resolveTenant(tenantSlug);
   const db = getDb();
 
-  // 2. Select theme: searchParams.theme is honored only in dev or demo=1
-  const rawThemeId = isDevOrDemo && searchParams.theme
-    ? searchParams.theme
-    : db.tenant?.themeId || tenantContext.tenant.themeId;
+  // 2. Select theme: searchParams.theme is honored if provided
+  const rawThemeId = searchParams.theme || db.tenant?.themeId || tenantContext.tenant.themeId;
   const themeId: ThemeId = resolveThemeId(rawThemeId);
 
   // 3. Load modular blocks data from registry

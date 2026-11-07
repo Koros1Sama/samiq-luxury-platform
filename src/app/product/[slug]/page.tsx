@@ -32,14 +32,15 @@ function ProductDetailContent() {
         const q = new URLSearchParams(window.location.search).get('theme');
         if (q && isValidThemeId(q)) {
           setUrlTheme(q as ThemeId);
+          subCtx.setActiveTheme(q as ThemeId);
         }
       } catch {
         // fallback
       }
     }
-  }, []);
+  }, [subCtx]);
 
-  const activeTheme = urlTheme || subCtx.activeTheme;
+  const activeTheme = subCtx.activeTheme || urlTheme || 'luxury-noir';
   const palette = resolveThemePalette(activeTheme, sf.customPalette);
   const isLight = palette.isLight;
   const locale = subCtx.locale || 'ar';

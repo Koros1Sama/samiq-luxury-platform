@@ -139,11 +139,15 @@ export function getClientActiveTheme(fallback: ThemeId = 'luxury-noir'): ThemeId
     const params = new URLSearchParams(window.location.search);
     const qTheme = params.get('theme');
     if (qTheme && isValidThemeId(qTheme)) {
+      try {
+        localStorage.setItem('samiq_demo_theme', qTheme);
+        localStorage.setItem('samiq_active_theme', qTheme);
+      } catch {}
       return qTheme;
     }
-    const saved = localStorage.getItem('samiq_demo_theme');
+    const saved = localStorage.getItem('samiq_demo_theme') || localStorage.getItem('samiq_active_theme');
     if (saved && isValidThemeId(saved)) {
-      return saved;
+      return saved as ThemeId;
     }
   } catch {
     // fallback

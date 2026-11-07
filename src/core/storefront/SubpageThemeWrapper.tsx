@@ -87,10 +87,9 @@ function SubpageThemeInner({
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
-        const params = new URLSearchParams(window.location.search);
-        const qTheme = params.get('theme');
-        if (qTheme && isValidThemeId(qTheme) && sf.activeTheme !== qTheme) {
-          sf.setActiveTheme?.(qTheme as ThemeId);
+        const clientTheme = getClientActiveTheme(sf.activeTheme);
+        if (clientTheme && isValidThemeId(clientTheme) && sf.activeTheme !== clientTheme) {
+          sf.setActiveTheme?.(clientTheme);
         }
       } catch {
         // fallback
@@ -800,10 +799,19 @@ export function SubpageThemeWrapper(props: SubpageThemeWrapperProps) {
     return <SubpageThemeInner {...props} />;
   }
 
-  // Otherwise, wrap in StorefrontProvider with sensible defaults so simulator & cart work
+  // Otherwise, wrap in StorefrontProvider reading the persisted client active theme
+  const clientTheme =
+    typeof window !== 'undefined'
+      ? getClientActiveTheme(props.tenant?.themeId || 'luxury-noir')
+      : (props.tenant?.themeId || 'luxury-noir');
+  const tenantWithTheme = {
+    ...(props.tenant || DEFAULT_STOREFRONT_TENANT),
+    themeId: clientTheme,
+  };
+
   return (
     <StorefrontProvider
-      tenant={props.tenant || DEFAULT_STOREFRONT_TENANT}
+      tenant={tenantWithTheme}
       features={props.features || DEFAULT_STOREFRONT_FEATURES}
     >
       <SubpageThemeInner {...props} />
