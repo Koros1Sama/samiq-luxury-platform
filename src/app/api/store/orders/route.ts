@@ -24,21 +24,32 @@ export async function GET(req: Request) {
   const phone = sanitizeText(searchParams.get('phone') || '', 50);
   const allOrders = getAllOrders();
 
-  // If a specific customer is checking their order history
+  // If a specific customer is checking their order history (require at least 7 digits to prevent enumeration)
   if (phone) {
-    const customerOrders = allOrders.filter(
-      (o) => o.customerPhone === phone || o.customerPhone.includes(phone)
-    );
+    const cleanDigits = phone.replace(/\D/g, '');
+    if (cleanDigits.length < 7) {
+      return NextResponse.json({ success: true, count: 0, orders: [] });
+    }
+    const customerOrders = allOrders.filter((o) => {
+      const orderDigits = (o.customerPhone || '').replace(/\D/g, '');
+      return o.customerPhone === phone || (orderDigits && orderDigits.endsWith(cleanDigits.slice(-7)));
+    });
     return NextResponse.json({ success: true, count: customerOrders.length, orders: customerOrders });
   }
 
-  // Admin access or full list
+  // Admin access required for full orders list
   const auth = verifyAdminAuth(req);
+  if (!auth.authorized) {
+    return NextResponse.json(
+      { success: false, count: 0, orders: [], isAdmin: false, message: 'غير مصرح لك بعرض سجل الطلبات الكامل' },
+      { status: 401 }
+    );
+  }
   return NextResponse.json({
     success: true,
     count: allOrders.length,
     orders: allOrders,
-    isAdmin: auth.authorized,
+    isAdmin: true,
   });
 }
 
@@ -121,11 +132,13 @@ export async function POST(req: Request) {
     const chatId = db.tenant?.notificationConfig?.telegramChatId || process.env.TELEGRAM_OWNER_CHAT_ID;
     if (botToken && chatId) {
       const storeName = db.tenant?.name || 'مفتاح الجمال';
+      const currencyLabels: Record<string, string> = { YER: 'ر.ي', SAR: 'ر.س', USD: '$' };
+      const activeCur = newOrder.currency || db.tenant?.currency || 'YER';
       const text = `طلب جديد في متجر ${storeName}:
 رقم الطلب: ${newOrder.orderNumber}
 العميل: ${newOrder.customerName} (${newOrder.customerPhone})
 المدينة: ${newOrder.city} - ${newOrder.address}
-الإجمالي: ${newOrder.totalYer} ريال يمني
+الإجمالي: ${newOrder.totalYer} ${currencyLabels[activeCur] || activeCur}
 طريقة الدفع: ${newOrder.paymentMethod}`;
 
       fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {

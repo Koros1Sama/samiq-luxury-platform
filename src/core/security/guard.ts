@@ -69,7 +69,7 @@ export function sanitizeText(input: unknown, maxLen = 500): string {
  * Blocks Prototype Pollution attacks (__proto__, constructor, prototype)
  * and strips XSS vectors from all nested string properties.
  */
-export function sanitizeObjectDeep<T>(input: T, maxStringLen = 1000): T {
+export function sanitizeObjectDeep<T>(input: T, maxStringLen = 25000): T {
   if (input === null || input === undefined) {
     return input;
   }

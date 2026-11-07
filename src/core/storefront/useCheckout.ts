@@ -161,9 +161,8 @@ export function useCheckout(options?: UseCheckoutOptions) {
   const discountYer = appliedCoupon ? appliedCoupon.discountYer : 0;
   const discountCurrent = useMemo(() => {
     if (!appliedCoupon) return 0;
-    if (currentCurrency === 'YER') return appliedCoupon.discountYer;
-    return convertCurrency(appliedCoupon.discountYer, 'YER', currentCurrency);
-  }, [appliedCoupon, currentCurrency]);
+    return appliedCoupon.discountYer;
+  }, [appliedCoupon]);
 
   const totalYer = Math.max(0, subtotalYer + shippingFeeYer - discountYer);
   const totalCurrent = Math.max(0, subtotalCurrent + shippingFeeCurrent - discountCurrent);
@@ -178,7 +177,7 @@ export function useCheckout(options?: UseCheckoutOptions) {
       const res = await fetch('/api/store/coupons', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code, subtotalYer }),
+        body: JSON.stringify({ code, subtotalYer: subtotalCurrent }),
       });
       const data = await res.json();
       if (data.isValid) {
@@ -195,7 +194,7 @@ export function useCheckout(options?: UseCheckoutOptions) {
     } finally {
       setIsApplyingCoupon(false);
     }
-  }, [couponCode, subtotalYer]);
+  }, [couponCode, subtotalCurrent]);
 
   const removeCoupon = useCallback(() => {
     setAppliedCoupon(null);
@@ -301,9 +300,21 @@ export function useCheckout(options?: UseCheckoutOptions) {
         const res = await fetch('/api/store/orders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(orderPayload),
+          body: JSON.stringify({
+            ...orderPayload,
+            subtotalYer: subtotalCurrent,
+            shippingFeeYer: shippingFeeCurrent,
+            discountYer: discountCurrent,
+            totalYer: totalCurrent,
+          }),
         });
         const data = await res.json();
+        if (!res.ok || data?.success === false) {
+          return {
+            success: false,
+            error: data?.message || 'تعذر حفظ الطلب، يرجى التحقق من البيانات والمحاولة مجدداً',
+          };
+        }
         const orderNumber =
           data?.order?.orderNumber || `MIFTAH-${Math.floor(1000 + Math.random() * 9000)}`;
 

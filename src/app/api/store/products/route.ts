@@ -12,18 +12,21 @@ import {
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
+  const auth = verifyAdminAuth(req);
   const includeWarehouse =
-    searchParams.get('includeWarehouse') === '1' || searchParams.get('all') === '1';
+    auth.authorized && (searchParams.get('includeWarehouse') === '1' || searchParams.get('all') === '1');
 
   const allProducts = getAllProducts();
   const products = includeWarehouse
     ? allProducts
-    : allProducts.filter(
-        (p) =>
-          p.visibilityStatus !== 'warehouse_only' &&
-          p.visibilityStatus !== 'archived' &&
-          p.isPublished !== false
-      );
+    : allProducts
+        .filter(
+          (p) =>
+            p.visibilityStatus !== 'warehouse_only' &&
+            p.visibilityStatus !== 'archived' &&
+            p.isPublished !== false
+        )
+        .map(({ costPriceYer, ...publicProd }) => publicProd);
 
   return NextResponse.json({ success: true, count: products.length, products });
 }

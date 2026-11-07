@@ -1059,31 +1059,33 @@ export function deleteCoupon(code: string): boolean {
   return false;
 }
 
-export function validateCoupon(code: string, subtotalYer: number): { isValid: boolean; discountAmountYer: number; message: string } {
+export function validateCoupon(code: string, subtotalAmount: number): { isValid: boolean; discountAmountYer: number; message: string } {
   const db = getDb();
+  const activeCur = db.tenant?.currency || 'YER';
+  const curLabel = activeCur === 'SAR' ? 'ر.س' : activeCur === 'USD' ? '$' : 'ر.ي';
   const coupon = db.coupons.find((c) => c.code.toUpperCase() === code.trim().toUpperCase() && c.isActive);
   if (!coupon) {
     return { isValid: false, discountAmountYer: 0, message: 'كود الخصم غير صحيح أو منتهي الصلاحية' };
   }
-  if (coupon.minOrderAmountYer && subtotalYer < coupon.minOrderAmountYer) {
+  if (coupon.minOrderAmountYer && subtotalAmount < coupon.minOrderAmountYer) {
     return {
       isValid: false,
       discountAmountYer: 0,
-      message: `الحد الأدنى لتطبيق هذا الكوبون هو ${coupon.minOrderAmountYer} ريال يمني`,
+      message: `الحد الأدنى لتطبيق هذا الكوبون هو ${coupon.minOrderAmountYer} ${curLabel}`,
     };
   }
 
   let discount = 0;
   if (coupon.discountPercentage > 0) {
-    discount = Math.round((subtotalYer * coupon.discountPercentage) / 100);
+    discount = Number(((subtotalAmount * coupon.discountPercentage) / 100).toFixed(activeCur === 'USD' ? 2 : 0));
   } else if (coupon.fixedDiscountYer) {
-    discount = Math.min(coupon.fixedDiscountYer, subtotalYer);
+    discount = Math.min(coupon.fixedDiscountYer, subtotalAmount);
   }
 
   return {
     isValid: true,
     discountAmountYer: discount,
-    message: `تم تطبيق الخصم بنجاح (-${discount} ر.ي)`,
+    message: `تم تطبيق الخصم بنجاح (-${discount} ${curLabel})`,
   };
 }
 
@@ -1497,6 +1499,16 @@ export function convertStoreCurrency(options: ConvertCurrencyOptions): {
       }
     });
 
+    if (db.shippingZones && Array.isArray(db.shippingZones)) {
+      db.shippingZones.forEach((zone) => {
+        const baseFee =
+          from === 'SAR' ? zone.feeSar : from === 'USD' ? zone.feeUsd : zone.feeYer;
+        if (to === 'YER') zone.feeYer = baseFee;
+        if (to === 'SAR') zone.feeSar = baseFee;
+        if (to === 'USD') zone.feeUsd = baseFee;
+      });
+    }
+
     db.tenant.currency = to;
     saveDb(db);
 
@@ -1566,6 +1578,10 @@ export function convertStoreCurrency(options: ConvertCurrencyOptions): {
         zone.feeYer = calculateNewPrice(zone.feeSar || 0);
       } else if (from === 'USD' && to === 'YER') {
         zone.feeYer = calculateNewPrice(zone.feeUsd || 0);
+      } else if (from === 'SAR' && to === 'USD') {
+        zone.feeUsd = calculateNewPrice(zone.feeSar || 0);
+      } else if (from === 'USD' && to === 'SAR') {
+        zone.feeSar = calculateNewPrice(zone.feeUsd || 0);
       }
     });
   }

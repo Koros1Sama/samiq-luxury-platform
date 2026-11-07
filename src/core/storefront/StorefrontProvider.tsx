@@ -282,7 +282,18 @@ export function StorefrontProvider({
 
       const savedCart = localStorage.getItem(STORAGE_KEYS.cart);
       if (savedCart) {
-        setCartItems(JSON.parse(savedCart));
+        const parsedCart: CartItem[] = JSON.parse(savedCart);
+        const reconciledCart = parsedCart.map((item) => {
+          const liveProduct = products.find((p) => p.id === item.productId);
+          if (!liveProduct) return item;
+          return {
+            ...item,
+            title: liveProduct.title,
+            image: liveProduct.image,
+            unitPrice: liveProduct.prices,
+          };
+        });
+        setCartItems(reconciledCart);
       }
 
       const savedWishlist = localStorage.getItem(STORAGE_KEYS.wishlist);
