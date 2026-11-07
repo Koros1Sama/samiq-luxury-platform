@@ -529,7 +529,7 @@ export default function SamiqShowcasePage() {
             </span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-serif font-bold text-[#FAF7F2] leading-tight">
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-serif font-bold text-[#FAF7F2] leading-[1.55] md:leading-[1.5]">
             متجرك الرقمي القادم بفخامة عالمية،
             <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#E8D390] via-[#C9A84C] to-[#AA771C]">

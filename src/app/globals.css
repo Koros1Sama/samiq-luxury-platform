@@ -30,6 +30,25 @@ body {
   letter-spacing: normal !important;
 }
 
+/* SAMIQ CRITICAL ARABIC TYPOGRAPHY RULE:
+   Arabic calligraphic typefaces (especially Amiri / font-serif) have tall ascenders and deep descenders.
+   They MUST have generous line-height (at least 1.5 - 1.6) so diacritics and ligatures never collide.
+*/
+[dir="rtl"] .font-serif,
+[lang="ar"] .font-serif,
+.font-serif:lang(ar) {
+  line-height: 1.55 !important;
+}
+
+[dir="rtl"] h1.font-serif,
+[dir="rtl"] h2.font-serif,
+[dir="rtl"] h3.font-serif,
+[lang="ar"] h1.font-serif,
+[lang="ar"] h2.font-serif,
+[lang="ar"] h3.font-serif {
+  line-height: 1.55 !important;
+}
+
 /* Custom Luxury Gold Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

@@ -49,7 +49,7 @@ export function HeroShowcase({ onCtaClick, section }: HeroShowcaseProps) {
       {/* Content Container: Exactly ONE headline, ONE subline, ONE primary button */}
       <div className="relative z-10 h-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 flex flex-col justify-center text-start space-y-1.5 sm:space-y-2.5">
         {/* 1. Exactly ONE Headline Line */}
-        <h1 className="text-base sm:text-2xl lg:text-3xl font-serif font-bold text-ivory leading-tight truncate max-w-2xl">
+        <h1 className="text-base sm:text-2xl lg:text-3xl font-serif font-bold text-ivory leading-[1.55] md:leading-[1.5] truncate max-w-2xl">
           {title}
         </h1>
 

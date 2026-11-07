@@ -34,7 +34,7 @@ export function ClinicHero({ onExploreClick }: ClinicHeroProps) {
             </div>
 
             {/* Headline */}
-            <h1 className="text-sm sm:text-2xl lg:text-3xl font-bold text-[#0F4C4A] leading-tight truncate sm:whitespace-normal">
+            <h1 className="text-sm sm:text-2xl lg:text-3xl font-bold text-[#0F4C4A] leading-[1.5] truncate sm:whitespace-normal">
               {title}
             </h1>
 

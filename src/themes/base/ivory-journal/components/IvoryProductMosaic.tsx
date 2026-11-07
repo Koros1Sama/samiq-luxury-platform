@@ -50,13 +50,13 @@ export function IvoryProductMosaic({ onSelectProduct }: IvoryProductMosaicProps)
       {/* Editorial Section Header */}
       <div className="mb-2.5 sm:mb-8 p-2.5 sm:p-6 bg-[#FAF7F2]/95 backdrop-blur-md border border-[#E8E2D8] rounded-md shadow-sm flex flex-col md:flex-row items-start md:items-end justify-between gap-1.5 sm:gap-4">
         <div>
-          <span className="text-xs font-sans font-semibold text-[#5E6B5A] block mb-1">
+          <span className="text-xs font-sans font-semibold text-[#5E6B5A] block mb-2.5">
             مختارات الأسبوع · الإصدار التحريري
           </span>
-          <h2 className="font-serif font-bold text-lg sm:text-3xl lg:text-4xl text-[#1B1612] leading-[1.35]">
+          <h2 className="font-serif font-bold text-lg sm:text-3xl lg:text-4xl text-[#1B1612] leading-[1.55] md:leading-[1.5]">
             اختيارات الأسبوع
           </h2>
-          <p className="font-sans text-sm text-[#554D46] mt-0.5 leading-[1.75] hidden sm:block">
+          <p className="font-sans text-sm text-[#554D46] mt-1.5 leading-[1.75] hidden sm:block">
             مستحضرات منتقاة بعناية فائقة، مصرحة ومطابقة لمعايير الهيئة العليا للأدوية والمستلزمات الطبية
           </p>
         </div>

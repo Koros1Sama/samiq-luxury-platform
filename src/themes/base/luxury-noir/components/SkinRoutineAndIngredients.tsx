@@ -107,7 +107,7 @@ export function SkinRoutineAndIngredients(props: SkinRoutineAndIngredientsProps)
 
               {/* Headline & CTA */}
               <div className="relative z-10 space-y-3 my-auto pt-12">
-                <h2 className="text-2xl sm:text-3xl font-serif font-bold leading-tight" style={{ color: textColor }}>
+                <h2 className="text-2xl sm:text-3xl font-serif font-bold leading-[1.55] md:leading-[1.5]" style={{ color: textColor }}>
                   روتين العناية ببشرتك لإشراقة تدوم
                 </h2>
                 <p className="text-sm font-sans leading-relaxed max-w-sm" style={{ color: mutedColor }}>

@@ -67,7 +67,7 @@ export function BlogPostClientView({ post, relatedPosts }: BlogPostClientViewPro
           </span>
         </div>
         <h1
-          className="text-2xl sm:text-4xl font-serif font-bold leading-tight"
+          className="text-2xl sm:text-4xl font-serif font-bold leading-[1.55] md:leading-[1.5]"
           style={{ color: palette.text }}
         >
           {post.title}

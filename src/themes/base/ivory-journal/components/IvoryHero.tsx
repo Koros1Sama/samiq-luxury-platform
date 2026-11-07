@@ -66,7 +66,7 @@ export function IvoryHero({ section }: IvoryHeroProps) {
             </div>
 
             {/* Headline in Royal Amiri Serif */}
-            <h1 className="font-serif font-bold text-lg sm:text-4xl lg:text-6xl text-[#1B1612] leading-[1.2]">
+            <h1 className="font-serif font-bold text-lg sm:text-4xl lg:text-6xl text-[#1B1612] leading-[1.55] md:leading-[1.5]">
               {title}
             </h1>
 
