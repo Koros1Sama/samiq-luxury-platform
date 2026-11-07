@@ -145,22 +145,22 @@ export function IvoryHeader({ onOpenSearch, onOpenAdvisor }: IvoryHeaderProps) {
             </button>
           )}
 
-          {/* Advisor Chat Trigger */}
+          {/* Advisor Chat Trigger (Hidden on narrow mobile to keep top header uncluttered) */}
           <button
             type="button"
             aria-label="استشارة خبيرة الجمال"
             onClick={onOpenAdvisor}
-            className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center text-[#5E6B5A] hover:text-[#1B1612] transition-colors rounded-sm"
+            className="hidden sm:flex w-11 h-11 min-w-[44px] min-h-[44px] items-center justify-center text-[#5E6B5A] hover:text-[#1B1612] transition-colors rounded-sm"
           >
             <AdvisorStarIcon size={20} color="#5E6B5A" />
           </button>
 
-          {/* Account Portal Link */}
+          {/* Account Portal Link (Hidden on mobile where bottom MobileAppTabBar provides حسابي) */}
           <a
             href="/account"
             aria-label="حسابي ونقاط الولاء"
             title="حسابي ونقاط الولاء"
-            className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center text-[#1B1612] hover:text-[#5E6B5A] transition-colors rounded-sm"
+            className="hidden md:flex w-11 h-11 min-w-[44px] min-h-[44px] items-center justify-center text-[#1B1612] hover:text-[#5E6B5A] transition-colors rounded-sm"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path

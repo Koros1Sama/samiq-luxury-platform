@@ -88,6 +88,25 @@ export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[
   const isEn = locale === 'en';
   const currency = sf.currency || 'YER';
 
+  const formatLinkedProductPrice = useCallback(
+    (meta: LinkedProductMeta) => {
+      const liveProd = sf.products?.find(
+        (p) => p.id === meta.productId || p.slug === meta.productSlug
+      );
+      if (liveProd?.prices) {
+        return sf.formatPrice(liveProd.prices);
+      }
+      const fallbackAmount =
+        currency === 'USD'
+          ? Math.max(1, Math.round(meta.priceYer / 530))
+          : currency === 'SAR'
+          ? Math.max(1, Math.round(meta.priceYer / 140))
+          : meta.priceYer;
+      return formatCurrency(fallbackAmount, currency);
+    },
+    [sf, currency]
+  );
+
   // State
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'authenticity' | 'science' | 'routine'>('all');
@@ -300,7 +319,7 @@ export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[
                     ? (palette.surfaceHex || '#FFFFFF')
                     : 'rgba(255,255,255,0.06)',
                   color: isSelected
-                    ? (isLight && palette.accent !== '#0F4C4A' ? '#FFFFFF' : '#0B0B0C')
+                    ? (isLight ? '#FFFFFF' : '#0B0B0C')
                     : (palette.textHex || palette.text),
                   border: `1px solid ${isSelected ? (palette.accentHex || palette.accent) : (palette.borderHex || palette.border)}`,
                 }}
@@ -418,7 +437,7 @@ export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[
                         <strong style={{ color: palette.textHex || palette.text }}>{enrichment.linkedProduct.brand}</strong>
                       </span>
                       <span className="font-mono font-bold" style={{ color: palette.accentHex || palette.accent }}>
-                        {formatCurrency(enrichment.linkedProduct.priceYer, currency)}
+                        {formatLinkedProductPrice(enrichment.linkedProduct)}
                       </span>
                     </div>
                   )}
@@ -649,7 +668,7 @@ export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[
                         {isEn ? activeEnrichment.linkedProduct.titleEn : activeEnrichment.linkedProduct.titleAr}
                       </h4>
                       <p className="text-xs font-mono font-bold" style={{ color: palette.text }}>
-                        {formatCurrency(activeEnrichment.linkedProduct.priceYer, currency)}
+                        {formatLinkedProductPrice(activeEnrichment.linkedProduct)}
                       </p>
                     </div>
                   </div>
@@ -664,9 +683,8 @@ export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[
                     </Link>
                     <a
                       href={`https://wa.me/967775234989?text=${encodeURIComponent(
-                        `مرحباً مفتاح الجمال، أود طلب المستحضر الأصلي المذكور في مقال المجلة:\n*${activeEnrichment.linkedProduct.titleAr}*\nالسعر: ${formatCurrency(
-                          activeEnrichment.linkedProduct.priceYer,
-                          currency
+                        `مرحباً مفتاح الجمال، أود طلب المستحضر الأصلي المذكور في مقال المجلة:\n*${activeEnrichment.linkedProduct.titleAr}*\nالسعر: ${formatLinkedProductPrice(
+                          activeEnrichment.linkedProduct
                         )}`
                       )}`}
                       target="_blank"
@@ -674,7 +692,7 @@ export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[
                       className="min-h-[44px] flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-xs font-sans font-bold text-center inline-flex items-center justify-center shadow-md transition hover:brightness-110"
                       style={{
                         backgroundColor: palette.accent,
-                        color: isLight && palette.accent !== '#0F4C4A' ? '#FFFFFF' : '#0B0B0C',
+                        color: isLight ? '#FFFFFF' : '#0B0B0C',
                       }}
                     >
                       {isEn ? 'Order via WhatsApp' : 'طلب فوري عبر واتساب'}

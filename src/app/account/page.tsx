@@ -78,11 +78,13 @@ function CustomerAccountContent() {
   useEffect(() => {
     // 1. Check existing customer session
     const savedCustomer = localStorage.getItem('samiq_customer');
+    let initialPhone = '';
     if (savedCustomer) {
       try {
         const parsed = JSON.parse(savedCustomer);
         setCustomer(parsed);
         setIsLoggedIn(true);
+        initialPhone = parsed?.phone || '';
       } catch (e) {}
     }
 
@@ -94,7 +96,9 @@ function CustomerAccountContent() {
 
     // 3. Load catalog products & orders
     fetchProducts();
-    fetchOrders();
+    if (initialPhone) {
+      fetchOrders(initialPhone);
+    }
   }, []);
 
   useEffect(() => {
@@ -115,9 +119,11 @@ function CustomerAccountContent() {
     } catch (e) {}
   };
 
-  const fetchOrders = async () => {
+  const fetchOrders = async (phoneFilter?: string) => {
+    const targetPhone = phoneFilter || customer?.phone || '';
+    if (!targetPhone) return;
     try {
-      const res = await fetch('/api/store/orders');
+      const res = await fetch(`/api/store/orders?phone=${encodeURIComponent(targetPhone)}`);
       const data = await res.json();
       if (data.success) {
         setOrders(data.orders || []);
@@ -158,6 +164,7 @@ function CustomerAccountContent() {
         setCustomer(data.customer);
         setIsLoggedIn(true);
         localStorage.setItem('samiq_customer', JSON.stringify(data.customer));
+        fetchOrders(data.customer.phone);
         setAuthSuccessMsg(data.message || 'تم تسجيل العضوية بنجاح وحصلتِ على 150 نقطة مجانية');
       } else {
         setAuthError(data.message || 'فشل تسجيل الحساب، يرجى التحقق من البيانات');
@@ -191,6 +198,7 @@ function CustomerAccountContent() {
         setCustomer(data.customer);
         setIsLoggedIn(true);
         localStorage.setItem('samiq_customer', JSON.stringify(data.customer));
+        fetchOrders(data.customer.phone);
       } else {
         setAuthError(data.message || 'بيانات الدخول غير صحيحة');
       }
@@ -220,6 +228,7 @@ function CustomerAccountContent() {
         setCustomer(data.customer);
         setIsLoggedIn(true);
         localStorage.setItem('samiq_customer', JSON.stringify(data.customer));
+        fetchOrders(data.customer.phone);
       }
     } catch (e) {} finally {
       setIsSubmitting(false);
@@ -451,7 +460,7 @@ function CustomerAccountContent() {
                   </span>
                   <div className="grid grid-cols-3 gap-1.5 pt-2">
                     <Link
-                      href="/"
+                      href="/?theme=luxury-noir"
                       className="min-h-[40px] px-2 rounded-lg border text-center text-xs flex items-center justify-center font-bold"
                       style={{
                         backgroundColor: isLight ? '#00000006' : 'rgba(255,255,255,0.05)',
@@ -496,7 +505,7 @@ function CustomerAccountContent() {
         {/* ==================================================================== */}
         {/* CASE B: LOGGED OUT — DUAL-TAB AUTH CARD                              */}
         {/* ==================================================================== */}
-        {!isLoggedIn && (
+        {!isLoggedIn && !isAdminLoggedIn && (
           <div
             className="max-w-2xl mx-auto p-6 sm:p-8 rounded-3xl border shadow-2xl space-y-6"
             style={{

@@ -179,25 +179,28 @@ export function LuxuryMoreDrawer({
           </div>
         </div>
 
-        {/* 4. PWA Install & Language */}
+        {/* 4. PWA Install & Interactive Language Switcher */}
         <div className="pt-2 border-t flex items-center justify-between gap-3 flex-wrap" style={{ borderColor: palette.border }}>
           <PwaInstallPrompt isCompact={false} />
-          <div
-            className="min-h-[40px] px-3.5 py-2 rounded-full border text-xs font-sans flex items-center justify-center"
+          <button
+            type="button"
+            onClick={() => sf.setLocale?.(sf.locale === 'en' ? 'ar' : 'en')}
+            className="min-h-[40px] px-3.5 py-2 rounded-full border text-xs font-sans font-bold flex items-center justify-center gap-1.5 transition"
             style={{
               backgroundColor: isLight ? '#00000006' : 'rgba(255, 255, 255, 0.05)',
               borderColor: palette.border,
-              color: palette.muted,
+              color: palette.text,
             }}
           >
-            اللغة: العربية (الافتراضية)
-          </div>
+            <span>{sf.locale === 'en' ? 'Language: English' : 'اللغة: العربية'}</span>
+            <span style={{ color: palette.accent }}>({sf.locale === 'en' ? 'التبديل للعربية' : 'Switch to EN'})</span>
+          </button>
         </div>
 
         {/* 5. Navigation Links in Drawer */}
         <div className="pt-2 border-t space-y-1" style={{ borderColor: palette.border }}>
           {navLinks.map((link, idx) => {
-            const isEn = typeof document !== 'undefined' && document.documentElement.lang === 'en';
+            const isEn = sf.locale === 'en';
             const labelText = isEn
               ? link.labelEn || link.label || link.labelAr
               : link.labelAr || link.label || link.labelEn;
@@ -205,7 +208,18 @@ export function LuxuryMoreDrawer({
               <a
                 key={link.href + idx}
                 href={link.href}
-                onClick={onClose}
+                onClick={(e) => {
+                  if (typeof window !== 'undefined' && window.location.pathname === '/') {
+                    if (link.href === '/') {
+                      e.preventDefault();
+                      sf.setMobileTab?.('home');
+                    } else if (link.href.includes('tab=catalog') || link.href.includes('#products')) {
+                      e.preventDefault();
+                      sf.setMobileTab?.('catalog');
+                    }
+                  }
+                  onClose();
+                }}
                 className="min-h-[44px] flex items-center py-2.5 text-xs font-sans border-b transition"
                 style={{
                   borderColor: isLight ? '#00000008' : 'rgba(255, 255, 255, 0.05)',

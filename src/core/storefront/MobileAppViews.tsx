@@ -81,8 +81,18 @@ export function MobileAppViews({ sections, renderers }: MobileAppViewsProps) {
   // Filtered products for catalog tab
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
-      if (activeCategory && activeCategory !== 'all' && activeCategory !== p.categorySlug && activeCategory !== p.id) {
-        return false;
+      if (activeCategory && activeCategory !== 'all') {
+        const matchedCat = sf.categories?.find(
+          (c) => c.id === activeCategory || c.title === activeCategory || c.href === `#${activeCategory}`
+        );
+        const targetSlug = matchedCat?.href?.replace(/^#/, '') || matchedCat?.id || activeCategory;
+        if (
+          p.categorySlug !== activeCategory &&
+          p.categorySlug !== targetSlug &&
+          p.id !== activeCategory
+        ) {
+          return false;
+        }
       }
       if (activeTag && (!p.tags || !p.tags.includes(activeTag))) {
         return false;
@@ -96,7 +106,7 @@ export function MobileAppViews({ sections, renderers }: MobileAppViewsProps) {
       }
       return true;
     });
-  }, [products, activeCategory, activeTag, catalogSearch]);
+  }, [products, activeCategory, activeTag, catalogSearch, sf.categories]);
 
   // Featured 4 for home bestsellers
   const bestsellers = useMemo(() => products.slice(0, 4), [products]);
@@ -526,18 +536,30 @@ export function MobileAppViews({ sections, renderers }: MobileAppViewsProps) {
                   >
                     <div>
                       {/* Badge Row */}
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-[10px] font-sans font-bold px-1.5 py-0.5 rounded-md bg-emerald-950/40 text-emerald-300 border border-emerald-500/30">
+                      <div className="flex items-center justify-between gap-1 mb-1.5">
+                        <span
+                          className={`text-[10px] font-sans font-bold px-1.5 py-0.5 rounded-md border shrink-0 ${
+                            isLight
+                              ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                              : 'bg-emerald-950/40 text-emerald-300 border-emerald-500/30'
+                          }`}
+                        >
                           أصلي 100%
                         </span>
-                        {product.badge && (
-                          <span
-                            className="text-[9px] font-sans font-bold px-1.5 py-0.5 rounded truncate max-w-[70px]"
-                            style={{ backgroundColor: `${accentColor}20`, color: accentColor }}
-                          >
-                            {product.badge}
-                          </span>
-                        )}
+                        {(() => {
+                          const cleanBadge = (product.badge || '')
+                            .replace(/^أصلي\s*100%\s*[·\-—]?\s*/i, '')
+                            .trim();
+                          if (!cleanBadge || cleanBadge === 'أصلي 100%') return null;
+                          return (
+                            <span
+                              className="text-[9px] font-sans font-bold px-1.5 py-0.5 rounded truncate max-w-[85px]"
+                              style={{ backgroundColor: `${accentColor}18`, color: accentColor }}
+                            >
+                              {cleanBadge}
+                            </span>
+                          );
+                        })()}
                       </div>
 
                       {/* Product Image Link */}
@@ -669,93 +691,7 @@ export function MobileAppViews({ sections, renderers }: MobileAppViewsProps) {
           </div>
         </div>
 
-        {/* Interactive SBDMA Product Name Verifier Card */}
-        <div
-          className="p-4 rounded-2xl border space-y-3.5 shadow-sm"
-          style={{ backgroundColor: surfaceColor, borderColor }}
-        >
-          <div className="space-y-1">
-            <h2 className="text-sm font-serif font-bold" style={{ color: textColor }}>
-              دليل وفاحص الأصالة السريع باسم المنتج
-            </h2>
-            <p className="text-xs font-sans" style={{ color: mutedColor }}>
-              اكتبي اسم المستحضر أو اضغطي على أحد الأمثلة السريعة أدناه:
-            </p>
-          </div>
-
-          {/* Input & Check Button */}
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={verifierQuery}
-              onChange={(e) => setVerifierQuery(e.target.value)}
-              placeholder="مثال: سيروم فيتامين سي أو الغسول..."
-              className="flex-1 px-3 py-2 rounded-xl text-xs font-sans border outline-hidden"
-              style={{
-                backgroundColor: isLight ? '#FAF7F2' : '#141416',
-                borderColor,
-                color: textColor,
-              }}
-            />
-            <button
-              type="button"
-              onClick={() => handleQuickVerify(verifierQuery || 'سيروم فيتامين سي')}
-              className="px-4 py-2 rounded-xl text-xs font-sans font-bold transition shrink-0"
-              style={{
-                backgroundColor: accentColor,
-                color: isLight ? '#FFFFFF' : '#070709',
-              }}
-            >
-              فحص
-            </button>
-          </div>
-
-          {/* Quick-test Chips */}
-          <div className="flex flex-wrap gap-1.5">
-            <button
-              type="button"
-              onClick={() => handleQuickVerify('سيروم فيتامين سي 10%')}
-              className="px-2.5 py-1 rounded-lg text-[11px] font-sans border transition"
-              style={{ borderColor, color: textColor }}
-            >
-              سيروم فيتامين سي 10%
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickVerify('الغسول المرطب للبشرة')}
-              className="px-2.5 py-1 rounded-lg text-[11px] font-sans border transition"
-              style={{ borderColor, color: textColor }}
-            >
-              الغسول المرطب
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickVerify('منتج مقلد غير مسجل')}
-              className="px-2.5 py-1 rounded-lg text-[11px] font-sans bg-rose-950/20 text-rose-300 border border-rose-500/30 transition"
-            >
-              اختبار مستحضر مقلد
-            </button>
-          </div>
-
-          {/* Verification Result Callout */}
-          {verifierResult && (
-            <div
-              className={`p-3.5 rounded-xl border text-xs font-sans space-y-1.5 animate-fadeIn ${
-                verifierResult.status === 'authentic'
-                  ? 'bg-emerald-950/30 border-emerald-500/30 text-emerald-200'
-                  : 'bg-rose-950/30 border-rose-500/30 text-rose-200'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-bold">{verifierResult.title}</span>
-                <span className="font-mono text-[10px] opacity-75">{verifierResult.batchNo}</span>
-              </div>
-              <p className="leading-relaxed opacity-90">{verifierResult.details}</p>
-            </div>
-          )}
-        </div>
-
-        {/* Interactive Comparison Slider */}
+        {/* Interactive Comparison & Real SBDMA Product Name Verifier */}
         <div className="rounded-2xl overflow-hidden border shadow-sm" style={{ borderColor }}>
           {renderSection(authSection)}
         </div>

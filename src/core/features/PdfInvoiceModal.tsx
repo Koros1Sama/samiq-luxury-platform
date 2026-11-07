@@ -140,6 +140,16 @@ export function PdfInvoiceModal({
     return new Set(selectedFeatureIds);
   }, [selectedFeatureIds]);
 
+  const formatRequiresLabel = (reqs: string[]) => {
+    if (!reqs || reqs.length === 0) return 'بدون متطلب';
+    const map: Record<string, string> = {
+      tier_1_static: 'الدرجة 1 (التعريفي)',
+      tier_2_editable: 'الدرجة 2 (لوحة المدير)',
+      tier_3_catalog: 'الدرجة 3 (الكتالوج)',
+    };
+    return reqs.map((r) => map[r] || r).join(' + ');
+  };
+
   // Dynamic price calculator matching /samiq and /platform multipliers and discounts
   const getDynamicPrice = (featureId: string, basePriceUsd: number) => {
     const isOverridden = priceOverrides?.[featureId] !== undefined;
@@ -486,8 +496,8 @@ export function PdfInvoiceModal({
                                 <td className="py-2.5 px-3 text-muted-lux print:text-neutral-600 whitespace-nowrap">
                                   {catLabel}
                                 </td>
-                                <td className="py-2.5 px-3 text-muted-dim print:text-neutral-500 font-mono text-xs whitespace-nowrap">
-                                  {addon.requires.length > 0 ? addon.requires.join(', ') : '—'}
+                                <td className="py-2.5 px-3 text-muted-dim print:text-neutral-500 font-sans text-xs whitespace-nowrap">
+                                  {addon.requires.length > 0 ? formatRequiresLabel(addon.requires) : '—'}
                                 </td>
                                 <td className="py-2.5 px-3 text-end font-mono font-bold text-gold print:text-neutral-900 whitespace-nowrap">
                                   +${addon.effectivePrice}
@@ -677,8 +687,8 @@ export function PdfInvoiceModal({
                                   {tier.descriptionAr}
                                 </p>
                               </td>
-                              <td className="py-3 px-3 text-muted-dim print:text-neutral-500 font-mono text-xs whitespace-nowrap">
-                                {tier.requires.length > 0 ? tier.requires.join(', ') : 'بدون متطلب'}
+                              <td className="py-3 px-3 text-muted-dim print:text-neutral-500 font-sans text-xs whitespace-nowrap">
+                                {formatRequiresLabel(tier.requires)}
                               </td>
                               <td className="py-3 px-3 text-end font-mono whitespace-nowrap">
                                 {tierPrice.hasDiscount ? (
@@ -763,8 +773,8 @@ export function PdfInvoiceModal({
                               <td className="py-2.5 px-3 text-muted-lux print:text-neutral-700 whitespace-nowrap">
                                 {catLabel}
                               </td>
-                              <td className="py-2.5 px-3 text-muted-dim print:text-neutral-500 font-mono text-[11px] whitespace-nowrap">
-                                {addon.requires.length > 0 ? addon.requires.join(', ') : '—'}
+                              <td className="py-2.5 px-3 text-muted-dim print:text-neutral-500 font-sans text-[11px] whitespace-nowrap">
+                                {addon.requires.length > 0 ? formatRequiresLabel(addon.requires) : '—'}
                               </td>
                               <td className="py-2.5 px-3 text-end font-mono whitespace-nowrap">
                                 {addonPrice.hasDiscount ? (

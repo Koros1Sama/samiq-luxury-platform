@@ -304,9 +304,9 @@ function ProductDetailContent() {
                   <span
                     className="px-2.5 py-1 rounded text-xs font-sans font-bold border"
                     style={{
-                      backgroundColor: product.stockQuantity > 0 ? '#052e16' : '#451a03',
-                      borderColor: product.stockQuantity > 0 ? '#22c55e' : '#f59e0b',
-                      color: product.stockQuantity > 0 ? '#86efac' : '#fde68a',
+                      backgroundColor: product.stockQuantity > 0 ? (isLight ? '#EAF4F2' : '#052e16') : (isLight ? '#FEF3C7' : '#451a03'),
+                      borderColor: product.stockQuantity > 0 ? (isLight ? '#0F4C4A' : '#22c55e') : '#f59e0b',
+                      color: product.stockQuantity > 0 ? (isLight ? '#0F4C4A' : '#86efac') : (isLight ? '#92400E' : '#fde68a'),
                     }}
                   >
                     {product.stockQuantity > 0
@@ -358,7 +358,7 @@ function ProductDetailContent() {
                 className="min-h-[44px] py-4 px-6 rounded-2xl font-sans font-bold text-sm shadow-md hover:brightness-110 active:scale-[0.98] flex items-center justify-center gap-2.5 transition"
                 style={{
                   backgroundColor: palette.accent,
-                  color: isLight && palette.accent !== '#0F4C4A' ? '#FFFFFF' : '#0B0B0C',
+                  color: isLight ? '#FFFFFF' : '#0B0B0C',
                 }}
               >
                 <BagCartIcon size={18} color="currentColor" />
@@ -525,7 +525,14 @@ function ProductDetailContent() {
                 {isEn ? 'Write a Verified Review' : 'أضيفي تقييمكِ وتجربتكِ'}
               </h4>
               {reviewSubmitted ? (
-                <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 text-xs font-sans">
+                <div
+                  className="p-3 rounded-xl border text-xs font-sans font-bold"
+                  style={{
+                    backgroundColor: isLight ? '#EAF4F2' : 'rgba(2, 44, 34, 0.4)',
+                    borderColor: isLight ? '#0F4C4A' : 'rgba(16, 185, 129, 0.3)',
+                    color: isLight ? '#0F4C4A' : '#6ee7b7',
+                  }}
+                >
                   {isEn ? 'Thank you! Your verified review has been submitted.' : 'شكراً لكِ! تم تسجيل تقييمكِ بنجاح.'}
                 </div>
               ) : (
@@ -588,7 +595,7 @@ function ProductDetailContent() {
                     className="w-full min-h-[44px] py-3 rounded-xl font-bold text-xs hover:brightness-110 transition inline-flex items-center justify-center"
                     style={{
                       backgroundColor: palette.accent,
-                      color: isLight && palette.accent !== '#0F4C4A' ? '#FFFFFF' : '#0B0B0C',
+                      color: isLight ? '#FFFFFF' : '#0B0B0C',
                     }}
                   >
                     {isEn ? 'Publish Verified Review' : 'نشر التقييم الموثق'}

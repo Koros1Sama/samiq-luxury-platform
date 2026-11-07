@@ -86,7 +86,7 @@ function AuthenticityHubContent() {
       batchCode: '1A02',
       country: 'معتمد دولياً',
       originalMarkers: [
-        'كود الباتش مطبوع بلون رمادي مائل للزرقة على الزجاج الخارجي',
+        'ختم الأصالة وتاريخ الإنتاج مطبوعان بدقة عالية بالليزر على الزجاج الخارجي',
         'ملمس السائل خفيف سريع الامتصاص برائحة خفيفة جداً',
         'خطوط الكتابة على الملصق رفيعة ودقيقة بدون أي أخطاء إملائية',
       ],
@@ -268,7 +268,11 @@ function AuthenticityHubContent() {
             <button
               type="button"
               onClick={() => handleVerify(undefined, 'منتج مجهول المصدر غير مصرح')}
-              className="min-h-[40px] px-3 py-1.5 inline-flex items-center rounded-xl bg-rose-950/40 hover:bg-rose-950/70 text-rose-300 border border-rose-500/30 font-bold transition active:scale-95"
+              className={`min-h-[40px] px-3 py-1.5 inline-flex items-center rounded-xl border font-bold transition active:scale-95 ${
+                isLight
+                  ? 'bg-rose-50 hover:bg-rose-100 text-rose-800 border-rose-300'
+                  : 'bg-rose-950/40 hover:bg-rose-950/70 text-rose-300 border-rose-500/30'
+              }`}
             >
               اختبار منتج مقلد غير مسجل
             </button>
@@ -276,11 +280,49 @@ function AuthenticityHubContent() {
 
           {/* Result Box */}
           {verificationResult && (
-            <div className="p-5 rounded-2xl bg-emerald-950/30 border border-emerald-500/40 space-y-3 animate-fadeIn">
-              <div className="flex items-center justify-between pb-3 border-b border-emerald-500/20">
-                <div className="flex items-center gap-2 text-emerald-300 font-bold text-sm font-sans">
-                  <VerifiedCheckIcon size={18} color="#34D399" />
-                  <span>نتيجة الفحص: مستحضر مصرح ومطابق لمعايير الهيئة العليا للأدوية والمستلزمات الطبية</span>
+            <div
+              className={`p-5 rounded-2xl border space-y-3 animate-fadeIn ${
+                verificationResult.isVerified !== false
+                  ? isLight
+                    ? 'bg-emerald-50/90 border-emerald-400 text-emerald-950'
+                    : 'bg-emerald-950/30 border-emerald-500/40 text-emerald-100'
+                  : isLight
+                  ? 'bg-rose-50/90 border-rose-400 text-rose-950'
+                  : 'bg-rose-950/30 border-rose-500/40 text-rose-100'
+              }`}
+            >
+              <div
+                className={`flex items-center justify-between pb-3 border-b ${
+                  verificationResult.isVerified !== false
+                    ? isLight
+                      ? 'border-emerald-300'
+                      : 'border-emerald-500/20'
+                    : isLight
+                    ? 'border-rose-300'
+                    : 'border-rose-500/20'
+                }`}
+              >
+                <div
+                  className={`flex items-center gap-2 font-bold text-sm font-sans ${
+                    verificationResult.isVerified !== false
+                      ? isLight
+                        ? 'text-emerald-800'
+                        : 'text-emerald-300'
+                      : isLight
+                      ? 'text-rose-800'
+                      : 'text-rose-300'
+                  }`}
+                >
+                  {verificationResult.isVerified !== false ? (
+                    <VerifiedCheckIcon size={18} color={isLight ? '#047857' : '#34D399'} />
+                  ) : (
+                    <CrossWarningIcon size={18} color={isLight ? '#BE123C' : '#FB7185'} />
+                  )}
+                  <span>
+                    {verificationResult.isVerified !== false
+                      ? 'نتيجة الفحص: مستحضر مصرح ومطابق لمعايير الهيئة العليا للأدوية والمستلزمات الطبية'
+                      : 'تحذير: مستحضر غير مسجل أو يشتبه بكونه مقلداً ومغشوشاً'}
+                  </span>
                 </div>
                 <span className="text-xs font-sans font-semibold" style={{ color: palette.accentHex || palette.accent }}>
                   {verificationResult.productName}
@@ -302,17 +344,41 @@ function AuthenticityHubContent() {
                 </div>
               </div>
 
-              <p className="text-sm text-emerald-200/90 font-sans leading-[1.75] pt-1">
+              <p
+                className={`text-sm font-sans leading-[1.75] pt-1 ${
+                  verificationResult.isVerified !== false
+                    ? isLight
+                      ? 'text-emerald-900'
+                      : 'text-emerald-200/90'
+                    : isLight
+                    ? 'text-rose-900'
+                    : 'text-rose-200/90'
+                }`}
+              >
                 {verificationResult.statusNotes}
               </p>
 
-              <div className="pt-2 border-t border-emerald-500/20 space-y-1">
+              <div
+                className={`pt-2 border-t space-y-1 ${
+                  verificationResult.isVerified !== false
+                    ? isLight
+                      ? 'border-emerald-300'
+                      : 'border-emerald-500/20'
+                    : isLight
+                    ? 'border-rose-300'
+                    : 'border-rose-500/20'
+                }`}
+              >
                 <span className="text-xs block font-sans" style={{ color: palette.mutedHex || palette.muted }}>
                   معايير فحص العبوة باليد:
                 </span>
                 {verificationResult.inspectionChecklist?.map((item: string, i: number) => (
                   <div key={i} className="flex items-center gap-2 text-xs font-sans" style={{ color: palette.textHex || palette.text }}>
-                    <VerifiedCheckIcon size={12} color="#34D399" />
+                    {verificationResult.isVerified !== false ? (
+                      <VerifiedCheckIcon size={12} color={isLight ? '#047857' : '#34D399'} />
+                    ) : (
+                      <CrossWarningIcon size={12} color={isLight ? '#BE123C' : '#FB7185'} />
+                    )}
                     <span>{item}</span>
                   </div>
                 ))}

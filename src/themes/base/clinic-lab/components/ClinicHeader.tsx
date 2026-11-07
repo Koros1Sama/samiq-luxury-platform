@@ -169,9 +169,9 @@ export function ClinicHeader({ onOpenAdvisor, onOpenCart }: ClinicHeaderProps) {
         </div>
       )}
 
-      {/* Row 2: Always-Visible Clinical Search Bar (Shown when catalog tier 3 is active) */}
+      {/* Row 2: Clinical Search Bar (Desktop only; on mobile, the Products tab has its own sticky search bar) */}
       {features.tier_3_catalog && (
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 pb-2 pt-0.5">
+        <div className="hidden md:block max-w-7xl mx-auto px-3 sm:px-6 pb-2 pt-0.5">
           <div className="relative flex items-center w-full">
             <div className="absolute start-3 pointer-events-none text-[#0F4C4A]/60 flex items-center justify-center">
               <SearchIcon size={18} />
