@@ -268,10 +268,10 @@ function AuthenticityHubContent() {
             <button
               type="button"
               onClick={() => handleVerify(undefined, 'منتج مجهول المصدر غير مصرح')}
-              className={`min-h-[40px] px-3 py-1.5 inline-flex items-center rounded-xl border font-bold transition active:scale-95 ${
+              className={`min-h-[44px] px-3.5 py-1.5 inline-flex items-center rounded-xl border font-bold transition active:scale-95 ${
                 isLight
-                  ? 'bg-rose-50 hover:bg-rose-100 text-rose-800 border-rose-300'
-                  : 'bg-rose-950/40 hover:bg-rose-950/70 text-rose-300 border-rose-500/30'
+                  ? 'bg-[#F8EDED] hover:bg-[#F1DFDF] text-[#7A202B] border-[#993B47]/40'
+                  : 'bg-[#221216] hover:bg-[#31181F] text-[#F5CCD2] border-[#993B47]/50'
               }`}
             >
               اختبار منتج مقلد غير مسجل
@@ -284,19 +284,19 @@ function AuthenticityHubContent() {
               className={`p-5 rounded-2xl border space-y-3 animate-fadeIn ${
                 verificationResult.isVerified !== false
                   ? isLight
-                    ? 'bg-emerald-50/90 border-emerald-400 text-emerald-950'
-                    : 'bg-emerald-950/30 border-emerald-500/40 text-emerald-100'
+                    ? 'bg-[#EFF7F5] border-[#0F4C4A]/35 text-[#0F4C4A]'
+                    : 'bg-[#111A16] border-[#C9A84C]/40 text-[#F4EFE6]'
                   : isLight
-                  ? 'bg-rose-50/90 border-rose-400 text-rose-950'
-                  : 'bg-rose-950/30 border-rose-500/40 text-rose-100'
+                  ? 'bg-[#FDF4F4] border-[#993B47]/40 text-[#7A202B]'
+                  : 'bg-[#211115] border-[#C25463]/45 text-[#FCE8EB]'
               }`}
             >
               <div
                 className={`flex items-center justify-between pb-3 border-b ${
                   verificationResult.isVerified !== false
                     ? isLight
-                      ? 'border-emerald-300'
-                      : 'border-emerald-500/20'
+                      ? 'border-[#0F4C4A]/20'
+                      : 'border-[#C9A84C]/25'
                     : isLight
                     ? 'border-rose-300'
                     : 'border-rose-500/20'
@@ -306,17 +306,17 @@ function AuthenticityHubContent() {
                   className={`flex items-center gap-2 font-bold text-sm font-sans ${
                     verificationResult.isVerified !== false
                       ? isLight
-                        ? 'text-emerald-800'
-                        : 'text-emerald-300'
+                        ? 'text-[#0F4C4A]'
+                        : 'text-[#E8D390]'
                       : isLight
-                      ? 'text-rose-800'
-                      : 'text-rose-300'
+                      ? 'text-[#7A202B]'
+                      : 'text-[#F5CCD2]'
                   }`}
                 >
                   {verificationResult.isVerified !== false ? (
-                    <VerifiedCheckIcon size={18} color={isLight ? '#047857' : '#34D399'} />
+                    <VerifiedCheckIcon size={18} color={isLight ? '#0F4C4A' : '#C9A84C'} />
                   ) : (
-                    <CrossWarningIcon size={18} color={isLight ? '#BE123C' : '#FB7185'} />
+                    <CrossWarningIcon size={18} color={isLight ? '#8C2D38' : '#E07A86'} />
                   )}
                   <span>
                     {verificationResult.isVerified !== false
@@ -348,11 +348,11 @@ function AuthenticityHubContent() {
                 className={`text-sm font-sans leading-[1.75] pt-1 ${
                   verificationResult.isVerified !== false
                     ? isLight
-                      ? 'text-emerald-900'
-                      : 'text-emerald-200/90'
+                      ? 'text-[#214F4D]'
+                      : 'text-[#DFDCD4]'
                     : isLight
-                    ? 'text-rose-900'
-                    : 'text-rose-200/90'
+                    ? 'text-[#7A202B]'
+                    : 'text-[#F4D5D9]'
                 }`}
               >
                 {verificationResult.statusNotes}
@@ -362,11 +362,11 @@ function AuthenticityHubContent() {
                 className={`pt-2 border-t space-y-1 ${
                   verificationResult.isVerified !== false
                     ? isLight
-                      ? 'border-emerald-300'
-                      : 'border-emerald-500/20'
+                      ? 'border-[#0F4C4A]/20'
+                      : 'border-[#C9A84C]/25'
                     : isLight
-                    ? 'border-rose-300'
-                    : 'border-rose-500/20'
+                    ? 'border-[#993B47]/25'
+                    : 'border-[#C25463]/25'
                 }`}
               >
                 <span className="text-xs block font-sans" style={{ color: palette.mutedHex || palette.muted }}>
@@ -375,9 +375,9 @@ function AuthenticityHubContent() {
                 {verificationResult.inspectionChecklist?.map((item: string, i: number) => (
                   <div key={i} className="flex items-center gap-2 text-xs font-sans" style={{ color: palette.textHex || palette.text }}>
                     {verificationResult.isVerified !== false ? (
-                      <VerifiedCheckIcon size={12} color={isLight ? '#047857' : '#34D399'} />
+                      <VerifiedCheckIcon size={12} color={isLight ? '#0F4C4A' : '#C9A84C'} />
                     ) : (
-                      <CrossWarningIcon size={12} color={isLight ? '#BE123C' : '#FB7185'} />
+                      <CrossWarningIcon size={12} color={isLight ? '#8C2D38' : '#E07A86'} />
                     )}
                     <span>{item}</span>
                   </div>

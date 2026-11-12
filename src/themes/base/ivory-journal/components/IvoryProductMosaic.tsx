@@ -1,16 +1,25 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { SmartImage } from '@/core/ui/SmartImage';
 import { useStorefront } from '@/core/storefront/StorefrontProvider';
-import { getProductQuickInfo, matchesProductCategory } from '@/core/storefront/productQuickInfo';
+import {
+  getProductQuickInfo,
+  matchesProductCategory,
+  splitBilingualProductTitle,
+} from '@/core/storefront/productQuickInfo';
 import { ProductCardData, SectionComponentProps } from '@/themes/contract';
 import { PlusIcon, VerifiedStampIcon } from './IvoryIcons';
 
-interface IvoryProductMosaicProps extends Partial<SectionComponentProps> {
+export interface IvoryProductMosaicProps extends Partial<SectionComponentProps> {
   onSelectProduct?: (product: ProductCardData) => void;
 }
 
+/**
+ * Curated Exhibition Mosaic for Ivory Journal.
+ * Features a unified editorial category bar, a compact collapsible concentration/tag filter,
+ * museum passe-partout framing, split BiDi product titles, and clean touch-safe add buttons.
+ */
 export function IvoryProductMosaic({ onSelectProduct }: IvoryProductMosaicProps) {
   const {
     products,
@@ -20,303 +29,277 @@ export function IvoryProductMosaic({ onSelectProduct }: IvoryProductMosaicProps)
     activeTag,
     setActiveTag,
     availableTags,
-    cart,
+    search,
+    features,
     currency,
+    locale,
+    cart,
   } = useStorefront();
 
-  // Filter products by active category and active tag
+  const [showAllTags, setShowAllTags] = useState(false);
+  const isEn = locale === 'en';
   const isAll = !activeCategory || activeCategory === 'all' || activeCategory === '';
+
   const filteredProducts = products.filter((p) => {
-    if (!matchesProductCategory(p, activeCategory, categories)) return false;
-    if (activeTag && (!p.tags || !p.tags.includes(activeTag))) return false;
-    return true;
+    const matchCategory = isAll || matchesProductCategory(p, activeCategory);
+    const matchTag = !activeTag || (p.tags && p.tags.includes(activeTag));
+    const q = (search?.query || '').trim().toLowerCase();
+    const matchSearch =
+      !q ||
+      p.title.toLowerCase().includes(q) ||
+      (p.brand || '').toLowerCase().includes(q) ||
+      (p.subtitle || '').toLowerCase().includes(q) ||
+      (p.tags && p.tags.some((t) => t.toLowerCase().includes(q)));
+    return matchCategory && matchTag && matchSearch;
   });
 
-  // Split into mobile 2 columns and desktop 3 columns cleanly without duplication
-  const mobileCols = [
-    filteredProducts.filter((_, i) => i % 2 === 0),
-    filteredProducts.filter((_, i) => i % 2 === 1),
-  ];
-
-  const desktopCols = [0, 1, 2].map((rem) =>
-    filteredProducts.filter((_, i) => i % 3 === rem)
-  );
+  const visibleTags = showAllTags ? availableTags : availableTags.slice(0, 6);
 
   return (
     <section
       id="mosaic"
-      className="relative w-full max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 -mt-3 sm:-mt-6 lg:-mt-8 z-20 pb-16"
+      aria-label={isEn ? 'Curated Product Index' : 'فهرس المستحضرات المعتمدة'}
+      className="w-full py-2 sm:py-14 bg-[#FAF7F2] border-b border-[#E8E2D8]"
     >
-      {/* Editorial Section Header */}
-      <div className="mb-2.5 sm:mb-8 p-2.5 sm:p-6 bg-[#FAF7F2]/95 backdrop-blur-md border border-[#E8E2D8] rounded-md shadow-sm flex flex-col md:flex-row items-start md:items-end justify-between gap-1.5 sm:gap-4">
-        <div>
-          <span className="text-xs font-sans font-semibold text-[#5E6B5A] block mb-2.5">
-            مختارات الأسبوع · الإصدار التحريري
-          </span>
-          <h2 className="font-serif font-bold text-lg sm:text-3xl lg:text-4xl text-[#1B1612] leading-[1.55] md:leading-[1.5]">
-            اختيارات الأسبوع
-          </h2>
-          <p className="font-sans text-sm text-[#554D46] mt-1.5 leading-[1.75] hidden sm:block">
-            مستحضرات منتقاة بعناية فائقة، مصرحة ومطابقة لمعايير الهيئة العليا للأدوية والمستلزمات الطبية
-          </p>
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-2.5 sm:space-y-8">
+        {/* Section Editorial Masthead */}
+        <div className="flex flex-row items-end justify-between gap-2 border-b border-[#E8E2D8] pb-2 sm:pb-4">
+          <div className="space-y-0.5 text-start">
+            <span className="hidden sm:block text-xs font-sans font-semibold text-[#5E6B5A]">
+              {isEn ? 'CURATED ARCHIVE · BATCH VERIFIED' : 'الأرشيف التحريري · مستحضرات أصلية مفحوصة'}
+            </span>
+            <h2 className="font-serif font-bold text-base sm:text-3xl lg:text-4xl text-[#1B1612] leading-[1.35]">
+              {isEn ? 'Selected Skin Formulations' : 'اختيارات العدد للعناية الفائقة'}
+            </h2>
+          </div>
+
+          <div className="flex items-center gap-1.5 text-xs font-sans text-[#554D46] shrink-0">
+            <VerifiedStampIcon size={15} color="#5E6B5A" />
+            <span className="tabular-nums">
+              {filteredProducts.length} {isEn ? 'formulas' : 'مستحضرات'}
+            </span>
+          </div>
         </div>
 
-        {/* Category Pill Filters (Single horizontally scrollable row on mobile) */}
-        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-0.5 max-w-full flex-nowrap">
-          <button
-            type="button"
-            onClick={() => setActiveCategory('all')}
-            className={`min-h-[44px] px-3.5 py-1.5 rounded-full text-xs font-sans font-medium whitespace-nowrap transition-all flex-shrink-0 ${
-              isAll
-                ? 'bg-[#1B1612] text-[#FAF7F2]'
-                : 'bg-[#F4EFE6] text-[#554D46] hover:bg-[#E8E2D8]'
-            }`}
-          >
-            الكل ({products.length})
-          </button>
-          {categories.map((cat) => (
+        {/* Single Clean Category Filter Strip */}
+        <div className="space-y-2 sm:space-y-3">
+          <div className="flex items-center gap-2 overflow-x-auto pb-0.5 no-scrollbar">
             <button
-              key={cat.id}
               type="button"
-              onClick={() => setActiveCategory(cat.id)}
-              className={`min-h-[44px] px-3.5 py-1.5 rounded-full text-xs font-sans font-medium whitespace-nowrap transition-all flex-shrink-0 ${
-                activeCategory === cat.id
+              onClick={() => setActiveCategory('all')}
+              className={`min-h-[44px] px-4 rounded-full text-xs sm:text-sm font-sans font-semibold whitespace-nowrap transition-colors shrink-0 ${
+                isAll
                   ? 'bg-[#1B1612] text-[#FAF7F2]'
-                  : 'bg-[#F4EFE6] text-[#554D46] hover:bg-[#E8E2D8]'
+                  : 'bg-[#F4EFE6] text-[#554D46] hover:bg-[#E8E2D8] border border-[#E2D9CB]'
               }`}
             >
-              {cat.title}
+              {isEn ? 'All Editions' : 'كافة المستحضرات'}
             </button>
-          ))}
-        </div>
-      </div>
+            {categories.map((cat) => {
+              const selected = activeCategory === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setActiveCategory(cat.id)}
+                  className={`min-h-[44px] px-4 rounded-full text-xs sm:text-sm font-sans font-semibold whitespace-nowrap transition-colors shrink-0 ${
+                    selected
+                      ? 'bg-[#1B1612] text-[#FAF7F2]'
+                      : 'bg-[#F4EFE6] text-[#554D46] hover:bg-[#E8E2D8] border border-[#E2D9CB]'
+                  }`}
+                >
+                  {cat.title}
+                </button>
+              );
+            })}
+          </div>
 
-      {/* Desktop Smart Multi-Tags Horizontal Scrollable Bar */}
-      {availableTags.length > 0 && (
-        <div className="hidden lg:flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1.5 mb-6">
-          <button
-            type="button"
-            onClick={() => setActiveTag(null)}
-            className={`min-h-[40px] px-3.5 rounded-full text-xs font-sans font-medium whitespace-nowrap transition-all shrink-0 inline-flex items-center justify-center ${
-              activeTag === null
-                ? 'bg-[#1B1612] text-[#FAF7F2] font-bold shadow-sm'
-                : 'bg-[#F4EFE6] text-[#554D46] hover:bg-[#E8E2D8]'
-            }`}
-          >
-            كل الوسوم
-          </button>
-          {availableTags.map(({ tag, count }) => {
-            const isSelected = activeTag === tag;
-            return (
-              <button
-                key={tag}
-                type="button"
-                onClick={() => setActiveTag(isSelected ? null : tag)}
-                className={`min-h-[40px] px-3.5 rounded-full text-xs font-sans transition-all shrink-0 inline-flex items-center gap-1.5 ${
-                  isSelected
-                    ? 'bg-[#5E6B5A] text-white font-bold shadow-sm'
-                    : 'bg-[#F4EFE6] text-[#554D46] hover:bg-[#E8E2D8] border border-[#E8E2D8]'
-                }`}
-              >
-                <span>#{tag}</span>
-                <span className="text-xs opacity-75">({count})</span>
-              </button>
-            );
-          })}
+          {/* Restraint Single-Row Tag Index (Tablet/Desktop; mobile fold stays crisp) */}
+          {features?.tags_filtering !== false && availableTags && availableTags.length > 0 && (
+            <div className="hidden sm:flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+              <span className="text-xs font-sans font-semibold text-[#877E75] shrink-0">
+                {isEn ? 'Focus:' : 'التخصص:'}
+              </span>
+              {activeTag && (
+                <button
+                  type="button"
+                  onClick={() => setActiveTag?.(null)}
+                  className="min-h-[40px] px-3 rounded-full text-xs font-sans font-semibold bg-[#5E6B5A] text-[#FAF7F2] shrink-0"
+                >
+                  {isEn ? 'Reset' : 'إلغاء التصفية'}
+                </button>
+              )}
+              {visibleTags.map(({ tag }) => {
+                const isSelected = activeTag === tag;
+                return (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => setActiveTag?.(isSelected ? null : tag)}
+                    className={`min-h-[40px] px-3 rounded-full text-xs font-sans font-medium whitespace-nowrap transition-colors shrink-0 ${
+                      isSelected
+                        ? 'bg-[#1B1612] text-[#FAF7F2] font-bold'
+                        : 'bg-[#FAF7F2] text-[#554D46] border border-[#E2D9CB] hover:border-[#1B1612]'
+                    }`}
+                  >
+                    #{tag}
+                  </button>
+                );
+              })}
+              {availableTags.length > 6 && (
+                <button
+                  type="button"
+                  onClick={() => setShowAllTags((prev) => !prev)}
+                  className="min-h-[40px] px-3 rounded-full text-xs font-sans font-semibold text-[#5E6B5A] underline underline-offset-4 shrink-0"
+                >
+                  {showAllTags
+                    ? isEn
+                      ? 'Fewer'
+                      : 'عرض أقل'
+                    : isEn
+                    ? `+${availableTags.length - 6} more`
+                    : `+${availableTags.length - 6} تخصصات`}
+                </button>
+              )}
+            </div>
+          )}
         </div>
-      )}
 
-      {/* Mobile 2-column layout (<= lg) */}
-      <div className="grid grid-cols-2 gap-2 sm:gap-6 items-start lg:hidden">
-        {mobileCols.map((col, colIdx) => (
-          <div
-            key={colIdx}
-            className={`flex flex-col gap-2.5 sm:gap-6 ${colIdx === 1 ? 'pt-1.5 sm:pt-4' : ''}`}
-          >
-            {col.map((product) => (
-              <IvoryCard
+        {/* Product Exhibition Grid */}
+        {filteredProducts.length === 0 ? (
+          <div className="py-12 text-center border border-[#E8E2D8] rounded-2xl bg-[#F4EFE6]/60 space-y-3">
+            <p className="font-serif text-base text-[#1B1612]">
+              {isEn ? 'No matching formulas in this edition' : 'لا توجد مستحضرات مطابقة لبحثك حالياً'}
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveCategory('all');
+                setActiveTag?.(null);
+                search?.setQuery('');
+              }}
+              className="min-h-[44px] px-5 rounded-full bg-[#1B1612] text-[#FAF7F2] text-xs font-sans font-bold"
+            >
+              {isEn ? 'Show Full Index' : 'عرض كافة المستحضرات'}
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6 lg:gap-8">
+            {filteredProducts.map((product, idx) => (
+              <EditorialProductCard
                 key={product.id}
                 product={product}
-                isTall={false}
                 currency={currency}
-                onSelect={onSelectProduct}
+                isEn={isEn}
+                isTall={idx % 3 === 1}
+                onSelect={() => onSelectProduct?.(product)}
                 onAdd={() => cart.add(product)}
-                activeTag={activeTag}
-                setActiveTag={setActiveTag}
               />
             ))}
           </div>
-        ))}
-      </div>
-
-      {/* Mobile Smart Multi-Tags Bar (Below the fold) */}
-      {availableTags.length > 0 && (
-        <div className="lg:hidden flex items-center gap-1.5 overflow-x-auto no-scrollbar py-2 my-3 border-t border-[#E8E2D8]">
-          <button
-            type="button"
-            onClick={() => setActiveTag(null)}
-            className={`min-h-[40px] px-3.5 rounded-full text-xs font-sans font-medium whitespace-nowrap transition-all shrink-0 inline-flex items-center justify-center ${
-              activeTag === null
-                ? 'bg-[#1B1612] text-[#FAF7F2] font-bold shadow-sm'
-                : 'bg-[#F4EFE6] text-[#554D46] hover:bg-[#E8E2D8]'
-            }`}
-          >
-            كل الوسوم
-          </button>
-          {availableTags.map(({ tag, count }) => {
-            const isSelected = activeTag === tag;
-            return (
-              <button
-                key={tag}
-                type="button"
-                onClick={() => setActiveTag(isSelected ? null : tag)}
-                className={`min-h-[40px] px-3.5 rounded-full text-xs font-sans transition-all shrink-0 inline-flex items-center gap-1.5 ${
-                  isSelected
-                    ? 'bg-[#5E6B5A] text-white font-bold shadow-sm'
-                    : 'bg-[#F4EFE6] text-[#554D46] hover:bg-[#E8E2D8] border border-[#E8E2D8]'
-                }`}
-              >
-                <span>#{tag}</span>
-                <span className="text-xs opacity-75">({count})</span>
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Desktop 3-column layout (lg+) */}
-      <div className="hidden lg:grid lg:grid-cols-3 lg:gap-8 items-start">
-        {desktopCols.map((col, colIdx) => (
-          <div
-            key={colIdx}
-            className={`flex flex-col gap-8 ${colIdx === 1 ? 'pt-8' : colIdx === 2 ? 'pt-4' : ''}`}
-          >
-            {col.map((product, pIdx) => (
-              <IvoryCard
-                key={product.id}
-                product={product}
-                isTall={colIdx === 0 ? pIdx % 2 === 0 : colIdx === 1 ? pIdx % 2 !== 0 : pIdx % 2 === 0}
-                currency={currency}
-                onSelect={onSelectProduct}
-                onAdd={() => cart.add(product)}
-                activeTag={activeTag}
-                setActiveTag={setActiveTag}
-              />
-            ))}
-          </div>
-        ))}
+        )}
       </div>
     </section>
   );
 }
 
-interface IvoryCardProps {
+function EditorialProductCard({
+  product,
+  currency,
+  isEn,
+  isTall,
+  onSelect,
+  onAdd,
+}: {
   product: ProductCardData;
+  currency: 'YER' | 'SAR' | 'USD';
+  isEn: boolean;
   isTall: boolean;
-  currency: any;
-  onSelect?: (product: ProductCardData) => void;
+  onSelect: () => void;
   onAdd: () => void;
-  activeTag: string | null;
-  setActiveTag: (tag: string | null) => void;
-}
-
-function IvoryCard({ product, isTall, currency, onSelect, onAdd, activeTag, setActiveTag }: IvoryCardProps) {
+}) {
   const info = getProductQuickInfo(product, currency);
+  const { arTitle, enSubtitle } = splitBilingualProductTitle(product.title);
 
   return (
     <article
-      data-product-card
-      onClick={() => onSelect && onSelect(product)}
-      className="group relative flex flex-col bg-[#F7F4ED] border border-[#E8E2D8] hover:border-[#1B1612]/40 transition-all duration-300 rounded-sm overflow-hidden cursor-pointer shadow-sm hover:shadow-md"
+      data-testid={`product-card-${product.id}`}
+      className="group flex flex-col justify-between bg-[#FAF7F2] border border-[#E8E2D8] hover:border-[#B89B5E] rounded-2xl overflow-hidden transition-colors duration-300"
     >
-      {/* Packshot Container with Warm Greige Studio Backdrop */}
-      <div
-        className={`relative w-full bg-[#EFEAE1] overflow-hidden ${
-          isTall ? 'aspect-[4/3] sm:aspect-[4/5]' : 'aspect-[4/3] sm:aspect-square'
-        }`}
-      >
-        <SmartImage
-          src={product.image}
-          alt={product.title}
-          priority={false}
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          className="object-cover object-center w-full h-full mix-blend-multiply opacity-95 transition-transform duration-500 group-hover:scale-105"
-        />
-
-        {/* Micro Authenticity Badge */}
-        {info.isAuthenticGuaranteed && (
-          <div className="absolute top-1.5 start-1.5 sm:top-2 sm:start-2 px-1.5 sm:px-2 py-0.5 rounded-full bg-[#FAF7F2]/90 backdrop-blur-sm border border-[#5E6B5A]/30 flex items-center gap-1 shadow-sm">
-            <VerifiedStampIcon size={11} color="#5E6B5A" />
-            <span className="text-xs font-sans font-medium text-[#5E6B5A]">
-              موثق
+      {/* Framed Exhibition Image Plate */}
+      <div className="p-1.5 sm:p-3 pb-0">
+        <button
+          type="button"
+          onClick={onSelect}
+          className={`w-full block relative overflow-hidden rounded-xl bg-[#EFE8DC] ${
+            isTall ? 'h-[88px] sm:h-auto sm:aspect-[4/5]' : 'h-[88px] sm:h-auto sm:aspect-[4/3]'
+          }`}
+          aria-label={isEn ? `Inspect ${product.title}` : `معاينة ${product.title}`}
+        >
+          <SmartImage
+            src={product.image}
+            alt={product.title}
+            fill
+            priority={false}
+            sizes="(max-width: 768px) 50vw, 33vw"
+            className="object-cover object-center transition-transform duration-700 group-hover:scale-[1.03]"
+          />
+          {(info.discountPercentage ?? 0) > 0 && (
+            <span className="absolute top-2 start-2 px-2 py-0.5 rounded-full bg-[#1B1612] text-[#FAF7F2] text-xs font-mono font-bold tabular-nums">
+              -{info.discountPercentage}%
             </span>
-          </div>
-        )}
+          )}
+        </button>
       </div>
 
-      {/* Editorial Caption Below Image */}
-      <div className="p-2 sm:p-4 flex flex-col justify-between flex-1 space-y-1">
-        <div className="space-y-0.5">
-          {info.concentration && (
-            <span className="text-xs font-sans text-[#5E6B5A] block leading-none">
-              تركيز {info.concentration}
-            </span>
-          )}
+      {/* Editorial Specimen Typography & Actions */}
+      <div className="p-2.5 sm:p-5 flex-1 flex flex-col justify-between gap-2 sm:gap-3 text-start">
+        <div className="space-y-0.5 sm:space-y-1">
+          <div className="flex items-center justify-between gap-2 text-xs font-sans text-[#5E6B5A]">
+            <span className="font-semibold truncate">{product.brand}</span>
+            {info.concentration && (
+              <span dir="ltr" className="hidden sm:inline font-mono text-[#877E75] shrink-0">
+                {info.concentration}
+              </span>
+            )}
+          </div>
 
-          {/* Product Name with data-product-title */}
-          <h3
-            data-product-title
-            className="font-serif font-bold text-xs sm:text-base text-[#1B1612] line-clamp-2 leading-[1.3] group-hover:text-[#5E6B5A] transition-colors"
+          <a
+            href={`/product/${product.id}`}
+            className="block min-h-[40px] flex flex-col justify-center group-hover:text-[#5E6B5A] transition-colors"
           >
-            {product.title}
-          </h3>
-
-          {/* Clickable Micro-chips for up to 2 tags */}
-          {product.tags && product.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1 pt-1">
-              {product.tags.slice(0, 2).map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveTag(activeTag === t ? null : t);
-                  }}
-                  className={`min-h-[40px] px-2.5 rounded-sm text-xs font-sans transition-colors inline-flex items-center justify-center ${
-                    activeTag === t
-                      ? 'bg-[#1B1612] text-[#FAF7F2] font-bold'
-                      : 'bg-[#F4EFE6] text-[#554D46] hover:bg-[#E8E2D8] border border-[#E8E2D8]'
-                  }`}
-                >
-                  #{t}
-                </button>
-              ))}
-            </div>
-          )}
+            <h3 className="font-serif font-bold text-xs sm:text-base text-[#1B1612] leading-[1.4] sm:leading-[1.55] line-clamp-2">
+              {arTitle}
+            </h3>
+            {enSubtitle && (
+              <span
+                dir="ltr"
+                className="hidden sm:block text-xs font-mono text-[#6E675F] truncate mt-0.5 text-end sm:text-start"
+              >
+                {enSubtitle}
+              </span>
+            )}
+          </a>
         </div>
 
-        {/* Price & Plain '+' Add Control */}
-        <div className="pt-1 flex items-center justify-between border-t border-[#E8E2D8]/60">
+        {/* Bottom Ledger: Price + Circular Add Action */}
+        <div className="pt-1.5 sm:pt-2.5 border-t border-[#E8E2D8] flex items-center justify-between gap-2">
           <div className="flex flex-col">
-            <span className="font-sans font-bold text-xs sm:text-base text-[#1B1612]">
+            <span className="font-sans font-bold text-sm sm:text-base text-[#1B1612] tabular-nums">
               {info.formattedPrice}
             </span>
-            {info.hasDiscount && info.formattedComparePrice && (
-              <span className="text-xs font-sans text-[#877E75] line-through leading-none">
+            {info.formattedComparePrice && (
+              <span className="text-xs font-sans text-[#877E75] line-through tabular-nums">
                 {info.formattedComparePrice}
               </span>
             )}
           </div>
 
-          {/* Plain '+' add button (44px hit area per B2 spec) */}
           <button
             type="button"
-            aria-label={`أضف ${product.title} إلى الحقيبة`}
-            onClick={(e) => {
-              e.stopPropagation();
-              onAdd();
-            }}
-            className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center border border-[#1B1612]/20 hover:border-[#1B1612] bg-[#FAF7F2] hover:bg-[#1B1612] text-[#1B1612] hover:text-[#FAF7F2] rounded-full transition-all text-lg font-bold shadow-sm"
+            onClick={onAdd}
+            className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-full border border-[#1B1612]/25 bg-[#F4EFE6] hover:bg-[#1B1612] text-[#1B1612] hover:text-[#FAF7F2] flex items-center justify-center transition-colors shrink-0"
+            aria-label={isEn ? `Add ${product.title} to bag` : `إضافة ${product.title} للحقيبة`}
           >
             <PlusIcon size={18} color="currentColor" />
           </button>

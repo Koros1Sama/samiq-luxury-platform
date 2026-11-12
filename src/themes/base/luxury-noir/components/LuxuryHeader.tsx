@@ -90,13 +90,13 @@ export function LuxuryHeader(props: LuxuryHeaderProps) {
         <div className="max-w-7xl mx-auto w-full px-3 sm:px-6 lg:px-8 flex items-center justify-between">
           {/* Start: Logo Mark + Shop Name on One Line */}
           <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-            <Link href="/" className="flex items-center group min-w-0">
+            <Link href="/" className="min-h-[44px] flex items-center group min-w-0">
               <MiftahLogoSvg size={36} showText={true} />
             </Link>
           </div>
 
           {/* Center: Desktop Navigation Bar */}
-          <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
+          <nav className="hidden lg:flex items-center gap-6 xl:gap-8 h-16">
             {navLinks.map((link) => {
               const label = isEn ? link.labelEn : link.labelAr;
               const isActive = activeNav === link.labelAr;
@@ -105,13 +105,13 @@ export function LuxuryHeader(props: LuxuryHeaderProps) {
                   key={link.labelAr}
                   href={link.href}
                   onClick={() => setActiveNav(link.labelAr)}
-                  className={`relative min-h-[40px] px-2 py-2 flex items-center text-xs xl:text-sm font-sans font-medium transition-colors ${
-                    isActive ? 'text-champagne font-bold' : 'text-ivory/70 hover:text-ivory'
+                  className={`relative h-full min-h-[44px] px-2 flex items-center text-xs xl:text-sm font-sans font-medium transition-colors ${
+                    isActive ? 'text-champagne font-bold' : 'text-ivory/75 hover:text-ivory'
                   }`}
                 >
                   {label}
                   {isActive && (
-                    <span className="absolute bottom-[-10px] inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#C9A84C] to-transparent rounded-full shadow-[0_0_8px_#C9A84C]" />
+                    <span className="absolute bottom-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#C9A84C] to-transparent" />
                   )}
                 </a>
               );
@@ -119,13 +119,13 @@ export function LuxuryHeader(props: LuxuryHeaderProps) {
           </nav>
 
           {/* End: Action Buttons */}
-          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {/* Bilingual AR | EN Toggle (Gated by second_language feature) */}
             {features?.second_language !== false && (
               <button
                 type="button"
                 onClick={() => sf.setLocale?.(isEn ? 'ar' : 'en')}
-                className="h-8 sm:min-h-[38px] px-2 sm:px-2.5 rounded-full border border-gold/30 bg-gold/10 hover:bg-gold/20 text-champagne text-[11px] sm:text-xs font-mono font-bold transition flex items-center gap-1"
+                className="min-h-[40px] px-2.5 sm:px-3 rounded-full border border-gold/30 bg-gold/10 hover:bg-gold/20 text-champagne text-xs font-mono font-bold transition flex items-center gap-1"
                 title={isEn ? 'التبديل إلى العربية' : 'Switch to English'}
                 aria-label="تبديل اللغة"
               >
@@ -144,7 +144,7 @@ export function LuxuryHeader(props: LuxuryHeaderProps) {
                   if (props.onOpenSearch) props.onOpenSearch();
                   else setSearchModalOpen(true);
                 }}
-                className="w-8 h-8 sm:w-11 sm:h-11 rounded-full flex items-center justify-center text-ivory/80 hover:text-champagne hover:bg-white/5 transition"
+                className="w-10 h-10 sm:w-11 sm:h-11 min-w-[40px] min-h-[40px] rounded-full flex items-center justify-center text-ivory/80 hover:text-champagne hover:bg-white/5 transition"
                 aria-label="بحث في المنتجات"
               >
                 <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -194,12 +194,12 @@ export function LuxuryHeader(props: LuxuryHeaderProps) {
                 type="button"
                 data-testid="cart-button"
                 onClick={onOpenCart}
-                className="relative hidden md:flex w-8 h-8 sm:w-11 sm:h-11 rounded-full items-center justify-center bg-white/5 hover:bg-gold/15 border border-white/10 hover:border-gold/30 text-ivory hover:text-champagne transition shadow-md"
+                className="relative hidden md:flex w-11 h-11 min-w-[44px] min-h-[44px] rounded-full items-center justify-center bg-white/5 hover:bg-gold/15 border border-white/10 hover:border-gold/30 text-ivory hover:text-champagne transition shadow-md"
                 aria-label="سلة المشتريات"
               >
                 <BagCartIcon size={17} color="currentColor" strokeWidth={1.5} />
                 {cartCount > 0 && (
-                  <span className="absolute -top-1 -end-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-sans font-bold text-[10px] sm:text-xs flex items-center justify-center shadow-md animate-pulse">
+                  <span className="absolute -top-1 -end-1 min-w-[20px] h-5 px-1 rounded-full bg-gradient-to-r from-[#BF953F] to-[#B38728] text-obsidian-dark font-sans font-bold text-xs tabular-nums flex items-center justify-center shadow-md">
                     {cartCount}
                   </span>
                 )}
@@ -211,7 +211,7 @@ export function LuxuryHeader(props: LuxuryHeaderProps) {
               type="button"
               data-testid="menu-button"
               onClick={() => setMoreDrawerOpen(true)}
-              className="lg:hidden w-8 h-8 sm:w-11 sm:h-11 rounded-full flex items-center justify-center text-ivory/80 hover:text-champagne hover:bg-white/5 transition"
+              className="lg:hidden w-10 h-10 sm:w-11 sm:h-11 min-w-[40px] min-h-[40px] rounded-full flex items-center justify-center text-ivory/80 hover:text-champagne hover:bg-white/5 transition"
               aria-label="المزيد من الخيارات"
             >
               <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

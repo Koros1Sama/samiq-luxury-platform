@@ -123,7 +123,7 @@ export function MobileAppTabBar() {
               <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
               <polyline points="9 22 9 12 15 12 15 22" />
             </svg>
-            <span className={`text-[11px] whitespace-nowrap leading-tight ${isHomeActive ? 'font-bold' : 'font-medium'}`}>
+            <span className={`text-xs whitespace-nowrap leading-tight ${isHomeActive ? 'font-bold' : 'font-medium'}`}>
               الرئيسية
             </span>
           </button>
@@ -137,7 +137,7 @@ export function MobileAppTabBar() {
               <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
               <polyline points="9 22 9 12 15 12 15 22" />
             </svg>
-            <span className="text-[11px] whitespace-nowrap leading-tight font-medium">
+            <span className="text-xs whitespace-nowrap leading-tight font-medium">
               الرئيسية
             </span>
           </Link>
@@ -163,7 +163,7 @@ export function MobileAppTabBar() {
               <rect x="14" y="14" width="7" height="7" rx="1" />
               <rect x="3" y="14" width="7" height="7" rx="1" />
             </svg>
-            <span className={`text-[11px] whitespace-nowrap leading-tight ${isCatalogActive ? 'font-bold' : 'font-medium'}`}>
+            <span className={`text-xs whitespace-nowrap leading-tight ${isCatalogActive ? 'font-bold' : 'font-medium'}`}>
               المنتجات
             </span>
           </button>
@@ -179,7 +179,7 @@ export function MobileAppTabBar() {
               <rect x="14" y="14" width="7" height="7" rx="1" />
               <rect x="3" y="14" width="7" height="7" rx="1" />
             </svg>
-            <span className="text-[11px] whitespace-nowrap leading-tight font-medium">
+            <span className="text-xs whitespace-nowrap leading-tight font-medium">
               المنتجات
             </span>
           </Link>
@@ -203,7 +203,7 @@ export function MobileAppTabBar() {
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               <polyline points="9 12 11 14 15 10" />
             </svg>
-            <span className={`text-[11px] whitespace-nowrap leading-tight ${isAuthActive ? 'font-bold' : 'font-medium'}`}>
+            <span className={`text-xs whitespace-nowrap leading-tight ${isAuthActive ? 'font-bold' : 'font-medium'}`}>
               الأصالة
             </span>
           </button>
@@ -223,7 +223,7 @@ export function MobileAppTabBar() {
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               <polyline points="9 12 11 14 15 10" />
             </svg>
-            <span className={`text-[11px] whitespace-nowrap leading-tight ${isAuthActive ? 'font-bold' : 'font-medium'}`}>
+            <span className={`text-xs whitespace-nowrap leading-tight ${isAuthActive ? 'font-bold' : 'font-medium'}`}>
               الأصالة
             </span>
           </Link>
@@ -250,7 +250,7 @@ export function MobileAppTabBar() {
             </svg>
             {cart.count > 0 && (
               <span
-                className="absolute -top-1.5 -end-2.5 min-w-[16px] h-4 px-1 rounded-full text-[10px] font-bold flex items-center justify-center font-sans shadow-md"
+                className="absolute -top-1.5 -end-2.5 min-w-[20px] h-5 px-1 rounded-full text-xs font-bold flex items-center justify-center font-sans shadow-md tabular-nums"
                 style={{
                   backgroundColor: isLight ? activeColor : '#C9A84C',
                   color: isLight ? '#FFFFFF' : '#070709',
@@ -260,7 +260,7 @@ export function MobileAppTabBar() {
               </span>
             )}
           </div>
-          <span className={`text-[11px] whitespace-nowrap leading-tight ${isCartActive ? 'font-bold' : 'font-medium'}`}>
+          <span className={`text-xs whitespace-nowrap leading-tight ${isCartActive ? 'font-bold' : 'font-medium'}`}>
             السلة
           </span>
         </button>
@@ -281,7 +281,7 @@ export function MobileAppTabBar() {
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
             <circle cx="12" cy="7" r="4" />
           </svg>
-          <span className={`text-[11px] whitespace-nowrap leading-tight ${isProfileActive ? 'font-bold' : 'font-medium'}`}>
+          <span className={`text-xs whitespace-nowrap leading-tight ${isProfileActive ? 'font-bold' : 'font-medium'}`}>
             حسابي
           </span>
         </Link>

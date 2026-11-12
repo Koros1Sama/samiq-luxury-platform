@@ -1,28 +1,99 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { SectionRenderers, ThemeLayoutProps } from '../../contract';
 import { useStorefront } from '@/core/storefront/StorefrontProvider';
 import { SectionsOutlet } from '@/core/storefront/SectionsOutlet';
+import { withDeferredMount, DeferredMount } from '@/core/ui/DeferredMount';
 import { ClinicHeader } from './components/ClinicHeader';
 import { ClinicNavTabs } from './components/ClinicNavTabs';
 import { ClinicHero } from './components/ClinicHero';
 import { ClinicProductSection } from './components/ClinicProductSection';
-import { ClinicCategories } from './components/ClinicCategories';
-import { ClinicBatchVerifier } from './components/ClinicBatchVerifier';
-import { ClinicCompareSlider } from './components/ClinicCompareSlider';
-import { ClinicRoutineSteps } from './components/ClinicRoutineSteps';
-import { ClinicContactSection } from './components/ClinicContactSection';
 import { ClinicAdvisorModalProps } from './components/ClinicAdvisorModal';
-import { PwaInstallPrompt } from '../luxury-noir/components/PwaInstallPrompt';
 import { MobileAppTabBar } from '@/core/storefront/MobileAppTabBar';
-import {
-  ClinicFeatureStrip,
-  ClinicRichText,
-  ClinicFaq,
-  ClinicCta,
-  ClinicTestimonials,
-} from './components/ClinicGenericSections';
+
+const ClinicCategories = withDeferredMount(
+  dynamic(
+    () => import('./components/ClinicCategories').then((m) => m.ClinicCategories),
+    { ssr: false }
+  ),
+  240
+);
+const ClinicContactSection = withDeferredMount(
+  dynamic(
+    () => import('./components/ClinicContactSection').then((m) => m.ClinicContactSection),
+    { ssr: false }
+  ),
+  280,
+  'contact'
+);
+const ClinicFooter = withDeferredMount(
+  dynamic(
+    () => import('./components/ClinicFooter').then((m) => m.ClinicFooter),
+    { ssr: false }
+  ),
+  200
+);
+
+const ClinicBatchVerifier = dynamic(
+  () => import('./components/ClinicBatchVerifier').then((m) => m.ClinicBatchVerifier),
+  { ssr: false }
+);
+const ClinicCompareSlider = dynamic(
+  () => import('./components/ClinicCompareSlider').then((m) => m.ClinicCompareSlider),
+  { ssr: false }
+);
+const ClinicRoutineSteps = withDeferredMount(
+  dynamic(
+    () => import('./components/ClinicRoutineSteps').then((m) => m.ClinicRoutineSteps),
+    { ssr: false }
+  ),
+  300,
+  'routine'
+);
+const PwaInstallPrompt = withDeferredMount(
+  dynamic(
+    () => import('../luxury-noir/components/PwaInstallPrompt').then((m) => m.PwaInstallPrompt),
+    { ssr: false }
+  ),
+  0
+);
+const ClinicFeatureStrip = withDeferredMount(
+  dynamic(
+    () => import('./components/ClinicGenericSections').then((m) => m.ClinicFeatureStrip),
+    { ssr: false }
+  ),
+  160
+);
+const ClinicRichText = withDeferredMount(
+  dynamic(
+    () => import('./components/ClinicGenericSections').then((m) => m.ClinicRichText),
+    { ssr: false }
+  ),
+  180
+);
+const ClinicFaq = withDeferredMount(
+  dynamic(
+    () => import('./components/ClinicGenericSections').then((m) => m.ClinicFaq),
+    { ssr: false }
+  ),
+  220
+);
+const ClinicCta = withDeferredMount(
+  dynamic(
+    () => import('./components/ClinicGenericSections').then((m) => m.ClinicCta),
+    { ssr: false }
+  ),
+  180
+);
+const ClinicTestimonials = withDeferredMount(
+  dynamic(
+    () => import('./components/ClinicGenericSections').then((m) => m.ClinicTestimonials),
+    { ssr: false }
+  ),
+  220
+);
 
 // Strongly-typed on-demand drawer loaders to defer off-screen bundles and keep cold First Load JS under 150 kB
 function OnDemandCartDrawer({
@@ -84,10 +155,12 @@ export const clinicLabRenderers: SectionRenderers = {
   blocks: {
     'authenticity-compare': ({ data }) => (
       <section id="authenticity" className="w-full py-8 sm:py-12 bg-white border-t border-[#E2ECE9]">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 space-y-6">
-          <ClinicBatchVerifier />
-          <ClinicCompareSlider guideData={data as any} />
-        </div>
+        <DeferredMount minHeight={360}>
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 space-y-6">
+            <ClinicBatchVerifier />
+            <ClinicCompareSlider guideData={data as any} />
+          </div>
+        </DeferredMount>
       </section>
     ),
     'skin-routine': ({ data: _data }) => <ClinicRoutineSteps />,
@@ -99,8 +172,8 @@ export function ClinicLabTheme(_props: ThemeLayoutProps) {
   const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
 
   return (
-    <div className="min-h-[100dvh] bg-white text-[#0F4C4A] font-sans selection:bg-[#CFE8E1] selection:text-[#0F4C4A] antialiased pb-14 md:pb-0">
-      {/* 1. Clinical Header (Sticky: Logo row + Always-Visible Search Field, Total ~104px) */}
+    <div className="min-h-[100dvh] bg-white text-[#0F4C4A] font-sans selection:bg-[#CFE8E1] selection:text-[#0F4C4A] antialiased pb-20 md:pb-0">
+      {/* 1. Clinical Header (Sticky compact row on Mobile, Search + Logo on Desktop) */}
       <ClinicHeader
         onOpenAdvisor={() => setIsAdvisorOpen(true)}
         onOpenCart={cart.open}
@@ -115,6 +188,9 @@ export function ClinicLabTheme(_props: ThemeLayoutProps) {
       <main>
         <SectionsOutlet renderers={clinicLabRenderers} />
       </main>
+
+      {/* 4. Dedicated Clinical Footer (Footer Parity) */}
+      <ClinicFooter />
 
       {/* 4. WhatsApp & Direct Clinical Cart Drawer (Loaded strictly on-demand when user opens cart) */}
       {features.cart_whatsapp && cart.isOpen && (

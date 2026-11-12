@@ -281,7 +281,7 @@ export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[
                   ? 'Search by keyword, active ingredient, or concern...'
                   : 'ابحثي بعنوان المقال، المادة الفعالة (فيتامين سي، سيراميدات)، أو اسم الخبير...'
               }
-              className="w-full bg-transparent text-xs sm:text-sm font-sans outline-hidden border-none"
+              className="w-full min-h-[44px] py-2 bg-transparent text-xs sm:text-sm font-sans outline-hidden border-none"
               style={{
                 backgroundColor: 'transparent',
                 color: palette.textHex || palette.text,
@@ -291,7 +291,7 @@ export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="text-xs px-2 py-1 rounded opacity-60 hover:opacity-100"
+                className="min-w-[44px] min-h-[44px] text-xs px-2.5 py-1 rounded opacity-60 hover:opacity-100 inline-flex items-center justify-center"
                 style={{ color: palette.mutedHex || palette.muted }}
               >
                 {isEn ? 'Clear' : 'مسح'}
@@ -309,7 +309,7 @@ export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[
                 key={cat.id}
                 type="button"
                 onClick={() => setSelectedCategory(cat.id as any)}
-                className={`min-h-[38px] px-4 rounded-full text-xs font-sans font-medium transition-all ${
+                className={`min-h-[44px] px-4 rounded-full text-xs font-sans font-medium transition-all ${
                   isSelected ? 'font-bold shadow-xs' : 'opacity-85 hover:opacity-100'
                 }`}
                 style={{
@@ -394,7 +394,7 @@ export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                     <div
-                      className="image-overlay-badge absolute top-3 start-3 px-3 py-1 rounded-full text-[11px] font-sans font-bold backdrop-blur-md border shadow-md"
+                      className="image-overlay-badge absolute top-3 start-3 px-3 py-1 rounded-full text-xs font-sans font-bold border shadow-md"
                       style={{
                         backgroundColor: 'rgba(11, 11, 12, 0.82)',
                         color: '#F4EFE6',
@@ -431,7 +431,7 @@ export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[
                 {/* Footer of Card: Linked Product Pill & Interactive Read Button */}
                 <div className="pt-4 border-t space-y-3" style={{ borderColor: palette.borderHex || palette.border }}>
                   {enrichment && (
-                    <div className="text-[11px] font-sans flex items-center justify-between" style={{ color: palette.mutedHex || palette.muted }}>
+                    <div className="text-xs font-sans flex items-center justify-between" style={{ color: palette.mutedHex || palette.muted }}>
                       <span className="truncate max-w-[200px]">
                         {isEn ? 'Linked Product: ' : 'المستحضر المرتبط: '}
                         <strong style={{ color: palette.textHex || palette.text }}>{enrichment.linkedProduct.brand}</strong>
@@ -505,7 +505,7 @@ export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[
                 <button
                   type="button"
                   onClick={handleCopyLink}
-                  className="min-h-[38px] px-3 rounded-lg border text-xs font-sans font-medium transition flex items-center gap-1.5"
+                  className="min-h-[44px] px-3.5 rounded-lg border text-xs font-sans font-medium transition flex items-center gap-1.5"
                   style={{ borderColor: palette.borderHex || palette.border, color: palette.textHex || palette.text }}
                   title={isEn ? 'Copy link to article' : 'نسخ رابط المقال'}
                 >
@@ -514,7 +514,7 @@ export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[
                 <button
                   type="button"
                   onClick={closeArticle}
-                  className="min-w-[38px] min-h-[38px] rounded-lg border flex items-center justify-center font-bold hover:opacity-80 transition"
+                  className="min-w-[44px] min-h-[44px] rounded-lg border flex items-center justify-center font-bold hover:opacity-80 transition"
                   style={{ borderColor: palette.borderHex || palette.border, color: palette.textHex || palette.text }}
                   aria-label="إغلاق المقال"
                 >
@@ -661,7 +661,7 @@ export function BlogClientView({ initialPosts }: { initialPosts: BlogPostRecord[
                       />
                     </div>
                     <div className="space-y-1 min-w-0">
-                      <span className="text-[11px] font-sans font-bold block" style={{ color: palette.accent }}>
+                      <span className="text-xs font-sans font-bold block" style={{ color: palette.accent }}>
                         {activeEnrichment.linkedProduct.brand}
                       </span>
                       <h4 className="text-sm sm:text-base font-serif font-bold truncate" style={{ color: palette.text }}>

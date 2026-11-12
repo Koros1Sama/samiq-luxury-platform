@@ -246,17 +246,17 @@ export function FeatureTierSimulator(props: FeatureTierSimulatorProps) {
               : 'الدرجة 3: كتالوج منتجات كامل'}
           </span>
           {pricing.isDiscountEnabled && pricing.discountUsd > 0 && (
-            <span className="text-[11px] font-mono text-[#8E8B85] line-through ms-1">${pricing.subtotalUsd}</span>
+            <span className="text-xs font-mono text-[#8E8B85] line-through ms-1 tabular-nums">${pricing.subtotalUsd}</span>
           )}
-          <span className="text-xs font-bold font-mono text-gold ms-1">${pricing.totalUsd}</span>
+          <span className="text-xs font-bold font-mono text-gold ms-1 tabular-nums">${pricing.totalUsd}</span>
 
           {/* Quick Theme Switches */}
           <div className="ms-2 hidden md:flex items-center gap-1 border-s border-white/10 ps-2">
-            <span className="text-[11px] text-muted-lux">القالب:</span>
+            <span className="text-xs text-muted-lux">القالب:</span>
             <button
               type="button"
               onClick={() => handleThemeChange('luxury-noir')}
-              className={`px-2 py-0.5 rounded text-[11px] font-sans transition ${
+              className={`min-h-[40px] px-2.5 py-1 rounded text-xs font-sans transition ${
                 activeTheme === 'luxury-noir'
                   ? 'bg-gold text-obsidian-dark font-bold'
                   : 'bg-white/5 hover:bg-white/10 text-ivory/70'
@@ -267,7 +267,7 @@ export function FeatureTierSimulator(props: FeatureTierSimulatorProps) {
             <button
               type="button"
               onClick={() => handleThemeChange('ivory-journal')}
-              className={`px-2 py-0.5 rounded text-[11px] font-sans transition ${
+              className={`min-h-[40px] px-2.5 py-1 rounded text-xs font-sans transition ${
                 activeTheme === 'ivory-journal'
                   ? 'bg-[#FAF7F2] text-[#1B1612] font-bold'
                   : 'bg-white/5 hover:bg-white/10 text-ivory/70'
@@ -278,7 +278,7 @@ export function FeatureTierSimulator(props: FeatureTierSimulatorProps) {
             <button
               type="button"
               onClick={() => handleThemeChange('clinic-lab')}
-              className={`px-2 py-0.5 rounded text-[11px] font-sans transition ${
+              className={`min-h-[40px] px-2.5 py-1 rounded text-xs font-sans transition ${
                 activeTheme === 'clinic-lab'
                   ? 'bg-[#0F4C4A] text-white font-bold'
                   : 'bg-white/5 hover:bg-white/10 text-ivory/70'

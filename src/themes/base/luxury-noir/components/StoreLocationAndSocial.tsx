@@ -166,7 +166,7 @@ export function StoreLocationAndSocial(_props: Partial<SectionComponentProps>) {
                       {b.nameAr || b.name}
                     </span>
                     {b.isMain && (
-                      <span className="text-[11px] px-2 py-0.5 rounded-full bg-gold/15 text-gold font-bold">
+                      <span className="text-xs px-2.5 py-0.5 rounded-full bg-gold/15 text-gold font-bold">
                         الفرع الرئيسي
                       </span>
                     )}
@@ -176,11 +176,11 @@ export function StoreLocationAndSocial(_props: Partial<SectionComponentProps>) {
                     {b.cityAr || b.city} — {b.addressAr || b.address}
                   </p>
 
-                  <div className="text-[11px] text-ivory/70 font-sans flex items-center justify-between pt-1 border-t border-white/5">
+                  <div className="text-xs text-ivory/70 font-sans flex items-center justify-between pt-1 border-t border-white/5">
                     <span>{b.hoursAr || b.workingHours || 'يومياً: 9 ص - 10 م'}</span>
                     <a
                       href={`tel:${b.phone}`}
-                      className="text-gold hover:underline font-mono"
+                      className="min-h-[44px] inline-flex items-center text-gold hover:underline font-mono tabular-nums"
                     >
                       {b.phone}
                     </a>

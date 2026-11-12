@@ -216,7 +216,7 @@ export function SkinRoutineAndIngredients(props: SkinRoutineAndIngredientsProps)
               >
                 <div className="flex items-center justify-between pb-3 border-b" style={{ borderColor }}>
                   <div className="flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full animate-ping" style={{ backgroundColor: accentColor }} />
+                    <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: accentColor }} />
                     <h3 className="text-base sm:text-lg font-serif font-bold" style={{ color: textColor }}>
                       المكونات الفعالة
                     </h3>

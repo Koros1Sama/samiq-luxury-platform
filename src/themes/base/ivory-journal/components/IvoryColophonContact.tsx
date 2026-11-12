@@ -21,7 +21,7 @@ export function IvoryColophonContact(_props: Partial<SectionComponentProps>) {
   const phoneNum = tenant.contact?.phone || tenant.phone || '775234989';
 
   return (
-    <footer id="colophon" className="w-full bg-[#F3EFE6] text-[#1B1612] pt-16 sm:pt-24 pb-12 border-t border-[#E8E2D8]">
+    <footer id="colophon" className="w-full bg-[#F3EFE6] text-[#1B1612] pt-16 sm:pt-24 pb-24 md:pb-12 border-t border-[#E8E2D8]">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 space-y-12 sm:space-y-16">
         {/* Magazine Colophon Header */}
         <div className="border-b border-[#E8E2D8] pb-6 sm:pb-8 flex flex-col md:flex-row items-start md:items-end justify-between gap-4">
@@ -190,7 +190,7 @@ export function IvoryColophonContact(_props: Partial<SectionComponentProps>) {
                       {b.nameAr || b.name}
                     </span>
                     {b.isMain && (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#EBF5EE] text-[#2D6A4F] font-bold">
+                      <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#EBF5EE] text-[#2D6A4F] font-bold">
                         المقر الرئيسي
                       </span>
                     )}
@@ -200,7 +200,7 @@ export function IvoryColophonContact(_props: Partial<SectionComponentProps>) {
                   </p>
                   <div className="pt-2 border-t border-[#E8E2D8] flex items-center justify-between text-[#877E75]">
                     <span>{b.hoursAr || b.workingHours || 'يومياً 9 ص - 10 م'}</span>
-                    <a href={`tel:${b.phone}`} className="font-mono font-bold text-[#1B1612] hover:underline">
+                    <a href={`tel:${b.phone}`} className="min-h-[44px] inline-flex items-center font-mono font-bold text-[#1B1612] hover:underline tabular-nums">
                       {b.phone}
                     </a>
                   </div>

@@ -1,316 +1,236 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useStorefront } from '@/core/storefront/StorefrontProvider';
 import { matchesProductCategory } from '@/core/storefront/productQuickInfo';
 import { formatCurrency } from '@/core/currency/formatter';
 import { ClinicSkinTypeSelector, SkinTypeId } from './ClinicSkinTypeSelector';
 import { ClinicProductList } from './ClinicProductList';
 import { SectionComponentProps } from '@/themes/contract';
-import {
-  FlaskIcon,
-  ShieldCheckIcon,
-  BagIcon,
-  CheckIcon,
-  SparklesIcon,
-} from './ClinicIcons';
+import { BagIcon, FlaskIcon } from './ClinicIcons';
 
-export function ClinicProductSection(_props?: SectionComponentProps) {
-  const { products, categories, search, activeCategory, activeTag, setActiveTag, availableTags, cart, currency } = useStorefront();
-  const [selectedSkinType, setSelectedSkinType] = useState<SkinTypeId>('all');
+/**
+ * Swiss Clinical Catalog Section.
+ * Uses a balanced 3-col Clinical Filter Sidebar + 9-col 2-column Specimen Grid on desktop,
+ * removing empty center-cramping right sidebars while keeping instant skin/category filtering.
+ */
+export function ClinicProductSection(_props?: Partial<SectionComponentProps>) {
+  const {
+    products,
+    categories,
+    search,
+    activeCategory,
+    setActiveCategory,
+    activeTag,
+    setActiveTag,
+    availableTags,
+    cart,
+    currency,
+    locale,
+  } = useStorefront();
 
-  const maxProductPrice = useMemo(() => {
-    const highest = Math.max(
-      0,
-      ...products.map((p) => p.prices[currency] ?? p.prices.YER ?? 0)
-    );
-    const defaultCap = currency === 'USD' ? 200 : currency === 'SAR' ? 800 : 50000;
-    return Math.max(defaultCap, highest);
-  }, [products, currency]);
+  const [selectedSkin, setSelectedSkin] = useState<SkinTypeId>('all');
+  const isEn = locale === 'en';
+  const isAllCat = !activeCategory || activeCategory === 'all' || activeCategory === '';
 
-  const [priceMax, setPriceMax] = useState<number>(maxProductPrice);
-
-  useEffect(() => {
-    setPriceMax(maxProductPrice);
-  }, [maxProductPrice]);
-
-  // Routine-based recommended product ids
-  const SKIN_RECOMMENDATIONS: Record<Exclude<SkinTypeId, 'all'>, string[]> = {
-    oily: ['prod-2', 'prod-3'],
-    dry: ['prod-1', 'prod-2', 'prod-6'],
-    sensitive: ['prod-2', 'prod-6'],
-  };
-
-  // Live filtering
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
-      // 1. Search Query Filter
-      if (search.query.trim()) {
-        const q = search.query.toLowerCase().trim();
-        const matchesTitle = p.title.toLowerCase().includes(q);
-        const matchesSubtitle = p.subtitle ? p.subtitle.toLowerCase().includes(q) : false;
-        const matchesBrand = p.brand ? p.brand.toLowerCase().includes(q) : false;
-        if (!matchesTitle && !matchesSubtitle && !matchesBrand) {
+      if (!isAllCat && !matchesProductCategory(p, activeCategory)) return false;
+      if (activeTag && (!p.tags || !p.tags.includes(activeTag))) return false;
+
+      if (selectedSkin !== 'all') {
+        const text = `${p.title} ${p.subtitle || ''} ${p.description || ''} ${(p.tags || []).join(' ')}`.toLowerCase();
+        if (selectedSkin === 'oily' && !/(نياسيناميد|سيبوم|دهن|oily|niacinamide|bha)/i.test(text)) {
+          return false;
+        }
+        if (selectedSkin === 'dry' && !/(مرطب|سيراميد|هيالورونيك|dry|ceramide|hyaluronic|hydrat)/i.test(text)) {
+          return false;
+        }
+        if (selectedSkin === 'sensitive' && !/(حساس|لطيف|مهدئ|غسول|sensitive|gentle|sooth)/i.test(text)) {
           return false;
         }
       }
 
-      // 2. Skin Type Filter
-      if (selectedSkinType !== 'all') {
-        const recommendedIds = SKIN_RECOMMENDATIONS[selectedSkinType];
-        if (recommendedIds && !recommendedIds.includes(p.id)) {
-          return false;
-        }
-      }
-
-      // 3. Category Filter
-      if (!matchesProductCategory(p, activeCategory, categories)) {
-        return false;
-      }
-
-      // 4. Smart Tag Filter
-      if (activeTag && (!p.tags || !p.tags.includes(activeTag))) {
-        return false;
-      }
-
-      // 5. Price Filter (Active Currency)
-      const activePrice = p.prices[currency] ?? p.prices.YER ?? 0;
-      if (activePrice > priceMax) {
-        return false;
+      const q = (search?.query || '').trim().toLowerCase();
+      if (q) {
+        const blob = `${p.title} ${p.brand} ${p.subtitle || ''} ${(p.tags || []).join(' ')}`.toLowerCase();
+        if (!blob.includes(q)) return false;
       }
 
       return true;
     });
-  }, [products, categories, search.query, selectedSkinType, activeCategory, activeTag, priceMax, currency]);
+  }, [products, isAllCat, activeCategory, activeTag, selectedSkin, search?.query]);
 
   return (
-    <section id="products" className="w-full py-4 sm:py-8 bg-white">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6">
-        {/* Mobile View: Skin-Type Segmented Selector as the FIRST content, followed directly by LIST rows */}
-        <div className="lg:hidden">
-          <ClinicSkinTypeSelector
-            selectedSkinType={selectedSkinType}
-            onSelectSkinType={setSelectedSkinType}
-            resultCount={filteredProducts.length}
-          />
-
-          <div className="mt-2">
-            <ClinicProductList products={filteredProducts} />
+    <section
+      id="products"
+      aria-label={isEn ? 'Clinical Catalog' : 'دليل المستحضرات السريرية'}
+      className="w-full py-2.5 sm:py-12 bg-[#FAFDFC] border-b border-[#E2ECE9]"
+    >
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 space-y-2.5 sm:space-y-6">
+        {/* Clinical Section Header */}
+        <div className="flex items-center justify-between gap-2 border-b border-[#DCEAE6] pb-2 sm:pb-4 text-start">
+          <div>
+            <div className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-[#0F4C4A] mb-1">
+              <FlaskIcon size={15} />
+              <span>{isEn ? 'DERMALOGIC FORMULARY' : 'الدليل الصيدلاني للمستحضرات الأصلية'}</span>
+            </div>
+            <h2 className="text-sm sm:text-3xl font-bold text-[#0F4C4A] leading-[1.35]">
+              {isEn ? 'Verified Formulations Archive' : 'أرشيف التركيبات المعتمدة'}
+            </h2>
           </div>
 
-          {/* Smart Multi-Tags Horizontal Scrollable Bar (Mobile - Below the fold) */}
-          {availableTags.length > 0 && (
-            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-2 mt-4 border-t border-[#E2ECE9]">
-              <button
-                type="button"
-                onClick={() => setActiveTag(null)}
-                className={`min-h-[40px] px-3.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all shrink-0 inline-flex items-center justify-center ${
-                  activeTag === null
-                    ? 'bg-[#0F4C4A] text-white shadow-sm'
-                    : 'bg-[#F2F7F5] text-[#0F4C4A] hover:bg-[#CFE8E1]/60 border border-[#D4E5E0]'
-                }`}
-              >
-                كل الوسوم
-              </button>
-              {availableTags.map(({ tag, count }) => {
-                const isSelected = activeTag === tag;
-                return (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => setActiveTag(isSelected ? null : tag)}
-                    className={`min-h-[40px] px-3.5 rounded-lg text-xs font-semibold transition-all shrink-0 inline-flex items-center gap-1.5 ${
-                      isSelected
-                        ? 'bg-[#0F4C4A] text-white shadow-sm'
-                        : 'bg-[#F2F7F5] text-[#0F4C4A] hover:bg-[#CFE8E1]/60 border border-[#D4E5E0]'
-                    }`}
-                  >
-                    <span>#{tag}</span>
-                    <span className="text-xs opacity-75">({count})</span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
+          <span className="text-xs font-mono font-bold text-[#0F4C4A] bg-white px-2.5 py-1 rounded-lg border border-[#D4E5E0] shrink-0 tabular-nums">
+            {filteredProducts.length} {isEn ? 'specimens' : 'مستحضرات'}
+          </span>
         </div>
 
-        {/* Desktop View: Left Filter Sidebar, Results Grid/List, Sticky Cart Summary */}
-        <div className="hidden lg:grid lg:grid-cols-12 gap-6 items-start">
-          {/* Left Filter Sidebar (3 cols) */}
-          <div className="lg:col-span-3 bg-[#F2F7F5] rounded-2xl border border-[#D4E5E0] p-5 text-start space-y-5 sticky top-28">
-            <div className="flex items-center gap-2 pb-3 border-b border-[#D4E5E0]">
-              <FlaskIcon size={18} className="text-[#0F4C4A]" />
-              <h3 className="font-bold text-sm text-[#0F4C4A]">
-                تصفية المعمل والعيادة
-              </h3>
-            </div>
-
-            {/* Skin Type Filter */}
-            <div>
-              <span className="text-xs font-bold text-[#0F4C4A] block mb-2">
-                نوع البشرة المستهدفة:
-              </span>
-              <div className="space-y-1.5">
-                {(['all', 'oily', 'dry', 'sensitive'] as const).map((type) => {
-                  const labels = {
-                    all: 'كافة أنواع البشرة',
-                    oily: 'البشرة الدهنية (تنقية)',
-                    dry: 'البشرة الجافة (ترطيب)',
-                    sensitive: 'البشرة الحساسة (تهدئة)',
-                  };
-                  const isActive = selectedSkinType === type;
-                  return (
-                    <button
-                      key={type}
-                      type="button"
-                      onClick={() => setSelectedSkinType(type)}
-                      className={`w-full min-h-[40px] px-3 py-1.5 rounded-lg text-xs font-semibold text-start flex items-center justify-between transition-colors ${
-                        isActive
-                          ? 'bg-white text-[#0F4C4A] border border-[#0F4C4A]/30 shadow-xs'
-                          : 'text-[#4A5568] hover:bg-white/60'
-                      }`}
-                    >
-                      <span>{labels[type]}</span>
-                      {isActive && <CheckIcon size={14} className="text-[#0F4C4A]" />}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Price Range Slider */}
-            <div>
-              <div className="flex items-center justify-between text-xs font-bold text-[#0F4C4A] mb-1.5">
-                <span>الحد الأقصى للسعر:</span>
-                <span>{formatCurrency(priceMax, currency)}</span>
-              </div>
-              <input
-                type="range"
-                min={currency === 'USD' ? 5 : currency === 'SAR' ? 20 : 2000}
-                max={maxProductPrice}
-                step={currency === 'USD' ? 5 : currency === 'SAR' ? 10 : 1000}
-                value={priceMax}
-                onChange={(e) => setPriceMax(Number(e.target.value))}
-                className="w-full min-h-[40px] h-10 accent-[#0F4C4A] cursor-pointer py-2"
-                aria-label="الحد الأقصى للسعر"
-              />
-            </div>
-
-            {/* Trust Pill */}
-            <div className="p-3 rounded-xl bg-white border border-[#D4E5E0] text-xs text-[#0F4C4A] flex items-center gap-2">
-              <ShieldCheckIcon size={16} className="shrink-0" />
-              <span className="leading-[1.75]">كافة المستحضرات مفحوصة ومصرحة وفق معايير الهيئة العليا للأدوية</span>
-            </div>
+        {/* Compact Mobile Category Row */}
+        <div className="lg:hidden space-y-2">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar">
+            <button
+              type="button"
+              onClick={() => setActiveCategory('all')}
+              className={`min-h-[44px] px-4 rounded-xl text-xs font-bold whitespace-nowrap transition-colors shrink-0 ${
+                isAllCat
+                  ? 'bg-[#0F4C4A] text-white'
+                  : 'bg-white border border-[#D4E5E0] text-[#0F4C4A]'
+              }`}
+            >
+              {isEn ? 'All' : 'الكل'}
+            </button>
+            {categories.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => setActiveCategory(c.id)}
+                className={`min-h-[44px] px-4 rounded-xl text-xs font-bold whitespace-nowrap transition-colors shrink-0 ${
+                  activeCategory === c.id
+                    ? 'bg-[#0F4C4A] text-white'
+                    : 'bg-white border border-[#D4E5E0] text-[#0F4C4A]'
+                }`}
+              >
+                {c.title}
+              </button>
+            ))}
           </div>
 
-          {/* Center Results List (6 cols) */}
-          <div className="lg:col-span-6 space-y-3">
-            <div className="flex items-center justify-between pb-2 border-b border-[#E2ECE9]">
-              <span className="text-xs font-bold text-[#0F4C4A]">
-                قائمة المستحضرات السريرية ({filteredProducts.length})
-              </span>
-              {selectedSkinType !== 'all' && (
-                <button
-                  type="button"
-                  onClick={() => setSelectedSkinType('all')}
-                  className="text-xs text-[#0F4C4A] font-semibold hover:underline"
-                >
-                  إعادة ضبط الفلاتر
-                </button>
-              )}
-            </div>
+          <ClinicSkinTypeSelector
+            selectedSkinType={selectedSkin}
+            onSelectSkinType={setSelectedSkin}
+            resultCount={filteredProducts.length}
+          />
+        </div>
 
-            {/* Smart Multi-Tags Horizontal Scrollable Bar (Desktop) */}
-            {availableTags.length > 0 && (
-              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
-                <button
-                  type="button"
-                  onClick={() => setActiveTag(null)}
-                  className={`min-h-[40px] px-3.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all shrink-0 inline-flex items-center justify-center ${
-                    activeTag === null
-                      ? 'bg-[#0F4C4A] text-white shadow-sm'
-                      : 'bg-[#F2F7F5] text-[#0F4C4A] hover:bg-[#CFE8E1]/60 border border-[#D4E5E0]'
-                  }`}
-                >
-                  كل الوسوم
-                </button>
-                {availableTags.map(({ tag, count }) => {
-                  const isSelected = activeTag === tag;
-                  return (
-                    <button
-                      key={tag}
-                      type="button"
-                      onClick={() => setActiveTag(isSelected ? null : tag)}
-                      className={`min-h-[40px] px-3.5 rounded-lg text-xs font-semibold transition-all shrink-0 inline-flex items-center gap-1.5 ${
-                        isSelected
-                          ? 'bg-[#0F4C4A] text-white shadow-sm'
-                          : 'bg-[#F2F7F5] text-[#0F4C4A] hover:bg-[#CFE8E1]/60 border border-[#D4E5E0]'
-                      }`}
-                    >
-                      <span>#{tag}</span>
-                      <span className="text-xs opacity-75">({count})</span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-
-            <ClinicProductList products={filteredProducts} />
-          </div>
-
-          {/* Right Sticky Cart Summary (3 cols) */}
-          <div className="lg:col-span-3 bg-white rounded-2xl border border-[#D4E5E0] p-5 text-start space-y-4 sticky top-28 shadow-xs">
-            <div className="flex items-center justify-between pb-3 border-b border-[#E2ECE9]">
-              <div className="flex items-center gap-2">
-                <BagIcon size={18} className="text-[#0F4C4A]" />
-                <h3 className="font-bold text-sm text-[#0F4C4A]">
-                  ملخص الطلب السريع
+        {/* Desktop Swiss 12-Col Split (3-col Diagnostic Rail + 9-col Specimen Grid) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* Sticky 3-col Sidebar (Desktop lg+) */}
+          <aside className="hidden lg:block lg:col-span-3 space-y-4 sticky top-24 text-start">
+            <div className="bg-white rounded-2xl border border-[#DCEAE6] p-4 space-y-4 shadow-xs">
+              <div>
+                <h3 className="text-xs font-bold text-[#0F4C4A] pb-2 border-b border-[#E8F1EE]">
+                  {isEn ? 'Clinical Categories' : 'التصنيفات العلاجية'}
                 </h3>
-              </div>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-[#CFE8E1] text-[#0F4C4A] font-bold">
-                {cart.count}
-              </span>
-            </div>
-
-            {cart.items.length === 0 ? (
-              <div className="py-8 text-center text-[#64748B]">
-                <p className="text-sm leading-[1.75]">
-                  السلة فارغة. اختاري المستحضرات المناسبة لبشرتك.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <div className="max-h-56 overflow-y-auto space-y-2 pe-1">
-                  {cart.items.map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex items-center justify-between gap-2 text-xs py-1.5 border-b border-[#F2F7F5]"
+                <div className="mt-2.5 flex flex-col gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setActiveCategory('all')}
+                    className={`min-h-[44px] px-3 rounded-xl text-xs font-bold text-start transition-colors flex items-center justify-between ${
+                      isAllCat
+                        ? 'bg-[#0F4C4A] text-white'
+                        : 'bg-[#F6FAF9] text-[#0F4C4A] hover:bg-[#EAF3F1]'
+                    }`}
+                  >
+                    <span>{isEn ? 'All Specimens' : 'جميع المستحضرات'}</span>
+                    <span className="font-mono tabular-nums">{products.length}</span>
+                  </button>
+                  {categories.map((cat) => (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => setActiveCategory(cat.id)}
+                      className={`min-h-[44px] px-3 rounded-xl text-xs font-bold text-start transition-colors flex items-center justify-between ${
+                        activeCategory === cat.id
+                          ? 'bg-[#0F4C4A] text-white'
+                          : 'bg-[#F6FAF9] text-[#0F4C4A] hover:bg-[#EAF3F1]'
+                      }`}
                     >
-                      <span className="font-semibold text-[#0F4C4A] truncate max-w-[120px]">
-                        {item.title}
-                      </span>
-                      <span className="text-[#4A5568]">
-                        x{item.quantity} · {item.unitPrice[currency]?.toLocaleString()} {currency}
-                      </span>
-                    </div>
+                      <span>{cat.title}</span>
+                    </button>
                   ))}
                 </div>
-
-                <div className="pt-2 border-t border-[#E2ECE9] flex justify-between text-sm font-bold text-[#0F4C4A]">
-                  <span>الإجمالي:</span>
-                  <span>{cart.total?.toLocaleString()} {currency}</span>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={cart.open}
-                  className="w-full min-h-[44px] px-4 py-2.5 rounded-xl bg-[#0F4C4A] hover:bg-[#0B3A38] text-white text-xs font-bold inline-flex items-center justify-center gap-2 transition-colors focus:outline-hidden focus:ring-2 focus:ring-[#0F4C4A]"
-                >
-                  <BagIcon size={16} />
-                  <span>معاينة السلة وإتمام الطلب</span>
-                </button>
               </div>
-            )}
+
+              <div className="pt-2 border-t border-[#E8F1EE]">
+                <ClinicSkinTypeSelector
+                  selectedSkinType={selectedSkin}
+                  onSelectSkinType={setSelectedSkin}
+                  resultCount={filteredProducts.length}
+                />
+              </div>
+
+              {availableTags && availableTags.length > 0 && (
+                <div className="pt-2 border-t border-[#E8F1EE] space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-[#0F4C4A]">
+                      {isEn ? 'Active Compounds' : 'المركبات النشطة'}
+                    </span>
+                    {activeTag && (
+                      <button
+                        type="button"
+                        onClick={() => setActiveTag(null)}
+                        className="text-xs font-semibold text-[#D9534F] hover:underline"
+                      >
+                        {isEn ? 'Reset' : 'إعادة تعيين'}
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {availableTags.slice(0, 6).map(({ tag }) => {
+                      const active = activeTag === tag;
+                      return (
+                        <button
+                          key={tag}
+                          type="button"
+                          onClick={() => setActiveTag(active ? null : tag)}
+                          className={`min-h-[40px] px-3 rounded-lg text-xs font-semibold transition-colors ${
+                            active
+                              ? 'bg-[#0F4C4A] text-white'
+                              : 'bg-[#F6FAF9] border border-[#D4E5E0] text-[#0F4C4A] hover:border-[#0F4C4A]'
+                          }`}
+                        >
+                          #{tag}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Compact Clinical Bag Trigger when items exist */}
+              {cart.count > 0 && (
+                <div className="pt-3 border-t border-[#E8F1EE]">
+                  <button
+                    type="button"
+                    onClick={cart.open}
+                    className="w-full min-h-[44px] px-3.5 rounded-xl bg-[#0F4C4A] text-white text-xs font-bold flex items-center justify-between hover:bg-[#0B3A38] transition-colors"
+                  >
+                    <span className="inline-flex items-center gap-1.5">
+                      <BagIcon size={15} />
+                      <span>سلة الطلب ({cart.count})</span>
+                    </span>
+                    <span className="font-mono tabular-nums">
+                      {formatCurrency(cart.total, currency)}
+                    </span>
+                  </button>
+                </div>
+              )}
+            </div>
+          </aside>
+
+          {/* 9-col Specimen Cards Container */}
+          <div className="lg:col-span-9">
+            <ClinicProductList products={filteredProducts} />
           </div>
         </div>
       </div>

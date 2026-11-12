@@ -33,9 +33,34 @@ export function matchesProductCategory(
   return false;
 }
 
+export interface SplitProductTitle {
+  arTitle: string;
+  enSubtitle?: string;
+}
+
+/**
+ * Splits "Arabic Name (English Subtitle)" safely so RTL parentheses
+ * never tear across line wraps in narrow product cards or headers.
+ */
+export function splitBilingualProductTitle(rawTitle: string): SplitProductTitle {
+  const cleaned = (rawTitle || '').trim();
+  if (!cleaned) return { arTitle: '' };
+
+  const parenMatch = cleaned.match(/^(.*?)\s*\(([^()]*[A-Za-z][^()]*)\)\s*$/);
+  if (parenMatch && parenMatch[1]?.trim()) {
+    return {
+      arTitle: parenMatch[1].trim(),
+      enSubtitle: parenMatch[2].trim(),
+    };
+  }
+  return { arTitle: cleaned };
+}
+
 export interface ProductQuickInfo {
   id: string;
   title: string;
+  arTitle: string;
+  enSubtitle?: string;
   subtitle?: string;
   brand: string;
   categorySlug: string;
@@ -59,6 +84,7 @@ export function getProductQuickInfo(
   product: ProductCardData,
   currency: ThemeCurrencyCode = 'YER'
 ): ProductQuickInfo {
+  const { arTitle, enSubtitle } = splitBilingualProductTitle(product.title);
   const price = product.prices[currency] ?? product.prices.YER ?? 0;
   const comparePrice = product.comparePrices ? product.comparePrices[currency] : undefined;
 
@@ -92,6 +118,8 @@ export function getProductQuickInfo(
   return {
     id: product.id,
     title: product.title,
+    arTitle,
+    enSubtitle,
     subtitle: product.subtitle,
     brand: product.brand,
     categorySlug: product.categorySlug,

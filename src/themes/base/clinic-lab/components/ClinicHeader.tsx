@@ -51,7 +51,7 @@ export function ClinicHeader({ onOpenAdvisor, onOpenCart }: ClinicHeaderProps) {
             <button
               type="button"
               onClick={() => setLocale?.(isEn ? 'ar' : 'en')}
-              className="min-h-[38px] px-2 rounded-lg border border-[#D4E5E0] bg-[#F2F7F5] text-[#0F4C4A] text-xs font-mono font-bold transition flex items-center gap-1"
+              className="min-h-[40px] px-2.5 rounded-lg border border-[#D4E5E0] bg-[#F2F7F5] text-[#0F4C4A] text-xs font-mono font-bold transition flex items-center gap-1"
               title={isEn ? 'التبديل إلى العربية' : 'Switch to English'}
               aria-label="تبديل اللغة"
             >
@@ -98,7 +98,7 @@ export function ClinicHeader({ onOpenAdvisor, onOpenCart }: ClinicHeaderProps) {
           >
             <BagIcon size={18} />
             {cart.count > 0 && (
-              <span className="absolute -top-1 -end-1 min-w-[18px] h-[18px] px-1 bg-[#D9534F] text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
+              <span className="absolute -top-1 -end-1 min-w-[20px] h-[20px] px-1 bg-[#D9534F] text-white text-xs font-bold rounded-full flex items-center justify-center leading-none tabular-nums">
                 {cart.count}
               </span>
             )}

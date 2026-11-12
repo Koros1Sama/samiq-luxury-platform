@@ -215,7 +215,7 @@ function BookingsContent() {
                     <p className="text-xs font-sans leading-relaxed" style={{ color: palette.muted }}>
                       {isEn ? srv.descriptionEn : srv.descriptionAr}
                     </p>
-                    <span className="text-[11px] mt-2 block font-sans" style={{ color: palette.muted }}>
+                    <span className="text-xs mt-2 block font-sans" style={{ color: palette.muted }}>
                       {isEn ? `Duration: ${srv.durationEn}` : `المدة: ${srv.durationAr}`}
                     </span>
                   </div>

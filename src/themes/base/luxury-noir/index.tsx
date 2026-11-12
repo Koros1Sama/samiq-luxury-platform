@@ -9,19 +9,94 @@ import { LuxuryHeader } from './components/LuxuryHeader';
 import { HeroShowcase } from './components/HeroShowcase';
 import { ProductShowcase } from './components/ProductShowcase';
 import { QuickCategoryStoriesBar } from './components/QuickCategoryStoriesBar';
-import { TrustFooterBar } from './components/TrustFooterBar';
 import { MobileAppBottomNav } from './components/MobileAppBottomNav';
-import { BrandBentoGrid } from './components/BrandBentoGrid';
-import { StoreLocationAndSocial } from './components/StoreLocationAndSocial';
-import { PwaInstallPrompt } from './components/PwaInstallPrompt';
+import { withDeferredMount } from '@/core/ui/DeferredMount';
 
-const AuthenticityCompareSlider = dynamic(
-  () => import('./components/AuthenticityCompareSlider').then((m) => m.AuthenticityCompareSlider),
-  { ssr: false }
+const BrandBentoGrid = withDeferredMount(
+  dynamic(
+    () => import('./components/BrandBentoGrid').then((m) => m.BrandBentoGrid),
+    { ssr: false }
+  ),
+  280
 );
-const SkinRoutineAndIngredients = dynamic(
-  () => import('./components/SkinRoutineAndIngredients').then((m) => m.SkinRoutineAndIngredients),
-  { ssr: false }
+const StoreLocationAndSocial = withDeferredMount(
+  dynamic(
+    () => import('./components/StoreLocationAndSocial').then((m) => m.StoreLocationAndSocial),
+    { ssr: false }
+  ),
+  280
+);
+const TrustFooterBar = withDeferredMount(
+  dynamic(
+    () => import('./components/TrustFooterBar').then((m) => m.TrustFooterBar),
+    { ssr: false }
+  ),
+  180
+);
+
+const PwaInstallPrompt = withDeferredMount(
+  dynamic(
+    () => import('./components/PwaInstallPrompt').then((m) => m.PwaInstallPrompt),
+    { ssr: false }
+  ),
+  0
+);
+const LuxuryFeatureStrip = withDeferredMount(
+  dynamic(
+    () => import('./components/LuxuryGenericSections').then((m) => m.LuxuryFeatureStrip),
+    { ssr: false }
+  ),
+  160
+);
+const LuxuryRichText = withDeferredMount(
+  dynamic(
+    () => import('./components/LuxuryGenericSections').then((m) => m.LuxuryRichText),
+    { ssr: false }
+  ),
+  180
+);
+const LuxuryFaq = withDeferredMount(
+  dynamic(
+    () => import('./components/LuxuryGenericSections').then((m) => m.LuxuryFaq),
+    { ssr: false }
+  ),
+  220
+);
+const LuxuryTestimonials = withDeferredMount(
+  dynamic(
+    () => import('./components/LuxuryGenericSections').then((m) => m.LuxuryTestimonials),
+    { ssr: false }
+  ),
+  220
+);
+const LuxuryCta = withDeferredMount(
+  dynamic(
+    () => import('./components/LuxuryGenericSections').then((m) => m.LuxuryCta),
+    { ssr: false }
+  ),
+  180
+);
+const LuxuryGallery = withDeferredMount(
+  dynamic(
+    () => import('./components/LuxuryGenericSections').then((m) => m.LuxuryGallery),
+    { ssr: false }
+  ),
+  260
+);
+
+const AuthenticityCompareSlider = withDeferredMount(
+  dynamic(
+    () => import('./components/AuthenticityCompareSlider').then((m) => m.AuthenticityCompareSlider),
+    { ssr: false }
+  ),
+  360
+);
+const SkinRoutineAndIngredients = withDeferredMount(
+  dynamic(
+    () => import('./components/SkinRoutineAndIngredients').then((m) => m.SkinRoutineAndIngredients),
+    { ssr: false }
+  ),
+  300
 );
 
 // On-demand loader to defer heavy drawer/modal chunks strictly until user interaction
@@ -53,13 +128,12 @@ export const luxuryNoirRenderers: SectionRenderers = {
   hero: (props) => <HeroShowcase {...props} />,
   'product-grid': (props) => <ProductShowcase {...props} />,
   'category-grid': (props) => <BrandBentoGrid {...props} />,
-  'feature-strip': (props) => (
-    <QuickCategoryStoriesBar
-      activeCategory=""
-      onSelectCategory={() => {}}
-      {...props}
-    />
-  ),
+  'feature-strip': (props) => <LuxuryFeatureStrip {...props} />,
+  'rich-text': (props) => <LuxuryRichText {...props} />,
+  gallery: (props) => <LuxuryGallery {...props} />,
+  testimonials: (props) => <LuxuryTestimonials {...props} />,
+  faq: (props) => <LuxuryFaq {...props} />,
+  cta: (props) => <LuxuryCta {...props} />,
   contact: (props) => <StoreLocationAndSocial {...props} />,
   blocks: {
     'authenticity-compare': ({ data }) => (
@@ -76,7 +150,7 @@ export function LuxuryNoirTheme(_props: ThemeLayoutProps) {
   const [isAdvisorOpen, setIsAdvisorOpen] = useState(false);
 
   return (
-    <div className="min-h-[100dvh] bg-[#070709] text-ivory font-sans selection:bg-gold selection:text-obsidian-dark antialiased pb-14 md:pb-0">
+    <div className="min-h-[100dvh] bg-[#070709] text-ivory font-sans selection:bg-gold selection:text-obsidian-dark antialiased pb-20 md:pb-0">
       {/* 1. Header (Sticky 56px on Mobile, 64px on Desktop - Utility strip deleted) */}
       <LuxuryHeader onOpenAdvisor={() => setIsAdvisorOpen(true)} />
 

@@ -290,16 +290,16 @@ export function IvoryCartDrawer() {
                               : checkout.jeebAccount}
                           </span>
                         </div>
-                        <div className="text-[11px] text-[#554D46]">
+                        <div className="text-xs text-[#554D46]">
                           اسم المستفيد: <span className="font-semibold text-[#1B1612]">{checkout.accountHolder}</span>
                         </div>
                       </div>
 
-                      <div className="p-2 rounded bg-[#EBF3EF] border border-[#C5DFD8] text-[11px] text-[#0F4C4A] leading-relaxed">
+                      <div className="p-2.5 rounded bg-[#EBF3EF] border border-[#C5DFD8] text-xs text-[#0F4C4A] leading-relaxed">
                         لا يُشترط التحويل الآن قبل المحادثة — أرسل طلبك أولاً عبر واتساب لتأكيد توفر المستحضرات وموعد المندوب، ثم حوّل المبلغ وأرسل الإشعار في المحادثة بعد الاتفاق.
                       </div>
 
-                      <details className="text-[11px] pt-1">
+                      <details className="text-xs pt-1">
                         <summary className="cursor-pointer text-[#8C5E3C] hover:underline font-medium select-none">
                           + هل قمت بالتحويل مسبقاً؟ أدخل رقم الإشعار (اختياري)
                         </summary>

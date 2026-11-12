@@ -31,7 +31,7 @@ export function QuickCategoryStoriesBar(props: QuickCategoryStoriesBarProps) {
 
   return (
     <div className="w-full bg-[#070709] border-b border-white/[0.06] h-11 flex items-center px-3 sm:px-6 relative z-20">
-      <div className="max-w-7xl mx-auto w-full flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth">
+      <div className="max-w-7xl mx-auto w-full flex items-center gap-6 overflow-x-auto no-scrollbar scroll-smooth">
         {categories.map((c) => {
           const isSelected = activeCategory === c.id;
           return (
@@ -39,13 +39,16 @@ export function QuickCategoryStoriesBar(props: QuickCategoryStoriesBarProps) {
               key={c.id}
               type="button"
               onClick={() => handleClick(c.id)}
-              className={`shrink-0 min-h-[40px] px-4 py-2 rounded-full text-xs font-sans transition-all duration-300 whitespace-nowrap flex items-center justify-center ${
+              className={`relative shrink-0 min-w-[48px] h-11 min-h-[44px] px-3 text-xs font-sans transition-colors duration-300 whitespace-nowrap flex items-center justify-center ${
                 isSelected
-                  ? 'bg-[#C9A84C]/15 text-[#FCF6BA] border border-[#C9A84C]/40 shadow-[0_0_12px_rgba(201,168,76,0.2)] font-bold'
-                  : 'bg-white/[0.03] text-[#9A968E] border border-white/[0.07] hover:border-[#C9A84C]/30 hover:text-[#F5F2EB]'
+                  ? 'text-[#FCF6BA] font-bold'
+                  : 'text-[#9A968E] hover:text-[#F5F2EB]'
               }`}
             >
-              {c.title}
+              <span>{c.title}</span>
+              {isSelected && (
+                <span className="absolute bottom-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#C9A84C] to-transparent" />
+              )}
             </button>
           );
         })}

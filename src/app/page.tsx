@@ -3,10 +3,10 @@ import { cookies } from 'next/headers';
 import { resolveTenant } from '@/core/tenant/resolver';
 import { getDb } from '@/core/db/store';
 import { StorefrontProvider } from '@/core/storefront/StorefrontProvider';
+import { DemoSimulatorGate } from '@/core/storefront/DemoSimulatorGate';
 import { ThemeHost } from '@/themes/ThemeHost';
 import { loadAllBlocksData } from '@/modules/blocks/registry';
 import { TenantBrandInfo, ThemeId, resolveThemeId } from '@/themes/contract';
-import { FeatureTierSimulator } from '@/themes/base/luxury-noir/components/FeatureTierSimulator';
 
 export const revalidate = 0; // Dynamic real-time persistence
 
@@ -57,7 +57,7 @@ export default async function StorefrontHomePage(props: PageProps) {
   );
   const categories = db.categories;
 
-  const showDemoPanel = searchParams.demo === 'panel' || searchParams.demo === '1';
+  const showDemoPanel = searchParams.demo === 'panel';
 
   return (
     <StorefrontProvider
@@ -71,7 +71,7 @@ export default async function StorefrontHomePage(props: PageProps) {
       shippingZones={db.shippingZones || []}
       initialCurrency={tenantData.currency || 'YER'}
     >
-      {showDemoPanel && <FeatureTierSimulator />}
+      {showDemoPanel && <DemoSimulatorGate />}
       <ThemeHost themeId={themeId} />
     </StorefrontProvider>
   );

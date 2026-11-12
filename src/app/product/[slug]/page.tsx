@@ -17,6 +17,7 @@ import { SubpageThemeWrapper, useSubpageTheme } from '@/core/storefront/SubpageT
 import { useStorefront } from '@/core/storefront/StorefrontProvider';
 import { isValidThemeId, ThemeId } from '@/themes/contract';
 import { resolveThemePalette } from '@/core/storefront/themePalette';
+import { splitBilingualProductTitle } from '@/core/storefront/productQuickInfo';
 
 function ProductDetailContent() {
   const params = useParams();
@@ -133,6 +134,7 @@ function ProductDetailContent() {
   const price = product.prices[currentCurrency] || product.prices.YER;
   const comparePrice = product.comparePrices?.[currentCurrency];
   const activeVariant = product.variants?.find((v) => v.id === selectedVariantId) || product.variants?.[0];
+  const { arTitle, enSubtitle } = splitBilingualProductTitle(product.title);
 
   const handleAddToCart = () => {
     if (product) {
@@ -180,7 +182,7 @@ function ProductDetailContent() {
     <div className="min-h-screen font-sans">
       {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 text-xs font-sans flex items-center gap-2" style={{ color: palette.muted }}>
-        <Link href="/" className="min-h-[44px] inline-flex items-center hover:underline">
+        <Link href="/" className="min-w-[44px] min-h-[44px] px-1.5 inline-flex items-center justify-center hover:underline">
           {isEn ? 'Home' : 'الرئيسية'}
         </Link>
         <span>/</span>
@@ -205,7 +207,7 @@ function ProductDetailContent() {
             >
               <div
                 className="relative rounded-[calc(2rem-0.5rem)] overflow-hidden aspect-[4/3]"
-                style={{ backgroundColor: palette.surface }}
+                style={{ backgroundColor: isLight ? '#F3EDE2' : palette.surface }}
               >
                 <SmartImage
                   src={activeImage || product.image}
@@ -218,12 +220,12 @@ function ProductDetailContent() {
                 <div
                   className="absolute top-4 start-4 px-3 py-1.5 rounded-full border text-xs font-sans font-bold flex items-center gap-1.5 shadow-md"
                   style={{
-                    backgroundColor: isLight ? '#EAF4F2' : '#052e16',
-                    borderColor: isLight ? '#10b981' : '#22c55e',
-                    color: isLight ? '#0F4C4A' : '#86efac',
+                    backgroundColor: isLight ? '#FFFFFFEE' : '#0B0B0DEE',
+                    borderColor: `${palette.accent}55`,
+                    color: palette.accent,
                   }}
                 >
-                  <VerifiedCheckIcon size={14} color={isLight ? '#0F4C4A' : '#34D399'} />
+                  <VerifiedCheckIcon size={14} color={palette.accent} />
                   <span>{isEn ? '100% Authenticity Guaranteed' : 'ضمان الأصالة 100%'}</span>
                 </div>
               </div>
@@ -268,8 +270,17 @@ function ProductDetailContent() {
                 {product.brand}
               </span>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold leading-[1.45] md:leading-[1.4]" style={{ color: palette.text }}>
-                {product.title}
+                {arTitle}
               </h1>
+              {enSubtitle && (
+                <span
+                  dir="ltr"
+                  className="inline-block text-xs sm:text-sm font-mono font-semibold"
+                  style={{ color: palette.accent }}
+                >
+                  {enSubtitle}
+                </span>
+              )}
               {product.subtitle && (
                 <p className="text-sm font-sans leading-relaxed" style={{ color: palette.muted }}>
                   {product.subtitle}
@@ -280,11 +291,11 @@ function ProductDetailContent() {
             {/* Price Row & Warehouse Stock Badge */}
             <div className="flex items-center justify-between flex-wrap gap-3 pb-4 border-b" style={{ borderColor: palette.border }}>
               <div className="flex items-baseline gap-3">
-                <span className="text-3xl font-serif font-bold" style={{ color: palette.accent }}>
+                <span className="text-3xl font-serif font-bold tabular-nums" style={{ color: palette.accent }}>
                   {formatCurrency(price, currentCurrency)}
                 </span>
                 {comparePrice && (
-                  <span className="text-sm line-through font-sans" style={{ color: palette.muted }}>
+                  <span className="text-sm line-through font-sans tabular-nums" style={{ color: palette.muted }}>
                     {formatCurrency(comparePrice, currentCurrency)}
                   </span>
                 )}
@@ -302,11 +313,11 @@ function ProductDetailContent() {
                 </span>
                 {typeof product.stockQuantity === 'number' && (
                   <span
-                    className="px-2.5 py-1 rounded text-xs font-sans font-bold border"
+                    className="px-2.5 py-1 rounded text-xs font-sans font-bold border tabular-nums"
                     style={{
-                      backgroundColor: product.stockQuantity > 0 ? (isLight ? '#EAF4F2' : '#052e16') : (isLight ? '#FEF3C7' : '#451a03'),
-                      borderColor: product.stockQuantity > 0 ? (isLight ? '#0F4C4A' : '#22c55e') : '#f59e0b',
-                      color: product.stockQuantity > 0 ? (isLight ? '#0F4C4A' : '#86efac') : (isLight ? '#92400E' : '#fde68a'),
+                      backgroundColor: product.stockQuantity > 0 ? `${palette.accent}15` : (isLight ? '#FEF3C7' : '#32240E'),
+                      borderColor: product.stockQuantity > 0 ? `${palette.accent}45` : '#C9963B',
+                      color: product.stockQuantity > 0 ? palette.accent : (isLight ? '#92400E' : '#F3D28B'),
                     }}
                   >
                     {product.stockQuantity > 0

@@ -41,7 +41,7 @@ export function IvoryHeader({ onOpenSearch, onOpenAdvisor }: IvoryHeaderProps) {
     <>
       <header
         data-testid="header"
-        className="sticky top-0 start-0 w-full h-[52px] bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#E8E2D8] z-40 flex items-center justify-between px-3 sm:px-6 transition-colors"
+        className="sticky top-0 start-0 w-full h-14 md:h-[68px] bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#E8E2D8] z-40 flex items-center justify-between px-3 sm:px-6 transition-colors"
       >
         {/* Start Side: Menu Trigger (Mobile) / Nav Links (Desktop) */}
         <div className="flex items-center gap-1 sm:gap-4 flex-1">
@@ -103,13 +103,13 @@ export function IvoryHeader({ onOpenSearch, onOpenAdvisor }: IvoryHeaderProps) {
         </div>
 
         {/* Center: Magazine Wordmark (min 44px hit area) */}
-        <div className="flex flex-col items-center justify-center text-center px-1">
+        <div className="flex flex-col items-center justify-center text-center px-1 shrink-0">
           <a
             href="/"
-            className="min-h-[44px] inline-flex flex-col items-center justify-center px-2 py-1 font-serif font-bold text-xl sm:text-2xl text-[#1B1612] hover:text-[#5E6B5A] transition-colors leading-none"
+            className="min-h-[44px] inline-flex flex-col items-center justify-center gap-0.5 px-2 py-1 font-serif font-bold text-lg sm:text-2xl text-[#1B1612] hover:text-[#5E6B5A] transition-colors leading-tight"
           >
             <span>{tenant.name}</span>
-            <span className="hidden sm:block text-xs font-sans text-[#5E6B5A] mt-0.5 leading-none">
+            <span className="hidden sm:block text-xs font-sans font-medium text-[#5E6B5A] leading-tight">
               {isEn ? 'Luxury Care & Authenticity Journal' : 'لكشف المقلد ومجلة العناية الفاخرة'}
             </span>
           </a>
@@ -122,7 +122,7 @@ export function IvoryHeader({ onOpenSearch, onOpenAdvisor }: IvoryHeaderProps) {
             <button
               type="button"
               onClick={() => setLocale?.(isEn ? 'ar' : 'en')}
-              className="min-h-[36px] px-2.5 rounded-full border border-[#E8E2D8] bg-[#F4EFE6]/70 text-[#1B1612] text-xs font-mono font-bold transition flex items-center gap-1"
+              className="min-h-[40px] px-3 rounded-full border border-[#D9D0C3] bg-[#F4EFE6] hover:border-[#1B1612] text-[#1B1612] text-xs font-mono font-bold transition flex items-center gap-1"
               title={isEn ? 'التبديل إلى العربية' : 'Switch to English'}
               aria-label="تبديل اللغة"
             >

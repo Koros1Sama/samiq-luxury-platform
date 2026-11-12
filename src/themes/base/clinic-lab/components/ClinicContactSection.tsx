@@ -147,7 +147,7 @@ export function ClinicContactSection() {
                       {b.nameAr || b.name}
                     </span>
                     {b.isMain && (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#CFE8E1] text-[#0F4C4A] font-bold">
+                      <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#CFE8E1] text-[#0F4C4A] font-bold">
                         المقر الرئيسي
                       </span>
                     )}
@@ -157,7 +157,7 @@ export function ClinicContactSection() {
                   </p>
                   <div className="pt-2 border-t border-[#D4E5E0] flex items-center justify-between text-[#4A5568]">
                     <span>{b.hoursAr || b.workingHours || 'يومياً 9 ص - 10 م'}</span>
-                    <a href={`tel:${b.phone}`} className="font-mono font-bold text-[#0F4C4A] hover:underline">
+                    <a href={`tel:${b.phone}`} className="min-h-[44px] inline-flex items-center font-mono font-bold text-[#0F4C4A] hover:underline tabular-nums">
                       {b.phone}
                     </a>
                   </div>

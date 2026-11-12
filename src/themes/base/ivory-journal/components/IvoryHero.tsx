@@ -6,87 +6,114 @@ import { useStorefront } from '@/core/storefront/StorefrontProvider';
 import { SectionComponentProps } from '@/themes/contract';
 import { ArrowIcon, VerifiedStampIcon } from './IvoryIcons';
 
-interface IvoryHeroProps extends Partial<SectionComponentProps> {
-  onCtaClick?: () => void;
+export interface IvoryHeroProps extends Partial<SectionComponentProps> {
+  section?: SectionComponentProps['section'];
 }
 
+/**
+ * Editorial Magazine Cover Spread for Ivory Journal.
+ * Single responsive SmartImage (priority=true) keeps mobile fold compact for Bar 1
+ * while expanding into a full architectural double-spread on desktop.
+ */
 export function IvoryHero({ section }: IvoryHeroProps) {
   const { tenant, locale } = useStorefront();
   const isEn = locale === 'en';
 
   const title =
-    (tenant as any).heroTitle ||
-    (section?.props?.title as string) ||
-    (tenant.name ? `${tenant.name} — لكشف المقلد` : 'مفتاح الجمال — لكشف المقلد');
+    (isEn ? (section?.props?.titleEn as string) : (section?.props?.title as string)) ||
+    (isEn
+      ? 'Pure clinical formulas, verified directly from authorized houses'
+      : 'عناية فائقة وموثقة بالمعايير المخبرية لبشرتك');
+
   const subtitle =
-    (tenant as any).heroSubtitle ||
-    (section?.props?.subtitle as string) ||
-    tenant.tagline ||
-    'دليلك التحريري الشامل لمستحضرات العناية الأصلية والموثقة مخبرياً في اليمن';
+    (isEn ? (section?.props?.subtitleEn as string) : (section?.props?.subtitle as string)) ||
+    (isEn
+      ? 'Curated skincare and dermatological essentials compliant with the Supreme Board of Drugs & Medical Appliances.'
+      : 'مستحضرات عناية أصلية مفحوصة بعناية ومطابقة لاشتراطات الهيئة العليا للأدوية والمستلزمات الطبية، مع توثيق مباشر عبر فاتورتك.');
+
   const heroImageSrc = tenant.heroImages?.ivory || '/media/hero/hero-ivory.jpg';
 
   const scrollTo = (hash: string) => {
     const el = document.querySelector(hash);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
-    <section className="relative w-full overflow-hidden bg-[#FAF7F2] border-b border-[#E8E2D8]/60">
-      {/* 
-        Full-bleed editorial canvas:
-        Photo's empty cream area is originally on its left.
-        We mirror the image wrapper horizontally via -scale-x-100 so the empty cream area 
-        sits on the right (start side in RTL) and the face sits on the left (end side in RTL).
-      */}
-      <div className="relative w-full min-h-[135px] sm:min-h-[340px] lg:min-h-[58dvh] flex items-center">
-        {/* Mirrored Image Wrapper (ONLY on the image container, NEVER on the text) */}
-        <div className="absolute inset-0 w-full h-full -scale-x-100 overflow-hidden pointer-events-none">
-          <SmartImage
-            src={heroImageSrc}
-            alt={title}
-            priority={true}
-            sizes="100vw"
-            className="object-cover object-center w-full h-full opacity-90 contrast-[1.02] brightness-[1.01]"
-          />
-          {/* Subtle gradient overlay to enhance typography contrast while maintaining cream paper texture */}
-          <div className="absolute inset-0 bg-gradient-to-s from-[#FAF7F2]/95 via-[#FAF7F2]/60 to-transparent" />
-        </div>
-
-        {/* Content Container (placed on the start side over the calm cream area) */}
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-3 sm:px-8 lg:px-12 pt-2 pb-3 sm:pt-10 sm:pb-14 lg:pt-16 lg:pb-20">
-          <div className="max-w-xl text-start space-y-1 sm:space-y-4">
-            {/* Editorial Metadata / Issue Badge */}
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border border-[#5E6B5A]/30 bg-[#F4EFE6]/80 text-[#5E6B5A]">
-              <VerifiedStampIcon size={12} color="#5E6B5A" />
-              <span className="text-xs font-sans font-medium">
-                {isEn ? 'Weekly Curated Editorial Edition' : 'مختارات العدد التحريري الموثق'}
+    <section
+      id="hero"
+      aria-label={isEn ? 'Editorial Cover' : 'غلاف العدد الافتتاحي'}
+      className="w-full bg-[#FAF7F2] border-b border-[#E8E2D8] overflow-x-clip"
+    >
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-1.5 sm:py-8 lg:py-12">
+        <div className="grid grid-cols-12 gap-2.5 sm:gap-8 lg:gap-12 items-center">
+          {/* Editorial Cover Manifesto (Cols 7 on Mobile beside thumb, 5 on Desktop) */}
+          <div className="col-span-8 md:col-span-5 flex flex-col justify-center space-y-1 sm:space-y-5 text-start order-1">
+            {/* Issue Stamp */}
+            <div className="hidden sm:flex items-center gap-2.5 text-xs font-sans font-medium text-[#5E6B5A]">
+              <VerifiedStampIcon size={15} color="#5E6B5A" />
+              <span>
+                {isEn
+                  ? 'ISSUE 04 · SBDMA VERIFIED ARCHIVE'
+                  : 'العدد ٠٤ · أرشيف الأصالة الموثق'}
               </span>
             </div>
 
-            {/* Headline in Royal Amiri Serif */}
-            <h1 className="font-serif font-bold text-lg sm:text-4xl lg:text-6xl text-[#1B1612] leading-[1.55] md:leading-[1.5]">
+            {/* Serif Headline */}
+            <h1 className="font-serif font-bold text-sm sm:text-3xl lg:text-[40px] text-[#1B1612] leading-[1.38] sm:leading-[1.38] line-clamp-2 sm:line-clamp-none">
               {title}
             </h1>
 
-            {/* Subtitle in Clean Arabic Sans */}
-            <p className="font-sans text-xs sm:text-base text-[#554D46] leading-[1.6] line-clamp-1 sm:line-clamp-none max-w-lg hidden xs:block">
+            {/* Subtitle (Desktop) */}
+            <p className="hidden md:block font-sans text-sm lg:text-base text-[#554D46] leading-[1.85] max-w-md">
               {subtitle}
             </p>
 
-            {/* Editorial Underlined Link CTA (NOT a pill button per spec) */}
-            <div className="pt-0.5 sm:pt-2">
+            {/* Hairline Rule & CTA Row */}
+            <div className="pt-0.5 sm:pt-3 flex flex-wrap items-center gap-3 sm:gap-5 border-t border-[#E8E2D8]">
               <button
                 type="button"
                 onClick={() => scrollTo('#mosaic')}
-                className="group inline-flex items-center gap-1.5 min-h-[44px] text-xs sm:text-base font-serif font-semibold text-[#1B1612] border-b-2 border-[#1B1612] pb-0.5 hover:text-[#5E6B5A] hover:border-[#5E6B5A] transition-colors"
+                className="min-h-[40px] sm:min-h-[44px] inline-flex items-center gap-2 font-sans font-bold text-xs sm:text-sm text-[#1B1612] border-b-2 border-[#1B1612] hover:text-[#5E6B5A] hover:border-[#5E6B5A] transition-colors"
               >
-                <span>{isEn ? 'Explore Curated Issue' : 'اكتشفي روائع العدد الأسبوعي'}</span>
-                <span className="rtl:-scale-x-100 transition-transform duration-300 group-hover:-translate-x-1">
-                  <ArrowIcon size={14} color="currentColor" />
+                <span>{isEn ? 'Browse the Index' : 'تصفحي مختارات العدد'}</span>
+                <span className="rtl:-scale-x-100">
+                  <ArrowIcon size={16} color="currentColor" />
                 </span>
               </button>
+
+              <a
+                href="/authenticity-hub"
+                className="hidden sm:inline-flex min-h-[44px] items-center px-4 py-2 rounded-full border border-[#D9D0C3] bg-[#F4EFE6] text-xs font-sans font-semibold text-[#554D46] hover:border-[#5E6B5A] hover:text-[#1B1612] transition-colors"
+              >
+                {isEn ? 'Verify Authenticity' : 'فحص مطابقة الهيئة'}
+              </a>
+            </div>
+          </div>
+
+          {/* Single Priority Editorial Photograph Frame */}
+          <div className="col-span-4 md:col-span-7 order-2">
+            <div className="p-1 sm:p-2.5 rounded-xl sm:rounded-2xl bg-[#F3ECE0] border border-[#E2D9CB] shadow-sm">
+              <div className="relative w-full h-[76px] sm:h-auto sm:aspect-[4/3] md:aspect-[16/10] md:min-h-[380px] lg:min-h-[430px] rounded-lg sm:rounded-xl overflow-hidden bg-[#EAE2D6]">
+                <SmartImage
+                  src={heroImageSrc}
+                  alt={title}
+                  fill
+                  priority={true}
+                  sizes="(max-width: 768px) 42vw, 60vw"
+                  className="object-cover object-center transition-transform duration-700 hover:scale-[1.02]"
+                />
+                {/* Subtle Print Margin Caption on Desktop */}
+                <div className="hidden lg:flex absolute bottom-4 inset-x-4 items-center justify-between px-4 py-2.5 rounded-xl bg-[#FAF7F2]/95 border border-[#E8E2D8] text-xs font-sans text-[#1B1612]">
+                  <span className="font-semibold">
+                    {isEn
+                      ? `${tenant.name} — Clinical & Botanical Curation`
+                      : `${tenant.name} — ملف الفحص والمطابقة السريرية`}
+                  </span>
+                  <span className="text-[#5E6B5A] font-mono font-bold tabular-nums">
+                    SBDMA · 100%
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

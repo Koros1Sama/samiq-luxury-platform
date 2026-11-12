@@ -18,11 +18,11 @@ import {
   DEFAULT_STOREFRONT_TENANT,
   DEFAULT_STOREFRONT_FEATURES,
 } from './StorefrontProvider';
-import { FeatureTierSimulator } from '@/themes/base/luxury-noir/components/FeatureTierSimulator';
 import { WhatsAppCartDrawer } from '@/themes/base/luxury-noir/components/WhatsAppCartDrawer';
 import { IvoryCartDrawer } from '@/themes/base/ivory-journal/components/IvoryCartDrawer';
 import { ClinicCartDrawer } from '@/themes/base/clinic-lab/components/ClinicCartDrawer';
 import { MobileAppTabBar } from './MobileAppTabBar';
+import { DemoSimulatorGate } from './DemoSimulatorGate';
 
 export interface SubpageThemeContextValue {
   activeTheme: ThemeId;
@@ -78,6 +78,7 @@ function SubpageThemeInner({
 }: SubpageThemeWrapperProps) {
   const sf = useStorefront();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isDemoPanel, setIsDemoPanel] = useState(false);
 
   const activeTheme = sf.activeTheme || 'luxury-noir';
   const palette = sf.palette || resolveThemePalette(activeTheme, sf.customPalette);
@@ -87,6 +88,8 @@ function SubpageThemeInner({
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
+        const params = new URLSearchParams(window.location.search);
+        setIsDemoPanel(params.get('demo') === 'panel');
         const clientTheme = getClientActiveTheme(sf.activeTheme);
         if (clientTheme && isValidThemeId(clientTheme) && sf.activeTheme !== clientTheme) {
           sf.setActiveTheme?.(clientTheme);
@@ -179,7 +182,7 @@ function SubpageThemeInner({
       }}
     >
       <div
-        className={`samiq-subpage-container min-h-screen transition-colors duration-300 font-sans pb-14 md:pb-0 ${
+        className={`samiq-subpage-container min-h-screen transition-colors duration-300 font-sans pb-20 md:pb-0 ${
           isLight ? 'is-light' : 'is-dark'
         }`}
         data-theme={activeTheme}
@@ -310,9 +313,9 @@ function SubpageThemeInner({
               borderBottom: `1px solid ${palette.border}`,
             }}
           >
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-3">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-3">
               {/* Brand Emblem & Name */}
-              <Link href="/" className="flex items-center gap-2 group min-w-0 shrink-0">
+              <Link href="/" className="min-h-[44px] flex items-center gap-2 group min-w-0 shrink-0">
                 {activeTheme === 'clinic-lab' ? (
                   <div className="flex items-center gap-2">
                     <div
@@ -329,7 +332,7 @@ function SubpageThemeInner({
                       <span className="font-bold text-sm sm:text-base leading-tight" style={{ color: palette.text }}>
                         {tenant.name}
                       </span>
-                      <span className="text-[10px] leading-tight" style={{ color: palette.muted }}>
+                      <span className="text-xs leading-tight" style={{ color: palette.muted }}>
                         {isEn ? 'Clinical Care & Authenticity Lab' : 'لكشف المقلد والعناية السريرية'}
                       </span>
                     </div>
@@ -339,7 +342,7 @@ function SubpageThemeInner({
                     <span className="font-serif font-bold text-lg sm:text-xl leading-none" style={{ color: palette.text }}>
                       {tenant.name}
                     </span>
-                    <span className="text-[10px] font-sans mt-0.5" style={{ color: palette.muted }}>
+                    <span className="text-xs font-sans mt-0.5" style={{ color: palette.muted }}>
                       {isEn ? 'Luxury Care & Authenticity Journal' : 'لكشف المقلد ومجلة العناية الفاخرة'}
                     </span>
                   </div>
@@ -386,7 +389,7 @@ function SubpageThemeInner({
                 {/* Interactive Template Switcher Pill (Gated by Demo Mode) */}
                 {sf.isDemoMode && (
                   <div
-                    className="hidden sm:inline-flex items-center p-0.5 rounded-full border text-[11px] font-medium"
+                    className="hidden sm:inline-flex items-center p-1 rounded-full border text-xs font-medium"
                     style={{
                       borderColor: palette.border,
                       backgroundColor: isLight ? '#00000008' : '#FFFFFF0A',
@@ -395,7 +398,7 @@ function SubpageThemeInner({
                     <button
                       type="button"
                       onClick={() => setActiveTheme('luxury-noir')}
-                      className={`min-h-[32px] px-2.5 rounded-full transition-all ${
+                      className={`min-h-[40px] px-3 rounded-full transition-all ${
                         activeTheme === 'luxury-noir' ? 'font-bold shadow-xs' : 'opacity-60 hover:opacity-100'
                       }`}
                       style={{
@@ -409,7 +412,7 @@ function SubpageThemeInner({
                     <button
                       type="button"
                       onClick={() => setActiveTheme('ivory-journal')}
-                      className={`min-h-[32px] px-2.5 rounded-full transition-all ${
+                      className={`min-h-[40px] px-3 rounded-full transition-all ${
                         activeTheme === 'ivory-journal' ? 'font-bold shadow-xs' : 'opacity-60 hover:opacity-100'
                       }`}
                       style={{
@@ -423,7 +426,7 @@ function SubpageThemeInner({
                     <button
                       type="button"
                       onClick={() => setActiveTheme('clinic-lab')}
-                      className={`min-h-[32px] px-2.5 rounded-full transition-all ${
+                      className={`min-h-[40px] px-3 rounded-full transition-all ${
                         activeTheme === 'clinic-lab' ? 'font-bold shadow-xs' : 'opacity-60 hover:opacity-100'
                       }`}
                       style={{
@@ -442,7 +445,7 @@ function SubpageThemeInner({
                   <button
                     type="button"
                     onClick={() => setLocale(isEn ? 'ar' : 'en')}
-                    className="min-h-[36px] px-2.5 rounded-lg border text-xs font-mono font-bold transition inline-flex items-center gap-1"
+                    className="min-h-[40px] px-3 rounded-lg border text-xs font-mono font-bold transition inline-flex items-center gap-1"
                     style={{
                       borderColor: palette.border,
                       backgroundColor: isLight ? '#00000008' : '#FFFFFF0A',
@@ -480,7 +483,7 @@ function SubpageThemeInner({
                   </svg>
                   {sf.cart?.count > 0 && (
                     <span
-                      className="absolute -top-1.5 -end-1.5 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center leading-none text-white shadow-xs"
+                      className="absolute -top-1.5 -end-1.5 min-w-[20px] h-[20px] px-1 rounded-full text-xs font-bold flex items-center justify-center leading-none text-white shadow-xs tabular-nums"
                       style={{ backgroundColor: '#D9534F' }}
                     >
                       {sf.cart.count}
@@ -616,7 +619,7 @@ function SubpageThemeInner({
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 {/* Col 1: Brand Info */}
                 <div className="space-y-4">
-                  <Link href="/" className="inline-block">
+                  <Link href="/" className="min-h-[44px] inline-flex items-center">
                     <span className="font-serif font-bold text-xl" style={{ color: palette.text }}>
                       {tenant.name}
                     </span>
@@ -642,15 +645,15 @@ function SubpageThemeInner({
 
                 {/* Col 2: Navigation Links */}
                 <div className="space-y-3">
-                  <h4 className="text-xs font-bold uppercase tracking-wider" style={{ color: palette.accent }}>
+                  <h4 className="text-xs font-bold" style={{ color: palette.accent }}>
                     {isEn ? 'Directory' : 'فهرس المتجر والمجلة'}
                   </h4>
-                  <ul className="space-y-2 text-xs font-sans">
+                  <ul className="space-y-1 text-xs font-sans">
                     {navLinks.map((l) => (
                       <li key={l.id}>
                         <Link
                           href={l.href}
-                          className="hover:underline transition-all"
+                          className="min-h-[40px] inline-flex items-center hover:underline transition-all"
                           style={{ color: palette.text }}
                         >
                           {isEn ? l.labelEn : l.labelAr}
@@ -662,7 +665,7 @@ function SubpageThemeInner({
 
                 {/* Col 3: Contact & Main Branch */}
                 <div className="space-y-3">
-                  <h4 className="text-xs font-bold uppercase tracking-wider" style={{ color: palette.accent }}>
+                  <h4 className="text-xs font-bold" style={{ color: palette.accent }}>
                     {isEn ? 'Main Branch' : 'الفرع الرئيسي والتواصل'}
                   </h4>
                   <div className="space-y-2 text-xs font-sans" style={{ color: palette.muted }}>
@@ -680,7 +683,7 @@ function SubpageThemeInner({
                       href={tenant.googleMaps || 'https://maps.app.goo.gl/DxsZTHrv2r386bXa9'}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 underline pt-1 font-semibold"
+                      className="min-h-[40px] inline-flex items-center gap-1 underline font-semibold"
                       style={{ color: palette.accent }}
                     >
                       <span>{isEn ? 'View on Google Maps' : 'موقع الفرع على خرائط جوجل'}</span>
@@ -691,7 +694,7 @@ function SubpageThemeInner({
 
                 {/* Col 4: Official Social Channels */}
                 <div className="space-y-3">
-                  <h4 className="text-xs font-bold uppercase tracking-wider" style={{ color: palette.accent }}>
+                  <h4 className="text-xs font-bold" style={{ color: palette.accent }}>
                     {isEn ? 'Social Channels' : 'القنوات المعتمدة'}
                   </h4>
                   <div className="space-y-2 text-xs font-sans">
@@ -699,7 +702,7 @@ function SubpageThemeInner({
                       href="https://wa.me/967775234989"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-between p-2 rounded-lg border transition hover:opacity-100"
+                      className="min-h-[44px] flex items-center justify-between p-2.5 rounded-lg border transition hover:opacity-100"
                       style={{
                         borderColor: palette.border,
                         color: palette.text,
@@ -715,7 +718,7 @@ function SubpageThemeInner({
                       href="https://instagram.com/tamifttah"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-between p-2 rounded-lg border transition hover:opacity-100"
+                      className="min-h-[44px] flex items-center justify-between p-2.5 rounded-lg border transition hover:opacity-100"
                       style={{
                         borderColor: palette.border,
                         color: palette.text,
@@ -731,7 +734,7 @@ function SubpageThemeInner({
                       href="https://tiktok.com/@tamiffttah"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-between p-2 rounded-lg border transition hover:opacity-100"
+                      className="min-h-[44px] flex items-center justify-between p-2.5 rounded-lg border transition hover:opacity-100"
                       style={{
                         borderColor: palette.border,
                         color: palette.text,
@@ -761,7 +764,7 @@ function SubpageThemeInner({
                     href="https://samiq.shop"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-bold underline"
+                    className="min-h-[40px] inline-flex items-center font-bold underline"
                     style={{ color: palette.accent }}
                   >
                     {isEn ? 'SAMIQ Luxury Commerce Engine' : 'منصة سَامِق للعلامات الفاخرة'}
@@ -783,8 +786,8 @@ function SubpageThemeInner({
           )
         )}
 
-        {/* 5. Feature Tier Simulator Bar (Bottom Live Bar) */}
-        {showSimulator && <FeatureTierSimulator />}
+        {/* 5. Feature Tier Simulator Bar (Only when explicitly requested via ?demo=panel) */}
+        {showSimulator && isDemoPanel && <DemoSimulatorGate />}
 
         {/* 6. Mobile App Tab Bar across all subpages */}
         <MobileAppTabBar />

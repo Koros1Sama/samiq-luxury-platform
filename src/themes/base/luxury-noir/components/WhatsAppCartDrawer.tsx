@@ -381,16 +381,16 @@ export function WhatsAppCartDrawer(props: WhatsAppCartDrawerProps) {
                               : jeebAccount}
                           </span>
                         </div>
-                        <div className="text-[11px] text-ivory/80">
+                        <div className="text-xs text-ivory/85">
                           اسم المستفيد: <span className="font-semibold text-ivory">{accountHolder}</span>
                         </div>
                       </div>
 
-                      <div className="p-2 rounded-lg bg-emerald-950/40 border border-emerald-500/25 text-[11px] text-emerald-300 leading-relaxed">
+                      <div className="p-2.5 rounded-lg bg-emerald-950/40 border border-emerald-500/25 text-xs text-emerald-300 leading-relaxed">
                         لا يُشترط التحويل الآن قبل المحادثة — أرسل طلبك أولاً عبر واتساب لتأكيد توفر المستحضرات وموعد المندوب، ثم حوّل المبلغ وأرسل الإشعار في المحادثة بعد الاتفاق.
                       </div>
 
-                      <details className="text-[11px] pt-1">
+                      <details className="text-xs pt-1">
                         <summary className="cursor-pointer text-gold hover:underline font-medium select-none">
                           + هل قمت بالتحويل مسبقاً؟ أدخل رقم الإشعار (اختياري)
                         </summary>

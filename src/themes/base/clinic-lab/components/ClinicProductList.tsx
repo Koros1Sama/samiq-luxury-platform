@@ -4,152 +4,159 @@ import React from 'react';
 import Link from 'next/link';
 import { ProductCardData } from '@/themes/contract';
 import { useStorefront } from '@/core/storefront/StorefrontProvider';
-import { getProductQuickInfo } from '@/core/storefront/productQuickInfo';
+import {
+  getProductQuickInfo,
+  splitBilingualProductTitle,
+} from '@/core/storefront/productQuickInfo';
 import { SmartImage } from '@/core/ui/SmartImage';
-import { BagIcon, ShieldCheckIcon, SparklesIcon, CheckIcon } from './ClinicIcons';
+import { BagIcon, ShieldCheckIcon } from './ClinicIcons';
 
-interface ClinicProductListProps {
+export interface ClinicProductListProps {
   products: ProductCardData[];
 }
 
+/**
+ * Swiss Clinical 2-Column Specimen Grid.
+ * Clean clinical frames without overlaid badges/floating buttons on photography,
+ * strict BiDi title/Latin code separation, tabular numeric pricing without overlap,
+ * and minimum 44px accessible controls.
+ */
 export function ClinicProductList({ products }: ClinicProductListProps) {
-  const { cart, currency, activeTag, setActiveTag } = useStorefront();
+  const { cart, currency, locale } = useStorefront();
+  const isEn = locale === 'en';
 
-  if (!products || products.length === 0) {
+  if (products.length === 0) {
     return (
-      <div className="w-full py-12 text-center bg-[#F2F7F5] rounded-xl border border-[#E2ECE9] p-6">
-        <p className="text-base font-medium text-[#0F4C4A] leading-[1.75]">
-          لا توجد منتجات مطابقة لهذا التصنيف حالياً.
+      <div className="p-10 rounded-2xl bg-[#F6FAF9] border border-[#D4E5E0] text-center space-y-2">
+        <p className="text-sm font-bold text-[#0F4C4A]">
+          {isEn
+            ? 'No formulations match your current clinical criteria.'
+            : 'لا توجد مستحضرات سريرية مطابقة لمعايير التصفية المختارة.'}
+        </p>
+        <p className="text-xs text-[#546E6C]">
+          {isEn
+            ? 'Try switching skin type or clearing search keywords.'
+            : 'جربي اختيار تصنيف آخر أو إزالة قيود البحث أعلاه.'}
         </p>
       </div>
     );
   }
 
   return (
-    <div className="w-full flex flex-col gap-2.5">
+    <div className="grid grid-cols-2 md:grid-cols-2 gap-2.5 sm:gap-5">
       {products.map((product) => {
         const info = getProductQuickInfo(product, currency);
-        const inCartCount = cart.items.find((item) => item.productId === product.id)?.quantity || 0;
-
-        // Active chips: concentration + first ingredient or clinical highlight
-        const chip1 = info.concentration || (info.isAuthenticGuaranteed ? 'نقاء 100%' : 'تركيبة علاجية');
-        const chip2 = info.ingredients?.[0] || info.badge || 'مختبر سريرياً';
+        const { arTitle, enSubtitle } = splitBilingualProductTitle(product.title);
 
         return (
-          <div
+          <article
             key={product.id}
-            data-product-card
-            className="w-full bg-white rounded-xl border border-[#E2ECE9] hover:border-[#0F4C4A]/40 transition-all shadow-xs p-2.5 sm:p-3 flex items-center justify-between gap-3 text-start"
+            data-testid={`product-card-${product.id}`}
+            className="group bg-white rounded-xl sm:rounded-2xl border border-[#DCEAE6] hover:border-[#0F4C4A]/60 overflow-hidden transition-colors flex flex-col justify-between shadow-xs"
           >
-            {/* Start Side: 88px Clinical Image Box */}
+            {/* Specimen Photography Frame */}
             <Link
-              href={`/product/${product.slug || product.id}`}
-              className="relative w-[88px] h-[88px] min-w-[88px] rounded-lg overflow-hidden border border-[#E2ECE9] bg-[#F2F7F5] shrink-0 block group hover:opacity-95 transition"
+              href={`/product/${product.id}`}
+              className="block p-2 sm:p-3 pb-0"
+              aria-label={product.title}
             >
-              <SmartImage
-                src={product.image}
-                alt={product.title}
-                fill
-                priority={false}
-                sizes="88px"
-                className="object-cover object-center"
-              />
-              {info.hasDiscount && (
-                <div className="absolute top-1 start-1 px-1.5 py-0.5 rounded bg-[#D9534F] text-white text-xs font-bold leading-none">
-                  -{info.discountPercentage}%
-                </div>
-              )}
+              <div className="relative h-[88px] sm:h-auto sm:aspect-[16/11] w-full rounded-lg sm:rounded-xl overflow-hidden bg-[#EFF6F4] border border-[#E2ECE9]">
+                <SmartImage
+                  src={product.image}
+                  alt={product.title}
+                  fill
+                  priority={false}
+                  sizes="(max-width: 768px) 48vw, 42vw"
+                  className="object-cover object-center transition-transform duration-500 group-hover:scale-[1.03]"
+                />
+              </div>
             </Link>
 
-            {/* Center Info: Name, Ingredients Chips, Verification Badge */}
-            <div className="flex-1 min-w-0 flex flex-col justify-center gap-1">
-              {/* Product Title */}
-              <Link href={`/product/${product.slug || product.id}`}>
-                <h3
-                  data-product-title
-                  className="font-bold text-xs sm:text-sm md:text-base text-[#0F4C4A] hover:underline line-clamp-1 leading-tight"
-                  title={product.title}
-                >
-                  {product.title.replace(/\s*\([^)]*\)\s*$/, '')}
-                </h3>
-              </Link>
-
-              {/* Clinical Ingredients / Concentration Chips */}
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-md bg-[#CFE8E1]/50 border border-[#CFE8E1] text-[#0F4C4A]">
-                  <SparklesIcon size={12} />
-                  <span>{chip1}</span>
-                </span>
-                <span className="inline-flex items-center text-xs font-medium px-2 py-0.5 rounded-md bg-[#F2F7F5] border border-[#D4E5E0] text-[#4A5568]">
-                  <span>{chip2}</span>
-                </span>
-              </div>
-
-              {/* Clickable Micro-chips for up to 2 tags on larger viewports */}
-              {product.tags && product.tags.length > 0 && (
-                <div className="hidden sm:flex flex-wrap items-center gap-1.5 pt-0.5">
-                  {product.tags.slice(0, 2).map((t) => (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setActiveTag(activeTag === t ? null : t);
-                      }}
-                      className={`min-h-[40px] px-2.5 rounded-md text-xs font-medium transition-colors inline-flex items-center justify-center ${
-                        activeTag === t
-                          ? 'bg-[#0F4C4A] text-white font-bold'
-                          : 'bg-[#F2F7F5] text-[#0F4C4A] hover:bg-[#CFE8E1] border border-[#D4E5E0]'
-                      }`}
-                    >
-                      #{t}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* Lab Verification Badge */}
-              <div className="flex items-center gap-1 text-xs font-medium text-[#0F4C4A]">
-                <ShieldCheckIcon size={14} className="text-[#0F4C4A] shrink-0" />
-                <span className="whitespace-nowrap">أصلي 100% · مصرح ومطابق للمعايير</span>
-              </div>
-            </div>
-
-            {/* End Side: Price & 44px Add Button */}
-            <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 shrink-0 ms-1">
-              {/* Price Container */}
-              <div className="flex flex-col items-end text-end">
-                <span className="font-bold text-xs sm:text-sm md:text-base text-[#0F4C4A] whitespace-nowrap">
-                  {info.formattedPrice}
-                </span>
-                {info.hasDiscount && info.formattedComparePrice && (
-                  <span className="text-xs line-through text-[#64748B] whitespace-nowrap">
-                    {info.formattedComparePrice}
+            {/* Specimen Dossier Content */}
+            <div className="p-2.5 sm:p-5 flex-1 flex flex-col justify-between gap-2 sm:gap-4 text-start">
+              <div className="space-y-1 sm:space-y-2">
+                {/* Brand & Concentration Line */}
+                <div className="flex items-center justify-between gap-1 text-xs">
+                  <span className="inline-flex items-center gap-1 font-bold text-[#0F4C4A] truncate">
+                    <ShieldCheckIcon size={13} />
+                    <span className="truncate">{product.brand}</span>
                   </span>
-                )}
+                  {info.concentration && (
+                    <span
+                      dir="ltr"
+                      className="hidden sm:inline-block px-2 py-0.5 rounded bg-[#EFF6F4] border border-[#D4E5E0] font-mono text-xs font-semibold text-[#0F4C4A]"
+                    >
+                      {info.concentration}
+                    </span>
+                  )}
+                </div>
+
+                {/* BiDi Split Title */}
+                <Link href={`/product/${product.id}`} className="min-h-[40px] flex flex-col justify-center space-y-0.5">
+                  <h3 className="text-xs sm:text-lg font-bold text-[#0F4C4A] leading-[1.45] line-clamp-2 group-hover:underline">
+                    {arTitle}
+                  </h3>
+                  {enSubtitle && (
+                    <span
+                      dir="ltr"
+                      className="hidden sm:block text-xs font-mono text-[#546E6C] truncate text-end sm:text-start"
+                    >
+                      {enSubtitle}
+                    </span>
+                  )}
+                </Link>
+
+                {/* Active Formulation Summary (Desktop/Tablet) */}
+                <p className="hidden sm:block text-xs text-[#4A5568] leading-[1.65] line-clamp-2">
+                  {product.subtitle || info.ingredients || 'تركيبة مفحوصة سريرياً ومعتمدة للاستخدام الطبي'}
+                </p>
               </div>
 
-              {/* 44px Add to Cart Button */}
-              <button
-                type="button"
-                onClick={() => cart.add(product)}
-                className="min-w-[44px] min-h-[44px] px-3 py-2 rounded-lg bg-[#0F4C4A] text-white hover:bg-[#0B3A38] inline-flex items-center justify-center gap-1 text-xs font-bold transition-colors focus:outline-hidden focus:ring-2 focus:ring-[#0F4C4A] shadow-xs shrink-0"
-                aria-label={`إضافة ${product.title} إلى السلة`}
-              >
-                {inCartCount > 0 ? (
-                  <>
-                    <CheckIcon size={16} />
-                    <span className="hidden sm:inline">{inCartCount}</span>
-                  </>
-                ) : (
-                  <>
-                    <BagIcon size={16} />
-                    <span className="hidden sm:inline">إضافة</span>
-                  </>
-                )}
-              </button>
+              {/* Clean Price & Action Row */}
+              <div className="pt-2 sm:pt-3 border-t border-[#E8F1EE] flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-3">
+                <div className="flex flex-col min-w-0 gap-0.5">
+                  <span className="text-xs sm:text-lg font-bold text-[#0F4C4A] tabular-nums whitespace-nowrap">
+                    {info.formattedPrice}
+                  </span>
+                  {(info.formattedComparePrice || (info.discountPercentage ?? 0) > 0) && (
+                    <div className="hidden sm:flex items-center gap-1.5 flex-wrap">
+                      {info.formattedComparePrice && (
+                        <span className="text-xs text-[#64748B] line-through tabular-nums">
+                          {info.formattedComparePrice}
+                        </span>
+                      )}
+                      {(info.discountPercentage ?? 0) > 0 && (
+                        <span
+                          dir="ltr"
+                          className="px-1.5 py-0.5 rounded bg-[#EAF4F2] text-[#0F4C4A] text-xs font-mono font-bold tabular-nums"
+                        >
+                          -{info.discountPercentage}%
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
+                  <Link
+                    href={`/product/${product.id}`}
+                    className="hidden sm:inline-flex min-h-[44px] px-3 rounded-xl border border-[#D4E5E0] bg-[#F6FAF9] hover:bg-[#E7F2EF] text-xs font-bold text-[#0F4C4A] items-center justify-center transition-colors"
+                  >
+                    {isEn ? 'Specs' : 'المواصفات'}
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => cart.add(product)}
+                    className="w-full sm:w-auto min-h-[44px] px-3 sm:px-4 rounded-xl bg-[#0F4C4A] hover:bg-[#0B3A38] text-white text-xs font-bold inline-flex items-center justify-center gap-1.5 transition-colors shadow-xs"
+                    aria-label={isEn ? `Add ${product.title}` : `إضافة ${product.title}`}
+                  >
+                    <BagIcon size={15} />
+                    <span>{isEn ? 'Add' : 'إضافة للسلة'}</span>
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
+          </article>
         );
       })}
     </div>

@@ -353,16 +353,16 @@ export function ClinicCartDrawer(_props?: Record<string, never>) {
                               : checkout.jeebAccount}
                           </span>
                         </div>
-                        <div className="text-[11px] text-[#4A5568]">
+                        <div className="text-xs text-[#4A5568]">
                           اسم المستفيد: <span className="font-semibold text-[#0F4C4A]">{checkout.accountHolder}</span>
                         </div>
                       </div>
 
-                      <div className="p-2 rounded-lg bg-[#0F4C4A]/10 border border-[#0F4C4A]/20 text-[11px] text-[#0F4C4A] leading-relaxed">
+                      <div className="p-2.5 rounded-lg bg-[#0F4C4A]/10 border border-[#0F4C4A]/20 text-xs text-[#0F4C4A] leading-relaxed">
                         لا يُشترط التحويل الآن قبل المحادثة — أرسل طلبك أولاً عبر واتساب لتأكيد توفر المستحضرات وموعد المندوب، ثم حوّل المبلغ وأرسل الإشعار في المحادثة بعد الاتفاق.
                       </div>
 
-                      <details className="text-[11px] pt-1">
+                      <details className="text-xs pt-1">
                         <summary className="cursor-pointer text-[#0F4C4A] hover:underline font-medium select-none">
                           + هل قمت بالتحويل مسبقاً؟ أدخل رقم الإشعار (اختياري)
                         </summary>

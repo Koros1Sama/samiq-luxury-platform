@@ -513,58 +513,112 @@ export default function SamiqShowcasePage() {
         </div>
       </header>
 
-      {/* Main Luxury Hero Section */}
-      <section className="relative overflow-hidden pt-12 pb-16 sm:pt-20 sm:pb-24 border-b border-white/[0.08]">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#C9A84C]/10 via-[#070709]/0 to-[#070709] pointer-events-none" />
-        
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 space-y-6">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#C9A84C]/10 border border-[#C9A84C]/30 text-[#E8D390] text-xs font-semibold">
-            <span className="w-2 h-2 rounded-full bg-[#C9A84C]" />
-            <span>
-              محرك معماري مستقل فائق السرعة يبدأ من{' '}
-              {pricingConfig.isDiscountEnabled && tier1Pricing.discountUsd > 0 && (
-                <span className="line-through text-[#8E8B85] font-mono text-[11px]">${tier1Pricing.subtotalUsd}{' '}</span>
-              )}
-              <strong className="text-champagne font-bold">${tier1Pricing.totalUsd}</strong> فقط
-            </span>
-          </div>
+      {/* Main Luxury Architectural Hero Showcase */}
+      <section className="relative overflow-hidden pt-10 pb-14 sm:pt-16 sm:pb-20 border-b border-white/[0.08] bg-[#070709]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+            {/* Editorial Manifesto & Pricing Summary (7 cols) */}
+            <div className="lg:col-span-7 text-start space-y-5">
+              <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#0D0D12] border border-[#C9A84C]/35 text-[#E8D390] text-xs font-semibold">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#C9A84C]" />
+                <span>
+                  محرك سَامِق المعماري المستقل · يبدأ من{' '}
+                  {pricingConfig.isDiscountEnabled && tier1Pricing.discountUsd > 0 && (
+                    <span className="line-through text-[#8E8B85] font-mono text-xs tabular-nums">
+                      ${tier1Pricing.subtotalUsd}{' '}
+                    </span>
+                  )}
+                  <strong className="text-champagne font-bold tabular-nums">${tier1Pricing.totalUsd}</strong>
+                </span>
+              </div>
 
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-serif font-bold text-[#FAF7F2] leading-[1.55] md:leading-[1.5]">
-            متجرك الرقمي القادم بفخامة عالمية،
-            <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#E8D390] via-[#C9A84C] to-[#AA771C]">
-              وتدرج هندسي يبدأ من واجهة تعريفية إلى أتمتة شاملة
-            </span>
-          </h1>
+              <h1 className="text-3xl sm:text-5xl lg:text-[50px] font-serif font-bold text-[#FAF7F2] leading-[1.42] sm:leading-[1.38]">
+                منصة متجرك الرقمي القادم{' '}
+                <span className="text-[#E8D390] block sm:inline">بمعمارية فاخرة ومستقلة</span>
+              </h1>
 
-          <p className="text-sm sm:text-lg text-[#A09D94] max-w-3xl mx-auto leading-relaxed">
-            محرك سَامِق (SAMIQ) يقدم لك 3 درجات أساسية تراكمية: موقع تعريفي ثابت بدون منتجات (${tier1Pricing.totalUsd})، ثم قابل للتعديل مع لوحة تحكم المدير (${tier2Pricing.totalUsd})، ثم كتالوج المنتجات والأقسام والوسوم (${tier3Pricing.totalUsd})، مع إضافات مستقلة تختار منها ما يناسب ميزانيتك وطبيعة نشاطك.
-          </p>
+              <p className="text-sm sm:text-base text-[#A8A39A] leading-[1.85] max-w-2xl">
+                ثلاث درجات هندسية تراكمية تنمو مع علامتك التجارية: واجهة تعريفية فائقة السرعة (
+                <span dir="ltr" className="font-mono text-[#E8D390] font-bold tabular-nums">${tier1Pricing.totalUsd}</span>
+                )، ثم لوحة تحكم كاملة للمحتوى والأقسام (
+                <span dir="ltr" className="font-mono text-[#E8D390] font-bold tabular-nums">${tier2Pricing.totalUsd}</span>
+                )، وصولاً إلى الكتالوج والوسوم والبيع المباشر عبر واتساب (
+                <span dir="ltr" className="font-mono text-[#E8D390] font-bold tabular-nums">${tier3Pricing.totalUsd}</span>
+                ).
+              </p>
 
-          {/* Quick Advantage Badges */}
-          <div className="pt-4 grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto text-start">
-            <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1">
-              <span className="text-xs font-bold text-[#E8D390] block">سرعة البرق</span>
-              <p className="text-xs text-[#8E8B85]">تحميل بارد أقل من 150kB، استجابة فورية بدون أي تأخير.</p>
+              <div className="pt-2 flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab('packages');
+                    document.getElementById('samiq-workspace')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="min-h-[44px] px-6 rounded-full bg-gradient-to-r from-[#BF953F] via-[#F2E2A8] to-[#B38728] text-[#070709] text-xs sm:text-sm font-sans font-bold inline-flex items-center gap-2 hover:brightness-105 transition"
+                >
+                  <span>استعراض الباقات والحاسبة</span>
+                  <span className="rtl:-scale-x-100">←</span>
+                </button>
+                <Link
+                  href="/"
+                  className="min-h-[44px] px-5 rounded-full bg-[#0D0D12] border border-white/15 hover:border-[#C9A84C]/50 text-[#FAF7F2] text-xs sm:text-sm font-sans font-semibold inline-flex items-center gap-2 transition"
+                >
+                  <span>معاينة المتجر التجريبي الحي</span>
+                </Link>
+              </div>
             </div>
-            <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1">
-              <span className="text-xs font-bold text-[#E8D390] block">3 قوالب مستقلة</span>
-              <p className="text-xs text-[#8E8B85]">رخامي ملكي، تحريري عاجي، وسريري طبي بمجرد نقرة زر.</p>
-            </div>
-            <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1">
-              <span className="text-xs font-bold text-[#E8D390] block">تعدد العملات</span>
-              <p className="text-xs text-[#8E8B85]">تسعير آلي بالريال اليمني والسعودي والدولار بدقة تامة.</p>
-            </div>
-            <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1">
-              <span className="text-xs font-bold text-[#E8D390] block">الوسوم الذكية AI</span>
-              <p className="text-xs text-[#8E8B85]">تحليل المنتجات وتوليد الوسوم التخصصية تلقائياً.</p>
+
+            {/* Double-Bezel Architectural Spec Monograph (5 cols) */}
+            <div className="lg:col-span-5">
+              <div className="samiq-bezel-noir">
+                <div className="samiq-bezel-noir-inner p-5 sm:p-6 space-y-5 text-start">
+                  <div className="flex items-center justify-between border-b border-white/[0.08] pb-3.5">
+                    <div>
+                      <span className="text-xs font-mono text-[#C9A84C] block">SAMIQ ENGINE SPECS</span>
+                      <h2 className="text-base sm:text-lg font-serif font-bold text-[#FAF7F2]">
+                        الضمان الهندسي والأداء
+                      </h2>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-full bg-[#C9A84C]/15 border border-[#C9A84C]/30 text-xs font-mono font-bold text-[#E8D390] tabular-nums">
+                      $0 SSL
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="p-3.5 rounded-xl bg-[#070709] border border-white/[0.06] space-y-1">
+                      <span dir="ltr" className="text-base font-mono font-bold text-[#E8D390] block tabular-nums">
+                        &lt; 150 kB
+                      </span>
+                      <span className="text-xs text-[#A8A39A] block">حجم التحميل البارد الفوري</span>
+                    </div>
+                    <div className="p-3.5 rounded-xl bg-[#070709] border border-white/[0.06] space-y-1">
+                      <span className="text-base font-mono font-bold text-[#E8D390] block tabular-nums">
+                        3 قوالب
+                      </span>
+                      <span className="text-xs text-[#A8A39A] block">رخامي، تحريري، وسريري</span>
+                    </div>
+                    <div className="p-3.5 rounded-xl bg-[#070709] border border-white/[0.06] space-y-1">
+                      <span dir="ltr" className="text-base font-mono font-bold text-[#E8D390] block">
+                        YER · SAR · USD
+                      </span>
+                      <span className="text-xs text-[#A8A39A] block">تحويل عملات آلي أو يدوي</span>
+                    </div>
+                    <div className="p-3.5 rounded-xl bg-[#070709] border border-white/[0.06] space-y-1">
+                      <span className="text-base font-mono font-bold text-[#E8D390] block">
+                        AI + SEO
+                      </span>
+                      <span className="text-xs text-[#A8A39A] block">توليد وسوم وبحث دلالي ذكي</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Main Interactive Workspace: Tabs */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10">
+      <section id="samiq-workspace" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10">
         <div className="flex items-center justify-center">
           <div className="p-1 rounded-2xl bg-white/[0.04] border border-white/10 inline-flex items-center gap-1 flex-wrap justify-center">
             <button
@@ -621,8 +675,8 @@ export default function SamiqShowcasePage() {
                     key={pkg.id}
                     className={`rounded-3xl p-6 border transition-all duration-300 flex flex-col justify-between gap-6 relative ${
                       isSelected
-                        ? 'bg-gradient-to-b from-[#C9A84C]/15 to-[#070709] border-[#C9A84C] shadow-[0_0_30px_rgba(201,168,76,0.2)] ring-1 ring-[#C9A84C]/50'
-                        : 'bg-white/[0.02] border-white/10 hover:border-white/20'
+                        ? 'bg-[#0D0D12] border-[#C9A84C] ring-1 ring-[#C9A84C]/35'
+                        : 'bg-[#0A0A0E] border-white/10 hover:border-white/25'
                     }`}
                   >
                     <div className="space-y-4">
@@ -631,7 +685,7 @@ export default function SamiqShowcasePage() {
                           {pkg.badge}
                         </span>
                         {isSelected && (
-                          <span className="text-xs text-emerald-400 font-bold">المحددة حالياً</span>
+                          <span className="text-xs text-[#E8D390] font-bold">المحددة حالياً</span>
                         )}
                       </div>
 
@@ -648,23 +702,23 @@ export default function SamiqShowcasePage() {
                         <div className="flex items-center justify-between gap-2">
                           <span className="text-xs text-[#8E8B85] block">عقد التأسيس (مرة واحدة):</span>
                           {pricingConfig.isDiscountEnabled && pkgPricing.discountUsd > 0 && (
-                            <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 font-bold">
+                            <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#C9A84C]/15 border border-[#C9A84C]/40 text-[#E8D390] font-bold tabular-nums">
                               خصم خاص {pkgPricing.discountPercent}% لفترة محدودة
                             </span>
                           )}
                         </div>
                         <div className="flex items-baseline gap-2 mt-0.5">
-                          <span className="text-3xl font-serif font-bold text-[#E8D390]">
+                          <span className="text-3xl font-serif font-bold text-[#E8D390] tabular-nums">
                             ${pkgPricing.totalUsd}
                           </span>
                           {pricingConfig.isDiscountEnabled && pkgPricing.discountUsd > 0 && (
-                            <span className="text-sm font-mono text-[#8E8B85] line-through">
+                            <span className="text-sm font-mono text-[#8E8B85] line-through tabular-nums">
                               ${pkgPricing.subtotalUsd}
                             </span>
                           )}
                           <span className="text-xs text-[#8E8B85]">دولار أمريكي</span>
                         </div>
-                        <span className="text-xs text-emerald-400 block">
+                        <span className="text-xs text-[#C9A84C] block">
                           {pricingConfig.firstYearHostingUsd > 0
                             ? `استضافة السنة الأولى: $${pricingConfig.firstYearHostingUsd}`
                             : 'يشمل استضافة السنة الأولى مجاناً ($0)'}
@@ -972,7 +1026,7 @@ export default function SamiqShowcasePage() {
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-[#8E8B85] block">إجمالي التأسيس لمرة واحدة:</span>
                       {pricingConfig.isDiscountEnabled && customPricing.discountUsd > 0 && (
-                        <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 font-bold">
+                        <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#C9A84C]/15 border border-[#C9A84C]/40 text-[#E8D390] font-bold tabular-nums">
                           خصم خاص {customPricing.discountPercent}% لفترة محدودة
                         </span>
                       )}

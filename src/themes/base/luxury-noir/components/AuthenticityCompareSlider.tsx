@@ -155,7 +155,7 @@ export function AuthenticityCompareSlider(props: AuthenticityCompareSliderProps)
                 setBatchCode('سيروم فيتامين سي 10%');
                 verify('سيروم فيتامين سي 10%');
               }}
-              className="min-h-[38px] px-2.5 py-1 rounded-xl bg-white/5 hover:bg-gold/15 text-champagne border border-white/10 text-xs font-bold transition active:scale-95"
+              className="min-h-[44px] px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-gold/15 text-champagne border border-white/10 text-xs font-semibold transition active:scale-95"
             >
               سيروم فيتامين سي 10%
             </button>
@@ -165,7 +165,7 @@ export function AuthenticityCompareSlider(props: AuthenticityCompareSliderProps)
                 setBatchCode('الغسول المرطب للبشرة');
                 verify('الغسول المرطب للبشرة');
               }}
-              className="min-h-[38px] px-2.5 py-1 rounded-xl bg-white/5 hover:bg-gold/15 text-champagne border border-white/10 text-xs font-bold transition active:scale-95"
+              className="min-h-[44px] px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-gold/15 text-champagne border border-white/10 text-xs font-semibold transition active:scale-95"
             >
               الغسول المرطب
             </button>
@@ -175,7 +175,7 @@ export function AuthenticityCompareSlider(props: AuthenticityCompareSliderProps)
                 setBatchCode('سيروم نياسيناميد 10%');
                 verify('سيروم نياسيناميد 10%');
               }}
-              className="min-h-[38px] px-2.5 py-1 rounded-xl bg-white/5 hover:bg-gold/15 text-champagne border border-white/10 text-xs font-bold transition active:scale-95"
+              className="min-h-[44px] px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-gold/15 text-champagne border border-white/10 text-xs font-semibold transition active:scale-95"
             >
               سيروم نياسيناميد
             </button>
@@ -185,7 +185,7 @@ export function AuthenticityCompareSlider(props: AuthenticityCompareSliderProps)
                 setBatchCode('منتج غير مصرح ومقلد');
                 verify('منتج غير مصرح ومقلد');
               }}
-              className="min-h-[38px] px-2.5 py-1 rounded-xl bg-rose-950/40 hover:bg-rose-950/70 text-rose-300 border border-rose-500/30 text-xs font-bold transition active:scale-95"
+              className="min-h-[44px] px-3 py-1.5 rounded-xl bg-[#221216] hover:bg-[#31181F] text-[#F5CCD2] border border-[#993B47]/50 text-xs font-semibold transition active:scale-95"
             >
               منتج مقلد غير مسجل
             </button>
@@ -317,8 +317,8 @@ export function AuthenticityCompareSlider(props: AuthenticityCompareSliderProps)
                       sizes="(max-width: 1024px) 100vw, 600px"
                       className="object-cover object-center filter blur-[0.5px] contrast-75 brightness-75 mix-blend-luminosity"
                     />
-                    <div className="absolute inset-0 bg-rose-950/40 mix-blend-multiply" />
-                    <div className="absolute top-3 end-3 px-3 py-1 rounded-md bg-rose-950/90 border border-rose-500/40 text-xs text-rose-300 font-sans font-bold">
+                    <div className="absolute inset-0 bg-[#1B0B0F]/35 mix-blend-multiply" />
+                    <div className="absolute top-3 end-3 px-3 py-1.5 rounded-lg bg-[#0A0A0E]/92 border border-[#993B47]/55 text-xs text-[#F5CCD2] font-sans font-semibold">
                       بديل مغشوش: رغوة + بدون ختم اعتماد
                     </div>
                   </div>
@@ -341,8 +341,8 @@ export function AuthenticityCompareSlider(props: AuthenticityCompareSliderProps)
                       className="object-cover object-center contrast-110 brightness-95"
                     />
                     <div className="absolute inset-0 bg-gold/10 mix-blend-overlay" />
-                    <div className="absolute top-3 start-3 px-3 py-1 rounded-md bg-emerald-950/90 border border-emerald-500/40 text-xs text-emerald-300 font-sans font-bold flex items-center gap-1.5">
-                      <VerifiedCheckIcon size={14} color="#34D399" />
+                    <div className="absolute top-3 start-3 px-3 py-1.5 rounded-lg bg-[#0A0A0E]/92 border border-gold/45 text-xs text-champagne font-sans font-semibold flex items-center gap-1.5">
+                      <VerifiedCheckIcon size={14} color="#C9A84C" />
                       <span>الأصلي المعتمد: مصرح ومطابق للمعايير</span>
                     </div>
                   </div>

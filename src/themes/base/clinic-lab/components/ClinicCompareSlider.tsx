@@ -43,7 +43,8 @@ export function ClinicCompareSlider({ guideData }: ClinicCompareSliderProps) {
 
   const points = guideData?.points || DEFAULT_INSPECTION_POINTS;
   const originalImage = guideData?.originalImage || '/media/products/serum-vitamin-c.jpg';
-  const fakeImage = guideData?.fakeImage || '/media/products/serum-niacinamide.jpg';
+  // Keep geometry aligned pixel-for-pixel across both optical halves; counterfeit traits render via filter + reticle
+  const fakeImage = originalImage;
 
   const updatePosition = useCallback((clientX: number) => {
     if (!containerRef.current) return;
