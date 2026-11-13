@@ -10,6 +10,7 @@ import {
   verifyAdminAuth,
   checkRateLimit,
   getClientIp,
+  sanitizeMediaUrl,
   sanitizeText,
   sanitizeNumber,
   sanitizeObjectDeep,
@@ -70,7 +71,7 @@ export async function POST(req: Request) {
       excerpt: sanitizeText(body.excerpt, 300) || content.slice(0, 140) + '...',
       content,
       author: sanitizeText(body.author || 'خبيرات مفتاح الجمال', 100),
-      coverImage: sanitizeText(body.coverImage || '/media/hero/hero-noir.jpg', 300),
+      coverImage: sanitizeMediaUrl(body.coverImage, '/media/hero/hero-noir.jpg'),
       tags: Array.isArray(body.tags)
         ? body.tags.map((t: string) => sanitizeText(t, 50))
         : ['العناية بالبشرة', 'كشف الأصلي'],
@@ -126,7 +127,13 @@ export async function PUT(req: Request) {
       id: existing.id,
       slug: slug || existing.slug,
       title: body.title ? sanitizeText(body.title, 150) : existing.title,
+      excerpt: body.excerpt !== undefined ? sanitizeText(body.excerpt, 300) : existing.excerpt,
       content: body.content ? sanitizeText(body.content, 10_000) : existing.content,
+      author: body.author !== undefined ? sanitizeText(body.author, 100) : existing.author,
+      coverImage:
+        body.coverImage !== undefined
+          ? sanitizeMediaUrl(body.coverImage, existing.coverImage)
+          : existing.coverImage,
     };
 
     saveBlogPost(updated);

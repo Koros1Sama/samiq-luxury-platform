@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getDb } from '@/core/db/store';
+import { getAllBranches, getAllCategories, getDb } from '@/core/db/store';
 
 export async function GET() {
   try {
@@ -15,6 +15,8 @@ export async function GET() {
       features: db.features,
       currency: db.tenant?.currency || 'YER',
       tenant: safeTenant,
+      branches: getAllBranches(),
+      categories: getAllCategories(),
       shippingZones: db.shippingZones || [],
     });
   } catch {

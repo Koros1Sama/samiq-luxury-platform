@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getAllProducts, getDb } from '@/core/db/store';
-import { ProductCardData } from '@/themes/contract';
+import { getPublishedProducts, getDb } from '@/core/db/store';
+import { PublicProductCardData, toPublicProducts } from '@/core/store/productApiHandlers';
 import {
   checkRateLimit,
   getClientIp,
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
     const queryLower = query.toLowerCase();
 
     const db = getDb();
-    const products = getAllProducts();
+    const products = toPublicProducts(getPublishedProducts());
     const storeName = sanitizeText(db.tenant?.name || 'مفتاح الجمال', 100);
 
     const apiKey = db.tenant?.notificationConfig?.geminiApiKey || process.env.GEMINI_API_KEY;
@@ -105,7 +105,7 @@ export async function POST(req: Request) {
 
     // Smart Local Heuristic Fallback
     let replyText = `يسعدني استشارتك في ${storeName}. جميع منتجاتنا في الكتالوج أصلية 100% ومستحضرات مصرحة ومطابقة للمواصفات والضمانات الرسمية.`;
-    let recommendedProducts: ProductCardData[] = [];
+    let recommendedProducts: PublicProductCardData[] = [];
     let quickPills = ['فحص سيروم فيتامين سي', 'روتين البشرة الدهنية', 'خدمة التوصيل بصنعاء'];
     let escalateToHuman = false;
 

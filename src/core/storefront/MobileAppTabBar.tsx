@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useStorefront } from './StorefrontProvider';
+import { resolveTenantContact } from './contactLinks';
 import { LuxuryMoreDrawer } from '@/themes/base/luxury-noir/components/LuxuryMoreDrawer';
 
 export function MobileAppTabBar() {
@@ -80,19 +81,7 @@ export function MobileAppTabBar() {
     { labelAr: 'حسابي ونقاط الولاء', labelEn: 'Account & Club', href: '/account' },
   ];
 
-  const contact = sf.tenant?.contact || {
-    phone: sf.tenant?.phone || '775234989',
-    whatsapp: sf.tenant?.whatsapp || '775234989',
-    social: {
-      tiktok: sf.tenant?.tiktok,
-      instagram: sf.tenant?.instagram,
-      facebook: sf.tenant?.facebook,
-    },
-    map: {
-      url: sf.tenant?.googleMaps || 'https://maps.app.goo.gl/DxsZTHrv2r386bXa9',
-      label: 'فرع صنعاء الرئيسي (حدة)',
-    },
-  };
+  const contact = resolveTenantContact(sf.tenant);
 
   return (
     <>

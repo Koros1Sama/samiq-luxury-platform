@@ -64,6 +64,45 @@ export function sanitizeText(input: unknown, maxLen = 500): string {
   return text;
 }
 
+const MAX_IMAGE_DATA_URL_LEN = 2_500_000;
+const SAFE_RASTER_DATA_IMAGE_RE =
+  /^data:image\/(?:png|jpeg|jpg|webp|avif|gif);base64,[A-Za-z0-9+/=]+$/i;
+
+/**
+ * Checks whether a string is a safe base64-encoded raster image Data URL
+ * (explicitly excludes SVG and non-image MIME types).
+ */
+export function isSafeRasterImageDataUrl(value: string): boolean {
+  const trimmed = value.trim();
+  return trimmed.length > 0 && trimmed.length <= MAX_IMAGE_DATA_URL_LEN && SAFE_RASTER_DATA_IMAGE_RE.test(trimmed);
+}
+
+/**
+ * Sanitizes image/media URLs while preserving safe raster Data URLs,
+ * local relative paths, and HTTP(S) URLs.
+ */
+export function sanitizeMediaUrl(input: unknown, fallback = ''): string {
+  if (typeof input !== 'string') return fallback;
+  const trimmed = input.trim();
+  if (!trimmed) return fallback;
+
+  if (isSafeRasterImageDataUrl(trimmed)) {
+    return trimmed;
+  }
+
+  if (/^\/(?!\/)/.test(trimmed)) {
+    const cleanPath = sanitizeText(trimmed, 500);
+    return /^\/(?!\/)/.test(cleanPath) ? cleanPath : fallback;
+  }
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    const cleanUrl = sanitizeText(trimmed, 1000);
+    return /^https?:\/\//i.test(cleanUrl) ? cleanUrl : fallback;
+  }
+
+  return fallback;
+}
+
 /**
  * Deeply and recursively sanitizes an object, array, or scalar.
  * Blocks Prototype Pollution attacks (__proto__, constructor, prototype)
@@ -75,6 +114,9 @@ export function sanitizeObjectDeep<T>(input: T, maxStringLen = 25000): T {
   }
 
   if (typeof input === 'string') {
+    if (isSafeRasterImageDataUrl(input)) {
+      return input.trim() as unknown as T;
+    }
     return sanitizeText(input, maxStringLen) as unknown as T;
   }
 
@@ -352,7 +394,7 @@ export function setAdminSessionCookie(response: NextResponse): void {
     sameSite: 'lax',
     path: '/',
     maxAge: 86400 * 7, // 7 days
-    secure: process.env.NODE_ENV === 'production',
+    secure: process.env.VERCEL === '1',
   });
 
   // Client-readable indicator cookie for UI state sync

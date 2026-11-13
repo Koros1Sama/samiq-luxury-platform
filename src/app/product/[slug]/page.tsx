@@ -18,6 +18,7 @@ import { useStorefront } from '@/core/storefront/StorefrontProvider';
 import { isValidThemeId, ThemeId } from '@/themes/contract';
 import { resolveThemePalette } from '@/core/storefront/themePalette';
 import { splitBilingualProductTitle } from '@/core/storefront/productQuickInfo';
+import { formatWhatsAppDigits } from '@/core/storefront/contactLinks';
 
 function ProductDetailContent() {
   const params = useParams();
@@ -148,7 +149,8 @@ function ProductDetailContent() {
     const text = isEn
       ? `Hello Miftah Al-Jamal, I would like to order the authentic product: *${product.title}*${varText} priced at ${formattedPrice}, compliant with SBDMA standards.`
       : `مرحباً متجر مفتاح الجمال، أود طلب المستحضر الأصلي: *${product.title}*${varText} بسعر ${formattedPrice}، مع التأكد من مطابقة معايير الهيئة العليا للأدوية والمستلزمات الطبية.`;
-    window.open(`https://wa.me/967775234989?text=${encodeURIComponent(text)}`, '_blank');
+    const waDigits = formatWhatsAppDigits(sf.tenant.contact?.whatsapp || sf.tenant.whatsapp);
+    window.open(`https://wa.me/${waDigits}?text=${encodeURIComponent(text)}`, '_blank');
   };
 
   const handleReviewSubmit = async (e: React.FormEvent) => {

@@ -4,6 +4,8 @@
  * Enforces strict dependency graph validation (requires)
  */
 
+import { FeatureFlags } from '@/themes/contract';
+
 export type FeatureCategory = 'tier' | 'addon' | 'channel' | 'integration' | 'intelligence';
 
 export interface FeatureDefinition {
@@ -493,4 +495,63 @@ export function resolveEffectiveFeatures(featureIds: string[]): string[] {
   }
 
   return Array.from(effective);
+}
+
+const ALL_PLATFORM_FEATURE_KEYS = [
+  'tier_1_static',
+  'tier_2_editable',
+  'tier_3_catalog',
+  'cart_whatsapp',
+  'customer_accounts',
+  'payment_gateways',
+  'ai_chatbot',
+  'whatsapp_channel',
+  'telegram_channel',
+  'authenticity_guide',
+  'skin_routine_advisor',
+  'smart_tags_ai',
+  'blog',
+  'bookings',
+  'coupons',
+  'delivery_zones',
+  'second_language',
+  'pwa_app',
+  'multi_branch',
+  'reviews_ratings',
+] as const;
+
+/**
+ * Converts an array of enabled feature IDs into a complete `FeatureFlags` record
+ * without dropping optional extension keys.
+ */
+export function buildFeatureFlagsFromList(
+  featureIds: string[],
+  existingFlags?: FeatureFlags
+): FeatureFlags {
+  const activeSet = new Set<string>(featureIds);
+  const allKeys = new Set<string>([
+    ...ALL_PLATFORM_FEATURE_KEYS,
+    ...Object.keys(FEATURES_REGISTRY),
+    ...Object.keys(existingFlags || {}),
+    ...featureIds,
+  ]);
+
+  const flags: FeatureFlags = {
+    tier_1_static: activeSet.has('tier_1_static'),
+    tier_2_editable: activeSet.has('tier_2_editable'),
+    tier_3_catalog: activeSet.has('tier_3_catalog'),
+    cart_whatsapp: activeSet.has('cart_whatsapp'),
+    customer_accounts: activeSet.has('customer_accounts'),
+    payment_gateways: activeSet.has('payment_gateways'),
+    ai_chatbot: activeSet.has('ai_chatbot'),
+    whatsapp_channel: activeSet.has('whatsapp_channel'),
+    telegram_channel: activeSet.has('telegram_channel'),
+    smart_tags_ai: activeSet.has('smart_tags_ai'),
+  };
+
+  for (const key of allKeys) {
+    flags[key] = activeSet.has(key);
+  }
+
+  return flags;
 }

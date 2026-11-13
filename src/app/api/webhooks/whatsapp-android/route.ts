@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getAllProducts, verifyBatchCode } from '@/core/db/store';
+import { getPublishedProducts, verifyBatchCode } from '@/core/db/store';
 
 /**
  * AutoResponder for WA Integration
@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     let reply = 'أهلاً بك في متجر مفتاح الجمال (لكشف المقلد). يمكنك كتابة "الاسعار" لمعرفة قائمة المنتجات، أو "الاصلي" لمعرفة علامات المنتج الأصلي ومطابقته لمعايير الهيئة العليا للأدوية، أو "طلب" لإتمام الشراء فوراً.';
 
     if (message.includes('اسعار') || message.includes('منتجات') || message.includes('كتالوج')) {
-      const products = getAllProducts();
+      const products = getPublishedProducts();
       reply = `قائمة المنتجات الأكثر طلباً في مفتاح الجمال:\n`;
       products.slice(0, 4).forEach((p, idx) => {
         reply += `${idx + 1}. ${p.title} (${p.brand}) - السعر: ${p.prices.YER} ر.ي\n`;

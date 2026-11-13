@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { SmartImage } from '@/core/ui/SmartImage';
-import { formatCurrency } from '@/core/currency/formatter';
+import { formatCurrency, convertCurrency } from '@/core/currency/formatter';
 import {
   VerifiedCheckIcon,
   CrossWarningIcon,
@@ -1169,9 +1169,13 @@ export default function MerchantAdminPage() {
     const prod = products.find((p) => p.id === posSelectedProductId);
     if (!prod) return;
 
-    const unitPrice = prod.prices?.[storeCurrency] ?? prod.prices?.YER ?? 20000;
-    const unitPriceYer = prod.prices?.YER ?? (storeCurrency === 'SAR' ? Math.round(unitPrice * 140) : storeCurrency === 'USD' ? Math.round(unitPrice * 530) : unitPrice);
-    const totalYer = unitPriceYer * posQuantity;
+    const unitPriceCurrent =
+      prod.prices?.[storeCurrency] ??
+      convertCurrency(prod.prices?.YER ?? 20000, 'YER', storeCurrency);
+    const totalCurrent =
+      storeCurrency === 'USD'
+        ? Number((unitPriceCurrent * posQuantity).toFixed(2))
+        : Math.round(unitPriceCurrent * posQuantity);
 
     const payload = {
       customerName: posCustomerName.trim(),
@@ -1186,10 +1190,10 @@ export default function MerchantAdminPage() {
           unitPrice: prod.prices,
         },
       ],
-      subtotalYer: totalYer,
+      subtotalYer: totalCurrent,
       shippingFeeYer: 0,
       discountYer: 0,
-      totalYer,
+      totalYer: totalCurrent,
       currency: storeCurrency,
       paymentMethod: posPaymentMethod,
       status: 'confirmed' as const, // auto-deducts stock!
@@ -1668,11 +1672,12 @@ export default function MerchantAdminPage() {
     (acc, p) => acc + (p.stockQuantity || 0) * (p.prices?.[storeCurrency] ?? p.prices?.YER ?? 0),
     0
   );
-  const expectedProfitCurrent = products.reduce(
-    (acc, p) =>
-      acc + (p.stockQuantity || 0) * ((p.prices?.[storeCurrency] ?? p.prices?.YER ?? 0) - (p.costPriceYer || 0)),
-    0
-  );
+  const expectedProfitCurrent = products.reduce((acc, p) => {
+    const retailCurrent =
+      p.prices?.[storeCurrency] ?? convertCurrency(p.prices?.YER ?? 0, 'YER', storeCurrency);
+    const costCurrent = convertCurrency(p.costPriceYer || 0, 'YER', storeCurrency);
+    return acc + (p.stockQuantity || 0) * (retailCurrent - costCurrent);
+  }, 0);
 
   const publishedCount = products.filter(
     (p) =>
@@ -2780,7 +2785,13 @@ export default function MerchantAdminPage() {
                         <div key={idx} className="flex items-center gap-2">
                           <span className="text-ivory">• {item.title}</span>
                           <span className="text-gold">×{item.quantity}</span>
-                          <span>({formatCurrency(item.unitPrice?.YER || 0, 'YER')})</span>
+                          <span>
+                            ({formatCurrency(
+                              item.unitPrice?.[o.currency || 'YER'] ??
+                                convertCurrency(item.unitPrice?.YER || 0, 'YER', o.currency || 'YER'),
+                              o.currency || 'YER'
+                            )})
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -3563,8 +3574,11 @@ export default function MerchantAdminPage() {
             {/* KPI Cards */}
             {(() => {
               const validOrders = orders.filter((o) => o.status !== 'cancelled');
-              const totalRevenueYer = validOrders.reduce((sum, o) => sum + (o.totalYer || 0), 0);
-              const totalRevenueUsd = Math.round(totalRevenueYer / 530);
+              const totalRevenueYer = validOrders.reduce(
+                (sum, o) => sum + convertCurrency(o.totalYer || 0, o.currency || 'YER', 'YER'),
+                0
+              );
+              const totalRevenueUsd = convertCurrency(totalRevenueYer, 'YER', 'USD');
               const avgOrderYer = validOrders.length > 0 ? Math.round(totalRevenueYer / validOrders.length) : 0;
               const completedCount = orders.filter((o) => o.status === 'delivered').length;
 

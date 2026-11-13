@@ -23,6 +23,11 @@ import { IvoryCartDrawer } from '@/themes/base/ivory-journal/components/IvoryCar
 import { ClinicCartDrawer } from '@/themes/base/clinic-lab/components/ClinicCartDrawer';
 import { MobileAppTabBar } from './MobileAppTabBar';
 import { DemoSimulatorGate } from './DemoSimulatorGate';
+import {
+  formatWhatsAppDigits,
+  formatWhatsAppDisplay,
+  resolveSocialChannel,
+} from './contactLinks';
 
 export interface SubpageThemeContextValue {
   activeTheme: ThemeId;
@@ -664,90 +669,105 @@ function SubpageThemeInner({
                 </div>
 
                 {/* Col 3: Contact & Main Branch */}
-                <div className="space-y-3">
-                  <h4 className="text-xs font-bold" style={{ color: palette.accent }}>
-                    {isEn ? 'Main Branch' : 'الفرع الرئيسي والتواصل'}
-                  </h4>
-                  <div className="space-y-2 text-xs font-sans" style={{ color: palette.muted }}>
-                    <p className="font-medium" style={{ color: palette.text }}>
-                      {isEn ? 'Sanaa Main Flagship' : 'صنعاء — فرع حدة الرئيسي'}
-                    </p>
-                    <p>{isEn ? 'Hadda St, near diplomatic quarter' : 'شارع حدة، بجوار الحي الدبلوماسي'}</p>
-                    <p>
-                      {isEn ? 'Direct Line / WhatsApp: ' : 'هاتف وواتساب: '}
-                      <span className="font-mono font-bold" style={{ color: palette.accent }}>
-                        775234989
-                      </span>
-                    </p>
-                    <a
-                      href={tenant.googleMaps || 'https://maps.app.goo.gl/DxsZTHrv2r386bXa9'}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="min-h-[40px] inline-flex items-center gap-1 underline font-semibold"
-                      style={{ color: palette.accent }}
-                    >
-                      <span>{isEn ? 'View on Google Maps' : 'موقع الفرع على خرائط جوجل'}</span>
-                      <span>↗</span>
-                    </a>
-                  </div>
-                </div>
+                {(() => {
+                  const rawWa = tenant.contact?.whatsapp || tenant.whatsapp || '775234989';
+                  const waDigits = formatWhatsAppDigits(rawWa);
+                  const waDisplay = formatWhatsAppDisplay(rawWa);
+                  const ig = resolveSocialChannel(tenant, 'instagram');
+                  const tk = resolveSocialChannel(tenant, 'tiktok');
+                  return (
+                    <>
+                      <div className="space-y-3">
+                        <h4 className="text-xs font-bold" style={{ color: palette.accent }}>
+                          {isEn ? 'Main Branch' : 'الفرع الرئيسي والتواصل'}
+                        </h4>
+                        <div className="space-y-2 text-xs font-sans" style={{ color: palette.muted }}>
+                          <p className="font-medium" style={{ color: palette.text }}>
+                            {isEn ? `${tenant.city || 'Sanaa'} Main Branch` : `${tenant.city || 'صنعاء'} — الفرع الرئيسي`}
+                          </p>
+                          <p>{tenant.deliveryCoverage || (isEn ? 'Hadda St, near diplomatic quarter' : 'شارع حدة، بجوار الحي الدبلوماسي')}</p>
+                          <p>
+                            {isEn ? 'Direct Line / WhatsApp: ' : 'هاتف وواتساب: '}
+                            <span className="font-mono font-bold" dir="ltr" style={{ color: palette.accent }}>
+                              {waDisplay}
+                            </span>
+                          </p>
+                          <a
+                            href={tenant.googleMaps || tenant.contact?.map?.url || 'https://maps.app.goo.gl/DxsZTHrv2r386bXa9'}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="min-h-[40px] inline-flex items-center gap-1 underline font-semibold"
+                            style={{ color: palette.accent }}
+                          >
+                            <span>{isEn ? 'View on Google Maps' : 'موقع الفرع على خرائط جوجل'}</span>
+                            <span>↗</span>
+                          </a>
+                        </div>
+                      </div>
 
-                {/* Col 4: Official Social Channels */}
-                <div className="space-y-3">
-                  <h4 className="text-xs font-bold" style={{ color: palette.accent }}>
-                    {isEn ? 'Social Channels' : 'القنوات المعتمدة'}
-                  </h4>
-                  <div className="space-y-2 text-xs font-sans">
-                    <a
-                      href="https://wa.me/967775234989"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="min-h-[44px] flex items-center justify-between p-2.5 rounded-lg border transition hover:opacity-100"
-                      style={{
-                        borderColor: palette.border,
-                        color: palette.text,
-                        backgroundColor: isLight ? '#00000005' : '#FFFFFF05',
-                      }}
-                    >
-                      <span>WhatsApp Direct</span>
-                      <span className="font-mono text-xs" style={{ color: palette.accent }}>
-                        +967 775 234 989
-                      </span>
-                    </a>
-                    <a
-                      href="https://instagram.com/tamifttah"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="min-h-[44px] flex items-center justify-between p-2.5 rounded-lg border transition hover:opacity-100"
-                      style={{
-                        borderColor: palette.border,
-                        color: palette.text,
-                        backgroundColor: isLight ? '#00000005' : '#FFFFFF05',
-                      }}
-                    >
-                      <span>Instagram</span>
-                      <span className="font-mono text-xs" style={{ color: palette.accent }}>
-                        @tamifttah
-                      </span>
-                    </a>
-                    <a
-                      href="https://tiktok.com/@tamiffttah"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="min-h-[44px] flex items-center justify-between p-2.5 rounded-lg border transition hover:opacity-100"
-                      style={{
-                        borderColor: palette.border,
-                        color: palette.text,
-                        backgroundColor: isLight ? '#00000005' : '#FFFFFF05',
-                      }}
-                    >
-                      <span>TikTok</span>
-                      <span className="font-mono text-xs" style={{ color: palette.accent }}>
-                        @tamiffttah
-                      </span>
-                    </a>
-                  </div>
-                </div>
+                      {/* Col 4: Official Social Channels */}
+                      <div className="space-y-3">
+                        <h4 className="text-xs font-bold" style={{ color: palette.accent }}>
+                          {isEn ? 'Social Channels' : 'القنوات المعتمدة'}
+                        </h4>
+                        <div className="space-y-2 text-xs font-sans">
+                          <a
+                            href={`https://wa.me/${waDigits}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="min-h-[44px] flex items-center justify-between p-2.5 rounded-lg border transition hover:opacity-100"
+                            style={{
+                              borderColor: palette.border,
+                              color: palette.text,
+                              backgroundColor: isLight ? '#00000005' : '#FFFFFF05',
+                            }}
+                          >
+                            <span>WhatsApp Direct</span>
+                            <span className="font-mono text-xs" dir="ltr" style={{ color: palette.accent }}>
+                              {waDisplay}
+                            </span>
+                          </a>
+                          {ig && (
+                            <a
+                              href={ig.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="min-h-[44px] flex items-center justify-between p-2.5 rounded-lg border transition hover:opacity-100"
+                              style={{
+                                borderColor: palette.border,
+                                color: palette.text,
+                                backgroundColor: isLight ? '#00000005' : '#FFFFFF05',
+                              }}
+                            >
+                              <span>Instagram</span>
+                              <span className="font-mono text-xs" dir="ltr" style={{ color: palette.accent }}>
+                                {ig.handle}
+                              </span>
+                            </a>
+                          )}
+                          {tk && (
+                            <a
+                              href={tk.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="min-h-[44px] flex items-center justify-between p-2.5 rounded-lg border transition hover:opacity-100"
+                              style={{
+                                borderColor: palette.border,
+                                color: palette.text,
+                                backgroundColor: isLight ? '#00000005' : '#FFFFFF05',
+                              }}
+                            >
+                              <span>TikTok</span>
+                              <span className="font-mono text-xs" dir="ltr" style={{ color: palette.accent }}>
+                                {tk.handle}
+                              </span>
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
 
               {/* Bottom Copyright & SAMIQ Attribution */}

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getAllProducts } from '@/core/db/store';
+import { getPublishedProducts } from '@/core/db/store';
 
 /**
  * Telegram Bot Webhook
@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     if (text === '/start') {
       responseText = 'مرحباً بك في مفتاح الجمال. بوابتك الموثوقة لعالم الجمال في صنعاء واليمن. نوفر لك أرقى مستحضرات التجميل والعناية الأصلية 100% مع ضمان فحص الباركود.';
     } else if (text === '/catalog' || text.includes('منتجات')) {
-      const products = getAllProducts();
+      const products = getPublishedProducts();
       responseText = 'كتالوج مفتاح الجمال الأكثر طلباً:\n\n';
       products.forEach((p, idx) => {
         responseText += `${idx + 1}. ${p.title} - ${p.prices.YER} ر.ي\n`;

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { MiftahLogoSvg } from './MiftahLogoSvg';
 import { BagCartIcon, SparkleStarIcon } from './LuxuryIcons';
 import { useStorefront } from '@/core/storefront/StorefrontProvider';
+import { resolveTenantContact } from '@/core/storefront/contactLinks';
 import { ThemeCurrencyCode, FeatureFlags } from '../../../contract';
 
 function OnDemandDrawer({
@@ -56,20 +57,7 @@ export function LuxuryHeader(props: LuxuryHeaderProps) {
   const locale = sf.locale || 'ar';
   const isEn = locale === 'en';
 
-  const contact = sf.tenant.contact || {
-    whatsapp: sf.tenant.whatsapp || '775234989',
-    phone: sf.tenant.phone || '775234989',
-    social: {
-      tiktok: sf.tenant.tiktok,
-      instagram: sf.tenant.instagram,
-      facebook: sf.tenant.facebook,
-    },
-    map: {
-      url: sf.tenant.googleMaps || 'https://maps.app.goo.gl/DxsZTHrv2r386bXa9',
-      label: 'فرع صنعاء الرئيسي (حدة)',
-      city: sf.tenant.city || 'صنعاء',
-    },
-  };
+  const contact = resolveTenantContact(sf.tenant);
 
   const navLinks = [
     { labelAr: 'الرئيسية', labelEn: 'Home', href: '/', show: true },

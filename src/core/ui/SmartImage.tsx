@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Image, { ImageProps } from 'next/image';
 
 export interface SmartImageProps extends Omit<ImageProps, 'onError'> {
@@ -19,11 +19,23 @@ export function SmartImage({
   wrapperClassName = '',
   aspectRatioClass,
   fallbackSrc,
+  unoptimized,
   ...rest
 }: SmartImageProps) {
-  const [hasError, setHasError] = useState(false);
+  const resolvedInitialSrc =
+    typeof src === 'string' && !src.trim() && fallbackSrc ? fallbackSrc : src;
+  const [activeSrc, setActiveSrc] = useState(resolvedInitialSrc);
+  const [hasError, setHasError] = useState(
+    typeof resolvedInitialSrc === 'string' && !resolvedInitialSrc.trim()
+  );
 
-  if (hasError) {
+  useEffect(() => {
+    const nextSrc = typeof src === 'string' && !src.trim() && fallbackSrc ? fallbackSrc : src;
+    setActiveSrc(nextSrc);
+    setHasError(typeof nextSrc === 'string' && !nextSrc.trim());
+  }, [src, fallbackSrc]);
+
+  if (hasError || (typeof activeSrc === 'string' && !activeSrc.trim())) {
     return (
       <div
         className={`w-full h-full flex flex-col items-center justify-center bg-neutral-900 border border-neutral-800 text-neutral-500 text-xs p-2 select-none ${
@@ -50,17 +62,22 @@ export function SmartImage({
     );
   }
 
+  const activeSrcStr = typeof activeSrc === 'string' ? activeSrc.trim() : '';
+  const shouldBypassOptimizer =
+    unoptimized ?? (activeSrcStr.startsWith('data:') || /^https?:\/\//i.test(activeSrcStr));
+
   const imageElement = (
     <Image
-      src={src}
+      src={activeSrc}
       alt={alt}
       fill={fill}
       priority={priority}
       sizes={fill ? sizes : undefined}
+      unoptimized={shouldBypassOptimizer}
       className={className}
       onError={() => {
-        if (fallbackSrc && src !== fallbackSrc) {
-          // If fallback provided, try that
+        if (fallbackSrc && activeSrc !== fallbackSrc) {
+          setActiveSrc(fallbackSrc);
           setHasError(false);
         } else {
           setHasError(true);

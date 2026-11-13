@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { CartItem, ThemeCurrencyCode } from '@/themes/contract';
 import { formatCurrency, convertCurrency } from '@/core/currency/formatter';
 import { useStorefront } from './StorefrontProvider';
+import { formatWhatsAppDigits } from './contactLinks';
 
 export interface ShippingZone {
   id: string;
@@ -74,6 +75,10 @@ export type PaymentMethodType =
 export interface AppliedCoupon {
   code: string;
   discountYer: number;
+  discountAmount?: number;
+  discountPercentage?: number;
+  fixedDiscountYer?: number;
+  currency?: ThemeCurrencyCode;
   message: string;
 }
 
@@ -91,11 +96,11 @@ export function useCheckout(options?: UseCheckoutOptions) {
 
   const items = options?.items || sf.cart.items;
   const currentCurrency = options?.currency || sf.currency;
-  const whatsappNumber =
+  const whatsappNumber = formatWhatsAppDigits(
     options?.whatsappNumber ||
     sf.tenant.contact?.whatsapp ||
-    sf.tenant.whatsapp ||
-    '967775234989';
+    sf.tenant.whatsapp
+  );
 
   const dynamicZones =
     options?.customZones ||
@@ -141,7 +146,9 @@ export function useCheckout(options?: UseCheckoutOptions) {
   const subtotalCurrent = useMemo(
     () =>
       items.reduce((sum, item) => {
-        const price = item.unitPrice[currentCurrency] || item.unitPrice.YER || 0;
+        const price =
+          item.unitPrice[currentCurrency] ??
+          convertCurrency(item.unitPrice.YER || 0, 'YER', currentCurrency);
         return sum + price * item.quantity;
       }, 0),
     [items, currentCurrency]
@@ -157,12 +164,33 @@ export function useCheckout(options?: UseCheckoutOptions) {
 
   const shippingFeeYer = selectedZone ? selectedZone.feeYer : 0;
 
-  // Discount in current currency
-  const discountYer = appliedCoupon ? appliedCoupon.discountYer : 0;
+  // Discount calculated dynamically for current currency and subtotal
+  const discountYer = useMemo(() => {
+    if (!appliedCoupon) return 0;
+    if (appliedCoupon.discountPercentage && appliedCoupon.discountPercentage > 0) {
+      return Math.min(subtotalYer, Math.round((subtotalYer * appliedCoupon.discountPercentage) / 100));
+    }
+    if (appliedCoupon.fixedDiscountYer && appliedCoupon.fixedDiscountYer > 0) {
+      return Math.min(subtotalYer, appliedCoupon.fixedDiscountYer);
+    }
+    return Math.min(subtotalYer, appliedCoupon.discountYer);
+  }, [appliedCoupon, subtotalYer]);
+
   const discountCurrent = useMemo(() => {
     if (!appliedCoupon) return 0;
-    return appliedCoupon.discountYer;
-  }, [appliedCoupon]);
+    if (appliedCoupon.discountPercentage && appliedCoupon.discountPercentage > 0) {
+      const pctDiscount = (subtotalCurrent * appliedCoupon.discountPercentage) / 100;
+      const rounded = currentCurrency === 'USD' ? Number(pctDiscount.toFixed(2)) : Math.round(pctDiscount);
+      return Math.min(subtotalCurrent, rounded);
+    }
+    if (appliedCoupon.fixedDiscountYer && appliedCoupon.fixedDiscountYer > 0) {
+      const converted = convertCurrency(appliedCoupon.fixedDiscountYer, 'YER', currentCurrency);
+      return Math.min(subtotalCurrent, converted);
+    }
+    const baseAmount = appliedCoupon.discountAmount ?? appliedCoupon.discountYer;
+    const baseCurrency = appliedCoupon.currency || 'YER';
+    return Math.min(subtotalCurrent, convertCurrency(baseAmount, baseCurrency, currentCurrency));
+  }, [appliedCoupon, subtotalCurrent, currentCurrency]);
 
   const totalYer = Math.max(0, subtotalYer + shippingFeeYer - discountYer);
   const totalCurrent = Math.max(0, subtotalCurrent + shippingFeeCurrent - discountCurrent);
@@ -177,13 +205,24 @@ export function useCheckout(options?: UseCheckoutOptions) {
       const res = await fetch('/api/store/coupons', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code, subtotalYer: subtotalCurrent }),
+        body: JSON.stringify({
+          code,
+          subtotal: subtotalCurrent,
+          subtotalYer: subtotalCurrent,
+          currency: currentCurrency,
+        }),
       });
       const data = await res.json();
       if (data.isValid) {
+        const appliedCurrency: ThemeCurrencyCode = data.currency || currentCurrency;
+        const resolvedDiscount = Number(data.discountAmount ?? data.discountAmountYer ?? 0);
         setAppliedCoupon({
           code: code.toUpperCase(),
-          discountYer: data.discountAmountYer,
+          discountAmount: resolvedDiscount,
+          discountPercentage: data.discountPercentage,
+          fixedDiscountYer: data.fixedDiscountYer,
+          currency: appliedCurrency,
+          discountYer: convertCurrency(resolvedDiscount, appliedCurrency, 'YER'),
           message: data.message,
         });
       } else {
@@ -194,7 +233,7 @@ export function useCheckout(options?: UseCheckoutOptions) {
     } finally {
       setIsApplyingCoupon(false);
     }
-  }, [couponCode, subtotalCurrent]);
+  }, [couponCode, subtotalCurrent, currentCurrency]);
 
   const removeCoupon = useCallback(() => {
     setAppliedCoupon(null);
@@ -229,7 +268,9 @@ export function useCheckout(options?: UseCheckoutOptions) {
       message += `المنتجات المطلوبة:\n`;
 
       items.forEach((item, index) => {
-        const itemPrice = item.unitPrice[currentCurrency] || item.unitPrice.YER;
+        const itemPrice =
+          item.unitPrice[currentCurrency] ??
+          convertCurrency(item.unitPrice.YER || 0, 'YER', currentCurrency);
         const isPreorder = Boolean((item as any).isPreorder || ((item as any).stockQuantity !== undefined && (item as any).stockQuantity <= 0));
         const preorderNote = isPreorder ? ' [حجز/تأكيد توفر]' : '';
         message += `${index + 1}. ${item.title}${item.variantTitle ? ` (${item.variantTitle})` : ''}${preorderNote} × ${item.quantity} = ${formatCurrency(itemPrice * item.quantity, currentCurrency)}\n`;

@@ -20,6 +20,7 @@ import {
   getClientActiveTheme,
   getClientCustomPalette,
 } from './themePalette';
+import { formatWhatsAppDigits } from './contactLinks';
 
 const DEFAULT_PLATFORM_META: PlatformMeta = {
   platformNameAr: 'سَامِق',
@@ -109,20 +110,28 @@ interface StorefrontProviderProps {
 }
 
 export function StorefrontProvider({
-  tenant = DEFAULT_STOREFRONT_TENANT,
+  tenant: initialTenant = DEFAULT_STOREFRONT_TENANT,
   features = DEFAULT_STOREFRONT_FEATURES,
   products: initialProducts = [],
-  categories = [],
+  categories: initialCategories = [],
   blocksData = {},
   initialCurrency = 'YER',
   platformMeta,
-  branches = [],
-  shippingZones = [],
+  branches: initialBranches = [],
+  shippingZones: initialShippingZones = [],
   children,
 }: StorefrontProviderProps) {
-  // 0. Features & Live Products state
+  // 0. Features, Tenant & Live Catalog state
+  const [tenant, setTenantState] = useState<TenantBrandInfo>(initialTenant);
   const [featuresState, setFeaturesState] = useState<FeatureFlags>(features);
   const [products, setProductsState] = useState<ProductCardData[]>(initialProducts);
+  const [categories, setCategoriesState] = useState<CategoryItem[]>(initialCategories);
+  const [branches, setBranchesState] = useState<any[]>(initialBranches);
+  const [shippingZones, setShippingZonesState] = useState<any[]>(initialShippingZones);
+
+  useEffect(() => {
+    setTenantState(initialTenant);
+  }, [initialTenant]);
   useEffect(() => {
     setFeaturesState(features);
   }, [features]);
@@ -131,6 +140,21 @@ export function StorefrontProvider({
       setProductsState(initialProducts);
     }
   }, [initialProducts]);
+  useEffect(() => {
+    if (initialCategories && initialCategories.length > 0) {
+      setCategoriesState(initialCategories);
+    }
+  }, [initialCategories]);
+  useEffect(() => {
+    if (initialBranches && initialBranches.length > 0) {
+      setBranchesState(initialBranches);
+    }
+  }, [initialBranches]);
+  useEffect(() => {
+    if (initialShippingZones && initialShippingZones.length > 0) {
+      setShippingZonesState(initialShippingZones);
+    }
+  }, [initialShippingZones]);
 
   const updateFeatures = useCallback((newFeatures: FeatureFlags) => {
     setFeaturesState((prev) => ({
@@ -140,10 +164,10 @@ export function StorefrontProvider({
   }, []);
 
   // Theme & Chameleon Palette State
-  const initialThemeId = (tenant.themeId || (tenant as any).activeTheme || 'luxury-noir') as ThemeId;
+  const initialThemeId = (initialTenant.themeId || (initialTenant as any).activeTheme || 'luxury-noir') as ThemeId;
   const [activeTheme, setActiveThemeState] = useState<ThemeId>(initialThemeId);
   const [customPalette, setCustomPaletteState] = useState<BrandPalette | null>(
-    (tenant as any).brandPalette || null
+    (initialTenant as any).brandPalette || null
   );
 
   // Bilingual Locale State
@@ -167,24 +191,52 @@ export function StorefrontProvider({
     }
   }, [tenant.currency]);
 
-  // Hydrate live store currency, features, shippingZones, and products on client (especially for subpages)
+  // Hydrate live store currency, tenant, branches, categories, features, shippingZones, and products on client
   useEffect(() => {
     let active = true;
     async function syncLiveStoreConfig() {
-      try {
-        const res = await fetch('/api/store/features');
-        const data = await res.json();
-        if (!active || !data?.success) return;
-        if (data.currency && ['YER', 'SAR', 'USD'].includes(data.currency)) {
-          setCurrencyState(data.currency as ThemeCurrencyCode);
-        }
-        if (data.features && typeof data.features === 'object') {
-          setFeaturesState((prev) => ({ ...prev, ...data.features }));
-        }
-        if (typeof window !== 'undefined' && Array.isArray(data.shippingZones) && data.shippingZones.length > 0) {
-          (window as any).__SAMIQ_SHIPPING_ZONES__ = data.shippingZones;
-        }
-      } catch {}
+      const urlTenantSlug =
+        typeof window !== 'undefined'
+          ? new URLSearchParams(window.location.search).get('tenant')
+          : null;
+      const isAlternateTenantPreview = Boolean(urlTenantSlug && urlTenantSlug !== 'miftah');
+
+      if (!isAlternateTenantPreview) {
+        try {
+          const res = await fetch('/api/store/features');
+          const data = await res.json();
+          if (!active || !data?.success) return;
+
+          if (data.currency && ['YER', 'SAR', 'USD'].includes(data.currency)) {
+            setCurrencyState(data.currency as ThemeCurrencyCode);
+          }
+          if (data.features && typeof data.features === 'object') {
+            setFeaturesState((prev) => ({ ...prev, ...data.features }));
+          }
+          if (data.tenant && typeof data.tenant === 'object') {
+            setTenantState((prev) => ({
+              ...prev,
+              ...data.tenant,
+              contact: {
+                ...prev.contact,
+                ...(data.tenant.contact || {}),
+              },
+            }));
+          }
+          if (Array.isArray(data.branches) && data.branches.length > 0) {
+            setBranchesState(data.branches);
+          }
+          if (Array.isArray(data.categories) && data.categories.length > 0) {
+            setCategoriesState(data.categories);
+          }
+          if (Array.isArray(data.shippingZones) && data.shippingZones.length > 0) {
+            setShippingZonesState(data.shippingZones);
+            if (typeof window !== 'undefined') {
+              (window as any).__SAMIQ_SHIPPING_ZONES__ = data.shippingZones;
+            }
+          }
+        } catch {}
+      }
 
       if (initialProducts.length === 0) {
         try {
@@ -535,8 +587,8 @@ export function StorefrontProvider({
     [currency]
   );
 
-  // Dynamic WhatsApp Messages: Uses tenant.name and tenant.contact.whatsapp
-  const whatsappNumber = tenant.contact?.whatsapp || tenant.whatsapp || '';
+  // Dynamic WhatsApp Messages: Uses tenant.name and normalized tenant whatsapp digits
+  const whatsappNumber = formatWhatsAppDigits(tenant.contact?.whatsapp || tenant.whatsapp);
   const tenantName = tenant.name || 'المتجر';
 
   const buildOrderWhatsAppUrl = useCallback(

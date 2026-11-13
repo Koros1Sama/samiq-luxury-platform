@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getPublishedProducts } from '@/core/db/store';
+import { toPublicProducts } from '@/core/store/productApiHandlers';
 import {
   checkRateLimit,
   getClientIp,
@@ -18,7 +19,7 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const q = sanitizeText(searchParams.get('q') || '', 100).toLowerCase();
 
-  const products = getPublishedProducts();
+  const products = toPublicProducts(getPublishedProducts());
   if (!q) {
     return NextResponse.json({ success: true, count: products.length, results: products });
   }

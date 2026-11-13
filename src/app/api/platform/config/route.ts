@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getDb, saveDb, SamiqProjectRecord, DEFAULT_PRICING_CONFIG } from '@/core/db/store';
 import { ThemeId, isValidThemeId, FeatureFlags, PlatformMeta } from '@/themes/contract';
+import { buildFeatureFlagsFromList } from '@/core/features/registry';
 import { MOCK_PLATFORM_META } from '@/core/store/mockData';
 import {
   verifyAdminAuth,
@@ -168,21 +169,7 @@ export async function POST(req: Request) {
         }
 
         if (projId === 'proj-miftah') {
-          const activeSet = new Set<string>(nextFeatures);
-          db.features = {
-            tier_1_static: activeSet.has('tier_1_static'),
-            tier_2_editable: activeSet.has('tier_2_editable'),
-            tier_3_catalog: activeSet.has('tier_3_catalog'),
-            cart_whatsapp: activeSet.has('cart_whatsapp'),
-            customer_accounts: activeSet.has('customer_accounts'),
-            payment_gateways: activeSet.has('payment_gateways'),
-            ai_chatbot: activeSet.has('ai_chatbot'),
-            whatsapp_channel: activeSet.has('whatsapp_channel'),
-            telegram_channel: activeSet.has('telegram_channel'),
-            authenticity_guide: activeSet.has('authenticity_guide'),
-            skin_routine_advisor: activeSet.has('skin_routine_advisor'),
-            smart_tags_ai: activeSet.has('smart_tags_ai'),
-          };
+          db.features = buildFeatureFlagsFromList(nextFeatures, db.features);
         }
       }
     }
@@ -202,22 +189,10 @@ export async function POST(req: Request) {
     // 3. Update feature flags directly if provided
     if (body.features) {
       if (Array.isArray(body.features)) {
-        const activeSet = new Set<string>(body.features);
-        const nextFeatures: FeatureFlags = {
-          tier_1_static: activeSet.has('tier_1_static'),
-          tier_2_editable: activeSet.has('tier_2_editable'),
-          tier_3_catalog: activeSet.has('tier_3_catalog'),
-          cart_whatsapp: activeSet.has('cart_whatsapp'),
-          customer_accounts: activeSet.has('customer_accounts'),
-          payment_gateways: activeSet.has('payment_gateways'),
-          ai_chatbot: activeSet.has('ai_chatbot'),
-          whatsapp_channel: activeSet.has('whatsapp_channel'),
-          telegram_channel: activeSet.has('telegram_channel'),
-          authenticity_guide: activeSet.has('authenticity_guide'),
-          skin_routine_advisor: activeSet.has('skin_routine_advisor'),
-          smart_tags_ai: activeSet.has('smart_tags_ai'),
-        };
-        db.features = nextFeatures;
+        db.features = buildFeatureFlagsFromList(
+          body.features.filter((item: unknown): item is string => typeof item === 'string'),
+          db.features
+        );
       } else if (typeof body.features === 'object') {
         db.features = {
           ...db.features,

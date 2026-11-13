@@ -197,6 +197,19 @@ export function resolveTenant(slugOrDomain?: string): ResolvedTenantContext {
     };
   }
 
+  // Demo restaurant tenant preset for multi-tenant verification
+  if (slugOrDomain === 'demo-restaurant') {
+    const rawFeatures = ['tier_1_static', 'tier_2_editable', 'tier_3_catalog', 'cart_whatsapp'];
+    const effectiveFeatureIds = resolveEffectiveFeatures(rawFeatures);
+    const featureSet = new Set(effectiveFeatureIds);
+    return {
+      tenant: DEMO_RESTAURANT_TENANT,
+      activeFeatureIds: effectiveFeatureIds,
+      isFeatureEnabled: (id: string) => featureSet.has(id),
+      mode,
+    };
+  }
+
   // Default to Miftah pilot tenant (Luxury Noir)
   const tenant = DEFAULT_PILOT_TENANT;
   const rawFeatures = DEFAULT_PILOT_FEATURES;

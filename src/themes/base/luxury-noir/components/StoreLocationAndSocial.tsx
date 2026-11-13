@@ -9,26 +9,13 @@ import {
   MapPinIcon,
 } from './LuxuryIcons';
 import { useStorefront } from '@/core/storefront/StorefrontProvider';
+import { resolveTenantContact } from '@/core/storefront/contactLinks';
 import { SectionComponentProps } from '../../../contract';
 
 export function StoreLocationAndSocial(_props: Partial<SectionComponentProps>) {
   const { tenant, features, branches } = useStorefront();
 
-  const contact = tenant.contact || {
-    whatsapp: tenant.whatsapp || '775234989',
-    phone: tenant.phone || '775234989',
-    social: {
-      tiktok: tenant.tiktok || 'https://www.tiktok.com/@tamiffttah',
-      instagram: tenant.instagram || 'https://www.instagram.com/tamifttah',
-      facebook: tenant.facebook || 'https://www.facebook.com',
-      tiktokHandle: '@tamiffttah',
-    },
-    map: {
-      url: tenant.googleMaps || 'https://maps.app.goo.gl/DxsZTHrv2r386bXa9',
-      label: 'فرع صنعاء الرئيسي (حدة)',
-      city: tenant.city || 'صنعاء',
-    },
-  };
+  const contact = resolveTenantContact(tenant);
 
   const channels = [
     {
@@ -46,7 +33,7 @@ export function StoreLocationAndSocial(_props: Partial<SectionComponentProps>) {
     {
       name: 'واتساب خدمة العملاء والطلبات',
       role: 'استشارة فورية والطلب المباشر مع خبراء التجميل',
-      url: `https://wa.me/${contact.whatsapp?.startsWith('967') ? contact.whatsapp : `967${contact.whatsapp}`}`,
+      url: `https://wa.me/${contact.whatsapp}`,
       icon: <WhatsAppIcon size={20} color="#C9A84C" />,
     },
     {

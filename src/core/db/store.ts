@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { MOCK_STOREFRONT_DATA } from '../store/mockData';
+import { convertCurrency } from '../currency/formatter';
 import { CLIENT_INDUSTRY_PRESETS } from '@/core/tenant/presets';
 import { ProductCardData, ThemeCurrencyCode, TenantBrandInfo, PlatformMeta, CategoryItem } from '@/themes/contract';
 import { AuthenticityComparisonData } from '@/modules/blocks/types';
@@ -1059,32 +1060,68 @@ export function deleteCoupon(code: string): boolean {
   return false;
 }
 
-export function validateCoupon(code: string, subtotalAmount: number): { isValid: boolean; discountAmountYer: number; message: string } {
+export interface CouponValidationResult {
+  isValid: boolean;
+  discountAmountYer: number;
+  discountAmount: number;
+  discountPercentage?: number;
+  fixedDiscountYer?: number;
+  currency: ThemeCurrencyCode;
+  message: string;
+}
+
+export function validateCoupon(
+  code: string,
+  subtotalAmount: number,
+  currency?: ThemeCurrencyCode
+): CouponValidationResult {
   const db = getDb();
-  const activeCur = db.tenant?.currency || 'YER';
+  const activeCur: ThemeCurrencyCode = currency || db.tenant?.currency || 'YER';
   const curLabel = activeCur === 'SAR' ? 'ر.س' : activeCur === 'USD' ? '$' : 'ر.ي';
-  const coupon = db.coupons.find((c) => c.code.toUpperCase() === code.trim().toUpperCase() && c.isActive);
+  const coupon = db.coupons.find(
+    (c) => c.code.toUpperCase() === code.trim().toUpperCase() && c.isActive
+  );
   if (!coupon) {
-    return { isValid: false, discountAmountYer: 0, message: 'كود الخصم غير صحيح أو منتهي الصلاحية' };
-  }
-  if (coupon.minOrderAmountYer && subtotalAmount < coupon.minOrderAmountYer) {
     return {
       isValid: false,
       discountAmountYer: 0,
-      message: `الحد الأدنى لتطبيق هذا الكوبون هو ${coupon.minOrderAmountYer} ${curLabel}`,
+      discountAmount: 0,
+      currency: activeCur,
+      message: 'كود الخصم غير صحيح أو منتهي الصلاحية',
+    };
+  }
+
+  const minOrderInCur = coupon.minOrderAmountYer
+    ? convertCurrency(coupon.minOrderAmountYer, 'YER', activeCur)
+    : 0;
+
+  if (minOrderInCur > 0 && subtotalAmount < minOrderInCur) {
+    return {
+      isValid: false,
+      discountAmountYer: 0,
+      discountAmount: 0,
+      currency: activeCur,
+      message: `الحد الأدنى لتطبيق هذا الكوبون هو ${minOrderInCur} ${curLabel}`,
     };
   }
 
   let discount = 0;
   if (coupon.discountPercentage > 0) {
-    discount = Number(((subtotalAmount * coupon.discountPercentage) / 100).toFixed(activeCur === 'USD' ? 2 : 0));
+    discount = Number(
+      ((subtotalAmount * coupon.discountPercentage) / 100).toFixed(activeCur === 'USD' ? 2 : 0)
+    );
   } else if (coupon.fixedDiscountYer) {
-    discount = Math.min(coupon.fixedDiscountYer, subtotalAmount);
+    const fixedInCur = convertCurrency(coupon.fixedDiscountYer, 'YER', activeCur);
+    discount = Math.min(fixedInCur, subtotalAmount);
   }
 
   return {
     isValid: true,
     discountAmountYer: discount,
+    discountAmount: discount,
+    discountPercentage: coupon.discountPercentage > 0 ? coupon.discountPercentage : undefined,
+    fixedDiscountYer: coupon.fixedDiscountYer,
+    currency: activeCur,
     message: `تم تطبيق الخصم بنجاح (-${discount} ${curLabel})`,
   };
 }

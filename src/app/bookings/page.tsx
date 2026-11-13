@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import {
   ConciergeHeadsetIcon,
@@ -83,7 +83,46 @@ function BookingsContent() {
   const isEn = subCtx.locale === 'en';
 
   const [selectedService, setSelectedService] = useState('skin_consultation');
+  const [liveBranches, setLiveBranches] = useState<
+    Array<{ id: string; name?: string; nameAr?: string; city?: string; cityAr?: string; isActive?: boolean }>
+  >(Array.isArray(sf.branches) ? sf.branches : []);
+
+  useEffect(() => {
+    if (Array.isArray(sf.branches) && sf.branches.length > 0) {
+      setLiveBranches(sf.branches);
+      return;
+    }
+    let active = true;
+    fetch('/api/store/bookings')
+      .then((res) => res.json())
+      .then((data) => {
+        if (active && data?.success && Array.isArray(data.branches)) {
+          setLiveBranches(data.branches);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [sf.branches]);
+
+  const activeBranches = useMemo(
+    () => liveBranches.filter((b) => b.isActive !== false),
+    [liveBranches]
+  );
+
   const [selectedBranch, setSelectedBranch] = useState('branch-sanaa');
+
+  useEffect(() => {
+    if (
+      activeBranches.length > 0 &&
+      selectedBranch !== 'online-whatsapp' &&
+      !activeBranches.some((b) => b.id === selectedBranch)
+    ) {
+      setSelectedBranch(activeBranches[0].id);
+    }
+  }, [activeBranches, selectedBranch]);
+
   const [bookingDate, setBookingDate] = useState('2026-11-10');
   const [bookingTime, setBookingTime] = useState('04:30 PM');
   const [customerName, setCustomerName] = useState('');
@@ -244,12 +283,26 @@ function BookingsContent() {
                     color: palette.text,
                   }}
                 >
-                  <option value="branch-sanaa">
-                    {isEn ? 'Sanaa Flagship (Hadda St)' : 'فرع صنعاء الرئيسي (شارع حدة)'}
-                  </option>
-                  <option value="branch-aden">
-                    {isEn ? 'Aden Delivery Hub (Al-Mansoura)' : 'نقطة تسليم عدن (المنصورة)'}
-                  </option>
+                  {activeBranches.length > 0 ? (
+                    activeBranches.map((branch) => {
+                      const label = branch.nameAr || branch.name || branch.id;
+                      const city = branch.cityAr || branch.city;
+                      return (
+                        <option key={branch.id} value={branch.id}>
+                          {city ? `${label} (${city})` : label}
+                        </option>
+                      );
+                    })
+                  ) : (
+                    <>
+                      <option value="branch-sanaa">
+                        {isEn ? 'Sanaa Flagship (Hadda St)' : 'فرع صنعاء الرئيسي (شارع حدة)'}
+                      </option>
+                      <option value="branch-aden">
+                        {isEn ? 'Aden Delivery Hub (Al-Mansoura)' : 'نقطة تسليم عدن (المنصورة)'}
+                      </option>
+                    </>
+                  )}
                   <option value="online-whatsapp">
                     {isEn ? 'Online Video Consultation' : 'استشارة أونلاين عبر مكالمة واتساب'}
                   </option>

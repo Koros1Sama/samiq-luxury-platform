@@ -12,6 +12,7 @@ import {
   verifyAdminAuth,
   checkRateLimit,
   getClientIp,
+  sanitizeMediaUrl,
   sanitizeText,
   sanitizeObjectDeep,
 } from '@/core/security/guard';
@@ -59,7 +60,7 @@ export async function POST(req: Request) {
       title,
       subtitle: sanitizeText(body.subtitle, 200),
       brand: sanitizeText(body.brand || body.title, 100),
-      image: sanitizeText(body.image || '/media/products/serum-vitamin-c.jpg', 300),
+      image: sanitizeMediaUrl(body.image, '/media/products/serum-vitamin-c.jpg'),
       ctaText: sanitizeText(body.ctaText || body.title, 50),
       href: sanitizeText(body.href || `#${categoryId}`, 100),
       badge: sanitizeText(body.badge, 50),
@@ -116,6 +117,12 @@ export async function PUT(req: Request) {
       ...body,
       id: existing.id,
       title: body.title ? sanitizeText(body.title, 100) : existing.title,
+      subtitle: body.subtitle !== undefined ? sanitizeText(body.subtitle, 200) : existing.subtitle,
+      brand: body.brand !== undefined ? sanitizeText(body.brand, 100) : existing.brand,
+      image: body.image !== undefined ? sanitizeMediaUrl(body.image, existing.image) : existing.image,
+      ctaText: body.ctaText !== undefined ? sanitizeText(body.ctaText, 50) : existing.ctaText,
+      href: body.href !== undefined ? sanitizeText(body.href, 100) : existing.href,
+      badge: body.badge !== undefined ? sanitizeText(body.badge, 50) : existing.badge,
     };
 
     db.categories[idx] = updated;

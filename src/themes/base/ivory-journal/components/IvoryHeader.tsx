@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useStorefront } from '@/core/storefront/StorefrontProvider';
+import { formatWhatsAppDigits, resolveSocialChannel } from '@/core/storefront/contactLinks';
 import { ThemeCurrencyCode } from '@/themes/contract';
 import {
   MenuIcon,
@@ -325,52 +326,60 @@ export function IvoryHeader({ onOpenSearch, onOpenAdvisor }: IvoryHeaderProps) {
             </span>
 
             {/* Social channels */}
-            <div className="flex items-center gap-2">
-              {tenant.whatsapp && (
-                <a
-                  href={`https://wa.me/${tenant.whatsapp.replace(/[^0-9]/g, '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="واتساب"
-                  className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center border border-[#E8E2D8] rounded-full text-[#1B1612] hover:border-[#1B1612] hover:text-[#5E6B5A] transition-colors"
-                >
-                  <WhatsAppIcon size={18} />
-                </a>
-              )}
-              {tenant.instagram && (
-                <a
-                  href={tenant.instagram}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="انستغرام"
-                  className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center border border-[#E8E2D8] rounded-full text-[#1B1612] hover:border-[#1B1612] hover:text-[#5E6B5A] transition-colors"
-                >
-                  <InstagramIcon size={18} />
-                </a>
-              )}
-              {tenant.tiktok && (
-                <a
-                  href={tenant.tiktok}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="تيك توك"
-                  className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center border border-[#E8E2D8] rounded-full text-[#1B1612] hover:border-[#1B1612] hover:text-[#5E6B5A] transition-colors"
-                >
-                  <TikTokIcon size={18} />
-                </a>
-              )}
-              {tenant.facebook && (
-                <a
-                  href={tenant.facebook}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="فيسبوك"
-                  className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center border border-[#E8E2D8] rounded-full text-[#1B1612] hover:border-[#1B1612] hover:text-[#5E6B5A] transition-colors"
-                >
-                  <FacebookIcon size={18} />
-                </a>
-              )}
-            </div>
+            {(() => {
+              const rawWa = tenant.contact?.whatsapp || tenant.whatsapp;
+              const ig = resolveSocialChannel(tenant, 'instagram');
+              const tk = resolveSocialChannel(tenant, 'tiktok');
+              const fb = resolveSocialChannel(tenant, 'facebook');
+              return (
+                <div className="flex items-center gap-2">
+                  {rawWa && (
+                    <a
+                      href={`https://wa.me/${formatWhatsAppDigits(rawWa)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="واتساب"
+                      className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center border border-[#E8E2D8] rounded-full text-[#1B1612] hover:border-[#1B1612] hover:text-[#5E6B5A] transition-colors"
+                    >
+                      <WhatsAppIcon size={18} />
+                    </a>
+                  )}
+                  {ig && (
+                    <a
+                      href={ig.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="انستغرام"
+                      className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center border border-[#E8E2D8] rounded-full text-[#1B1612] hover:border-[#1B1612] hover:text-[#5E6B5A] transition-colors"
+                    >
+                      <InstagramIcon size={18} />
+                    </a>
+                  )}
+                  {tk && (
+                    <a
+                      href={tk.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="تيك توك"
+                      className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center border border-[#E8E2D8] rounded-full text-[#1B1612] hover:border-[#1B1612] hover:text-[#5E6B5A] transition-colors"
+                    >
+                      <TikTokIcon size={18} />
+                    </a>
+                  )}
+                  {fb && (
+                    <a
+                      href={fb.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="فيسبوك"
+                      className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center border border-[#E8E2D8] rounded-full text-[#1B1612] hover:border-[#1B1612] hover:text-[#5E6B5A] transition-colors"
+                    >
+                      <FacebookIcon size={18} />
+                    </a>
+                  )}
+                </div>
+              );
+            })()}
           </div>
         </div>
       )}

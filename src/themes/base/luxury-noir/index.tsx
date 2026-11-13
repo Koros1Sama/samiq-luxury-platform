@@ -17,14 +17,16 @@ const BrandBentoGrid = withDeferredMount(
     () => import('./components/BrandBentoGrid').then((m) => m.BrandBentoGrid),
     { ssr: false }
   ),
-  280
+  280,
+  'categories-bento'
 );
 const StoreLocationAndSocial = withDeferredMount(
   dynamic(
     () => import('./components/StoreLocationAndSocial').then((m) => m.StoreLocationAndSocial),
     { ssr: false }
   ),
-  280
+  280,
+  'store-location'
 );
 const TrustFooterBar = withDeferredMount(
   dynamic(
@@ -89,14 +91,16 @@ const AuthenticityCompareSlider = withDeferredMount(
     () => import('./components/AuthenticityCompareSlider').then((m) => m.AuthenticityCompareSlider),
     { ssr: false }
   ),
-  360
+  360,
+  'authenticity-lab'
 );
 const SkinRoutineAndIngredients = withDeferredMount(
   dynamic(
     () => import('./components/SkinRoutineAndIngredients').then((m) => m.SkinRoutineAndIngredients),
     { ssr: false }
   ),
-  300
+  300,
+  'skin-routine'
 );
 
 // On-demand loader to defer heavy drawer/modal chunks strictly until user interaction

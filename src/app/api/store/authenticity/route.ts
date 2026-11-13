@@ -11,6 +11,7 @@ import {
   verifyAdminAuth,
   checkRateLimit,
   getClientIp,
+  sanitizeMediaUrl,
   sanitizeText,
   sanitizeObjectDeep,
 } from '@/core/security/guard';
@@ -49,14 +50,14 @@ export async function POST(req: Request) {
         brand: sanitizeText(body.brand, 100) || 'سيرومات نقية',
         original: {
           title: sanitizeText(body.originalTitle, 100) || 'الأصلي المعتمد',
-          image: sanitizeText(body.image, 300) || '/media/products/serum-vitamin-c.jpg',
+          image: sanitizeMediaUrl(body.image, '/media/products/serum-vitamin-c.jpg'),
           batchCode: 'مصرح ومطابق لمعايير الهيئة',
           formulaNotes: sanitizeText(body.formulaNotes, 500) || 'قوام نقي متجانس مطابق لمواصفات المختبر الأصلي ومعايير الهيئة العليا للأدوية',
           packagingNotes: sanitizeText(body.packagingNotes, 500) || 'زجاج معتم عازل للضوء مع ختم الأصالة والباركود المعتمد',
         },
         counterfeit: {
           title: 'التقليد المغشوش',
-          image: sanitizeText(body.image, 300) || '/media/products/serum-vitamin-c.jpg',
+          image: sanitizeMediaUrl(body.counterfeitImage || body.image, '/media/products/serum-vitamin-c.jpg'),
           batchCode: 'بدون ختم اعتماد أو مطبوع بحبر باهت',
           formulaNotes: 'سائل معكر سريع التأكسد يسبب تهيج الجلد',
           packagingNotes: 'عبوة رديئة ومطاط يسرب الهواء',
